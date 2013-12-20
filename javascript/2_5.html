@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+    <link href="/css/js.css" rel="stylesheet">
+    <title>二章第五回　木構造の操作：ノードの追加 - JavaScript初級者から中級者になろう - uhyohyo.net</title>
+    <script src="/script/top.js"></script>
+  </head>
+  <body class="javascript">
+    <header>
+      <h1><a href="/">uhyohyo.net</a></h1>
+    </header>
+    <main>
+      <article>
+        <h1>JavaScript初級者から中級者になろう</h1>
+       <nav>
+          <p><a href="index.html" rel="bookmark">戻る</a> | <a href="2_4.html" rel="prev">二章第四回</a> | <a href="2_6.html" rel="next">二章第六回</a></p>
+        </nav>
+        <h2>二章第五回　木構造の操作：ノードの追加</h2>
+        <p>今回は、前回とは逆に新しいノードを子に追加するということを解説します。</p>
+
+        <h3>ノードを作る</h3>
+        <p>まず、ノードを追加するには、追加するノードを新しく作る必要があります。その方法を解説します。</p>
+
+        <h4>createElement</h4>
+        <p><dfn>createElement</dfn>というメソッドがあります。これは、<strong>document</strong>が持つメソッドです。つまり、次のように呼び出します。</p>
+        <pre><code>document.<strong>createElement</strong>()</code></pre>
+        <p>これは、<strong>HTMLElement</strong>を作るメソッドです。次のサンプルを見てみましょう。</p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newelement = <strong>document.createElement</strong>('p');
+      console.log(newelement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+        <p>変数newelementに、document.createElementの返り値を代入しています。それを表示すると、「HTMLParagraphElement」のように表示されることから、p要素のオブジェクトができていることが分かります。</p>
+        <p>何の要素ができるかは、引数で指定します。今回は、文字列で「p」と指定しているからp要素ができたのです。何の要素でも作ることができます。</p>
+
+        <p>こうしてできたHTMLElementは、document.getElementByIdなどで取得したものと同じように扱うことができます。</p>
+        <p>ただし、ただできただけで、まだ木構造には加わっていません。そのため、親もありません。そこで、これを木構造に追加する方法をこれから解説します。</p>
+
+        <h3>ノードを追加する</h3>
+        <p>まず、上のサンプルでのHTML全体の木構造を見てみましょう。</p>
+        <pre><code>html
+｜
+├――head
+｜　　 ｜
+｜　　 └――title
+｜　　　　　　 ｜
+｜　　　　　　 └――#text　　　"test"
+└――body
+　　　 ｜
+　　　 ├──　p
+　　　 ｜　　　｜
+　　　 ｜　　　├――#text　　　"t"
+　　　 ｜　　　｜
+　　　 ｜　　　├――strong
+　　　 ｜　　　｜　　　｜
+　　　 ｜　　　｜　　　└――#text　　　"es"
+　　　 ｜　　　｜
+　　　 ｜　　　└――#text　　　"t"
+　　　 ｜
+　　　 ├――#text
+　　　 ｜
+　　　 └――script
+　　　　　　　 ｜
+　　　　　　　 └――#text　　　"var newel〜;"
+        </code></pre>
+        <p>このようになっています。p要素とscript要素の間に#textがありますが、ここにあるのは<strong>改行</strong>です。このように、改行があるだけで、テキストノードが発生します（ただし、終了タグの前の改行はテキストノードにならないことになっています）。</p>
+        <p>今回はbody要素に追加しましょう。ここで、body要素のオブジェクトが必要になります。</p>
+        <p>body要素にid属性をつけて、getElementByIdで取得することもできますが、body要素の場合はもっとよい方法があります。それは、<strong>documentオブジェクトのbodyプロパティ</strong>です。つまり、
+          <code>document.body</code>ですね。これに、そのままbody要素を表すHTMLElementが代入されています。今回はこれを使いましょう。</p>
+
+        <h4>appendChild</h4>
+        <p>さて、それでは、ノードに子ノードを追加するには、<dfn>appendChild</dfn>というメソッドを使います。</p>
+        <p>このメソッドに引数を渡すと、そのノードの子ノードの一番最後に引数のノードが追加されます。</p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newelement = <strong>document.createElement</strong>('p');
+
+      <mark class="ins">document.body.<strong>appendChild</strong>(newelement);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+        <p>この場合、追加するのは新しく作ったp要素、つまりnewelementに代入されているものです。</p>
+        <p>これをbody要素の子ノードに追加するので、こうなります。
+          <code>body
+｜
+├――　p
+｜　　　｜
+｜　　　├――#text
+｜　　　｜
+｜　　　├――strong
+｜　　　｜　　　｜
+｜　　　｜　　　└――#text
+｜　　　｜
+｜　　　└――#text
+｜
+├――#text
+｜
+├――script
+<mark class="ins">｜</mark>　　　｜
+<mark class="ins">｜</mark>　　　└――#text<mark class="ins">
+  ｜
+  └―― p</mark>
+        </code></p>
+        <p>しかし、画面には何の変化もありません。それは、p要素がテキストノードを持っていないからです。p要素の中身が空なのでは、<code>&lt;p&gt;&lt;/p&gt;</code>を追加したのと同じです。</p>
+
+        <p>つまり、追加するp要素に、さらにテキストノードの子ノードを持たせる必要があるわけです。次は、これを解説します。</p>
+
+        <h3>テキストノードを作成する</h3>
+        <p>テキストノードを持たせるには、当然作る必要があります。テキストノードは、先に紹介したcreateElementでは作れません。別のメソッドを使います。</p></p>
+        <p>それは、<dfn>createTextNode</dfn>です。これまた、<strong>documentが持つメソッド</strong>です。
+        <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newtextnode = document.<strong>createTextNode</strong>("新しいテキストノード");
+
+      console.log(newtextnode.nodeValue);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+        <p>引数を1つ持っていて、これは作るテキストノードの中身を指定します。</p>
+        <p>つまり、「新しいテキストノード」という中身を持つテキストノードを作っています。</p>
+        <p>できたテキストノードは戻り値として得ることができます。今回は、それをnewtextnodeに代入しています。</p>
+        <p>できたもののnodeValueプロパティ（<a href="2_3.html">二章第三回</a>参照）を見てみるとその中身が表示されることから、これはテキストノードであることが分かります。</p>
+
+        <p>さて、これをp要素に追加するのは、さっきと同じappendChildです。
+        <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newelement = document.createElement('p');
+      var newtextnode = document.<strong>createTextNode</strong>("新しいテキストノード");
+
+      newelement.<strong>appendChild</strong>(<mark>newtextnode</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+        <p>newelementの子ノードにnewtextnodeを追加しています。</p>
+        <p>また、ここで、newelementは<strong>独立した木構造</strong>を持っています。実際に画面に表示されている、html要素を頂点とした木構造とは別に、今作ったばっかりのp要素を頂点とした木構造があるのです。</p>
+        <pre><code> p
+
+↓↓↓
+
+p<mark class="ins">
+  ｜
+  └――#text　　　"新しいテキストノード"</mark>
+        </code></pre>
+        <p>さて、この木構造を持ったノードを別のノードの親にすると、木構造がまとめてくっつきます。つまり、</p>
+        <pre><code>body
+｜
+├――　p
+｜　　　｜
+｜　　　├――#text
+｜　　　｜
+｜　　　├――strong
+｜　　　｜　　　｜
+｜　　　｜　　　└――#text
+｜　　　｜
+｜　　　└――#text
+｜
+├――#text
+｜
+├――script
+<mark class="ins">｜</mark>　　　｜
+<mark class="ins">｜</mark>　　　└――#text<mark class="ins">
+  ｜
+  └――  p<mark>
+    　　　　｜
+    　　　　└――#text</mark>
+</mark>
+        </code></pre>
+        <p>というようになります。実際にやってみましょう。</p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newelement = document.createElement('p');
+      var newtextnode = document.<strong>createTextNode</strong>("新しいテキストノード");
+
+      newelement.appendChild(newtextnode);
+      <mark class="ins">document.body.appendChild(newelement);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code>newelementをBODY要素にappendChildしています。</p>
+        <p>ここで、画面に「新しいテキストノード」と表示されました。上の図の通りになったのです。</p>
+        <p>ちなみに、まずp要素を作ってbody要素に追加してから、あとでp要素にテキストノードを追加しても結果は同じになります。</p>
+        <p>変数newelementに入っているP要素のHTMLElementをbody要素に追加した時点で、変数newelementは「（文書全体の）木構造の一部」としてのP要素を表すようになります。もっとも、指すものはまったく同じです。P要素の立ち位置が少し変わっただけです。</p>
+
+        <p>これで、かなり自由に文書を操作できるようになったと思います。もちろん、作った要素に、別の要素を作ってまたくっつけることもできます。</p>
+        <nav>
+          <p><a href="index.html" rel="bookmark">戻る</a> | <a href="2_4.html" rel="prev">二章第四回</a> | <a href="2_6.html" rel="next">二章第六回</a></p>
+        </nav>
+      </article>
+    </main>
+  </body>
+</html>
+

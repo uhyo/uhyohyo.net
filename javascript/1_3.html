@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+    <link href="/css/js.css" rel="stylesheet">
+    <title>一章第三回　配列のコピー - JavaScript初級者から中級者になろう - uhyohyo.net</title>
+    <script src="/script/top.js"></script>
+  </head>
+  <body class="javascript">
+    <header>
+      <h1><a href="/">uhyohyo.net</a></h1>
+    </header>
+    <main>
+      <article>
+        <h1>JavaScript初級者から中級者になろう</h1>
+        <nav>
+          <p><a href="index.html" rel="bookmark">戻る</a> | <a href="1_2.html" rel="prev">一章第二回</a> | <a href="1_4.html" rel="next">一章第四回</a></p>
+        </nav>
+        <h2>一章第三回　配列のコピー</h2>
+        <h3>配列のコピーとは</h3>
+        <p>配列のコピーとは、読んで字のごとく、配列を複製することです。</p>
+        <p>しかし、前回解説した通り、配列のオブジェクトの一種なので、普通に配列変数をコピーしただけでは、結局同じオブジェクトを参照してしまいます。</p>
+        <p>そこで、ちゃんと別々のオブジェクトを参照するようにしてやらないと複製したとはいえません。例えばこんな感じです。</p>
+        <pre><code>var a = [0,1,2,3,4];
+<mark>b=a</mark>;
+a[5]=5;
+alert(a);
+alert(b);</code></pre>
+        <p>bにaを代入して、aを変更したはずに、bも同じように変更されてしまっています。</p>
+        <p>今回は、ちゃんと別々のオブジェクトを参照するように配列をコピーしてみましょうという、今までの知識を利用した演習的な回です。</p>
+        <p>とりあえず、配列をコピーする関数を作りましょう。引数がコピー元の配列で、戻り値が複製された配列というようにします。</p>
+        <pre><code>function copyArray(arr){
+}</code></pre>
+        <p>「copyArray」が関数名で、引数が「arr」ですね。「Array」とは、配列のことです。ちなみに、関数呼び出しのときに引数としてオブジェクトを渡した場合も、渡されるのはあくまで<strong>参照</strong>です。</p>
+        <p>最終的に別々のオブジェクトを参照するようになればいいので、とりあえず配列をもう1つ作ります。
+          <code>function copyArray(arr){
+    <mark class="ins">var newarr = [];</mark>
+}</code></pre>
+        <p>結論からいうと、この新しい配列に要素を1つずつコピーしていけばいいのです。</p>
+        <p>1つずつの要素はオブジェクトではなくプリミティブ値なので、そのようにしていけば同じ中身を持った別々の配列ができるというわけです。</p>
+        <p>今具体的な方法を解説しました。これで自分でコードを書くことができれば、結構JavaScriptの力がついているといえます。</p>
+        <p>まず、配列の要素1つずつに処理するときはどのようにしましたか？そうです。繰り返しの構文を使います。</p>
+        <pre><code>function copyeArray(arr){
+var newarr = [];
+<mark class="ins">for(var i = 0;i&lt;arr.length;i++){
+    }</mark>
+}</code></pre>
+        <p>このようにfor（やwhile）を使うのでした。この形で、iが0から最後の要素の添字まで増加するのを利用してひとつずつ処理します。</p>
+        <p>処理の中身は簡単です。元の配列のその番号の要素を、新しい配列の同じ番号の要素にコピーすればいいだけです。</p>
+        <pre><code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        <mark class="ins">newarr[i] = arr[i];</mark>
+    }
+}</code></pre>
+        <p>最後に、できた配列を戻り値として返します。
+          <code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        newarr[i] = arr[i];
+    }
+    <mark class="ins">return newarr;</mark>
+}</code></pre>
+        <p>できたら、実際に使ってみましょう。</p>
+        <pre><code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        newarr[i] = arr[i];
+    }
+    return newarr;
+}
+var a = [0,1,2,3,4];
+alert(a);
+var b = copyArray(a);
+alert(b);
+
+a[5]=5;
+alert(b); </code></pre>
+        <p>アラートが3回表示されます。</p>
+        <p>まず最初にcopyArray関数をつくり、次の行でaに[0,1,2,3,4]を代入しています。</p>
+        <p>そして、次の行でそのaを表示します。ちなみに、アラートで配列変数を直接表示すると、丁寧に要素が「<kbd>,</kbd>」で区切られて表示されます。</p>
+        <p>そして、次の行でbにcopyArray関数でaと同じ配列を代入しています。アラートでbを表示すると、正常にコピーされていることがわかります。</p>
+        <p>その後、a[5]に5を代入されています。この時点でaは、[0,1,2,3,4,5]になることが分かると思います。その後bを表示すると、aを変えてもbには影響がないことが分かります。</p>
+
+        <p>ちなみに、これを
+          <code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        newarr[i] = arr[i];
+    }
+    return newarr;
+}
+var a = [0,1,2,3,4];
+alert(a);
+<mark class="ins">var b = a;</mark>
+alert(b);
+
+a[5]=5;
+alert(b);</code></pre>
+        <p>のようにした場合、bにはaの参照が代入されるだけで、オブジェクトそのものは複製されません。</p>
+        <p>その結果、a[5]に5を代入したときに、bを表示してもaへの変更が反映されてしまっています。aとbは同じオブジェクトを指しているのだから、当然のことです。</p>
+
+        <h4>多次元配列</h4>
+        <p>さて、上で解説した配列のコピーですが、まだ完璧ではない部分があります。例えば、配列の要素にプリミティブではなく<strong>オブジェクト</strong>が代入されていたら、結局その要素は参照になってしまいます。まあ、それで困るかどうかは場合次第ですし、オブジェクトのコピーは配列ほど簡単ではないのでここでは解説しません。</p>
+        <p>しかし、配列の要素にまた<strong>配列</strong>が代入されているという場合があります。これくらいは対処したいものです。ちなみに、このように配列の要素にまた配列が代入されているものを、<dfn>多次元配列</dfn>ということがあります。</p>
+        <p><code>var a = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8]
+];
+
+            alert(a[0][1]);
+            alert(a[2][0]); </code></pre>
+        <p>このサンプルでは、1〜5行目でaに配列を代入しています。全体が<kbd>[ 〜 ]</kbd>で囲まれているのが分かります。しかし、そのひとつひとつの要素ですが、<kbd>[0,1,2]</kbd>が0番目の要素、<kbd>[3,4,5]</kbd>が1番目の要素、<kbd>[6,7,8]</kbd>が2番目の要素となっています。今回は分かりやすく改行を入れています。</p>
+        <p>これらの要素もそれぞれ配列であることが分かります。つまり、配列の要素がまた配列というわけです。</p>
+        <p>それをアラートで表示するわけですが、なんと添字が2個ついています。</p>
+        <p><kbd>a[0][1]</kbd>の場合、<strong>左から処理されます</strong>。まず、<kbd>a[0]</kbd>が処理されます。これは、<kbd>[0,1,2]</kbd>の配列でしたね。つまり、<kbd>a[0][1]</kbd>は「（[0,1,2]の配列への参照）<kbd>[1]</kbd>」のようになり、<kbd>[0,1,2]</kbd>の1番目の要素を表しています。つまり1ですね。</p>
+        <p>同様に<kbd>a[2][0]</kbd>の場合、<kbd>a[2]</kbd>が<kbd>[6,7,8]</kbd>で、その0番目の要素ですから6ということになります。</p>
+        <p>ちなみに、「配列の中の配列の要素がまた配列」なんていう場合もあると思います。その場合も<kbd>a[0][0][0]</kbd>のように添字の数を増やすことで対応できます。もっとも、よく使われるのはせいぜい2つくらいまでです。</p>
+
+        <h4>多次元配列のコピー</h4>
+        <p>さて、それではcopyArrayを作りなおしましょう。さっきのものだと、配列の要素がまた配列だと、結局そこで参照をコピーしてしまいうまくいかなかったのでした。</p>
+        <pre><code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        newarr[i] = arr[i];
+    }
+    return newarr;
+}
+var a = [ [0,1,2] , [3,4,5] ];
+alert(a[0]);
+var b = copyArray(a);
+alert(b[0]);
+
+a[0][3]=3;
+alert(b[0]);</code></pre>
+        <p>まずaに多次元配列を代入し、<kbd>a[0]</kbd>を表示しています。<kbd>[0,1,2]</kbd>が表示されます。</p>
+        <p>bにさっきのcopyArrayでaをコピーしますが、ここで<strong>bはaとは別の配列です</strong>。ややこしくなってきましたが、しっかり理解しましょう。</p>
+        <p>bそのものは確かにaとは<strong>中身が同じ</strong>別の配列です。その中身は、普通の配列ではプリミティブ値でしたが、今回の多次元配列は<strong>参照</strong>でした。中身は同じですから、当然参照が指すものは<strong>同じ</strong>ということです。</p>
+        <p>つまり<kbd>a[0]</kbd>と<kbd>b[0]</kbd>は、同じオブジェクト（今回の場合は<kbd>[0,1,2]</kbd>）を指す参照がそれぞれ代入されています。だから、a[0]を通して操作すると、結局同じオブジェクトを操作することになってしまうというわけです。<kbd>a[1]</kbd>と<kbd>b[1]</kbd>も同じです。</p>
+
+        <p>さて、ではどうすればいいかですが、配列の要素をひとつひとつコピーするとき、その要素が配列だったら<strong>その配列の要素をまたひとつひとつコピーする</strong>必要があります。</p>
+        <p>つまり、こうなります。</p>
+        <pre><code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        <mark class="ins">if(もしarr[i]が配列だったら){
+            newarr[i] = copyArray(arr[i]);
+        }else{</mark>
+            newarr[i] = arr[i];
+        <mark class="ins">}</mark>
+    }
+    return newarr;
+}</code></pre>
+        <p>copyArrayをcopyArrayの中で使うのです。一見よく分からないように思えますが、確かなのは「copyArrayは配列の要素を1つ1つコピーする関数だ」ということです。だから、配列の要素が配列だったとき、copyArrayを呼び出せばちゃんとコピーしてくれるというわけです。ちなみに、このように関数の中でさらに同じ関数を呼び出す方法を<dfn>再帰</dfn>といいます。</p>
+
+        <p>さて、if文が登場しましたが、条件が日本語で書いていますね。これでは動きません。わざわざこう書いたのは、配列かどうかの判定法はまだ解説していなかったからです。それには、<strong>Array.isArray</strong>という関数を使います。これは引数に何かを渡すと、それが配列の場合はtrue、そうでない場合はfalseを返してくれる関数です。これを用いるとcopeArrayの完成形は次のようになります。</p>
+        <pre><code>function copyArray(arr){
+    var newarr = [];
+    for(var i = 0;i&lt;arr.length;i++){
+        if(<mark class="ins">Array.isArray(<mark>arr[i]</mark>)</mark>){
+            newarr[i] = copyArray(arr[i]);
+        }else{
+            newarr[i] = arr[i];
+        }
+    }
+    return newarr;
+}</code></pre>
+        <p>これをさっきのサンプルに組み入れると、正しく動作することがわかります。やってみましょう。</p>
+        <nav>
+          <p><a href="index.html" rel="bookmark">戻る</a> | <a href="1_1.html" rel="prev">一章第一回</a> | <a href="1_3.html" rel="next">一章第三回</a></p>
+        </nav>
+      </article>
+    </main>
+  </body>
+</html>
+
