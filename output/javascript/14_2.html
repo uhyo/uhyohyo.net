@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十四章第二回　Indexed Database — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="14_1.html">十四章第一回</a>
+                          |
+          <a rel="next" href="14_3.html">十四章第三回</a>
+              </p>
+    </nav>
+    <h2>十四章第二回　Indexed Database</h2>
+<p>今回紹介する<dfn>Indexed Database</dfn>、通称<strong>IndexedDB</strong>は、前回のStorageが進化したようなもので、ある種の<strong>データベース</strong>をJavaScriptから作ってブラウザに保存しておいてもらえるものです。</p>
+<p>昔はSQLを用いたクライアントサイドデータベースの仕様策定が進んでいましたが、のちに破棄され、SQLを使わない方向（<mark>NoSQL</mark>）の新しいデータベースAPIが用意されたのです。</p>
+
+<h3>データベースの構造</h3>
+<p>データベースは、localStorageと同様に同じ<b>オリジン</b>から参照できます。データベースは同オリジン内に複数作ることができ、名前をつけることで区別します。</p>
+<p>またデータベースは<strong>バージョン</strong>を持ちます。アプリが進化してくると、データベースの仕様も変化して、互換性がなくなることがありますね。データベースにバージョン情報をもたせることで問題を回避できます（詳しくは後述）。</p>
+
+<p>当然ながら、データベースにはデータを入れることができます。ひとつひとつのデータは<dfn>レコード</dfn>(<span lang="en">record</span>)といい、レコードは<dfn>key</dfn>と<dfn>value</dfn>を持つとされています。</p>
+<p>名前の通り、keyとはあるレコードに対してつけられた名前のようなもので、valueとはデータの中身です。keyはレコードをソートしたりするときに使われます。</p>
+
+<p>データベースは<dfn>オブジェクトストア</dfn>を保持して、レコードはオブジェクトストアの中に保存されることになっています。</p>
+<p>オブジェクトストアには名前をつけることができ、データベースの中に複数存在することが可能です。</p>
+
+<p>まとめると、レコードはオブジェクトストアの中に保存されていて、1つ以上のオブジェクトストアをまとめたものがデータベースだということです。</p>
+
+<h3>データベースを扱う</h3>
+<p>それでは、JavaScriptにおけるIndexedDBの使い方を見ていきます。IndexedDBには<b>同期API</b>と<b>非同期API</b>がありますが、ここで主に解説するのは非同期APIです。非同期とは<strong>イベント</strong>を用いて操作の結果を得るやつです。やはり同期よりもこちらのほうが使い勝手が良いため、よく利用されています。</p>
+
+<h4>IDBRequest</h4>
+<p>まず最初に<dfn>IDBRequest</dfn>というオブジェクトを紹介します。これはIndexedDBに対して何か操作を行った時の<strong>結果</strong>を返すもので、EventTargetの一種（イベントが発生するオブジェクト）です。</p>
+<p>IDBRequestで発生するイベントは2種類で、<dfn>success</dfn>と<dfn>error</dfn>で、操作が成功したらsuccess、失敗したらerrorが発生します。</p>
+<p>さらに操作に対しては<strong>結果</strong>が存在します。例えばデータベースからデータを読み込んだなら、その読み込まれたデータが結果としてIDBRequestから取り出せます。結果は<dfn>result</dfn>プロパティに入っています。resultプロパティの中身は、当然ながらどんな操作をしたかによって異なります。</p>
+<p>実は、データベースに対して何かを要求した場合、即座に結果のIDBRequestオブジェクトが得られます。ただし非同期ですから、IDBRequestを手に入れた直後はまだ結果は分かりません。IDBRequestの<dfn>readyState</dfn>プロパティをみると、操作が完了して結果が取り出せるかどうか分かります。readyStateはいろいろなオブジェクトで出てきて、数値という印象が強いように思えますが、ここでは<strong>文字列</strong>で、2種類あります。次のようになっています。</p>
+<dl>
+  <dt>"pending"</dt>
+  <dd>まだ処理中（結果を利用できない）</dd>
+  <dt>"done"</dt>
+  <dd>処理終了（結果利用可能）</dd>
+</dl>
+<p>ただし普通は、いちいちreadyStateで確かめるのではなくて、successイベントやerrorイベントが発生したら処理終了と判断します。</p>
+<p>ちなみに、他に利用可能なプロパティは、<dfn>error</dfn>プロパティ（処理終了時にエラーが発生した場合、エラーオブジェクトが入っている。正常終了の場合はnull）があります。さらにsourceプロパティ、transactionプロパティがありますが、これらは後述します。</p>
+
+<h4>データベースにアクセスする</h4>
+<p>データベースにアクセスするには、IDBFactoryと呼ばれる種類のオブジェクトを使います。IDBFactoryのインスタンスである<dfn>indexedDB</dfn>変数が、windowのプロパティとして用意されています<small>（正確にはIDBEnvironmentのプロパティですが、そんなに気にすることはありません）</small>。ちなみにブラウザ上では、windowのもつプロパティはグローバル変数としてアクセス可能です。</p>
+<pre><code>console.log(window.<mark>indexedDB</mark>);	//IDBFactoryオブジェクトであることが表示される
+console.log(<mark>indexedDB</mark>);	//実はグローバル変数としてもアクセスできる</code></pre>
+
+<p>さて、このIDBFactoryは3つのメソッドを持ちますが、まずはそのうち2つを紹介します。<dfn>open</dfn>と<dfn>deleteDatabase</dfn>です。openはデータベースを開く、つまり操作可能にするということです。deleteDatabaseはその名の通りです。</p>
+<p>いきなり返り値の説明から入りますが、先ほどの説明からいけば返り値はIDBRequestのはずですね。しかしいきなりここでは、IDBRequestの進化系である<mark>IDBOpenDBRequest</mark>が登場します。しかしこれはIDBRequestを継承したもので、基本は変わりません。違いは、<strong>blockedイベント</strong>と<strong>upgradeneededイベント</strong>が追加されているだけです。この二つはあとで紹介します。</p>
+<p>それで、<strong>open</strong>メソッドは、2つの引数を持ちます。一つ目は<strong>データベースの名前</strong>です。データベースは複数存在可能ですから、名前を付けて区別するわけです。もう一つは<strong>データベースのバージョン</strong>です。バージョンは1以上の整数です。</p>
+<p>動作は単純に、そのデータベースを開くというものですが、そのデータベースが存在しない場合は作ってくれます。つまり、とにかくデータベースを使いたければopenということです。それでは、引数として与えられたバージョンの意味を説明します。</p>
+<p>引数のバージョンの意味は、簡単に言うと「このバージョンで開きたい！」と宣言するものです。データベースというのは、自分のバージョンを記憶しています。バージョンというのは、そのデータベースにどのようなデータが入っているかを示すもので、もしアプリのアップデート等によりデータ構造が変わってしまったら、バージョンを上げる必要があります。</p>
+<p>引数のバージョンが開こうとしたデータベースより低い場合（すなわち、保存されているデータベースのバージョンが高いのにそれより低いバージョンのデータを要求した場合）、このアプリは新しいデータベースに対応していなくて誤動作を起こす可能性があるということなので、エラーを起こしデータベースは開けません。</p>
+<p>同オリジンの制約から、このデータベースを扱うのは自分だけだから心配ないだろうと思うかもしれませんが、例えば古いページのキャッシュが残っていて新しいページと古いページが混在した時などに厄介なことになりかねません。適切にバージョン管理をしていれば、古いほうは動かなくなり問題は起きません。</p>
+<p>指定したバージョンが、現在のデータベースのバージョンと同じなら、問題なくデータベースが開けます。</p>
+<p>それでは、データベースのバージョンを上げたい場合はどうしたいかというと、現在より新しいバージョンを指定してopenすればいいのです。つまり、何かデータベースの仕様変更があったときは、openメソッドに指定するバージョン番号を上げてやれば、自動的に新しいバージョンのデータベースに移行するというわけです。</p>
+<p>ちなみにバージョン番号は省略可能で、その場合は普通にデータベースを開くことができ、データベースのバージョンは上がりません。つまり、現在のバージョンと同じ番号を指定したのと同じ動作です。このように、データベースを開くだけならバージョンは省略できますが、やはり省略しないほうが安全でしょう。</p>
+
+<p>さて、無事データベースを開けた場合は、IDBOpenDBRequestのresultプロパティには、<dfn>IDBDatabase</dfn>というオブジェクトが入っています。これを用いていよいよデータベースの中身をいじることができます。ここまでを確認しましょう。</p>
+<pre><code>var request = indexedDB.<mark>open</mark>("test",1);	<mark class="ins">//testというデータベースをバージョン1で開く。openの返り値はIDBOpenDBRequest</mark>
+<mark class="ins">//成功したときのイベントハンドラ</mark>
+request.addEventListener("<mark>success</mark>",function(e){
+  console.log(request.result);	<mark class="ins">//resultにはIDBDatabaseが入っている</mark>
+});
+<mark class="ins">//失敗したとき</mark>
+request.addEventListener("<mark>error</mark>",function(e){
+  console.error(request.error);
+});</code></pre>
+<p>次に、データベースの操作に移る前に、deleteDatabaseも紹介していおきますが、これは簡単です。名前を引数に指定するだけです。</p>
+<p>返り値はopenと同じくIDBOpenDBRequestで、successイベントやerrorイベントが発生します。また、データベースがまだ処理中で消去できない場合は、終わるのを待ってから（といってもどうせ消えてしまいますが）消去します。待たされた場合は、上で述べた<mark>blockedイベント</mark>が発生します。注意点は、blockedイベントが発生しても、消去処理に失敗したわけではなく、処理が終了してから改めて消去して、success（失敗したらerror）イベントが発生して、それで終了となります。</p>
+
+<p>それではデータベースの操作の話に移りますが、その前にIDBDatabaseの基礎的な話をします。</p>
+<p>IDBDatabaseは<dfn>name</dfn>プロパティ（データベースの名前が文字列で入っている）と<dfn>version</dfn>プロパティ（データベースの現在のバージョン）を持ちます。nameには代入できません。つまり、データベースの名前は一度作ったら変えられないということです。消して作りなおせば別ですが。versionも代入できません。変えるには、さっき説明したようにopenメソッドでバージョンを上げます。</p>
+<p>また、<dfn>close</dfn>メソッドを持ちます。これはそのデータベースに対する操作を終了することを明示するメソッドです（消すわけではありません）。返り値も引数もありません。</p>
+
+<h4>オブジェクトストアを扱う</h4>
+<p>データベースはオブジェクトストアを保持すると上で紹介しました。ですから、データベースがあっても、中にオブジェクトストアを作ってやらないと、レコードを入れることはできないのです。</p>
+<p>オブジェクトストアは複数作れます。ひとつのデータベースでも、複数の領域を用意して異なる情報を入れておけるというわけですね。基本的に一つのアプリケーションなら一つのデータベースで完結するのがよいのではないでしょうか。</p>
+<p>そこでまず、IDBDatabaseがもつ、オブジェクトストアを作るメソッド<dfn>createObjectStore</dfn>を紹介します。引数は2つで、一つ目は作るオブジェクトストアの名前（文字列）、次はオプション（省略可能）です。</p>
+<p>データベース内のオブジェクトストアも名前で区別しますから、作るときに名前をつけてやります。createObjectStoreの返り値は、<dfn>IDBObjectStore</dfn>というオブジェクトで、これがオブジェクトストアを表します。IDBObjectstoreについては次回解説します。</p>
+
+<p>しかし、createObjectStoreはいつ呼べばいいのか、ちょっと困りませんか。いざデータを保存しようとするとオブジェクトストアが必要なので作るわけですが、オブジェクトストアを作るのは最初の一回だけで十分です。ですから、普通なら、データベースが持っているオブジェクトストアを調べて、目当てのが無かったらcreateObjectStoreを呼ぶ、という手段を踏みたくなるところですが、そうではない方法があります。それが、<strong>versionchangeトランザクション</strong>を使う方法で、実はcreateObjectStoreはこの方法専用のメソッドなので、この方法をとるしかないのです。</p>
+<p>トランザクションとは実際にデータベースを操作するときに使う仕組みで、まだオブジェクトストアの話をしていますから順序が逆になってしまうのですが、そういう仕様になっているので仕方ありません。</p>
+<p>しかしここではトランザクションには深入りしません。内部ではいろいろと複雑なことをしていますが、以下では表面的な説明をします。</p>
+<p>上で説明したopenメソッドでデータベースを開くときに、データベースのバージョンが、引数で与えられたバージョンより古い場合に、<mark>versionchangeトランザクション</mark>が発動します。つまり、versionchangeトランザクションとは、簡単に言うと、データベースが古かった場合に発生する処理といえます。</p>
+<p>ちなみに、存在しないデータベースに対してopenメソッドを使用して新しいデータベースを作った場合には、必ずversionchangeトランザクションが発動します。なぜなら、バージョンとして引数に指定可能な数字は1以上であるのに対し、新しくデータベースを作成した場合、バージョンは0として扱われるからです。このように、初めての場合もversionchangeトランザクションが起きるというのは実は重要です。</p>
+<p>さて、versionchangeトランザクションが発動すると何が起こるかというと、表面的に起こるのは、openの返り値であるIDBOpenDBRequestにおいて、<dfn>upgradeneededイベント</dfn>が発生します。upgrade（更新）needed（が必要）という意味です。つまり、upgradeneededイベントは、新しいバージョンのデータベースが必要なので、古いデータベースを新しいやつに対応させて下さいと言っているのです。だからそれに対する処理として、新しいデータベースに必要なオブジェクトストアをcreateObjectStoreによって追加したり、いらないオブジェクトストアをdeleteObjectStoreで消したりなどの処理をすればいいわけです。</p>
+<p>また、はじめてデータベースを作ったときもversionchangeトランザクション、しいてはupgradeneededイベントが発生するので、ここでデータベースの初期化をしてやればいいのです。つまり、コードで表すとこんな感じです。</p>
+<pre><code>var request = indexedDB.<mark>open</mark>("test",1);	<mark class="ins">//testというデータベースをバージョン1で開く。openの返り値はIDBOpenDBRequest</mark>
+<mark class="ins">//データベースの更新処理</mark>
+request.addEventListener("<mark>upgradeneeded</mark>",function(e){
+  <mark class="ins">// ここにデータベースの更新処理を書く</mark>
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  console.log(request.result);	//resultにはIDBDatabaseが入っている
+});
+        </code></pre>
+<p>実は、upgradeneededは、success（やerror）よりも前に発生することになっています。しかし、upgradeneededの時点でIDBOpenRequestのresultプロパティ（IDBDatabaseが入っている）は利用可能になっています。したがって、これを用いてcreateObjectStoreすればいいのです。簡単にいうと次のような感じです。</p>
+<pre><code>var request = indexedDB.open("test",1);	//testというデータベースをバージョン1で開く
+//データベースの更新処理
+request.addEventListener("<mark>upgradeneeded</mark>",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+  db.<mark>createObjectStore</mark>("foo");	<mark class="ins">//fooというオブジェクトストアを作る</mark>
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  console.log(request.result);	//resultにはIDBDatabaseが入っている
+});
+          </code></pre>
+<p>実はcreateObjectStoreは、このようにversionchangeトランザクション中に呼ばないとエラーになるのです。だから上で、この方法専用と述べたのです。</p>
+
+<p>また、upgradeneededにおけるイベントオブジェクトは<dfn>IDBVersionChangeEvent</dfn>と呼ばれる種類のもので、<dfn>oldVersion</dfn>と<dfn>newVersion</dfn>という2つのプロパティが利用できます。</p>
+<p>それぞれ、変更前のデータベースのバージョン、変更後のバージョンです。これにより、バージョンが何から何へ変わったのか知ることができます。上で説明した通り、データベースが新規作成されたためにupgradeneededが発動している場合は、oldVersionは0です。</p>
+<p>これを用いて、例えばデータベースがどんどん複雑化してバージョンが何度も上がっている場合、upgradeneededのイベントハンドラは次のようになっていることが想定できます。</p>
+<pre><code>var request = indexedDB.open("test",5);	//testというデータベースをバージョン5で開く
+//データベースの更新処理
+request.addEventListener("<mark>upgradeneeded</mark>",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+  <mark class="ins">var old=e.<mark>oldVersion</mark>;	//前のバージョン</mark>
+
+  <mark class="ins">
+  if(old&lt;1){
+    //データベースが初めて作られたときの処理
+    db.<mark>createObjectStore</mark>("foo");	//fooというオブジェクトストアを作る
+  }
+  if(old&lt;2){
+    //データベースのバージョンが1から2に上がった時に追加されたオブジェクトストア
+    db.<mark>createObjectStore</mark>("bar");	//barというオブジェクトストアを作る
+  }
+  if(old&lt;3){
+  //同様に2から3のとき
+    db.<mark>createObjectStore</mark>("baz");
+  }
+  if(old&lt;4){
+    db.<mark>createObjectStore</mark>("qux");
+  }
+  if(old&lt;5){
+    db.<mark>createObjectStore</mark>("hoge");
+  }
+            </mark>
+
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  console.log(request.result);	//resultにはIDBDatabaseが入っている
+});
+        </code></pre>
+<p>このデータベースには、foo,bar,baz,qux,hogeという5つのオブジェクトストアがありますが、バージョン1のときはfooしか無かったのでしょう。2に上がるにあたって、bazが追加されました。以下同様に、バージョンが上がるごとに1つずつオブジェクトストアが追加されていったのです。</p>
+<p>条件判定に不等号を用いることで、柔軟に対応することができます。</p>
+<p>例えばバージョン2のデータベースを持つ人がこのページを読み込んだ場合、「old&lt;2」は満たさないが「old&lt;3」からは満たすので、baz,qux,hogeの3つが追加されます。初めて来た人も、同様にちゃんと5こ全部が追加されます。</p>
+
+<p>ちなみに、オブジェクトストアを削除する<dfn>deleteObjectStore</dfn>メソッドもあり、これもcreateObjectStoreと同様に、versionchangeトランザクション中しか呼べません。引数は削除するオブジェクトストア名のみです。</p>
+
+<p>さて、createObjectStoreには第二引数を指定することができるといいましたが、ここまで登場していませんね。第二引数は<strong>オブジェクト</strong>です。複数（といっても2つですが）のオプションをまとめて一つの引数で渡すためにオブジェクトの形になっています。</p>
+<p>すなわち、渡すオブジェクトのプロパティとして、各オプションを教えてあげるわけです。オプションとなるプロパティ名は2つ、<dfn>keyPath</dfn>（文字列またはnull）、<dfn>autoIncrement</dfn>（真偽値）です。例えば、次のように渡します。</p>
+<pre><code>db.createObjectStore("foo",{
+  <mark>keyPath</mark>:"hoge",
+  <mark>autoIncrement</mark>:true
+});</code></pre>
+<p>これら2つのオプションは、<strong>key</strong>に関係してきます。そこで次回は、keyとは何かから説明したいと思います。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="14_1.html">十四章第一回</a>
+                          |
+          <a rel="next" href="14_3.html">十四章第三回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

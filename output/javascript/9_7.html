@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>九章第七回　プリミティブとオブジェクト — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_6.html">九章第六回</a>
+                          |
+          <a rel="next" href="9_8.html">九章第八回</a>
+              </p>
+    </nav>
+    <h2>九章第七回　プリミティブとオブジェクト</h2>
+<p>今回はプリミティブとオブジェクトの関係について解説します。</p>
+<p>プリミティブとは、</p>
+<pre><code>"あいうえお"
+123
+true
+</code></pre>
+<p>のように、オブジェクトではない値のことでした。</p>
+
+<h3>プリミティブのプロパティ</h3>
+<p>ここで、次のサンプルを見てみます。</p>
+<pre><code>var aaa = "aiueo";
+
+console.log(aaa.<strong>length</strong>);
+          </code></pre>
+<p>「5」と表示されます。実はこの<dfn>length</dfn>プロパティは<strong>文字列の長さ</strong>がわかるものなのですが、なかなか便利です。しかし、おかしいと思いませんか？</p>
+<p>変数aaaの中身は"aiueo"です。これは<strong>プリミティブ</strong>だから、プロパティなどないはずです。</p>
+<p>実は、プリミティブのプロパティを呼び出そうとしたとき、内部的に<strong>オブジェクト</strong>が作られて、そのプロパティを参照しているのです。</p>
+<p>それでは、どんなオブジェクトが作られているというのでしょう。</p>
+<p>実はこれは、プリミティブの型ごとに決まっています。プリミティブには文字列・数値・真偽値がありましたが、それぞれString,Number,Booleanのインスタンスが作られます。</p>
+<p>これらのインスタンスは自分でも作れます。</p>
+        <pre><code>var abc = new <mark>String</mark>("あああ");
+console.log(abc);
+          </code></pre>
+        <p>「あああ」が表示されます。</p>
+        <p>つまり、<code>aaa.length</code>は、内部的に</p>
+        <pre><code><mark class="ins">(new <mark>String</mark>(aaa))</mark>.length</code></pre>
+        <p>というようにして処理されていたのです。</p>
+        <p>だから、String.prototypeにプロパティを追加すれば、文字列リテラルのプロパティとして利用できるかもしれません。もっとも、使い道があるかは分かりませんし、そのようなことはあまり勧められません。</p>
+        <pre><code>String.prototype.abcabc = "test";
+
+console.log("あああ".abcabc);
+          </code></pre>
+        <p>この例のように、いちいち変数に代入しなくてもプロパティを参照したりできます。</p>
+
+        <h3>型変換</h3>
+        <p>先の例のように、Javascriptでは、Stringのインスタンスを文字列と同じように使うことができました。Numberも同様なのですが、注意すべき点があります。</p>
+        <p>それは<strong>型変換</strong>です。JavaScriptでは、異なる型どうしを演算子で扱う場合など、型の変換をして同じ型に合わせてから処理します。それについて解説します。</p>
+
+        <h4>真偽値への変換</h4>
+        <p>まず最初に真偽値への変換を解説します。これは、if文である変数や値を直接評価するときなどによく出現します。</p>
+        <pre><code>if(<mark>aaa</mark>){ ・・・ }</code></pre>
+        <p>というような場合ですね。</p>
+        <p>if文は真偽値にしないと評価できないので、全て真偽値に変換されます。<a href="2_14.html">二章第十四回</a>で出てきた感じの話題です。二章第十四回では、if文で処理するとき真になるか偽になるかという解説をしましたが、実はこれは<strong>真偽値に変換するとtrueになるかfalseになるか</strong>ということだったのです。</p>
+        <p>さて、変換結果は、null・undefinedはfalseに変換されます。数値は0ならfalse、それ以外は全てtrueです。文字列も、""ならfalse、他は全てtrueです。そして、<strong>オブジェクトは全てtrue</strong>です。</p>
+        <p>ここで、さっきのオブジェクトが出てきます。<strong>真偽値</strong>には、Booleanのインスタンスが対応しています。</p>
+        <pre><code>console.log(new <mark>Boolean</mark>(false));</code></pre>
+        <p>これで真偽値を表せそうな気がしますが、これをif文で使うとどうでしょう。</p>
+        <pre><code>if(new Boolean(<mark>false</mark>)){
+  console.log("真");
+}else{
+  console.log("偽");
+}
+          </code></pre>
+        <p>なんと「真」となります。</p>
+        <p>falseのBooleanオブジェクトのはずなのにtrueに変換されてしまったということです。</p>
+        <p>これはなぜかというと、<strong>オブジェクトは全てtrueに変換される</strong>からです。このようなことが起こるので、値を表すならばプリミティブ値を使うようにしましょう。StringやBooleanなどのインスタンスを使う機会はめったにありません。</p>
+
+        <h4>等価演算子</h4>
+        <p>さて、<strong>等価演算子</strong>（<code>==</code>）でもさまざまな型変換が行われます。実は、比べる型が違う場合、どのように処理するかは細かく決まっています。</p>
+        <p>まず、nullとundefinedは型が違いますが、これらを比べた場合trueです。</p>
+        <p>次に、<strong>数値と文字列</strong>を比べた場合、文字列が数値に変換されます。つまり、"3"なら3、"7"なら7・・・という感じです。</p>
+        <p>ですから、たとえば<code>3=="3"</code>はtrueになります。</p>
+        <p>その次は、<strong>真偽値</strong>とそれ以外を比べる場合、とりあえず真偽値を<strong>数値</strong>に変換します。例えば真偽値と文字列とか、それでも同じに成らない場合、これは「数値と文字列」の比較となるので、文字列が数値に変換されて、晴れて数値どうしになるわけです。</p>
+        <p>ところで、真偽値を数値に変換するとどうなるかですが、これは単純です。<strong>trueなら1、falseなら0</strong>です。</p>
+        <pre><code>true == "1"	<mark>//これはtrue</mark>
+false == 0	<mark>//これもtrue</mark>
+true == 2	<mark>//これはfalse</mark>
+        </code></pre>
+        <p>さて、これでもまだうまくいかないのは、<strong>オブジェクトとプリミティブの比較</strong>の場合です。オブジェクトと真偽値を比較する場合は前述の通り真偽値が数値に変換されるので、オブジェクトと、文字列または数値の比較になります。この場合、<strong>オブジェクトをプリミティブに変換</strong>します。これにより、プリミティブどうしの比較となり、解決できます。</p>
+
+        <h4>オブジェクトの変換</h4>
+        <p>さて、オブジェクトをプリミティブに変換するにはどうするのでしょう。実は、オブジェクトが変換されるときに呼び出される<strong>メソッド</strong>があります。それは、<dfn>toString</dfn>と<dfn>valueOf</dfn>です。一般に、toStringは文字列に変換したいとき、valueOfは数値に変換したいときに呼び出されることになっています。自分でオブジェクトを作ったとき、これらのメソッドを作っておけば変換されたときの値を操作できるというわけです。</p>
+        <pre><code>var aaa={
+  <mark>toString</mark>: function(){return "aaa!";}
+};
+console.log("aaa!"==aaa);
+          </code></pre>
+        <p>また、文字列がほしい場合でも、toStringがない場合はvalueOfを呼び出します。逆もありえます。ただ、toStringは実はObject.prototypeにあるので、nullを代入するなどして使えないようにしないとこれは起こりません。</p>
+        <pre><code>var aaa={
+  <mark>toString</mark>:null,
+  <mark>valueOf</mark>:function(){return "aaa!";}
+};
+console.log("aaa!"==aaa);
+          </code></pre>
+        <p>toStringもvalueOfもない場合、変換しようとするとエラーになります。</p>
+        <p>さて、valueOfは数値に変換したい場合と説明しましたが、toStringは「文字列に変換」なのに対して、実はvalueOfは「数値に変換」というわけではありません。「オブジェクトのデフォルト値」ということになっています。String,Number,Booleanのオブジェクトの場合は、対応するプリミティブ値が返りますが、Object.prototype.valueOfは、「自分自身を返す」というメソッドです。つまり、オブジェクトが帰ってくるということです。まったく変換できていません。このように、toStringやvalueOfがプリミティブ以外を返した場合、それは無効となります。つまり、先にtoStringが呼び出されてプリミティブが返されなかった場合、無効となって今度はvalueOfが呼び出されます。両方とも無効の場合はやはりエラーです。</p>
+        <p>オブジェクトを変換しようとしてtoStringやvalueOfで真偽値が帰ってきても、それはエラーにはなりません。等価演算子の場合、その真偽値がさらに数値に変換されて無事比較できるというわけです。また、等価演算子でオブジェクトを変換する場合、「数値に変換したいとき」に該当する感じで、valueOfが先に呼び出されます。</p>
+        <p>だから、次のコードはtrueとなります。</p>
+        <pre><code>var aaa = {
+  <mark>valueOf</mark>: function(){return false;}
+};
+console.log(aaa == 0);
+          </code></pre>
+        <p>これは、　「（オブジェクト） == （数値）」の形です。まずオブジェクトを変換するためにvalueOfが呼び出され、falseになるので、「（真偽値） == （数値）」のパターンとなります。真偽値は数値に変換されるので、数値どうしの比較となるわけです。</p>
+        <p>前述の、</p>
+        <pre><code>var aaa={
+  <mark>toString</mark>: function(){return "aaa!";}
+};
+console.log("aaa!"==aaa);
+          </code></pre>
+        <p>というケースではvalueOfではなくtoStringが呼び出されているように見えますが、これはvalueOf（Object.prototype.valueOfが呼ばれる）を呼び出した結果がオブジェクトだったので無効になり、次にtoStringが呼ばれて比較されたことによります。</p>
+
+        <h4>厳密等価演算子</h4>
+        <p>ここで、<dfn>厳密等価演算子</dfn>というものを紹介します。これは、<code>===</code>という、イコールを3つ並べたもので、等価演算子(<code>==</code>)と同じように使えます。</p>
+        <p>では、どこが違うかというと、<strong>型が違うものどうしは全てfalse</strong>という点です。等価演算子では、型変換をして調整してくれていましたが、厳密等価演算子では全てfalseにされます。等価演算子ではtrueだったnullとundefinedの比較も、falseになります。</p>
+        <p>たとえば普通の等価演算子だと、<code>0==false</code>のようなものがtrueになるなど、直感的ではないかもしれない場合があります。厳密等価演算子では型変換を行わないのでこれもfalseになります。</p>
+        <p>実際、型変換をして比較してくれないと困るという場面は滅多に無く、型が違うならばfalseにしてよいという場面のほうが多いので、この厳密等価演算子がよく使われます。型変換が必要ない場面（というよりそれがほとんどですが）では厳密等価演算子を使うようになれば、一歩ステップアップです。</p>
+        <p>また、型が違えば型変換をすることなくfalseを返すので、普通の等価演算子よりわずかに処理速度が速いという利点もあるそうです。</p>
+        <p>逆に、普通の等価演算子を使う場面で多いのが、<code><var>変数</var>==null</code>というnullとの比較です。変数がundefinedまたはnullのときtrueを返します（厳密等価演算子の場合はundefinedならfalse）。undefinedとnullに共通する特徴は「プロパティを参照しようとするとエラーになる」ことなので、その場合を除外したい場合などにこの比較を用います。</p>
+        <p>ちなみに、<code>===</code>の否定形は<code>!==</code>です。</p>
+
+        <h4>加法演算子</h4>
+        <p>さて、次は<strong>加法演算子</strong>(<code>+</code>)について見ていきます。今までやたら説明が長かったですが、基礎がわかったのでこれからは簡単です。</p>
+        <p>加法演算子は、まず最初に両辺のオブジェクトをプリミティブに変換してしまいます。これもvalueOf優先です。</p>
+        <p>ここで、どちらか一方でも<strong>文字列</strong>であれば文字列の連結となり、もう片方が文字列でなくても文字列に変換してしまい、連結します。</p>
+        <p>そうではない場合、どちらも数値に変換されます。真偽値の場合などは、ここで数値になります。あとは足すだけです。だから、「2 + true」は、trueが1に変換されるので3です。「"2" + true」の場合、trueは文字列に変換されるので"2true"になります。</p>
+
+        <h4>減法演算子</h4>
+        <p>減法演算子は、文字列の連結機能がないのでもっと単純です。両方を数値に変換して計算するだけです。</p>
+        <p>そこで、数値以外を数値に変換する手軽な方法として、「0を引く」というものがあります。そうすれば減法演算子が左辺を数値に変換してくれて、0を引いても変わらないので結果左辺を数値に変換できたことになります。</p>
+        <pre><code>console.log(true - 0);</code></pre>
+        <p>また、falseも0に変換されるので、falseを引いてもいいです。</pre>
+        <pre><code>console.log(true-false);</code></pre>
+        <p>こうすれば、一目見ただけでは何がしたいのか分かりません。コードを汚くするのに一役かってくれます。</p>
+        <p>ただ、ひとつ注意したいのが、<strong>NaN</strong>の存在です。</p>
+        <p><dfn>NaN</dfn>というのは、実は<strong>数値の一種</strong>です。そのため、NaNはプリミティブであり、数値であるということです。ちなみにこれは、null,undefinedなどと同様に、NaN　とするとNaNが得られます。また、NaNと他の数値どうしで数値計算をしようとすると、結果はNaNになります。例えば計算に複数の変数を使うとして、そのうち1つでも間違ってNaNになると、一瞬にしてNaNが広がっていきます。</p>
+        <p>また、NaNには大きな特徴があります。</p>
+        <pre><code>console.log(NaN==NaN);</code></pre>
+        <p>これがなんとfalseになります。NaNを等価演算子で比較しようとすると、無条件でfalseになってしまうのです（厳密等価演算子でもfalseです）。</p>
+
+        <p>さて、なぜこのNaNに注意するかというと、関数などを数値に変換する際、このNaNが現れる可能性があるということです。そうすると、せっかく0を引いてみたりしてもNaNのままです。まあ確かに数値ではありますが、あまり意味がないですね。</p>
+        <p>たとえば、<code>"a" - 0</code>のように数値に変換できない値を数値に変換しようとするとNaNになります。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_6.html">九章第六回</a>
+                          |
+          <a rel="next" href="9_8.html">九章第八回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

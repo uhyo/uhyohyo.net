@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Page Visibilityのサンプル</title>
+</head>
+<body>
+<script>
+var message_count=0;
+
+//ページが読み込まれたときの状況を判断
+if(document.hidden){
+	message("現在ページは見えていません。");
+}else{
+	message("現在ページは見えています。");
+}
+//状況が変わったら再び判断
+document.addEventListener("visibilitychange",function(e){
+	if(document.hidden){
+		message("ページが見えなくなりました。");
+	}else{
+		message("ページが見えるようになりました。");
+	}
+});
+
+// メッセージを表示する関数。新しいp要素を作って追加。わかりやすいように番号もつける。
+function message(str){
+	var p=document.createElement("p");
+	p.textContent=(++message_count)+". "+str;
+	document.body.appendChild(p);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Navigation Timingのサンプル</title>
+</head>
+<body>
+<script>
+//今回もここのスクリプトが実行されている時点で既に通信が終わっていると判断して、ここで直接判断する
+
+//時間を引き算して通信にかかった時間を取得する
+var result;
+var nav=performance.navigation;
+switch(nav.type){
+	case nav.TYPE_NAVIGATE:
+		result="通常のナビゲーションでこのページを読み込みました。";
+		break;
+	case nav.TYPE_RELOAD:
+		result="ページを更新してこのページを読み込みました。";
+		break;
+	case nav.TYPE_BACK_FORWARD:
+		result="「戻る」ボタンや「進む」ボタンでこのページを読み込みました。";
+		break;
+	case nav.TYPE_RESERVED:
+		result="よくわからない方法でこのページを読み込みました。";
+		break;
+}
+console.log(nav.type);
+
+
+//結果を表示する
+var p=document.createElement("p");
+p.textContent=result;
+document.body.appendChild(p);
+</script>
+</body>
+</html>

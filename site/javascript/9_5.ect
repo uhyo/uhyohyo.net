@@ -1,0 +1,222 @@
+<% @page.title="九章第五回　クロージャ"
+@page.prev=[9,4]
+@page.next=[9,6] %>
+<h2>九章第五回　クロージャ</h2>
+
+<h3>クロージャとは</h3>
+<p>今回は<dfn>クロージャ</dfn>について解説します。</p>
+<p>クロージャとは、ある関数が作られたとき、そこの<strong>環境</strong>が関数の中で保持されるということです。</p>
+<p>正式名称ではないとからしいですが、クロージャということでいきます。</p>
+<p>さて、環境とは、そこの処理でどの変数が使えるかということです。例えば、</p>
+<pre><code>var a=3;
+console.log(a);
+          </code></pre>
+<p>という何の変哲もないコードですが、console.log(a)が実行されたときの環境では、変数aが使用できます。変数a以外にも、<strong>全てのグローバル変数</strong>が使用できます。</p>
+<p>また、</p>
+<pre><code>function aaa(){
+  var b = 3;
+  console.log(a+b);
+}
+var a = 5;
+aaa();
+          </code></pre>
+<p>というコードでは、関数aaa内で変数a,bが使われています。変数aはグローバル変数で、変数bはローカル変数ということです。</p>
+<p>つまり、関数内の環境は、グローバル変数とその関数のローカル変数を使うことができるというわけです。関数外では、ローカル変数は参照できないというわけです。</p>
+<p>今回、このローカル変数がポイントです。</p>
+
+<p>最初の説明で、「関数が作られたとき」とあります。関数を作ってみましょう。ローカル変数がポイントなので、ローカル変数が使える環境にある関数内で関数を作ってみます。</p>
+<pre><code>function aaa(){
+  var a = 3;
+  var bbb = function(){
+    console.log(a);
+  }
+  bbb();
+}
+aaa();
+          </code></pre>
+<p>関数aaa内で、ローカル変数aと関数bbbが作られています。varを付けて代入されているので、bbbもまたローカル変数であり、関数内でしか利用できません。</p>
+<p>関数bbbの中では、関数が作られた環境（aaa内の環境）を保持しているため、グローバル変数・aaa内のローカル変数が利用できます。また、さらに、bbb内でローカル変数を作ればそれも利用できます。</p>
+
+<p>さて、これだけだと何の意味があるのか分かりません。本題は、次のサンプルにあります。</p>
+<pre><code>function aaa(){
+  var a = 5;
+  <mark>	return bbb;</mark>
+
+  function bbb(){
+    console.log(a);
+  }
+}
+var ccc = aaa();
+ccc();
+          </code></pre>
+<p>関数aaaは、ローカル変数aを作ったあと、bbbを返しています。ここで、関数の中で</p>
+<pre><code>function <var>関数名</var>(){
+}</code></pre>
+<p>の形を使用していますが、実はこういうこともできます。こうすると、先の例と同じようにローカル変数のようになります。</p>
+<p>さて、返ってきたbbbは、今度はcccに代入されます。そしてそれを呼び出しています。このbbbは、aをログするだけです。</p>
+<p>ここで、cccは関数aaaの外で実行されたのに、aの内容が正しく表示されます。これは、ccc、つまりbbbが、関数aaaの中で作られたため、その環境（ローカル変数aが使える）を保持しているからです。</p>
+<p>つまり、cccは関数の処理が終了してしまってもう干渉することができなくなったローカル変数に、干渉する手段を与えていることになります。</p>
+<p>今はconsole.logで表示するだけですが、これはどうでしょう。</p>
+<pre><code>function aaa(){
+  var a = 5;
+  <mark>return bbb;</mark>
+
+  function bbb(){
+    <mark class="ins">a++;</mark>
+    console.log(a);
+  }
+}
+var ccc = aaa();
+ccc();
+          </code></pre>
+<p><code>a++;</code>が追加され、cccを呼び出すことでaを増やすことができるようになりました。</p>
+<p>ここで、関数aaaの外ではcccはaに干渉する唯一の手段であり、aを同時に2以上増やす手段がなく、またaを1増やすにはログをそのつど表示しなければなりません。aは、決して5より小さくなりません。</p>
+<p>aを100にするには、ログを95回出さなければいけないということです。</p>
+
+<p>このように、クロージャは、想定外の動作を絶対にされたくない変数を保護したり、ローカル変数の内容を関数の外に伝えたりするのに使うことができます。</p>
+
+<h3>クロージャの活用</h3>
+<p>クロージャの活用法として以前から利用されてきたものは、<strong>this</strong>と関連した使い方があります。</p>
+<p>DOMとの絡みが出てきますが、次のサンプルを見てみましょう。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  function MyDiv(name){
+    this.div = document.createElement("div");
+    this.name=name;
+    this.div.textContent="このdiv要素は"+name+"です";
+    document.body.appendChild(this.div);
+  }
+
+  var div1 = new MyDiv("div1");
+&lt;/script&gt;
+        </code></pre>
+<p>新しいMyDivのインスタンスを作って、変数div1に代入しています。</p>
+<p>インスタンスを作った時点で、コンストラクタMyDivが実行されます。ここでやっていることは、新しいdiv要素を作ってプロパティdivに代入し、テキストノードのメッセージも加えてbody要素に追加されます。</p>
+<p>また、名前を引数で渡し、プロパティnameに代入しています。</p>
+<p>その結果、これを実行すると、body要素に「このdiv要素はdiv1です」という中身のdiv要素が出現します。これだけでは何の意味もないですが、きっとこの後このdivを使って凄いことをするのでしょう。</p>
+
+<p>そういった時に欠かせないのが、<strong>イベント</strong>です。そこで、「クリックされたら自身の名前（this.name）を表示するというのをやってみましょう。</p>
+<p>イベントについては、<a href="3_2.html">第三章</a>を参照して下さい。</p>
+
+<p>そこで、単純に考えると次のようになるでしょう。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  function MyDiv(name){
+    this.div = document.createElement("div");
+    this.name=name;
+    this.div.textContent="このdiv要素は"+name+"です";
+    document.body.appendChild(this.div);
+
+    <mark class="ins">this.div.<mark>addEventListener</mark>('click',function(e){
+      console.log(<mark>this.name</mark>);
+    },false);</mark>
+  }
+
+  var div1 = new MyDiv("div1");
+&lt;/script&gt;
+        </code></pre>
+<p>さっき書いたことをそのままコードで表現するとこうなりますね。クリックされるとthis.nameが表示されます。</p>
+<p>さて、クリックすると表示された値は<strong>undefined</strong>です。これは、thisのプロパティとしてnameなどというものは無かった、つまりthisは、MyDivのインスタンスを表していないということです。</p>
+<p>これはひょっとすると、イベントとして登録された関数（イベントハンドラ）がインスタンスのメソッドでは無いからかもしれません。ということでメソッドにしてみましょう。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  function MyDiv(name){
+    this.div = document.createElement("div");
+    this.name=name;
+    this.div.textContent="このdiv要素は"+name+"です";
+    document.body.appendChild(this.div);
+
+    this.div.<mark>addEventListener</mark>('click',<mark class="ins">this.clicked</mark>,false);
+  }
+  <mark class="ins">//クリックされたときに呼ばれるメソッド
+  MyDiv.prototype.clicked=function(e){
+  console.log(this.name);
+  };</mark>
+
+  var div1 = new MyDiv("div1");
+&lt;/script&gt;
+      </code></pre>
+<p>しかし、結果はまだ<strong>undefined</strong>です。</p>
+<p>何が起こっているかというと、このthisというのは、基本的に</p>
+      <pre><code><var>インスタンス</var>.<var>メソッド名</var>();</code></pre>
+<p>というような形で呼ばれないとthisがインスタンスとしてセットされないのです。</p>
+<p>しかし、イベントハンドラとして関数が呼ばれる場合は、この形で呼ばれることはありません。だから、最初にやった方法ではthisがインスタンスではなかったのです。</p>
+<p>それではどうするかというと、ここで<strong>クロージャ</strong>の登場です。具体的には次のようにします。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  function MyDiv(name){
+    this.div = document.createElement("div");
+    this.name=name;
+    this.div.textContent="このdiv要素は"+name+"です";
+    document.body.appendChild(this.div);
+
+    this.div.addEventListener('click',<mark class="ins">(function(<mark>i</mark>){
+      return function(e){
+        console.log(<mark>i</mark>.name);
+      };
+    })(<mark>this</mark>)</mark>,false);
+  }
+
+var div1 = new MyDiv("div1");
+&lt;/script&gt;
+      </code></pre>
+<p>何か複雑になりましたね。しかし、試してみると確かにクリックすると"div1"が表示されます。</p>
+<p>addEventListenerの第二引数で何が起こっているかというと、最後の<code>(<mark>this</mark>)</code>は<strong>関数呼び出し</strong>です。呼び出されている関数は、その前の</p>
+<pre><code>(function(<mark>i</mark>){
+  return function(e){
+    console.log(<mark>i</mark>.name);
+  };
+})</code></pre>
+<p>です。括弧で囲まれていますが、<code>function (){ }</code>という<strong>無名関数</strong>の形ですね。括弧で囲んでいるのは、分かりやすくするためです。今回は括弧が無くても大丈夫ですが、場合によっては括弧がないと動作が変になります<small>（関数式がFunctionDeclarationと間違われる場合）</small>。</p>
+<p>それで、この無名関数は引数iを持ちます。この引数iに<strong>this</strong>を渡していますね。この無名関数を仮に<b>外側の無名関数</b>と呼ぶことにします。</p>
+<p>さて、この外側の無名関数が返すのは、またも<strong>無名関数</strong>です。ややこしいですが、これを<b>内側の無名関数</b>と呼びましょう。</p>
+<p>この内側の無名関数は、<strong>外側の無名関数内で作られた</strong>のです。ここがポイントで、ここにクロージャが関わってきます。クロージャとは、ある関数が作られたとき、その関数が作られた環境を保持していて、その環境の変数を参照できるということでした。</p>
+<p>ここで、作られた関数は<b>内側の無名関数</b>で、環境は<b>外側の無名関数</b>の環境です。</p>
+<p>外側の無名関数で利用できる変数とは、そう、<strong>変数i</strong>です。外側の無名関数が呼ばれた時点で、その引数はthisです。このthisはコンストラクタ内で使用されたものであるから、このthisは確かにインスタンスを表します。つまり、ここでは<strong>変数iはMyDivのインスタンスである</strong>のです。</p>
+<p>ここで、クロージャにより、<strong>内側の無名関数から変数iを参照できる</strong>のです。内側の無名関数が作られた時点、つまり外側の無名関数が呼ばれた時点では変数iはインスタンスなわけですから、内側の無名関数はその環境を保持し、関数呼び出しが終了した後でも変数iはインスタンスとして残り続けるのです。</p>
+
+<p>さて、内側の無名関数は、実は外側の無名関数の<strong>戻り値</strong>となっています。戻り値とは即ち関数呼び出しの結果ですから、それがaddEventListenerの第二引数となります。</p>
+<p>内側の無名関数の働きは、iのプロパティnameをログすることでした。iはインスタンスですから、クリックするとインスタンスのプロパティnameが正しく表示されたのです。</p>
+<p>ここで、結局何をしたかというと、クロージャを利用して、実際にイベントハンドラとしてクリック時に呼ばれる関数（内側の無名関数）内で、インスタンスへの参照（この場合は変数i）が保持されるようにしたのです。</p>
+<p>このような手法は、良く利用されていました。<em>少し前までは</em>。</p>
+
+<p>ちなみに、実はこのような方法もあります。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  function MyDiv(name){
+    this.div = document.createElement("div");
+    this.name=name;
+    this.div.textContent="このdiv要素は"+name+"です";
+    document.body.appendChild(this.div);
+
+    <mark class="ins">var t=<mark>this</mark>;</mark>
+
+    this.div.addEventListener('click',<mark class="ins">function(e){
+      console.log(<mark>t</mark>.name);
+    }</mark>,false);
+  }
+
+  var div1 = new MyDiv("div1");
+&lt;/script&gt;
+    </code></pre>
+<p>これは、二重の無名関数が一重になりました。</p>
+<p>ここでポイントは、変数tにthisを代入している点です。addEventListener第二引数の無名関数は、コンストラクタである関数MyDivの内部で作られたものですから、またMyDiv内の環境を保持しているわけです。</p>
+<p>すなわち、addEventListenerの第二引数となった無名関数からは、いつでも変数tが参照できるのです。変数tとはインスタンスですから、そのプロパティを参照してやればいいということです。</p>
+<p>なぜtなら良くてthisならだめなのかというと、thisは特別な存在で、関数呼び出し時にはその内側の環境で新しいthisが発生するからです。普通の変数ならばそのようなことは起こりません。</p>
+<p>始めに紹介した複雑な方法には、余計なローカル変数（この場合t）をMyDivの環境に増やさないということがあります。このような方法が以前は使用されていました。</p>
+
+<p>そう、以前は使われていました。今はあまり使われていないのです。</p>
+<p>では今はどうかというと、呼ばれる時のthis値を指定するメソッド<strong>bind</strong>があります。これは詳しくはまた紹介するので、今は使用例だけ紹介しておきます。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  function MyDiv(name){
+    this.div = document.createElement("div");
+    this.name=name;
+    this.div.appendChild(document.createTextNode("このdiv要素は"+name+"です"));
+    document.body.appendChild(this.div);
+
+    this.div.addEventListener('click',<mark class="ins">(function(e){
+      console.log(<mark>this</mark>.name);
+    }).<mark>bind</mark>(<mark>this</mark>)</mark>,false);
+  }
+
+  var div1 = new MyDiv("div1");
+&lt;/script&gt;
+    </code></pre>
+<p>bindを用いると、呼ばれた時のthis値を固定することができるのです。つまりこの場合、第二引数に渡された関数（にbindを適用した返り値）は、this値が本来とは異なりbindの第一引数の渡したものになるのです。これは比較的新しいもので、今の時代これが使われます。</p>
+
+<p>しかし、クロージャのサンプルとしてはさっきの複雑な方法はいい例です。理解して使えるようになりましょう。</p>

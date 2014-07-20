@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>三章第二回　イベントリスナ — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="3_1.html">三章第一回</a>
+                          |
+          <a rel="next" href="3_3.html">三章第三回</a>
+              </p>
+    </nav>
+    <h2>三章第二回　イベントリスナ</h2>
+<h3>addEventListener</h3>
+<p>DOM的にイベントを登録する（イベントが起こったとき関数が動くようにする）には、<dfn>addEventListener</dfn>を使います。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+
+      p.<dfn>addEventListener</dfn>(<mark>'click'</mark>, aaa, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このサンプルで、p要素をクリックすると、aaa関数が実行されます。これは、もちろんaddEventListenerによるものです。</p>
+<p>これは<strong>ノード</strong>が持つメソッドで、見て分かるように3つの引数をとります。</p>
+<p>一つ目の引数は<strong>イベント名</strong>です。今回の場合'click'ですね。「onclick」のように<strong>onはつかない</strong>ことに注意しましょう。ここで指定したイベントの種類について、イベントが登録されます。つまり、今回の場合、クリックした場合のイベントを登録しています。</p>
+<p>二つ目の引数は<dfn>イベントリスナ</dfn>です。イベントリスナとは、要するに呼び出される関数です。関数の<strong>オブジェクト</strong>（<a href="1_4.html">一章第四回</a>）を渡しています。</p>
+<p>さて、三つめの引数はフェーズというものの設定です。真偽値であることが分かります。これは、もっと後で説明するので、とりあえずfalseにしておきましょう。これの説明は<a href="3_4.html">三章第四回</a>で行います。</p>
+<p>まとめると、要するに、この関数で、イベントが発生したときに呼ばれる関数を設定しているのです。今回の場合は「clickが起こったとき（クリックされたとき）に関数aaaを呼ぶ」という設定をしているのでした。</p>
+<p>これは、<code>p.<mark>onclick</mark> = aaa;</code>と同じような動作をしますね。</p>
+
+<h3>利点</h3>
+<p>さて、このメソッドを使うことにどんな利点があるかを紹介したいと思います。一つに、<strong>複数登録できる</strong>ということがあります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+      &lt;script type="text/javascript"&gt;
+        function aaa(){
+            console.log('aaa!');
+        }
+        function bbb(){
+            console.log('bbb!');
+        }
+
+        var p = document.getElementById('abcd');
+
+        p.addEventListener('click', <mark>aaa</mark>, false);
+        p.addEventListener('click', <mark>bbb</mark>, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>addEventListenerで関数aaaを登録したあと、続けて関数bbbも登録しています。</p>
+<p>このサンプルでp要素をクリックしてみると、なんと<strong>ログが2回表示されます</strong>。これから、関数aaaとbbbが<strong>両方呼ばれた</strong>ことが分かります。</p>
+<p>これは、前回のイベントプロパティを使う方法とは異なる点のひとつです。</p>
+<pre><code>p.onclick = aaa;
+p.onclick = bbb;</code></pre>
+<p>のように2回関数を<strong>代入</strong>すると上書きされてしまうことは、前回説明しました。</p>
+<p>つまり、addEventListenerを使えば<strong>上書きされない</strong>ということです。これなら前回説明した問題点を解消することができます。</p>
+<p>他にもありますが、とりあえず、JavaScriptからイベントを登録するときは、このaddEventListenerを使うようにしましょう。</p>
+
+<h3>removeEventListener</h3>
+<p>反対に、登録されているイベントをなくすというメソッドもあります。それが<dfn>removeEventListener</dfn>です。使い方はaddEventListenerと同じで、まったく同じ引数3つを渡します。</p>
+        <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+
+      p.addEventListener('click', aaa, false);
+      <mark class="ins">p.<dfn>removeEventListener</dfn>('click', aaa, false);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>上のほうのサンプルにremoveEventListenerの一行を追加したことで、p要素をクリックしてもログが表示されなくなりました。引数はまったく同じです。</p>
+<p>ちなみに、2つめの引数は関数名（正確には関数をあらわす変数の名前）ですが、変数名まで同じである必要はありません。おなじ関数を表していればいいのです。つまり、</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+
+      p.addEventListener('click', aaa, false);
+      <mark class="ins">var <mark>b</mark> = aaa;</mark>
+      p.removeEventListener('click', <mark>b</mark>, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>のように書いた場合でも正しく動作するということです。</p>
+<p>変数bにaaaを代入しています。aaaはある関数を表しているから、bも同じ関数を表すようになります。よって、removeEventListenerにbを渡せば、ただしく処理されるということになります。</p>
+<p>また逆に、無名関数を登録したら消すことができません。次のサンプルで確かめましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('abcd');
+
+      p.addEventListener('click', <mark>function(){
+        console.log('aaa!');
+      }</mark>, false);
+      p.removeEventListener('click', <mark>function(){
+        console.log('aaa!');
+      }</mark>, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>この書き方はわかりにくいかもしれません。addEventListenerの呼び出し部分は、引数は次の3つです。すなわち、<code>'click'</code>と</p>
+<pre><code>function(){
+    console.log('aaa!');
+}</code></pre>
+<p>と<code>false</code>です。このように、別に関数呼び出しが複数行にまたがってもいいわけですね。ここでは2つ目の引数が無名関数式になっていて、3行使っています。removeEventListenerの引数も全く同じですね。ちなみに無名関数については<a href="1_4.html">一章第四回</a>で説明しました。</p>
+<p>ところが、このように書いた場合、p要素をクリックするとログが表示されます。なぜかというと、<code>function(){ 〜 }</code>という式はその場で新しい無名関数を作るので、addEventListenerに渡された無名関数とremoveEventListenerに渡された無名関数は処理が全く同じであっても別物扱いだということになります。ですから、removeEventListenerに渡された関数は、addEventListenerに渡された関数とは別物であると考えられるので、消せなかったのです。このように、いちど無名関数を登録してしまったら消せません。あとで消したいものには名前をつける（変数に入れて参照できるようにする）必要があります。</p>
+
+<h3>おまけ：IEへの対応</h3>
+<p>実は、addEventListenerやremoveEventListenerに、<strong>IE</strong>は今のところ<strong>対応していません</strong>（追記:IE9で対応しました）。しかし、IEは独自のメソッドなどを作り、似たようなことができるようにしています。</p>
+<p>これはDOMに従っていないから放っておいてもいいし、現に<a href="kiso1.html">基礎第一回</a>で「IEなんてやめましょう」というようにしたのですが、現実的にはまだまだIEでWebサイトに訪問する人も多く、それを全て切り捨てるのも（JavaScriptが動作しなくても最低限見れるページを作るのが望ましいのですが）、あまりいい話ではないかもしれません。そこで、IEで動くようにする方法を一応紹介しておきます。</p>
+<p>IEでは、上のサンプルと同じことをしたい場合、次のようにします。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+
+      p.<mark>attachEvent</mark>('<mark>on</mark>click', aaa);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>addEventListenerの代わりに、attachEventというメソッドが使われています。これが、IEでイベントリスナを登録するメソッドです。1つめの引数はイベントの種類で、2つめはイベントリスナです。これはaddEventListenerと同じですね。3つめの引数がありませんが、これはfalseを指定したのと同等です。</p>
+<p>ただ、第一引数に違いがあります。addEventListenerではイベント名に「on」を付けないのに、attachEventではつけていますね。</p>
+<p>反対に、detachEventというメソッドもあります。これは、removeEventListenerにあたるもので、引数はattachEventと同じです。</p>
+
+<p>さて、IEの人が困るからといってattachEventを使うようにすると、今度はIE以外の人が困ります。そこで、共存させるためにはこのようにします。</p>
+<pre><code>if(p.addEventListener){
+  p.addEventListener('click', aaa, false);
+}else if(p.attachEvent){
+  p.attachEvent('onclick', aaa);
+}</code></pre>
+<p>ifの条件にp.addEventListenerを指定しています。もしaddEventListenerがあれば、関数オブジェクトが入っているため真で、addEventListenerが呼ばれます。</p>
+<p>対して、p.addEventListenerがないIEでは、まったく想定外のプロパティが参照されたことになるので、undefinedとなり、つまり偽です。このあたりのことについては、<a href="2_14.html">二章十四回</a>で解説しましたね。</p>
+<p>同じことを一応attachEventでもしています。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="3_1.html">三章第一回</a>
+                          |
+          <a rel="next" href="3_3.html">三章第三回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

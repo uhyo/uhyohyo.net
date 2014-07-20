@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>XHRのサンプル</title>
+</head>
+<body>
+<!-- ここに結果を表示する -->
+<pre id="result"></pre>
+<script>
+var xhr = new XMLHttpRequest();
+
+xhr.addEventListener("load",function(ev){
+	//結果を表示
+	document.getElementById('result').textContent = xhr.response;
+});
+
+xhr.open("GET","/index.html");
+xhr.send();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DnD APIのサンプル</title>
+<style>
+div.d{
+	padding:10px;
+	margin:20px;
+	width:100px;
+	border:4px dotted black;
+}
+</style>
+</head>
+<body>
+<p>下の画像はドラッグできます。</p>
+<p><img src="img1.gif"><img src="img2.gif"><img src="img3.gif"></p>
+
+<div class="d" id="dropzone" dropzone="copy string:text/x-src">ここにドロップ</div>
+
+<script>
+document.addEventListener("dragstart",function(ev){
+	var target = ev.target;	//ドラッグされた要素
+	if(/^img$/i.test(target.tagName)){
+		//img要素かどうか判定する
+    ev.dataTransfer.items.add(target.src,"text/x-src");
+	}
+},false);
+
+//idが"dropzone"のdivにイベントを設定する
+var dropzone=document.getElementById('dropzone');
+dropzone.addEventListener('drop',function(ev){
+  for(var i=0;i<ev.dataTransfer.items.length;i++){
+    var item=ev.dataTransfer.items[i];
+    if(item.kind==="string" && item.type==="text/x-src"){
+      item.getAsString(function(data){
+        var img=document.createElement("img");
+        img.src=data;
+        dropzone.appendChild(img);
+      });
+    }
+  }
+},false);
+</script>
+</body>
+</html>

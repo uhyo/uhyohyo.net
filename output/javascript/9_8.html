@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>九章第八回　例外処理 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_7.html">九章第七回</a>
+                          |
+          <a rel="next" href="10_1.html">十章第一回</a>
+              </p>
+    </nav>
+    <h2>九章第八回　例外処理</h2>
+<h3>例外とは</h3>
+<p>今回は<dfn>例外</dfn>の解説です。例外とは何かというと、簡単にいうと<strong>エラー</strong>のことです。ふつう、エラーが出るとプログラムはそこで強制的に終了してしまいます。しかし、それだと困る場面があります。そこで、エラーが発生しても対応できる方法があります。</p>
+
+<h3>throw文</h3>
+<p>そこでまず解説するのが、<dfn>throw文</dfn>です。throwとは英語で「投げる」という意味です。throwで何かが投げられると、<strong>エラーが発生</strong>したことになります。</p>
+<pre><code>a=3;
+<strong>throw</strong> <mark>a</mark>;
+console.log(a);
+          </code></pre>
+<p>この例では、aを投げています。throwでエラーが発生したので、その後のconsole.logは実行されません。</p>
+<p>このようにして、エラーを発生させることができました。ところで、throwで何を投げてもエラーが発生するわけですが、それでは何を投げるのがよいのでしょう。</p>
+
+<h3>Errorオブジェクト</h3>
+<p>ここで登場するのが<dfn>Errorオブジェクト</dfn>です。これはつまり<strong>Errorのインスタンス</strong>で、その名の通りエラーを表すオブジェクトで、これを投げるのがよいです。</p>
+<p>Errorのインスタンスには<strong>message</strong>というプロパティがあり、これが<strong>エラーメッセージ</strong>を表します。</p>
+<pre><code>var err = new <strong>Error</strong>();
+err.<mark>message</mark> = "エラーが発生しました。";
+          <mark>throw</mark> err;
+        </code></pre>
+<p>このようにして、ちゃんと例外が発生したときにエラーメッセージも表すことができ、親切です。</p>
+<p>また、いちいちmessageに代入することなく、次のようにできます。</p>
+      <pre><code><mark>throw</mark> new <mark>Error</mark>("エラーが発生しました。");</code></pre>
+<p>これはどういうことかというと、前と決定的に違うのはErrorに引数があるということです。実は、引数を指定すると、コンストラクタErrorの働きによってmessageに代入してくれます。Errorを自分で作るとすると、</p>
+<pre><code>functin Error(mes){
+  this.<mark>message</mark> = mes;
+}</code></pre>
+<p>という感じですね。</p>
+<p>これを使うことで変数に代入してからプロパティに代入する必要もなくなり、throw文に渡すときに直接newでインスタンスを作ることができるようになりました。もっとも、messageに自分で代入する方法でも、throw文に渡すときに処理する方法はあります。詳しくは解説しませんが、</p>
+<pre><code>throw (function(){var err=new Error();err.<mark>message</mark>="エラーが発生しました。";return err})();
+        </code></pre>
+<p>という感じです。<a href="1_4.html">一章第四回</a>に出てきた無名関数を利用した方法です。まあしかし、こんな回りくどい方法を使う必要はありません。素直にErrorコンストラクタにエラーメッセージを渡しましょう。</p>
+
+<h3>try〜catch文</h3>
+<p>さて、これでエラーの発生のさせ方は分かりました。しかし、ただエラーを出すだけでは例外処理とはいえません。もっと凄いことができるのです。</p>
+<p>今まで見てきたように、通常エラーが発生したら実行は止まります。しかし、JavaScriptで<strong>エラーの発生を検知</strong>して処理するという方法があります。それは、<dfn>try〜catch文</dfn>です。これは次のように書きます。</p>
+<pre><code><mark>try</mark>{
+処理1
+}
+<mark>catch</mark>(<mark>e</mark>){
+処理2
+}
+        </code></pre>
+<p><code>try{ 〜 }</code>と<code>catch(e){ 〜 }</code>の中にそれぞれ処理が書いてあります。</p>
+<p>これはどのように実行されるかというと、まずtryの中の処理1が実行されます。ここで、エラーが起きなければ処理2は実行されません。</p>
+<p>もしここでエラーが起きたら、処理1はそこで中断されます。そして、catch中の処理2が実行されます。throw（投げる）したエラーをcatch（受け止める）するという感じです。</p>
+<p>処理2は<code>catch(e){ }</code>の中に書いてありますが、この (e) とは何でしょう。実は、このeというのは変数名なので、別にeでなくても構いません。エラーが起きて処理2が実行されるとき、この変数に<strong>投げられたもの</strong>が代入されます。前述の通り、大抵はErrorオブジェクトですね。</p>
+<p>それでは試してみましょう。</p>
+<pre><code>try{
+  a;
+}catch(<mark>e</mark>){
+  console.log(<mark>e</mark>);
+}
+        </code></pre>
+<p>これを実行するとログが表示されます。ブラウザによって多少違うかもしれませんが、「ReferenceError」ということが書いてあると思います。</p>
+<p>これは何が起きたかというと、tryの中にある文は<code>a;</code>の一文だけです。こういう場合の挙動は<a href="9_6.html">九章第六回</a>で解説したもので、特に意味はないが、とりあえずaが参照されるのでした。</p>
+<p>しかし、aという変数はないので、ここでエラーが発生したわけです。</p>
+<p>実は、このように自分でthrowで投げたエラー以外でもcatchすることができます。その場合でも、throwのときと同じようにちゃんと何かが投げられています。catchの中では、それをconsole.logで表示しています。</p>
+<p>さて、投げられてcatchしたこのeは、実はオブジェクトです。</p>
+<pre><code>try{
+  a;
+}catch(<mark>e</mark>){
+  console.log(<mark>e</mark> instanceof <mark>Error</mark>);
+}
+        </code></pre>
+<p>このようにしてみると、これも前述のErrorのインスタンスであるということが分かります。</p>
+<p>また、</p>
+      <pre><code>console.log(e instanceof <mark>ReferenceError</mark>);</code></pre>
+<p>がtrueとなることから、実はeはReferenceErrorというオブジェクトのインスタンスでもあったのです。実はこのReferenceErrorというのはErrorを継承しています。JavaScriptで発生するエラーは数種類に大別されていて、それぞれに対応するオブジェクトがあり、それぞれErrorを継承しています。これはちょうど「敵」から「ドラゴン」「魔法使い」などが派生していくさまと同じです。</p>
+
+<p>同様に、もちろん自分でthrowすることも可能です。</p>
+<pre><code>try{
+  throw new Error("エラーが発生しましたか。");
+}catch(e){
+  console.log(e);
+}
+        </code></pre>
+
+<p>さて、try〜catchを利用したもう少し実用的な例を考えてみましょう。<a href="9_6.html">九章第六回</a>の次のサンプルを持ってきました。</p>
+<pre><code>var obj = {
+  _a : 0,
+  get a(){return this._a; },
+  set a(n){
+    if(n===true || n===false){
+      this._a = n;
+    }
+  }
+};
+        </code></pre>
+<p>このオブジェクトobjのプロパティaに、数値以外は代入できなくするというサンプルでした。</p>
+<p>例えば、代入する値をユーザーが入力する場合を考えてみましょう。具体的な方法は<a href="2_12.html">二章第十二回</a>などで解説したので、今回はわりと抽象的な説明です。</p>
+<p>入力した値をこのobjのプロパティに代入するわけですが、もし代入に失敗した場合、ユーザーに教えてあげたいとします。簡単なのは、</p>
+<pre><code>var obj = {
+  _a : 0,
+  get a(){return this._a; },
+  set a(n){
+    if(n===true || n===false){
+      this._a = n;
+    }<mark class="ins">else{
+      alert("代入できません！");
+    }</mark>
+  }
+};
+        </code></pre>
+<p>のようにしてアラートを出すなどです。</p>
+<p>しかし、アラートというのはユーザーからしてみたら不便なものです。アラートを消すまでは他の操作ができないからです。そこで、これを使わない方法を考えましょう。</p>
+
+<p>ここで登場するのが<strong>例外処理</strong>です。この場合、セッタ内で代入できないときにやるべきことは、<strong>throwでエラーを投げること</strong>です。こうすることで、関数外に情報を伝えることができるのです。</p>
+<pre><code>var obj = {
+  _a : 0,
+  get a(){return this._a; },
+  set a(n){
+    if(n===true || n===false){
+      this._a = n;
+    }else{
+      <mark class="ins"><mark>throw</mark> new Error("代入できません！");</mark>
+    }
+  }
+};
+        </code></pre>
+<p>このままでも使えないことはありません。不正な値を代入しようとするとエラーを起こすという厄介なオブジェクトのできあがりです。</p>
+<p>このようにして、エラーを投げることで関数外、しいてはプログラム全体に情報を使えることができました。これをうまく扱うのが今回説明してきたtry〜catch文です。</p>
+<p>このオブジェクトを使う部分をtryの中に入れておけば、不正な値が代入されたときエラーが投げられ、それをcatchできるというわけです。つまり、このようになります。</p>
+<pre><code><mark class="ins">//↓↓↓プログラム全体の流れ↓↓↓</mark>
+
+try{
+  var i = <mark>ユーザーの入力を取得してくれる関数</mark>();
+
+  obj.a = i;	<mark class="ins">//←エラーを投げるかもしれないセッタを使用</mark>
+
+  <mark>ユーザーの入力を使用する関数</mark>(obj);
+}catch(e){
+  <mark>注意を表示してくれる関数</mark>();
+}
+        </code></pre>
+<p>ここで登場しているobjは、セッタを利用して不正な値を代入しようとするとエラーを投げるものです。</p>
+<p>これはいい感じに役割がわかれています。「プログラム本体」（このプログラム全体）では、処理の流れを決めています。まずユーザーの入力を取得して、それを代入して、使用して何らかの処理をするという流れになっています。</p>
+<p>ここで、架空の関数が3つ登場しています。それぞれの機能をそれぞれ1つの関数にまとめることができたのです。そして、それぞれの関数は他の機能に干渉しません。抽象的で分かりにくいかもしれませんが、try〜catch文にはこういった利点があります。</p>
+<p>また、ここでエラーをcatchしたら無条件で「注意を表示してくれる関数」を呼んでいますが、万が一違う原因でエラーが起きていたらどうしましょう。</p>
+<p>投げられたエラーのオブジェクトを判別する必要が出てきます。その方法として、Errorを継承したオブジェクトを自分で作ってしまうという方法があります。</p>
+<pre><code>function myError(){
+  Error.apply(this,arguments);
+}
+myError.prototype = new Error;
+
+var obj = {
+  _a : 0,
+  get a(){return this._a; },
+  set a(n){
+    if(n===true || n===false){
+      this._a = n;
+    }else{
+      throw new <mark>myError</mark>("代入できません！");
+    }
+  }
+};
+try{
+  obj.a="あああ";
+}catch(e){
+  if(e instanceof <mark>myError</mark>){
+    console.log("代入できないエラーが発生しました。");
+  }
+}
+        </code></pre>
+<p>こうするとメッセージが表示されます。</p>
+<p>ちなみにこの時、e.messageに実は"代入できません！"が代入されていません。これは、コンストラクタErrorが呼び出されたときに、new演算子がついていない場合でも内部でコンストラクタを作成して返すという仕様になっているからです。すなわち、<code>Error.apply</code>でError関数を呼んだとき、Error関数は自身がnewで呼ばれたかどうかを判別して、違った場合はthis（applyで変えられている）をいじるのではなくnewで新しいインスタンスを作成してそれを返り値として返すからです。そのような仕様になっている理由は、<code>new Error("メッセージ")</code>の代わりに<code>Error("メッセージ")</code>を書けるようにするためでしょう。メッセージがどうしても必要な場合は、自分で代入するのがよいでしょう。</p>
+
+<h3>finally文</h3>
+<p>さて、実は<dfn>finally文</dfn>というのがあります。これは、try〜catch構文の後に付けることで、エラーが起きた場合でも起きなかった場合でも最終的に実行される部分となります。</p>
+<pre><code>try{
+
+}
+catch(e){
+
+}
+<mark>finally</mark>{
+
+}
+        </code></pre>
+<p>という形です。今までのサンプルを見て分かる通り、finallyはなくても構いません。また、catchを省略してtry{ 〜 }finally{ 〜 }とすることが可能です。この場合は、tryの中でエラーが投げられた場合、そのままfinallyに移行して終了ということになります。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_7.html">九章第七回</a>
+                          |
+          <a rel="next" href="10_1.html">十章第一回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

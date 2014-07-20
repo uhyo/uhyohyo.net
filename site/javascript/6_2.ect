@@ -1,0 +1,230 @@
+<% @page.title="六章第二回　名前空間"
+@page.prev=[6,1]
+@page.next=[6,3] %>
+<h2>六章第二回　名前空間</h2>
+<p>XMLの、HTMLにはない特徴として、<dfn>名前空間</dfn>というものがあります。今回、それについて解説します。</p>
+
+<p>名前空間があるXMLの具体例を見てみます。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;<mark>aaa</mark>:abc <mark>xmlns:aaa="http://example.com/aaa"</mark>&gt;
+  &lt;<mark>aaa</mark>:abcd a="aaaaaaaa" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="bbbbbbbb" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="cccccccc" /&gt;
+&lt;/<mark>aaa</mark>:abc&gt;
+        </code></pre>
+<p>この文書では、タグ名の全てに最初に「<kbd>aaa:</kbd>」がついています。この部分が名前空間を表すものです。</p>
+<p>このとき、タグabcやabcdはaaaに属しているという意味になります。abc要素に謎の「xmlns:aaa」という属性がありますが、これについては後で説明します。</p>
+
+<p>また、このように複数の名前空間を使うことも可能です。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;root <mark>xmlns:aaa="http://example.com/aaa" xmlns:bbb="http://example.com/bbb"</mark>&gt;
+  &lt;<mark>aaa</mark>:abcd a="aaaaaaaa" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="bbbbbbbb" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="cccccccc" /&gt;
+  &lt;<mark>bbb</mark>:abcd&gt;aaaaaaaa&lt;/<mark>bbb</mark>:abcd&gt;
+  &lt;<mark>bbb</mark>:abcd&gt;bbbbbbbb&lt;/<mark>bbb</mark>:abcd&gt;
+  &lt;<mark>bbb</mark>:abcd&gt;cccccccc&lt;/<mark>bbb</mark>:abcd&gt;
+&lt;/root&gt;
+        </code></pre>
+<p>aaaに属しているのもbbbに属しているのもabcdタグですね。今回は、ルート要素であるrootタグはこれらの名前空間に属していません。</p>
+<p>ここで、同じabcdでも、aaaに属するそれとbbbに属するそれは<strong>異なる要素</strong>として扱われます。</p>
+<p>逆に、</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;root xmlns:aaa="http://example.com/aaa"&gt;
+  &lt;<mark>aaa</mark>:abc /&gt;
+  &lt;<mark>aaa</mark>:def /&gt;
+  &lt;<mark>aaa</mark>:ghi /&gt;
+&lt;/root&gt;
+          </code></pre>
+<p>のように同じaaaに属する要素は、タグ名が違うから確かに別々の要素なのですが、同じ仲間であるといえます。このとき、これらの仲間を（aaaについての）「語彙」などと呼ぶことがあります。</p>
+<p>上のaaaとbbbのサンプルでは、2種類の語彙が混在していることになりますね。</p>
+
+<h3>名前空間の実体</h3>
+<p>実はここまで、「aaaに属する」という言い方はしても「aaaが名前空間である」とは言っていません。実は、aaa自体は名前空間とはまた少し違うものなのです。</p>
+<p>どういうことかというと、ここで「xmlns:aaa」という属性が絡んできます。</p>
+<p>タグ名の前につく「aaa」などを<dfn>名前空間接頭辞</dfn>といいます。xmlns:aaaは、</p>
+        <pre><code>xmlns:<var>名前空間接頭辞</var> ="<var>URI</var>"</code></pre>
+<p>という書き方で任意の要素の属性として書く特殊な属性です。こうして書くと、その接頭辞とURIが結びつきます。つまり、今回の場合、aaaという接頭辞がURIと結びついて、そのURIを表していたということです。aaaの場合、「http://example.com/aaa」というURIですね。</p>
+<p>このURIこそが名前空間の本体といえます。要素はその名前空間に属するから、例えば「<kbd>aaa:abcd</kbd>」というタグは、名前空間接頭辞のaaaが表す名前空間http://example.com/aaaに属していたということになります。</p>
+<p>ちなみに、名前空間がURLの場合など、そのURLが表すインターネット上のページなどが存在しなくても構いません。実際に存在するサイトのURLでなくてもよいということです。</p>
+<p>それならなぜURIを使うかというと、重複する可能性が低いからです。一般的にWebサイトは誰かの所有物となるので、関係ない人が他人のWebサイトのURLを使うことは考えにくいですね。</p>
+
+<h3>名前空間の意味</h3>
+<p>上記の重複しにくいというのは、名前空間に意味を持たせるということに関連してきます。</p>
+<p>名前空間に意味を持たせるとは、ある書き方（語彙）とある名前空間を結びつけるということです。例えば、あなたがユーザーリストの書き方を考えだして使ったとします。前回の</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;users&gt;
+  &lt;ユーザー&gt;
+    &lt;名前&gt;Aさん&lt;/名前&gt;
+    &lt;年齢&gt;23&lt;/年齢&gt;
+  &lt;/ユーザー&gt;
+  &lt;ユーザー&gt;
+    &lt;名前&gt;Bさん&lt;/名前&gt;
+    &lt;年齢&gt;100&lt;/年齢&gt;
+  &lt;/ユーザー&gt;
+&lt;/users&gt;
+          </code></pre>
+<p>を使ってみましょう。</p>
+<p>ここで、これに出てきている要素名（users、ユーザー、名前、年齢）やその使い方（usersの子はユーザーで、ユーザーの子は名前と年齢…）はこの「ユーザーリスト」の語彙です。</p>
+<p>ここで、このユーザーリストをひとつの名前空間に属するようにすると、こうなります。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;<mark class="ins">users:</mark>users <mark class="ins">xmlns:users="http://example.com/users"</mark>&gt;
+  &lt;<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;<mark class="ins">users:</mark>名前&gt;Aさん&lt;/<mark class="ins">users:</mark>名前&gt;
+    &lt;<mark class="ins">users:</mark>年齢&gt;23&lt;/<mark class="ins">users:</mark>年齢&gt;
+  &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+  &lt;<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;<mark class="ins">users:</mark>名前&gt;Bさん&lt;/<mark class="ins">users:</mark>名前&gt;
+    &lt;<mark class="ins">users:</mark>年齢&gt;100&lt;/<mark class="ins">users:</mark>年齢&gt;
+  &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+&lt;/<mark class="ins">users:</mark>users&gt;
+          </code></pre>
+<p>ここで、この名前空間「http://example.com/users」とこれらの語彙が結びついたことになります。「http://example.com/users」という名前空間が、これらの語彙を表すのです（実際はこのようにexample.comは使わず、例えば自分のサイトのURLを使ったりしましょう）。</p>
+
+<p>このように結びつけることが何の役に立つのかというと、例えば他のXML文書（やXHTML文書）でその語彙を使いたいときに役に立ちます。</p>
+<p>例えば、次のようなXML文書を考えます。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;users&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Cさん&lt;/名前&gt;
+        &lt;年齢&gt;-5&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+    &lt;/users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+          </code></pre>
+<p>ccc要素の下で、さっきの「ユーザーリスト」の語彙が使われているのがわかります。</p>
+<p>ところが、この文書全体も一応は何らかの規則性に従って書かれているわけだから、この文書全体についての語彙というものもあります。ここで、全体を見ると、「ユーザーリスト」の語彙もこの文書の語彙に含まれているように見えます。</p>
+<p>しかし「ユーザーリスト」の語彙は独立したものだから、実際はそうはしたくないわけです。ここで出てくるのが名前空間です。</p>
+<p>ユーザーリストの部分を文書とは別の名前空間に属するようにすれば、その部分が独立した語彙であることを明示できます。すなわち、</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;<mark class="ins">users:</mark>users <mark class="ins">xmlns:users="http://example.com/users"</mark>&gt;
+      &lt;<mark class="ins">users:</mark>ユーザー&gt;
+        &lt;<mark class="ins">users:</mark>名前&gt;Cさん&lt;/<mark class="ins">users:</mark>名前&gt;
+        &lt;<mark class="ins">users:</mark>年齢&gt;-5&lt;/<mark class="ins">users:</mark>年齢&gt;
+      &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;/<mark class="ins">users:</mark>users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+          </code></pre>
+<p>という風にします。ここで、文章の途中に出てくるusersタグにxmlns:users属性がありますが、ここで作った名前空間接頭辞（今回の場合はusers）は、その要素以下（その要素とその子孫）で有効になります。</p>
+<p>こうすることで、users以下の「ユーザーリスト」の語彙は、名前空間「http://example.com/users」に属するようになりました。</p>
+<p>ここで使うURIですが、基本的に、同じURI（同じ名前空間）なら同じ語彙です。なるべく重複しないようにするのはそのためです。やはり重複しにくいのは自分のサイトのURLでしょう。まさか別の関係ない人が他の人のサイトのURLを使うということもないと思います。</p>
+<p>また、このようにいろいろな文書で使われる場合にどのURIに統一すればいいかですが、基本的に一番最初にその語彙を作って使ったときに何という名前空間に属するか決めることでしょう。そうしたらそれに従えばいいのです。</p>
+
+<h3>デフォルト名前空間</h3>
+<p>また、<strong>デフォルト名前空間</strong>というものがあります。それはつまり、名前空間接頭辞の無いタグがどの名前空間に属するかということです。</p>
+<p>実は、それはあらかじめ決めることができます。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;aaa <mark>xmlns="http://example.com/"</mark>&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+&lt;/aaa&gt;
+          </code></pre>
+<p>このサンプルで、aaa要素はxmlnsという属性を持っています。<code>xmlns:<var>名前空間接頭辞</var></code>という形の、接頭辞の部分が省略された形だといえますね。</p>
+<p>この形で、接頭辞のないタグが属する名前空間を指定することができます。これがデフォルト名前空間です。</p>
+<p>ちなみに、</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+&lt;/aaa&gt;
+          </code></pre>
+<p>のようにxmlnsも無い場合は、「名前空間が無い」という扱いになります。</p>
+
+<p>これは結構利用できます。例えば上の</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;<mark class="ins">users:</mark>users <mark class="ins">xmlns:users="http://example.com/users"</mark>&gt;
+      &lt;<mark class="ins">users:</mark>ユーザー&gt;
+        &lt;<mark class="ins">users:</mark>名前&gt;Cさん&lt;/<mark class="ins">users:</mark>名前&gt;
+        &lt;<mark class="ins">users:</mark>年齢&gt;-5&lt;/<mark class="ins">users:</mark>年齢&gt;
+      &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;/<mark class="ins">users:</mark>users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+          </code></pre>
+<p>というXML文書は、users要素以下全てのタグにusersという接頭辞をつけなければならず見にくいので、このようにできます。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;users <mark>xmlns="http://example.com/users"</mark>&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Cさん&lt;/名前&gt;
+        &lt;年齢&gt;-5&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+    &lt;/users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+          </code></pre>
+<p>users接頭辞がなくなりました。上記のように、接頭辞がない場合はデフォルト名前空間に属しますが、xmlnsでデフォルト名前空間をhttp://example.com/usersにしたから、結局users要素以下は変更前と同じhttp://example.com/usersに属することになります。</p>
+<p>上のほうで解説したとおり、xmlnsの適用範囲はその要素以下なので、usersの外側には影響はありません。このように、全部のタグに名前空間接頭辞をつけるのは見づらいし億劫なので、このようにデフォルト名前空間を設定して省略することがよく行われます。</p>
+
+<h3>XHTMLと名前空間</h3>
+<p>ここで、XHTMLの話題に戻ります。XHTMLの文法（ルート要素はhtmlで、その下にはheadとbodyがあって…）もひとつの語彙であるとみなすことができます。</p>
+<p>そこで、XHTMLは決まった名前空間に属することになっています。その名前空間は、<strong>http://www.w3.org/1999/xhtml</strong>です。</p>
+<p>だから、XHTMLは、例えば名前空間接頭辞をxhtmlとしたとき、</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;xhtml:html <mark>xmlns:xhtml="http://www.w3.org/1999/xhtml"</mark>&gt;
+  &lt;xhtml:head&gt;
+    &lt;xhtml:meta charset="UTF-8" /&gt;
+    &lt;xhtml:title&gt;タイトル&lt;/xhtml:title&gt;
+  &lt;/xhtml:head&gt;
+  &lt;xhtml:body&gt;
+    &lt;xhtml:p&gt;サンプル&lt;/xhtml:p&gt;
+  &lt;/xhtml:body&gt;
+&lt;/xhtml:html&gt;
+          </code></pre>
+<p>という感じにします。ただ、一目見て分かるようにとても見にくいです。そこで、大抵の場合、デフォルト名前空間を用いて次のようにします。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;html <mark>xmlns="http://www.w3.org/1999/xhtml"</mark>&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;タイトル&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;サンプル&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+<p>これならとてもすっきりして、HTMLとそこまで変わらなくなりました。</p>
+
+<p>また、これを逆に考えると、XHTMLを使うことのさらなる利点が見えてきます。XHTMLの語彙は決まった名前空間に属していなければいけませんでしたが、実は、<strong>他の名前空間に属していればXHTML以外の語彙を使用してもよい</strong>のです。</p>
+<p>だから、次のようなことが可能です。</p>
+<pre><code>&lt;?xml version="1.0" ?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;ユーザー一覧&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;ユーザーの一覧です。&lt;/p&gt;
+    <mark>&lt;users xmlns="http://example.com/users"&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Dさん&lt;/名前&gt;
+        &lt;年齢&gt;35&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Eさん&lt;/名前&gt;
+        &lt;年齢&gt;0.6&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+    &lt;/users&gt;</mark>
+  &lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+<p>強調部分は、さっきの「ユーザーリスト」です。明らかにXHTMLの語彙ではありませんね。しかし、users以下でデフォルト名前空間がユーザーリストのそれになっていることにより、この部分はXHTMLの語彙として使われているわけではないから、これでもXHTMLとして問題ありません。</p>
+<p>ただ、XHTML以外の自分が勝手に作った語彙をブラウザは当然知りませんから、そこにそういうタグがあってそういう構造をしていることは認識できても、それがユーザーリストであることを認識したりはしてくれません。だから、気を利かせてリストっぽく描画してくれたりはしません（スタイルシートでうまく描画させることは可能です）。</p>
+<p>次回からは、このようなXHTMLなどの扱い方を解説します。</p>

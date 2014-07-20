@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>八章第四回　サンプルの改良 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="8_3.html">八章第三回</a>
+                          |
+          <a rel="next" href="9_1.html">九章第一回</a>
+              </p>
+    </nav>
+    <h2>八章第四回　サンプルの改良</h2>
+<h3>考え方</h3>
+<p>今回は、前回の、選択した部分の背景色を変えるサンプルを完成させます。前回は、結局
+  <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      document.addEventListener('mouseup',function(ev){
+        var selection = getSelection();
+        if(selection.rangeCount &gt; 0){
+          var range = selection.getRangeAt(0);
+          //新しいspan要素を作る
+          var newspan = document.createElement('span');
+          //background-colorを設定
+          newspan.style.backgroundColor="#ffff00";
+
+          var df = range.extractContents();
+          newspan.appendChild(df);
+          range.insertNode(newspan);
+        }
+      },false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+          </code></pre>
+<p>という物を作ったのでした。しかし、問題もあるということは前回解説しました。</p>
+<p>そこで、今回それをどう改良するかということをまず解説します。</p>
+<p>今回どうやって背景色を変えるかというと、<strong>Rangeに含まれる要素ひとつひとつにスタイルを指定して回る</strong>という方針でいきます。</p>
+<p>つまり、</p>
+        <pre><code>&lt;p&gt;......<mark>...&lt;/p&gt;&lt;p&gt;.....&lt;/p&gt;&lt;p&gt;...</mark>.....&lt;/p&gt;</code></pre>
+<p>というように選択していた場合、適宜spanを補いつつ、</p>
+        <pre><code>&lt;p&gt;......<mark class="ins">&lt;span style="background-color:yellow"&gt;</mark>...<mark class="ins">&lt;/span&gt;</mark>&lt;/p&gt;&lt;p <mark class="ins">style="background-color:yellow"</mark>&gt;.....&lt;/p&gt;&lt;p&gt;<mark class="ins">&lt;span style="background-color:yellow"&gt;</mark>...<mark>&lt;/span&gt;</mark>.....&lt;/p&gt;</code></pre>
+<p>というようにします。このように、真ん中のp要素に関しては全て範囲内なので、そのp要素に直接スタイルを指定してしまいます（これはあまり好ましくないかもしれませんが、サンプルなのでそこまできにしません）。</p>
+<p>Rangeの開始点や終了点がテキストの途中にある場合はテキストに直接スタイルを適用できませんので、span要素を補います。</p>
+<p>このような方針をとれば、目的の動作を達成することができます。</p>
+<p>今回は、一番上（body要素）から順に調べていきます。方針としては、あるノードを調べたとき、そのノードにRangeの範囲の一部が入っていれば中を詳しく調べる。完全にRangeの範囲外ならそのノードはやめて次を調べる。このような方針をとりましょう。中（子要素）を詳しく調べれば、それらの中でもRangeの範囲外のものとRangeの範囲を含むものがあり、処理範囲を絞っていくことができます。</p>
+<p>まず、現在のノードを変数に入れます。さらに、whileで無限ループを作ります。これは次々と処理していって、条件を満たしたら終了するというループの場合で、条件をwhileの条件部に書くのが難しい場合に使われる方法です。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  document.addEventListener('mouseup',function(ev){
+    var selection = getSelection();
+    if(selection.rangeCount &gt; 0){
+      var range = selection.getRangeAt(0);
+      <mark class="ins">var currentNode = document.body;
+      while(true){
+      }</mark>
+    }
+  },false);
+&lt;/script&gt;
+          </code></pre>
+<p>基本的に調べるのは親から子へ、兄弟間では前から後ろへ調べることにしましょう。すると、ちょっと考えると、具体的には以下のような処理をすればいいことが分かります。</p>
+<ul>
+  <li>現在のノードがRangeより完全に後ろにある場合、もう処理すべきものはないので終了する。</li>
+  <li>現在のノードがRangeより完全に前にある場合、自身の次の兄弟ノードに移る。</li>
+  <li>現在のノードが完全にRangeの内側にある場合、現在のノードを着色して次の兄弟ノードに移る。</li>
+</ul>
+<p>ここまでは単純ですね。残る場合は、現在のノードが部分的にRangeに含まれている場合です。この場合は「親から子へ」なので、自身の子の一番最初のものを現在のノードとします。</p>
+<p>ところで、気づいたかもしれませんが、実は「親から子へ」ばかりではなく親に戻る場面も必要になってきます。例えば、現在のノードがRangeの開始点を含むが、終了点は後ろの兄弟ノードの中にある場合を考えてみましょう。自分の子ノードを全て処理し終わったあと、戻ってきて自分の次の兄弟ノードを処理してもらう必要があります。</p>
+<p>これを具体化すると、「自身の次の兄弟ノードに移る」処理において、「もう後ろに兄弟がいない場合は親に戻る」という処理を行うことで解決できます。</p>
+<p>ここまで全て文字で考察したのでわかりにくいと思いますが、図などを書いてみるとわかりやすくなるかと思います。それでは以上の内容を実際のプログラムにしてみます。</p>
+<pre><code>var range=selection.getRandeAt(0);
+var currentNode = document.body;
+//現在のノードとRangeの位置を比較するために現在のノードを表すRangeを作っておく（使いまわす）
+var currentRange= document.createRange();
+while(<mark class="ins">currentNode</mark>){
+  //currentRangeは現在のノードを囲む位置にする
+  currentRange.selectNode(currentNode);
+
+  if(currentRange.compareBoundaryPoints(Range.END_TO_START,range) &gt;= 0){
+    //現在のノードがRangeより完全に後ろにある場合は終了する
+    break;
+  }
+  if(currentRange.compareBoundaryPoints(Range.START_TO_END,range) &lt;= 0){
+    //現在のノードがRangeより完全に前にある場合は次の兄弟ノードに移動
+    nextSibling();
+    continue;
+  }
+  if(currentRange.compareBoundaryPoints(Range.START_TO_START,range) &gt;= 0 &amp;&amp;
+     currentRange.compareBoundaryPoints(Range.END_TO_END,range) &lt;= 0){
+    //現在のノードがRangeに完全に含まれる場合は自身を着色して次のノードに移動
+    paint(currentNode);
+    nextSibling();
+    continue;
+  }
+  //そうでない場合は、現在のノードはRangeを部分的にまたは完全に含む
+  if(currentNode.firstChild){
+    //子ノードがある場合はそれを現在のノードにする
+    currentNode=currentNode.firstChild;
+  }else{
+    //子がなにもない（のにRangeを含むという変な場合）
+    //仕方ないので次のノードに移る
+    nextSibling();
+  }
+}
+
+//補助関数
+function paint(node){
+  //要素をひとつ着色
+  node.style.backgroundColor="yellow";
+}
+//currentNodeを次の兄弟ノードに移動（ただしもう兄弟がいない場合は親をさかのぼって兄弟を探す）
+function nextSibling(){
+  do{
+    if(currentNode.nextSibling){
+      currentNode=currentNode.nextSibling;
+      return;
+    }
+  }while(currentNode=currentNode.parentNode);
+  //注意：一番最後まで到達してしまった場合はcurrentNodeがnullになります
+}
+</code></pre>
+<p>案外すっきりしたプログラムになりましたね。</p>
+<p>しかし、これはまだひとつ考慮できていない場合があります。Rangeがテキストノードの途中に開始点や終了点を持つ場合です。</p>
+<p>これについては、事前に処理してしまうという方法があります。Rangeの開始点や終了点がテキストノードをコンテナに持つ場合は、そこに適宜span要素を生成してやることで、コンテナをテキストノードでなくしてやればいいのです。</p>
+<p>ということで、事前処理を加えると以下のようになります。この処理により、コンテナがテキストノードだった場合、テキストノードを分割することでその親に移します。これは以下のようなイメージです。</p>
+<pre><code>｜
+├―― p
+｜　　｜
+｜　　└――#text "aaa<mark>bbb</mark>"
+｜  　               <mark>| ←開始点</mark>
+
+↓↓↓↓↓
+
+｜
+├―― p
+｜　　｜
+｜　　├――#text "aaa"
+｜　　｜ <mark>←開始点</mark>
+｜　　└――#text "<mark>bbb</mark>"
+｜
+</code></pre>
+<p>これにより、開始点のコンテナがテキストノードからp要素に移っています。これにより、テキストノードの一部のみ色を付けないといけないという事態は回避され、1つまるごと着色すればOKになります（実際に色を塗るときはspan要素で囲みます）。</p>
+<pre><code>&lt;script type="text/javascript"&gt;
+  document.addEventListener('mouseup',function(ev){
+    var selection = getSelection();
+    if(selection.rangeCount &gt; 0){
+      var range = selection.getRangeAt(0);
+      <mark class="ins">
+
+      //テキストノードの事前処理
+      if(range.startContainer.nodeType==Node.TEXT_NODE){
+        //テキストノードをRangeの開始点の位置で2つに分ける
+        range.startContainer.<mark>splitText</mark>(range.startOffset);
+        //選択範囲の開始点をテキストノードの外側にする
+        range.setStartAfter(range.startContainer);
+      }
+      //終了点についても同じ処理を行う
+      if(range.endContainer.nodeType==Node.TEXT_NODE){
+        //テキストノードをRangeの終了点の位置で2つに分ける
+        range.endContainer.<mark>splitText</mark>(range.endOffset);
+        //選択範囲の終了点をテキストノードの外側にする
+        range.setEndAfter(range.endContainer);
+      }
+      </mark>
+
+      var currentNode = document.body;
+      //現在のノードとRangeの位置を比較するために現在のノードを表すRangeを作っておく（使いまわす）
+      var currentRange= document.createRange();
+      while(currentNode){
+        //currentRangeは現在のノードを囲む位置にする
+        currentRange.selectNode(currentNode);
+
+        if(currentRange.compareBoundaryPoints(Range.END_TO_START,range) &gt;= 0){
+          //現在のノードがRangeより完全に後ろにある場合は終了する
+          break;
+        }
+        if(currentRange.compareBoundaryPoints(Range.START_TO_END,range) &lt;= 0){
+          //現在のノードがRangeより完全に前にある場合は次の兄弟ノードに移動
+          nextSibling();
+          continue;
+        }
+        if(currentRange.compareBoundaryPoints(Range.START_TO_START,range) &gt;= 0 &amp;&amp;
+           currentRange.compareBoundaryPoints(Range.END_TO_END,range) &lt;= 0){
+          //現在のノードがRangeに完全に含まれる場合は自身を着色して次のノードに移動
+          paint(currentNode);
+          nextSibling();
+          continue;
+        }
+        //そうでない場合は、現在のノードはRangeを部分的にまたは完全に含む
+        if(currentNode.firstChild){
+          //子ノードがある場合はそれを現在のノードにする
+          currentNode=currentNode.firstChild;
+        }else{
+          //子がなにもない（のにRangeを含むという変な場合）
+          //仕方ないので次のノードに移る
+          nextSibling();
+        }
+      }
+
+      //補助関数
+      function paint(node){
+        //要素をひとつ着色
+        <mark class="ins">
+        if(node.<mark>nodeType</mark>==Node.TEXT_NODE){
+          //着色したい要素がテキストノードの場合はspanで囲んで着色
+          var range=document.createRange();
+          range.selectNode(node);
+          //着色対象のnodeをspan要素に変更
+          node=document.createElement("span");
+          range.surroundContents(node);
+        }
+        </mark>
+        node.style.backgroundColor="yellow";
+      }
+      //currentNodeを次の兄弟ノードに移動（ただしもう兄弟がいない場合は親をさかのぼって兄弟を探す）
+      function nextSibling(){
+        do{
+          if(currentNode.nextSibling){
+            currentNode=currentNode.nextSibling;
+            return;
+          }
+        }while(currentNode=currentNode.parentNode);
+        //注意：一番最後まで到達してしまった場合はcurrentNodeがnullになります
+      }
+    }
+  },false);
+&lt;/script&gt;
+</code></pre>
+<p>これで完成です。ところで、今回新しく登場したものが2つあります。ひとつは<dfn>nodeType</dfn>プロパティですね。ノードがテキストノードかどうか判定するところで登場しています。</p>
+<p>お察しの通り、このnodeTypeはそのノードの種類が何かを示すプロパティです。Nodeオブジェクトのもつ定数となっていて、TEXT_NODE（テキストノード）の他にもELEMENT_NODE(要素）などがあります。</p>
+<p>さらに、事前処理のところで<dfn>splitText</dfn>というメソッドが出てきています。これはText（テキストノード）が持つメソッドで、テキストノードをある位置で2つに分割するメソッドです。その位置は数値で示します。見て分かるとおり、一番最初を0とするもので、Rangeのオフセットと同じ考え方ですね。</p>
+<p>splitTextにより、厳密にはもともとのテキストノードから分割点より後ろの文字列が除去され、直後に追加された新しいテキストノードに移されます。ちなみにsplitTextの返り値は、後ろに作られた新しいテキストノードです。</p>
+<p>ちなみに、whileの条件がtrueではなくcurrentNodeになったのは、Rangeがドキュメントの一番最後まで範囲に含んでいた場合に、nextSibling関数によってcurrentNodeがnullになる場合があり、その場合は処理を終了しなければならないからです。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="8_3.html">八章第三回</a>
+                          |
+          <a rel="next" href="9_1.html">九章第一回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

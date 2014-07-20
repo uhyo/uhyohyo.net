@@ -1,0 +1,207 @@
+<% @page.title="二章第六回　木構造の操作：さまざまな機能"
+@page.prev=[2,5]
+@page.next=[2,7] %>
+<h2>二章第六回　木構造の操作：さまざまな機能</h2>
+<p>前回、木構造の操作の基本を解説しました。他にもさまざまなメソッドがあるので、解説します。</p>
+
+<h3>getElementsByTagName</h3>
+<p><dfn>getElementsByTagName</dfn>というメソッドがあります。これはdocumentやノードが持つメソッドです。これは引数に<strong>要素名</strong>を渡すと、その要素の一覧の<strong>NodeList</strong>を返します。NodeListについては、<a href="2_3.html">二章第三回</a>を参照して下さい。</p>
+<p>documentが持つgetElementsByTagNameの場合、文書全てから探します。ノードが持つgetElementsByTagNameの場合、そのノードより下（子、子の子、そのまた子…）から探します。</p>
+<p>サンプルを見てみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;t&lt;/strong&gt;e&lt;strong&gt;st&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var nodelist = document.<strong>getElementsByTagName</strong>('strong');
+
+      console.log(nodelist.length);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>「3」と表示されました。</p>
+<p>document.getElementsByTagNameは、今回の場合、文書全てからstrong要素を探し、それをNodeListとして返します。ここで、今回の文書の木構造は、bodyから下を見てみると、</p>
+<pre><code>body
+｜
+├――　p
+｜　　　｜
+｜　　　├――#text
+｜　　　｜
+｜　　　├――<mark>strong</mark>
+｜　　　｜　　　｜
+｜　　　｜　　　└――#text
+｜　　　｜
+｜　　　└――#text
+├――#text
+｜
+├――  p
+｜　　　｜
+｜　　　├――<mark>strong</mark>
+｜　　　｜　　　｜
+｜　　　｜　　　└――#text
+｜　　　｜
+｜　　　├――#text
+｜　　　｜
+｜　　　└――<mark>strong</mark>
+｜　　　　　　　｜
+｜　　　　　　　└――#text
+├――#text
+｜
+└――script
+　　　　｜
+　　　　└――#text
+        </code></pre>
+<p>となっています。bodyの子ノードのうち、pとpの間の#textと、pとscriptの間の#textは改行です。</p>
+<p>strongは3箇所あるため、このNodeListには3つの要素が含まれていることになります。そのため、<code>nodelist.length</code>を表示すると3になるのでした。</p>
+<p>これは、同じ種類の要素をまとめて処理するときなどに使うことができます。次のサンプルを見てみます。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;t&lt;/strong&gt;e&lt;strong&gt;st&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var nodelist = document.<strong>getElementsByTagName</strong>('strong');
+
+      for(var i=0; i&lt;nodelist.length; i++){
+        var node = nodelist.item(i);
+        node.firstChild.nodeValue = "strong要素";
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>このサンプルは、今までの知識を組み合わせれば何をしているのか分かります。</p>
+<p>まず、変数nodelistに3つのstrong要素が入ったNodeListを代入しています。</p>
+<p>その次からはfor文です。変数iが0から(nodelist.length-1)になるまで、繰り返します。</p>
+<p>次の行では変数nodeにnodelistのi番目のノードを代入しています。nodelistのノードは、0番目から(nodelist.length-1)番目まであるため、nodelistの全てのノードに対して処理ができるというわけです。</p>
+<p>その次の行では、node.firstChild.nodeValueに"strong要素"を代入しています。3つのstrong要素全てにおいて、firstChild(最初の子ノード）は全てテキストノードです。というより、子が1つしかありませんね。本当は、中がテキストノードだけでない可能性もあるのでちゃんと処理したほうがいいのですが、今回は面倒なのでしませんでした。</p>
+<p>そのnodeValueを書き換えているため、strong要素の中の文字列が書き換わるということです。</p>
+<p>したがって、動作の結果として、3箇所の強調部分（strongなので大抵は太字で）が全て「strong要素」となります。</p>
+
+<h3>HTMLElementのプロパティ</h3>
+<p>次に、HTMLElementなら、どの要素でも持っている汎用的なプロパティがあります。それについて解説します。</p>
+<h4>idプロパティ</h4>
+<p><dfn>id</dfn>というプロパティがあります。これは、そのままその要素のid属性を表します。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p id="fff"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+    console.log(document.body.getElementsByTagName('p').item(0).<dfn>id</dfn>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>全て1行にまとまっていて長いので、1つずつ読み解いていきましょう。</p>
+<p>document.bodyとは、body要素のHTMLElementでした。HTMLElementが持つgetElementsByTagNameで、body要素より下のp要素の一覧のNodeListを作っています。</p>
+<p>といっても、今回の場合は1つだけです。そして、itemメソッドで0番目のノードを取得し、そのidプロパティを表示しています。よって、idの"fff"が表示されます。</p>
+
+<p>また、getElementsByTagName特別な使い方として、タグ名の代わりに"<code>*</code>"を引数とすると、<strong>全ての要素</strong>を取得できます。</p>
+
+<h4>classNameプロパティ</h4>
+<p><dfn>className</dfn>プロパティは、その要素の<strong>class属性</strong>を表示します。大抵のプロパティは属性名とそれを取得できるプロパティ名が同じですが、これは珍しく違うため注意が必要です。</p>
+<p>class属性は、スタイルシートで要素をタグ名とは別にグループ分けするためのものですが、JavaScriptにも同様のことがいえます。そういう点でなかなか汎用的なプロパティです。</p>
+<p>ちなみにclass属性を扱う方法はもうひとつ存在します。そちらは<a href="12_1.html">第十二章第一回</a>で解説します。</p>
+
+<h4>titleプロパティ</h4>
+<p><dfn>title</dfn>プロパティは、その要素の<strong>title属性</strong>を表示します。</p>
+<p>title属性は、その要素の補足情報を表すものです。</p>
+<p>ほかにもありますが、このくらいがメジャーなところです。</p>
+
+<h3>insertBefore</h3>
+<p>次に、<dfn>insertBefore</dfn>というメソッドを紹介します。これは、前回のappendChildと似ていて、appendChildは子ノードの最後にしか追加できませんでしたが、insertBeforeならどこにでも追加できるというものです。appendChildと同様に、<strong>ノード</strong>が持つメソッドです。</p>
+<p>追加する位置を指定するために、引数が追加するノードの他にもう1つあります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var a = document.createElement('a');
+      a.href = "http://www.google.com/";
+
+      var textnode = document.createTextNode("Google");
+      a.appendChild(textnode);
+
+      var p = document.getElementById('aaaaa');
+      <mark>p.<strong>insertBefore</strong>(a, p.firstChild);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>p要素の先頭にa要素が追加されたのが分かります。</p>
+<p>最初の2行では、a要素を作っています。まずcreateElementでa要素を作り、aに代入しています。a要素のHTMLElementは、<dfn>HTMLAnchorElement</dfn>といいます。</p>
+<p>このHTMLAnchorElementは多くのプロパティを持っています。その1つが、次の行で代入されている<dfn>href</dfn>です。</p>
+<p>これはそのまま<strong>href属性</strong>で、書き換えもできます。つまり、a要素のhref属性を設定しています。この場合GoogleのURLですね。</p>
+
+<p>しかし、このままではやはり<code>&lt;a&gt;&lt;/a&gt;</code>のように中身がないから、中身のテキストノードも作ります。この流れは前回と同じですね。</p>
+<p>"Google"というテキストノードを作り、aの子ノードに追加しています。つまり、</p>
+<pre><code> a<mark class="ins">
+｜
+└――#text</mark>
+          </code></pre>
+<p>となります。</p>
+<p>今回は、これをp要素に追加します。そこで、次の行で、getElementByIdを使ってp要素を取得しています。</p>
+<p>次の行で、insertBeforeが使われています。引数が、1つめは追加するノードである変数aで、もうひとつはp.firstChildです。</p>
+<p>これはどういうことかというと、この2つめの引数には、親となるノード（この場合p要素）の子ノードのうちのどれかを渡す必要があります。</p>
+<p>そうした場合、その子ノードの<strong>前</strong>に新しいノードを追加します。</p>
+<p>つまり、今回は、p.firstChild、つまり</p>
+<pre><code> p
+｜
+├――<mark>#text</mark>　　　　←これ
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text
+｜
+└――#text
+        </code></pre>
+<p>です。その直前だから、</p>
+<pre><code> p
+｜
+｜　　　<mark>←ここ</mark>
+｜
+├――#text
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text
+｜
+└――#text
+          </code></pre>
+<p>に追加されます。その結果、</p>
+<pre><code> p
+｜
+├<mark class="ins">――　a</mark>
+｜<mark class="ins">　　　｜</mark>
+｜<mark class="ins">　　　└――#text</mark>　　"Google"
+├――#text　　　　　　"t"
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text　　"es"
+｜
+└――#text　　　　　　"t"
+        </code></pre>
+<p>となったのです。</p>
+<p>自由な位置にノードを追加できるので、なかなか便利です。</p>

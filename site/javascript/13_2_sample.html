@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Server-Sent Eventsのサンプル</title>
+</head>
+<body>
+<script>
+var stream=new EventSource("13_2_sample.cgi");
+stream.addEventListener('message',function(e){
+	console.log(e.data);
+});
+
+</script>
+</body>
+</html>

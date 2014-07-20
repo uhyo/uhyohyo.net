@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>八章第一回　Rangeとは — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="7_6.html">七章第六回</a>
+                          |
+          <a rel="next" href="8_2.html">八章第二回</a>
+              </p>
+    </nav>
+    <h2>八章第一回　Rangeとは</h2>
+<p>八章では、<dfn>Range</dfn>というものを解説します。今回は、そもそもRangeとはどういうものかを解説します。</p>
+
+<h3>Rangeとは</h3>
+<p><dfn>Range</dfn>とは、「<strong>範囲</strong>」を表すものです。例えば、</p>
+        <pre><code>あい&lt;strong&gt;うえ&lt;/strong&gt;お。</code></pre>
+<p>というソースががあれば、</p>
+        <pre><code>あい<strong>うえ</strong>お。</code></pre>
+<p>のように表示されます。このとき、例えば</p>
+<pre><code>あい<strong>う　</strong><mark><strong>え</strong></mark><mark>お</mark>　。
+<mark>　　　↑　　↑
+  ここから　　ここまで</mark></code></pre>
+<p>のような感じである範囲を表せます。</p>
+<p>要するに「『え』から『お』まで」なので、案外単純なように見えます。しかし、DOMという観点からこれを見ていくと、上の木構造は</p>
+<pre><code>｜
+├――#text　　"あい"
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text 　"う<mark>え</mark>"
+｜
+└――#text　　"<mark>お</mark>。"
+          </code></pre>
+<p>となっていて、複数のノードにまたがっています。こうなると、一筋縄ではいかないのが想像がつくと思います。このようなものを扱うのが、Rangeなのです。</p>
+
+<h3>範囲の表し方</h3>
+<p>まず、Rangeには「開始点」と「終了点」があります。そのままですね。</p>
+<p>今回の場合、開始点は簡単に言うと「『え』の前」、終了点は「『。』の前」ということになりますね。しかし、こういう方法だとやはり曖昧です。そこで、DOMでは、ある点（開始点・終了点）を表すのに、<dfn>コンテナ</dfn>と<dfn>オフセット</dfn>を使います。</p>
+<p>これらの意味は、実は、文字列を表す、テキストノードなどの場合と、それ以外の場合に分けられます。まず、それ以外の場合について見ていきます。例えば、</p>
+<pre><code>AAA
+｜
+├――BBB
+｜
+├――CCC
+｜
+└――DDD
+          </code></pre>
+<p>という木構造があったとき、開始点や終了点と成り得る場所は、</p>
+<pre><code>AAA
+｜　　　　　<mark>←BBBの前</mark>
+├――BBB
+｜　　　　　<mark>←BBBとCCCの間</mark>
+├――CCC
+｜　　　　　<mark>←CCCとDDDの間</mark>
+└――DDD
+　　　　　　<mark>←DDDの後</mark>
+          </code></pre>
+<p>が考えられます。このように、文字列中の位置だけでなく、兄弟ノードにおいての、ノードとノードの間の位置も点と成り得ます。タグで表すと</p>
+        <pre><code>&lt;AAA&gt; &lt;BBB /&gt; &lt;CCC /&gt; &lt;DDD /&gt; &lt;/AAA&gt;</code></pre>
+<p>という感じです。</p>
+<p>さて、このとき、<strong>コンテナ</strong>は、これらの兄弟の<strong>親ノード</strong>です。今回の場合、AAAですね。そして、<strong>オフセット</strong>は数値です。これは、最初の子ノードの前を0として、その次を1,その次を2,・・・と順番に番号をつけていったものです。つまり、</p>
+<pre><code>AAA　←これがコンテナ
+｜　　　　　<mark>←0</mark>
+├――BBB
+｜　　　　　<mark>←1</mark>
+├――CCC
+｜　　　　　<mark>←2</mark>
+└――DDD
+　　　　　　<mark>←3</mark>
+          </code></pre>
+<p>ということです。</p>
+
+<p>さて、これで、ノードとノードの間の位置を点とする場合は、その表し方が分かりました。次に、文字列中の位置（文字と文字の間）の表し方を解説します。</p>
+<pre><code>EEE
+｜
+├――#text　　"あいうえお"
+｜
+└――#text　　"かきくけこ"
+          </code></pre>
+<p>という木構造があって、例えば"あいうえお"のテキストノードの中に点をおきたいとします。このとき、<strong>コンテナ</strong>は<strong>そのテキストノード</strong>です。つまり、</p>
+<pre><code>EEE
+｜
+├――<mark>#text　　"あいうえお"　　　←これ</mark>
+｜
+└――#text　　"かきくけこ"
+            </code></pre>
+<p>ですね。</p>
+<p>このとき、その文字列の中でも、</p>
+<pre><code>　あ　い　う　え　お<mark>
+↑　↑　↑　↑　↑　↑
+0　 1　 2　 3　 4　 5</mark>
+            </code></pre>
+<p>これだけ可能性があります。数字が振ってありますが、これがそのまま<strong>オフセット</strong>になります。つまり、一番最初の位置が0、その次が1,・・・という具合ですね。</p>
+
+<p>ここで、</p>
+<pre><code>｜
+├――#text　　"あい"
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text 　"う<mark>え</mark>"
+｜
+└――#text　　"<mark>お</mark>。"
+            </code></pre>
+<p>の「えお」の部分を範囲とするRangeの、開始点と終了点を表わしてみましょう。まず、開始点のコンテナは</p>
+<pre><code>｜
+├――#text　　"あい"
+｜
+├――strong
+｜　　　｜
+｜　　　└――<mark>#text 　"うえ"　　　←これ</mark>
+｜
+└――#text　　"お。"
+            </code></pre>
+<p>で、</p>
+<pre><code> う え
+0　<mark>1</mark>　2</code></pre>
+<p>と考えると、オフセットは1であることが分かります。</p>
+<p>同様に、終了点は、コンテナが</p>
+<pre><code>｜
+├――#text　　"あい"
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text 　"うえ"
+｜
+└――<mark>#text　　"お。"　　　←これ</mark>
+            </code></pre>
+<p>で、オフセットは1ですね。</p>
+
+<h3>Rangeの作り方</h3>
+<p>これで、Rangeの範囲の表し方が分かりました。いよいよ、JavaScriptでのRangeの作り方を解説します。</p>
+<p>Rangeを作るには、documentの持つメソッド<dfn>createRange</dfn>を使います。引数はなく、戻り値で新しくできたRangeが帰ってきます。</p>
+      <pre><code>var r = document.<strong>createRange</strong>();</code></pre>
+<p>ここでできたRangeの開始点と終了点は、共に「文書の一番前」ということになっています。コンテナとオフセットで表すと、コンテナはdocumentで、オフセットは0ということになっています。つまり、</p>
+<pre><code>document　←コンテナ
+　｜　　　　　　　　　<mark>←ここ</mark>
+　└――html
+　　　　 ｜
+　　　　 ├――body
+　　　　 ｜　　 ｜
+　　　　 ｜　　 …
+　　　　 └――head
+　　　　　　　　｜
+　　　　　　　　…
+            </code></pre>
+<p>ですね。確かに一番前です。</p>
+<p>さて、ただRangeを作っても、開始点や終了点がまともでなければ使い物になりません。そこで、開始点・終了点を変更するメソッドがあります。それぞれ、<dfn>setStart</dfn>と<dfn>setEnd</dfn>です。</p>
+<p>どちらも、引数は2つです。一つ目は<strong>コンテナ</strong>、二つ目が<strong>オフセット</strong>です。</p>
+<pre><code>var r = document.createRange();
+<mark class="ins">r.<strong>setStart</strong>(document.body,0);
+r.<strong>setEnd</strong>(document.body,document.body.childNodes.length);</mark>
+            </code></pre>
+<p>という感じで使います。ちなみに、このソースでやっていることは分かりますか？　開始点は、body要素の一番最初に設定しています。終了点のコンテナも同じbody要素ですが、オフセットがdocument.body.childNodes.lengthとなっています。</p>
+<p>これはどういうことかというと、あるノードの最初の子ノードを0番目の子ノードとしたとき、</p>
+<pre><code>AAA
+｜　　　　　<mark>←オフセット：0</mark>
+├――BBB	…0番目
+｜　　　　　<mark>←オフセット：1</mark>
+├――CCC	…1番目
+｜　　　　　<mark>←オフセット：2</mark>
+└――DDD	…2番目
+　　　　　　<mark>←オフセット：3</mark>
+            </code></pre>
+<p>となっていて、オフセットがnの位置は、n番目の子ノードの直前になっています。ここで、childNodes.lengthは子ノードの数なので、一番最後の子ノードは(length-1)番目ということになります。そして、最後の子ノードのさらに後ろに設定したい場合、オフセットを最後の子ノードの直前からさらに1増やすことになります。最後の子ノードの直前のオフセットは(length-1)だから、それに1を出してオフセットはlengthになります。</p>
+<p>つまり、childNodes.lengthを指定することで、その要素の一番後ろに位置を設定していたのです。</p>
+<p>結局、このRangeは、body要素の中身全体を包んでいるということになります。</p>
+
+<p>また、開始点や終了点を設定するときの注意として、コンテナとなるノードは<strong>同じdocumentかdocumentFragmentの木構造に属していなければならない</strong>ということがあります。考えてみれば、そもそも木構造に属していないノード同士や、片方しか属していないような状態で、その間の範囲なんてものが存在するわけがありません。</p>
+<p>また、開始点が終了点より後ろになるように設定したり、終了点が開始点より前になるように設定することもできません。もしそのように設定しようとした場合、例えば開始点が終了点より後ろになるようにしようとした場合は、終了点もその場所まで押し下げられます。逆も然りです。ちなみに、このように、開始点と終了点が一致しているRangeを「つぶれている」（<q>collapsed</q>）というそうです。</p>
+<p>だから、上のコードでは、createRangeで作ったノードは開始点と終了点が共に文書の一番前だからつぶれているRangeで、そのあとsetStartで開始点をbody要素の最初に設定しようとしたとき、終了点より開始点が後になってしまうから、一旦終了点もbody要素の最初の位置にきていたのです。</p>
+
+<p>また、現在の開始点や終了点を知る方法もあります。これらは、Rangeのプロパティとして参照できます。<dfn>startContainer</dfn>,<dfn>startOffset</dfn>,<dfn>endContainer</dfn>,<dfn>endOffset</dfn>の4つのプロパティをRangeは持っており、それぞれ開始点のコンテナ、開始点のオフセット、終了点のコンテナ、終了点のオフセットです。</p>
+<p>ただし、これらは<strong>書き換えできません</strong>。これを直接いじって開始点・終了点を変えることはできないのです。</p>
+
+<h4>その他のメソッド・プロパティ</h4>
+<p>他にもいろいろRangeをいじるメソッドがあります。</p>
+<p><dfn>setStartBefore</dfn>,<dfn>setEndBefore</dfn>は、それぞれ開始点・終了点を、あるノードの直前に移動します。引数はそのノードです。例えば、</p>
+<pre><code>var r = document.createRange();
+r.<strong>setStartBefore</strong>(document.body);
+            </code></pre>
+<p>とした場合、body要素の前だから、開始点は</p>
+<pre><code>html　←コンテナ
+｜
+├――head
+｜　　 └…
+｜　　　　<mark>←ここ</mark>
+└――body
+　　　　└…
+            </code></pre>
+<p>ということになります。即ち、コンテナはhtml要素で、オフセットは1ですね。</p>
+<p>また、<dfn>setStartAfter</dfn>,<dfn>setEndAfter</dfn>というメソッドもあります。これは、上の2つは逆にあるノードの直後に移動します。</p>
+
+<p>さらに、使う機会があるかは知りませんが、<dfn>collapse</dfn>というメソッドがあります。これは、そのRangeをつぶれた状態にする、つまり開始点と終了点が同じ状態にするものです。このとき、開始点に合わせるか終了点に合わせるかという問題があるので、それを1つの引数で指定します。これは<strong>真偽値</strong>で、trueなら開始点、falseなら終了点に合わされます。</p>
+<p>また、そのRangeが今つぶれているかどうかは、<dfn>collapsed</dfn>というプロパティに真偽値で入っています。</p>
+
+<p>さらにさらに、<dfn>selectNode</dfn>と<dfn>selectNodeContents</dfn>という2つのメソッドがあります。どちらも引数はノード一つです。これらのメソッドでは、開始点と終了点が同時に変更されます。</p>
+<p>selectNodeは、Rangeを、そのノードを囲む（選択した）状態にするというものです。例えば、</p>
+<pre><code>var r = document.createRange();
+r.<strong>selectNode</strong>(document.body);
+            </code></pre>
+<p>としたとき、</p>
+<pre><code>html　←コンテナ
+｜
+├――head
+｜　　 └…
+｜　　　　<mark>←開始点</mark>
+└――body
+　　　　└…
+　　　　　<mark>←終了点</mark>
+            </code></pre>
+<p>となります。body要素全体が範囲になっていることがわかります。コンテナは、いずれもhtml要素ですね。</p>
+<p>selectNodeContentsは、そのノードの外側から囲むのではなく、内側から囲みます。つまり、例えば</p>
+<pre><code>var r = document.createRange();
+r.<strong>selectNodeContents</strong>(document.body);
+            </code></pre>
+<p>としたとき、</p>
+<pre><code>html
+｜
+├――head
+｜　　 └…
+｜
+└――body　←コンテナ
+　　　　｜　　<mark>←開始点</mark>
+　　　　├―…
+　　　　｜
+　　　　├―…
+　　　　｜
+　　　　└―…
+　　　　　　<mark>←終了点</mark>
+            </code></pre>
+<p>という感じになります。コンテナはどちらもbody要素になります。</p>
+
+<p>今回は、Rangeの作り方を解説しました。次回から、Rangeの使い方を解説していきます。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="7_6.html">七章第六回</a>
+                          |
+          <a rel="next" href="8_2.html">八章第二回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

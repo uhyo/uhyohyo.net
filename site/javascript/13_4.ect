@@ -1,0 +1,67 @@
+<% @page.title="十三章第四回　HTML5 Web Messaging 2"
+@page.prev=[13,3]
+@page.next=[14,1] %>
+<h2>十三章第四回　HTML5 Web Messaging 2</h2>
+<p>前回紹介したWeb Messagingには、まだ続きがあります。</p>
+<p>それは、<dfn>チャンネルメッセージング</dfn>です。</p>
+<p>これは何かというと、前回紹介したWeb Messagingにおいては、メッセージを送るpostMessageはwindowのメソッドであり、同じくメッセージを受けるのもwindowオブジェクトのmessageイベントです。</p>
+<p>ここで、複数のウィンドウと同時に通信する場合を考えましょう。この場合、2つのウィンドウからくるメッセージが混在してしまい、判別する処理などが必要になり面倒です。</p>
+<p>そこで、通信相手ごとに専用の回線を用意して、その中で通信することができます。これが<strong>チャンネル</strong>です。</p>
+
+<h3>MessageChannel</h3>
+<p>チャンネルを開設するには、<dfn>MessageChannel</dfn>というオブジェクトを用意します。このオブジェクトのインスタンスを作成すると、2つの<dfn>MessagePort</dfn>が作成され、<dfn>port1</dfn>と<dfn>port2</dfn>という2つのプロパティに入ります。</p>
+<pre><code>var channel=new <mark>MessageChannel</mark>();
+channel.<mark>port1</mark>;	//MessagePort
+channel.<mark>port2</mark>;	//MessagePort</code></pre>
+<p>MessagePortとは、チャンネルを通してメッセージを送るための窓口のようなものです。チャンネルメッセージングにおいては、windowオブジェクトではなくMessagePortにおいて<strong>messageイベント</strong>が発生します。</p>
+<p>また、MessagePortは、postMessageメソッドも持っています。ここまで見て分かる通り、MessagePortは2つ組になっています。同じMessageChannelから作られたMessagePortがペアになっています。実質、MessageChannelには、このペアになったMessagePortを作る以外の機能はありません。</p>
+<p>すなわち、あるMessagePortでpostMessageメソッドを利用すると、それで発せられたメッセージはもう1つのMessagePortへ届き、messageイベントが発生します。このようにしてチャンネルメッセージングが行われるのです。</p>
+
+<h3>MessagePort</h3>
+<p>それでは、MessagePortの使い方を見てみましょう。messageイベントが発生するので、その扱いかたは前回紹介した場合と同じです。</p>
+<p>しかし、postMessageには少しだけ違いがあります。前回のwindow.postMessageの場合は、第一引数が送るデータで、第二引数が<strong>オリジン</strong>でした。しかし、MessagePortにおいては第二引数のオリジンはありません。なぜなら、MessagePortを受け取った時点（後述）で相手が誰かはわかっているので、改めてセキュリティチェックする必要はないからです。ですから、引数ひとつでメッセージを送るだけという単純な形で利用可能です。</p>
+<p>また、MessagePortは、<dfn>start</dfn>と<dfn>close</dfn>というメソッド（いずれも引数無し）を持ちます。実は、MessagePortを利用する際は、まずこのstartメソッドを呼び出しておかないとメッセージを受信してくれないのです。closeは反対に、受信を終了してそのポートを無効化するメソッドです。</p>
+
+<p>以上を踏まえて、挙動を確かめるための<a href="13_4_sample.html">サンプル</a>を用意しました。結果はconsole.logで表示されるのでコンソールを開きましょう。また、詳しくはソースを参照しましょう。</p>
+<p>このサンプルで、port1のpostMessageで送ったメッセージはport2に届きます。逆も然りです。</p>
+
+<h3>MessagePortを渡す</h3>
+<p>さて、以上でMessagePortの挙動は理解できたと思います。しかし、このままでは使い物になりません。というのも、1つのページの中でいくら通信しても仕方ないのです。これを有効に利用するには、前回同様異なるウィンドウの間で通信しないと意味がありません。</p>
+<p>つまり、<strong>MessagePortを作って他のウィンドウに渡せばいい</strong>のです。</p>
+<p>この方法は、実は前回の、MessagePortを介さない通常のWindow Messagingです。つまり、まず通常のpostMessageでMessagePortを送ってやり、それを受け取った側は以後MessagePortを利用して個別のメッセージングをしようということです。</p>
+<p>さて、postMessageでMessagePortを渡す方法ですが、じつは一筋縄ではいきません。普通に第一引数のメッセージで送ればいいように思いますが、前回「送ることが可能なもの」として紹介した中にMessagePortは含まれませんから、これでは送れません。</p>
+<p>ここで、window.postMessageの<strong>第三引数</strong>が登場します。これは当然ながら省略可能であり、<strong>配列</strong>です。配列であるという点に注意しましょう。</p>
+<p>この配列の中にMessagePortを入れてやれば、向こうに届きます。受け取る側は、第一引数ではありませんから、イベントオブジェクトのdataプロパティには入っていません。これは、イベントオブジェクトの<dfn>ports</dfn>プロパティとして配列のまま届きます。このようにしてMessagePortを受け渡すことができました。</p>
+<p>なぜMessagePortは第一引数で普通に受け渡せないかというと、第一引数のデータは全て<strong>クローン</strong>（コピー）して送られるのに対し、MessagePortではクローンではなく現物をそのまま送らなければならない、という理屈からだそうです。第三引数は、現物を送るための機能ということになっていますが、今はMessagePort専用です。</p>
+
+<p>それでは、以上を利用した<a href="13_4_sample2.html">サンプル2</a>を用意しました。詳細はサンプル2のソースを参照して下さい。</p>
+
+<!-- 2012/11/18追記 -->
+<h3>PortCollection</h3>
+<p>次に紹介するのは、2012/11/02にHTML5に追加されたわりと新しい仕様です。実際にブラウザで使用可能になるのがいつかは分かりません。</p>
+<p>それは<dfn>PortCollection</dfn>というオブジェクトです。</p>
+<p>これは、複数のMessagePortに対してまとめてメッセージを送ったりできるものです。しかし、普通に配列に入れておいてループするのでも十分だとは思いませんか。つまり、</p>
+<pre><code>var ports=[port1, port2, port3];	<mark class="ins">// port1〜3は適当なMessagePort</mark>
+
+<mark class="ins">//全てのポートにメッセージを送る</mark>
+ports.forEach(function(port){
+  port.postMessage("foo");
+});</code></pre>
+<p>これは、PortCollectionを用いて書くと次のようになります。</p>
+<pre><code>var ports=new <mark>PortCollection</mark>();
+<mark class="ins">//作ってから<dfn>add</dfn>メソッドで1つずつ追加する</mark>
+ports.<mark>add</mark>(port1);
+ports.<mark>add</mark>(port2);
+ports.<mark>add</mark>(port3);
+
+<mark class="ins">//iterateメソッドでポート全てに対してコールバックを呼んでもらう</mark>
+ports.<mark>iterate</mark>(function(port){
+  port.postMessage("foo");
+});</code></pre>
+<p>使い方は、上のサンプルで紹介したメソッドの他に、<dfn>remove</dfn>メソッド（引数にポートを渡すと、ポート一覧の中からそのポートを除く）と<dfn>clean</dfn>メソッド（ポート一覧を空にする）があります。</p>
+<p>他にはありません。簡単ですね。</p>
+<p>そして、ただの配列に対してPortCollectionを使う利点は、追加や、既知のポートを削除することはできても、PortCollectionの中にいったいいくつのMessagePortが入っているのかは良くわからないということです。</p>
+<p>というのも、既にいらなくなったMessagePort（相手がいなくなって切断されたときなど）はもはや意味がありませんが、配列だと中身が勝手に変わっていいわけがありませんから、そのまま残ってしまいます。しかしPortCollectionならば、不要になったMessagePortを自動で削除してくれます。むしろ、この機能のためにPortCollectionという特別なオブジェクトが用意されたといっても過言ではありません。</p>
+<p>ちなみに、このように不要になったものが（もはやあっても無くても影響がないものが）自動で（内部的なメモリから）消去されていく機能を<strong>ガベージコレクション</strong>といいます。PortCollectionがないと、ただの配列の場合、MessagePortオブジェクトが配列の中に残ってしまいJavaScriptから参照可能なので、ガベージコレクションで消すことができないのです。</p>
+
+<p>Window Messagingに関して説明することは以上です。機会があったら使ってみて下さい。</p>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>九章第四回　プロトタイプベース — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_3.html">九章第三回</a>
+                          |
+          <a rel="next" href="9_5.html">九章第五回</a>
+              </p>
+    </nav>
+    <h2>九章第四回　プロトタイプベース</h2>
+
+<h3>プロトタイプベースとは</h3>
+<p>今まで解説してきたオブジェクト指向ですが、実はひとくちにオブジェクト指向といっても種類があります。JavaScriptは、その中でも<dfn>プロトタイプベース</dfn>という種類のものになっています。</p>
+<p>では、プロトタイプベースとは何でしょう。プロトタイプとは、<a href="9_2.html">九章第二回</a>で解説したprototypeのことです。</p>
+<p>これは、コンストラクタのprototypeにプロパティ（やメソッド）をくっつけておくことで全てのインスタンスから利用することができ、オブジェクトを特徴付けるというものでした。</p>
+<p>ここで、プロトタイプベースの特徴といえるのが、インスタンスも1つのオブジェクトであるので、自由にメソッドを変更・追加したり、プロパティも追加したりできます。</p>
+<p>「インスタンスも1つのオブジェクトであるので」と書きましたが、どんなオブジェクトであろうと自由に操作できるというのがプロトタイプベース（インスタンスベースとも言います）の特徴なのです。</p>
+
+<h4>クラスベース</h4>
+<p>プロトタイプベースと対立する概念として、<dfn>クラスベース</dfn>というものがあります。代表的なのはJavaなどです（JavaScriptとは別物なので注意しましょう）。</p>
+<p>クラスベースでは、オブジェクトの型は<dfn>クラス</dfn>を作ることで表現されます。クラスでは、そのクラスのインスタンスが持つプロパティ・メソッドを全て決定してしまい、それ以外のプロパティやメソッドは持てないというものです。クラスベースのオブジェクト指向は型システムと相性が良いという特徴をもちます。また、JavaScript以外のプロトタイプベース言語としてはIoなどがあります。</p>
+
+<h4>継承</h4>
+<p>さて、継承は、prototypeを利用することで実現していました。つまり、prototypeの機能は型とインスタンスの関係を結びつけるもので、直接継承のための機能ではないので、JavaScriptの機能としては継承はないことになります。</p>
+<p>対してクラスベースでは、基本的に言語の機能として継承があります。このように、言語機能として継承を用意しなくても継承を行えるのがプロトタイプベースの特徴の1つです。</p>
+
+<h3>DOMにみるオブジェクト指向</h3>
+<p>ここで話がDOMに戻ります。実は、DOMの構造もオブジェクト指向的です。</p>
+<p>例えば、全てのノードがappendChildなどのようなメソッドを持っています。これは、ノードが何かのコンストラクタであり、prototypeにappendChildがあるのであろうと想像がつきます。</p>
+<p>ただ、DOMそのものは、構造を定義しているだけで、DOMそのものがプロトタイプベースというわけではありません。先の例に出したJavaもDOMを一応扱えます。</p>
+<p>さて、ノードは、Nodeというオブジェクトのインスタンスです。</p>
+<pre><code>var body = document.body;
+            console.log(body <mark>instanceof</mark> <mark>Node</mark>);
+          </code></pre>
+<p>「true」となります。</p>
+        <pre><code>console.log(<mark>Node</mark>.<mark>prototype</mark>.appendChild);</code></pre>
+<p>これは実はブラウザによって結果がわかれたのですが、Opera,Chromeなどはundefinedとならず、メソッドが存在するということがわかります。</p>
+        <pre><code>console.log(Element.prototype instanceof Node)</code></pre>
+<p>これも同じく結果がわかれましたが、Opera,Chromeなどはtrueとなり、継承が前回紹介した方法で行われていることがわかります。</p>
+<p>ちなみに、Elementは、ノードのうち、要素のことです。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_3.html">九章第三回</a>
+                          |
+          <a rel="next" href="9_5.html">九章第五回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HTML5 Web Messagingのサンプル</title>
+<style>
+div{
+	border:6px dashed black;
+	padding:15px;
+	margin:10px;
+}
+</style>
+</head>
+<body>
+<h1>受け取る側</h1>
+<script>
+window.addEventListener("message",function(e){
+	//メッセージを受信
+	var div=document.createElement("div");
+	div.textContent=e.data;
+	document.body.appendChild(div);
+},false);
+</script>
+</body>
+</html>

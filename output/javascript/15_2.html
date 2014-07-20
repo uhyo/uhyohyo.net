@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十五章第二回　Navigation Timing — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="15_1.html">十五章第一回</a>
+                      </p>
+    </nav>
+    <h2>十五章第二回　Navigation Timing</h2>
+<p>今回紹介する<dfn>Navigation Timing API</dfn>は、ページを表示するときの時間経過とかを知ることができるAPIです。</p>
+<p>ページを表示するのにどれだけかかったのかとか、そういう詳細情報を得ることができるのです。</p>
+<p>このAPIは大きく分けて2つの部分からなっています。時間に関する情報を表す<strong>PerformanceTiming</strong>とその他に関する<strong>PerformanceNavigation</strong>です。</p>
+
+<p>APIを使うには、<dfn>window.performance</dfn>に入っている<dfn>Performance</dfn>オブジェクトを用います。ブラウザ上だとwindowのプロパティはグローバル変数として参照できますね。</p>
+<p>このオブジェクトは、PerformanceTimingたる<strong>timing</strong>プロパティと、PerfomanceNavigationたる<strong>navigation</strong>プロパティの2つを持っています。</p>
+
+<h3>PerformanceTiming</h3>
+<p>PerformanceTimingはさまざまなタイミングを表すプロパティを持っています。タイミングは全て数値です。これは、世界標準時で1970年1月1日午前0時0分ちょうどから経過したミリ秒数で表されていて、コンピュータで時間を表現するには一般的な形式です。例えば2013年1月1日午前0時0分（世界標準時）だったら、1356998400000になります。</p>
+<p>以下ではプロパティを時系列順に列挙します。</p>
+<dl>
+  <dt>navigationStart</dt>
+  <dd>簡単に言えば、このページを開こうとした瞬間です。もうちょっと詳しく言うと、beforeunloadイベントの処理が終了したあとunloadイベントが発生する直前の瞬間です。</dd>
+  <dt>unloadEventStart</dt>
+  <dd>前のページでunloadイベントが発生する直前のタイミングです。ただし、新しくこのページを開いた場合は前のページが存在しないので、0になります。また、前のページが別オリジンのページの場合は、セキュリティ上の理由から0になります。</dd>
+  <dt>unloadEventEnd</dd>
+  <dd>前のページでunloadイベントの処理が終了した瞬間のタイミングです。unloadEventStartが0のときはunloadEventEndも0になります。</dd>
+  <dt>redirectStart</dd>
+  <dd>もし前のページから移動した先がリダイレクトでそこを経由してこのページを表示した場合は、リダイレクトを読み込み始めた瞬間です。リダイレクトしていない場合は0です。また、リダイレクト中に他のオリジンを経由した場合も0です。</dd>
+  <dt>redirectEnd</dd>
+  <dd>リダイレクトがあった場合、リダイレクトページとの通信を終了した瞬間（その情報にしたがってこのページの読み込み処理を開始する直前）です。リダイレクトが無かった場合は0です。</dd>
+  <dt>fetchStart</dt>
+  <dd>このページを読み込む処理を開始した瞬間です。読み込み処理というのは与えられたURLを解析するところから始まるのでその瞬間です。</dd>
+  <dt>domainLookupStart</dt>
+  <dd>URLを解析したらDNSを用いて接続先のIPアドレスを取得します。その処理が始まる瞬間です。</dd>
+  <dt>domainLookupEnd</dt>
+  <dd>同様に、その処理が終了した瞬間です。</dd>
+  <dt>connectStart</dt>
+  <dd>接続先が決まり、Webサーバーに接続する直前の瞬間です。</dd>
+  <dt>connectEnd</dt>
+  <dd>Webサーバーとの接続が確立した瞬間です。</dd>
+  <dt>secureConnectionStart</dt>
+  <dd>プロトコルがHTTPSの場合、そのハンドシェイクを開始した瞬間です。HTTPSでない場合は0です。</dd>
+  <dt>requestStart</dt>
+  <dd>接続の確立後、HTTPリクエストをサーバーに送る直前の瞬間です。</dd>
+  <dt>responseStart</dt>
+  <dd>リクエスト送信後、サーバーからの応答を受信し始めた瞬間です。</dd>
+  <dt>responseEnd</dt>
+  <dd>サーバーからの応答を全て受信した瞬間です。</dd>
+  <dt>domLoading</dt>
+  <dd>サーバーからの応答をもとにDOMの構築を始めた瞬間です。具体的には、このページに対応するdocumentオブジェクトが生成された瞬間です。</dd>
+  <dt>domInteractive</dt>
+  <dd>DOMの構築が終了した瞬間（HTMLのパースが終了した瞬間）です。</dd>
+  <dt>domContentLoadedEventStart</dt>
+  <dd>DOMの構築が終了したあと、DOMContentLoadedイベントが発生しますが、それが発生する直前の瞬間です。ちなみにパース終了とDOMContentLoadedイベント発生の間には、読み込み終了時に実行するスクリプトが実行される処理が挟まっています。</dd>
+  <dt>domContentLoadedEventEnd</dt>
+  <dd>DOMContentLoadedイベントの処理が終了した瞬間です。</dd>
+  <dt>domComplete</dt>
+  <dd>ページの読み込みが全て終了した瞬間です。後述のloadEventStartとの違いがよくわかりません。</dd>
+  <dt>loadEventStart</dt>
+  <dd>ページの読み込みが終了するとloadイベントが発生しますが、それが発生する直前の瞬間です。</dd>
+  <dt>loadEventEnd</dt>
+  <dd>loadイベントの処理が終了した瞬間です。</dd>
+</dl>
+<p>以上です。けっこうたくさんありますね。これらを用いることで、ページ読み込みにかかった時間とかも知ることができます。例えば通信にかかった時間を知りたいなら、fetchStartからresponseEndまでの時間を計算すればよいでしょう。</p>
+<p>それを知ったあとそれを使って何をするかはあなた次第です。</p>
+<p>実際に通信にかかった時間を表示する<a href="15_2_sample.html">サンプル</a>を用意しました。</p>
+<p>ちなみにこのサンプルをパソコンに保存してからブラウザで開いてみると、通信にかかった時間の代わりにページをファイルから読みこむのにかかった時間を計算してくれます。</p>
+
+<h3>PerformanceNavigation</h3>
+<p>さて、もう一つがPerformanceNavigationです。その他といいましたが、実はここで得られる情報は2つだけです。</p>
+<p>1つは<dfn>type</dfn>プロパティに入っていて、これはこのページを開いたときのナビゲーションの種類です。これは<strong>定数</strong>で、以下の意味があります。</p>
+<dl>
+  <dt>TYPE_NAVIGATE</dt>
+  <dd>リンクをクリックしたりアドレスをアドレスバーに入力して開いたときのような、通常のページ移動。</dd>
+  <dt>TYPE_RELOAD</dt>
+  <dd>ページを更新したとき。</dd>
+  <dt>TYPE_BACK_FORWARD</dt>
+  <dd>「戻る」ボタンや「進む」ボタンで移動してきたとき。</dd>
+  <dt>TYPE_RESERVED</dt>
+  <dd>上の分類に当てはまらない特殊な方法のとき。</dd>
+</dl>
+<p>これらの定数はやはりPerformanceNavigationのプロパティです。</p>
+<p>これを用いた<a href="15_2_sample2.html">サンプル2</a>を用意しました。まずは普通に開いて、その後ページを更新したりこのページと「戻る」「進む」ボタンで行き来してみましょう。3種類の異なる表示を見ることができます。</p>
+
+<p>PerformanceNavigationから得られるもう一つの情報は、リダイレクトの回数です。このページを開いた時に何回リダイレクトを経由したかの数値が、<dfn>redirectCount</dfn>プロパティに入っています。ただし、リダイレクトで違うオリジンを経由した場合はセキュリティ上の理由で0になります。</p>
+
+<p>以上がNavigation Timingの全てです。</p>
+<p>ちなみに、強化版のNavigation Timing 2というのが今作成中だそうです。そのうち紹介します。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="15_1.html">十五章第一回</a>
+                      </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

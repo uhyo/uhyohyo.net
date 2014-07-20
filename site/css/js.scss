@@ -1,0 +1,56 @@
+// JavaScript初級者から中級者になろう
+
+ul.recent {
+  background-color:#eeeeee;
+  padding:1ex 1ex 1ex 40px;
+  margin:0 1em;
+
+  li {
+    list-style-position:inside;
+  }
+}
+
+pre {
+  display:block;
+  white-space:pre;
+
+  background-color:#e4e4e4;
+  padding:6px;
+}
+mark {
+  color:#cc0000;
+  background-color:transparent;
+}
+mark.ins {
+  color:#ff6060;
+}
+mark.comment {
+  color:#ff6060;
+}
+img.ss {
+  float:left;
+}
+
+// 広告
+aside.ad-javascript {
+  float:right;
+  background-color:white;
+  width:200px;
+  padding:10px;
+}
+
+// 質問ページ
+div.q {
+  background-color:#eefff3;
+  padding:0.6em;
+  margin:0.6em 0.2em;
+}
+nav.re {
+  background-color:#eeffee;
+  padding:0.6em;
+  margin:0.6em 0.2em;
+}
+em.rec {
+  //おすすめ
+  color:#cc0000;
+}

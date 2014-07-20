@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>三章第四回　イベントキャプチャリング — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="3_3.html">三章第三回</a>
+                          |
+          <a rel="next" href="3_5.html">三章第五回</a>
+              </p>
+    </nav>
+    <h2>三章第四回　イベントキャプチャリング</h2>
+<h3>イベントキャプチャリング</h3>
+<p>いきなりですが、次のサンプルを見てみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="aaa"&gt;
+      &lt;p onclick="console.log('p');"&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var div = document.getElementById('aaa');
+
+      div.addEventListener('click',function(){
+          console.log('div');
+      },<mark>true</mark>);
+
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>p要素にonclick属性がついています。</p>
+<p>また、script要素内では、変数divにgetElementByIdでdiv要素を取得して代入し、そのaddEventListenerを呼び出しています。今までと違うのは3つ目の引数です。3つめの引数は、<a href="3_2.html">三章第二回</a>で「とりあえずfalseにしておきましょう」といったものですが、<strong>trueになっています</strong>。これが今回の鍵です。</p>
+
+<p>さて、このサンプルを実行してみます。onclick属性があり、またaddEventListenerでも「click」を登録しているので、とりあえずP要素をクリックしてみます。木構造は</p>
+<pre><code>div
+｜
+└―― <mark>p</mark>
+          </code></pre>
+<p>というようになっていますね。ここで、前回解説したイベントバブリングの仕様に従うと、p要素をクリックすると、まずp要素でイベントが発生し、onclick属性で設定された<code>console.log('p');</code>が実行されて「p」のログが表示されます。</p>
+<p>その後、</p>
+<pre><code><mark>div</mark>
+<mark>｜</mark>
+<mark>└――</mark>p</code></pre>
+<p>このように親要素であるdivに伝わり、divでイベントが発生します。divにはaddEventListenerで</p>
+<pre><code>function(){
+    console.log('div');
+}</code></pre>
+<p>が登録してあるので、それが実行されて「div」が表示されます。</p>
+<p>まとめると、「p」がまず表示されて、その後「div」が表示されると予想できます。</p>
+
+<p>しかし、<strong>実際は違います</strong>。クリックしてみると、先に表示されるのはなんと「div」で、その後「p」が表示されます。ここに、<dfn>イベントキャプチャリング</dfn>が関わってきます。</p>
+<p>イベントキャプチャリングとは、<strong>イベントバブリングの前に、親要素から子要素に向けてイベントが伝わる</strong>というものです。</p>
+<p>つまり、今回の場合、イベントバブリングで「p → div」という子から親の流れの<strong>前</strong>に、「div → p」という親から子の流れがあったということです。</p>
+<p>そして、実はaddEventListenerの3つめの引数は、そのイベントリスナ（関数）を<strong>イベントキャプチャリングで処理するならtrue</strong>、<strong>イベントバブリングで処理するならfalse</strong>ということになっています。ちなみに、イベント属性で登録されたイベントは、イベントバブリングで処理されることになっています。</p>
+
+<p>より具体的に見ていくと、まず、</p>
+<pre><code>div
+｜
+└―― <mark>p　　　　　←ここ</mark>
+</code></pre>
+<p>でイベントが<strong>発生</strong>したとします。すると、<strong>イベントキャプチャリング</strong>の仕様にしたがって、まず</p>
+<pre><code><mark>div　　　　　←ここ</mark>
+｜
+└―― p
+</code></pre>
+<p>から処理されます（もちろん、本当は、もっと上のhtml要素やbody要素から処理されますが、今回は簡略化のためにdivが一番上ということにしています）。ここで見られるのは、イベントキャプチャリングで処理するように登録された、つまりaddEventListenerの第三引数が<strong>true</strong>で登録されたものです。</p>
+<p>今回、'div'をログする関数がこれにあたるので、ここでまず先に「div」が表示されたというわけです。</p>
+<p>そのあと、親から子へ、</p>
+<pre><code>div
+<mark>｜</mark>
+<mark>└―― p　　　　　←ここ</mark>
+</code></pre>
+<p>このように伝わり、p要素が処理されます。しかし、p要素のイベント属性はイベントバブリングのほうで処理されるので、ここでp要素が処理するものはありません。よって、何も起こらず次に進みます。</p>
+<p>ここからは前回解説したイベントバブリングです。まず</p>
+<pre><code>div
+｜
+└―― <mark>p　　　　　←ここ</mark>
+</code></pre>
+<p>が処理されます。上と同じp要素ですが、今度はイベントバブリングだから、イベント属性の処理が処理され、「p」が表示されます。その後、</p>
+<pre><code><mark>div　　　　　←ここ
+  ｜</mark>
+<mark>└――</mark> p
+</code></pre>
+<p>このように伝わり、div要素が処理されます。しかし、div要素にはイベントバブリングで処理されるものはないので、何も起こらず、終了します。これが一連の流れです。</p>
+
+<p>さて、ここで、上のサンプルを</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="aaa" <mark class="ins">onclick="console.log('div2');"</mark>&gt;
+      &lt;p onclick="console.log('p');"&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var div = document.getElementById('aaa');
+
+      div.addEventListener('click',function(){
+          console.log('div');
+      },true);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>のようにしてみたら、どうなるか分かりますか？　そう、div要素についたイベント属性はバブリングフェーズで処理されるから、p要素の「p」よりも後、つまり、「div」「p」「div2」の順番でログが表示されます。</p>
+
+<h3>フェーズ</h3>
+<p>さて、いまイベント処理の一連の処理をみてきましたが、実はこの流れは3つの段階に分けることができます。そのひとつひとつはフェーズと呼ばれます。</p>
+<p>まず、イベントが発生して、イベントキャプチャリングの仕様にそって親から子へイベントを見ていく処理があります。この処理は、<dfn>キャプチャリングフェーズ</dfn>といいます。</p>
+<p>その後、発生源の要素に到達し、その要素の処理を行います。これは今までイベントバブリングに含めていましたが、厳密にはここだけを抜き出して<dfn>ターゲットフェーズ</dfn>といいます。</p>
+<p>そして、イベントバブリングの仕様に従って、発生源から親へイベントを見ていく段階が<dfn>バブリングフェーズ</dfn>です。</p>
+<p>この3段階になっています。この一連の流れを、全部あわせて<dfn>イベントフロー</dfn>といいます。</p>
+<p>今回はイベントキャプチャリングを紹介しましたが、使う機会はそれほど多くありません。ほとんどの場合はイベントバブリングだけで事足ります。イベントキャプチャリングは、イベントバブリングで処理される本処理の前にちょっと準備処理のようなものが必要だという場合に使われることがあります。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="3_3.html">三章第三回</a>
+                          |
+          <a rel="next" href="3_5.html">三章第五回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,93 @@
+<% # /javascript/以下 %>
+<% 
+if @page.title
+  @page.title = @page.title + " \u2014 JavaScript初級者から中級者になろう"
+else
+  @page.title = "JavaScript初級者から中級者になろう"
+%>
+
+<%
+kanji = (num)->
+  result=""
+  if num==0
+    return "零"
+  else
+    if num>=100
+      if num>=200
+        result+=kanji(Math.floor(num/100))
+      result+="百"
+      num=num%100
+    if num>=10
+      if num>=20
+        result+=kanji(Math.floor(num/10))
+      result+="十"
+      num=num%10
+    switch num
+      when 1
+        result+="一"
+      when 2
+        result+="二"
+      when 3
+        result+="三"
+      when 4
+        result+="四"
+      when 5
+        result+="五"
+      when 6
+        result+="六"
+      when 7
+        result+="七"
+      when 8
+        result+="八"
+      when 9
+        result+="九"
+  return result
+%>
+<%
+if Array.isArray @page.additinalCSS
+  @page.additionalCSS.push "/css/js.css"
+else
+  @page.additionalCSS=["/css/js.css"]
+%>
+<% block 'nav' : %>
+  <% if @page.filepath != "javascript/index.ect" : %>
+    <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+        <% if Array.isArray @page.prev : %>
+          <% # [10,1]のような配列 %>
+          |
+          <a rel="prev" href="<%- @page.prev[0]+"_"+@page.prev[1]%>.html"><%= kanji(@page.prev[0])+"章第"+kanji(@page.prev[1])+"回" %></a>
+        <% else if @page.prev : %>
+          |
+          <a rel="prev" href="<%- @page.prev %>">前回</a>
+        <% end %>
+        <% if Array.isArray @page.next : %>
+          |
+          <a rel="next" href="<%- @page.next[0]+"_"+@page.next[1]%>.html"><%= kanji(@page.next[0])+"章第"+kanji(@page.next[1])+"回" %></a>
+        <% else if @page.next : %>
+          |
+          <a rel="next" href="<%- @page.next %>">次回</a>
+        <% end %>
+      </p>
+    </nav>
+  <% end %>
+<% end %>
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+  <% content 'nav' %>
+  <%- @content %>
+  <% content 'nav' %>
+</article>
+

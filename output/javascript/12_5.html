@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十二章第五回　File API — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="12_4.html">十二章第四回</a>
+                          |
+          <a rel="next" href="12_6.html">十二章第六回</a>
+              </p>
+    </nav>
+    <h2>十二章第五回　File API</h2>
+<p>次に、Web近代史(?)中で重要な役割を果たす<dfn>File API</dfn>について紹介します。</p>
+<p>これはその名の通り<strong>JavaScriptからファイルを扱うためのもの</strong>なのですが、ではどんなファイルを扱うのでしょう。</p>
+<p>実は、<strong>ローカルのファイル</strong>です。つまり、ページを開いた利用者のパソコン（など）の中のファイルを見られるということです。</p>
+<p>ただし、自由にファイルを見られてはセキュリティも何もないので、<strong>ユーザーが認めたファイルのみ</strong>開けるという安全仕様です。</p>
+<p>ユーザーに認めてもらうには、<strong>ユーザーに選択してもらう</strong>必要があります。その方法というのはどうすればいいのでしょうか。実は、HTMLにこういうのがありましたね。</p>
+<pre><code> &lt;input type="<mark>file</mark>"&gt;
+        </code></pre>
+<p>そう、このファイル選択のinput要素を使ってユーザーにファイルを選択してもらえばいいのです。</p>
+
+<h3>ファイルの取得</h3>
+<p><a href="12_2.html">十二章第二回</a>で紹介したとおりHTML5になってフォーム周りは大きく機能が強化されましたが、実はこのファイル選択においてもそうだったのです。</p>
+<p>それでは、ここから選択済みファイルを取得するには、このinput要素の<dfn>filesプロパティ</dfn>を調べます。このfilesプロパティに入っているのが、<dfn>FileListオブジェクト</dfn>です。</p>
+<p>名前の通り<strong>リスト</strong>ですから、もしかしたら複数ファイルが選択されている可能性があるかもしれないのですね。</p>
+<p>そして、このFileListオブジェクトは、もはやNodeList（getElementsByTagNameなどで出現）などなどでお馴染みの<dfn>lengthプロパティ</dfn>と<dfn>itemメソッド</dfn>を持っています。ピンと来ると思いますが、lengthがファイルの総数で、itemメソッドは数値を指定するとn番目のファイルを返してくれるというわけです。</p>
+<p>ちなみに、</p>
+        <pre><code>filelist.<mark>item</mark>(0);	//0番目のファイルを取得</code></pre>
+<p>の代わりに、</p>
+        <pre><code>filelist<mark>[0]</mark>;</code></pre>
+<p>という省略記法が用意されているのも同じです。</p>
+
+<p>さて、このようにして得たファイルの一つ一つを表すオブジェクトを<dfn>Fileオブジェクト</dfn>といいます。</p>
+<p>このFileオブジェクトというのが<dfn>Blobオブジェクト</dfn>の一種で（ElementがNodeの一種であるのと同様で、<a href="9_3.html">九章第三回</a>で紹介した<mark>継承</mark>のような関係ですね）、ではBlobとは何かというと<strong>バイナリデータ</strong>を表す、要するにファイルの中身そのものを表す<mark>オブジェクト</mark>であるということです。</p>
+<p>そして、ではFileオブジェクトはBlobオブジェクトと何が違うかというと、Blobオブジェクトの機能（これはあとで紹介します）に加えて<dfn>nameプロパティ</dfn>と<dfn>lastModifiedDateプロパティ</dfn>を持っています。これは読んで字のごとく、前者は<strong>ファイル名</strong>で後者は<strong>最終更新日</strong>です。</p>
+<p>ファイル名は当然文字列で、あとの最終更新日というのは<strong>Dateオブジェクト</strong>で返ってきます。</p>
+<p>それでは一旦、ここまでをサンプルで振り返ります。<a href="12_5_sample.html">サンプル</a></p>
+<p>ソースを見てみると、さっそくファイル選択のinput要素があって、</p>
+        <pre><code>onchange="change(event)"</code></pre>
+<p>とあります。onchangeということは変更されたときということですから、今回の場合はファイルが選択されたときですね。</p>
+<p>そして問題のchange関数では、<code>ev.target.files</code>を取得しています。つまり、ev.targetが例のinput要素であるということです。このようなことは第三章以降何度も出てきていますのでいいですね。</p>
+<p>そして今回は最初のファイルに決め打ちして、その名前を表示しているのです。</p>
+<p>ちなみに、他にBlobのプロパティとして、<dfn>size</dfn>（そのファイルのバイト数）があります。</p>
+
+<h3>ファイルの中身を取得する</h3>
+<p>ところで、Blob（ファイルの中身データ）を取得したといっても、それをどうやって読み込んで利用するのでしょう。じつは、Blob自体はそういったメソッドを持っていないのです。</p>
+<p>そこで登場するのが<dfn>FileReaderオブジェクト</dfn>です。このオブジェクトがBlobの読み込みを担当します。</p>
+<p>この特徴は<strong>非同期読み込み</strong>であるということです。JavaScriptで非同期といった場合、意味するところは<strong>コールバックで結果を得る</strong>ということです。</p>
+<p>例えば、読み込むためにはいくつは方法がありますが、まずは<dfn>readAsText</dfn>メソッドを紹介します。つまりこれは、「読み込んでテキストを得る」ということです。テキストファイルを読み込むときなんかに使えますね。</p>
+<p>ちなみに非同期の反対として<strong>同期</strong>というのもあります。同期ということは、その関数が全部処理をおこなってしまって、プログラム側は関数の処理が終わるまで<strong>待つ</strong>ということです。このようにプログラムが待たされることを<strong>ブロッキング</strong>といいます。ブロッキングの典型的な例はalert（ユーザーがOKなどを押すまでプログラムは次に進まない）です。</p>
+<p>ところが、今の時代同期というのはなかなか問題があるということで、最近は非同期が人気です。非同期というのは、さっきも出てきた<strong>コールバック</strong>によって結果を出るのですが、要するにこれは「終わったら呼んでね」ということです。今回の場合、readAsTextを「終わったら呼んでね！」と言って呼び出して、自分はその後も悠々と他の処理を続けているわけです。それで、結果が出たら呼ばれます。</p>
+<p>呼ばれるというのは、要するに<strong>関数</strong>です。「終わったらこの関数を呼んでね」ということです。</p>
+<p>さて、そんなことを考えつつ、いよいよFileReaderを見て行きましょう。</p>
+
+<p>まず、FileReaderのインスタンスを作ります。</p>
+        <pre><code>var reader=new <mark>FileReader</mark>();</code></pre>
+<p>次に、<strong>コールバック関数</strong>を設定してあげます。コールバックしてくれるタイミングというのもいくつかあるのですが（後述）、その中でも今回は<strong>読み込み完了</strong>のタイミングで関数を呼び出してもらうようにします。これは、<dfn>onload</dfn>というプロパティに関数を代入します。</p>
+<pre><code>var reader=new FileReader();
+<mark class="ins">reader.<mark>onload</mark>=function(e){
+console.log("読み込みが終わりました");
+};</mark>
+        </code></pre>
+<p>そして、これで準備ができたのでいよいよreadAsTextを呼び出します。readAsTextは、第一引数にBlob（今回はFileなのでさっき読み込んだFile）を渡します。</p>
+<pre><code>var reader=new FileReader();
+  reader.<mark>onload</mark>=function(e){
+    console.log("読み込みが終わりました");
+  };
+  <mark class="ins">reader.<mark>readAsText</mark>(file);</mark>
+        </code></pre>
+<p>ここで、readAsTextを呼び出す前にonloadに代入したのは、非同期なので、readAsTextを呼び出したあとonloadに代入するまでの間に完了してしまったら結果が得られなくて困るからです。</p>
+<p>また、コールバック関数の第一引数にeと書いてますね。これは何かというと、実はおなじみの<strong>イベントオブジェクト</strong>です。FileReaderの場合、コールバックはイベントのように扱われるのです。</p>
+<p>ですから、e.targetにFileReaderオブジェクト、つまり今回の場合はreaderが入っています。複数のFileReaderで同じコールバック関数を使いまわしたいときなどに利用できるでしょう。</p>
+
+<p>さて、読み込みが終わった時点で、読み込み結果はどこに入っているのかというと、FileReaderの<dfn>resultプロパティ</dfn>に入っています。つまり、今回の場合reader.resultです（もちろん、e.target.resultでも同じです）。</p>
+<p>ということで、ここまでのを試す<a href="12_5_sample2.html">サンプル2</a>を見ましょう。</p>
+<p>ファイルを選択するとコンソールに中身が表示されるのを確認できたと思います。</p>
+<p>ところで、テキストというと<strong>エンコード</strong>の問題がつきまといます。そのファイルをどんなエンコードで読み込むかは<strong>第二引数</strong>で指定します。第二引数がない場合は<strong>UTF-8</strong>になります。他に"UTF-16"とか、"Shift_JIS"などなどが使えます。</p>
+
+<h3>バイナリファイルの読み込み</h3>
+<p>さて、では読み込みたいファイルがテキストでない場合はどうしたらいいかというと、readAsTextではなく別のメソッドを使います。</p>
+<p>そこで次に紹介するのが、<dfn>readAsArrayBuffer</dfn>です。これは、そのBlobを<dfn>ArrayBuffer</dfn>として読み込むということです。もちろん読み込んだ結果はreadAsTextと同じように、resultプロパティに入っています。</p>
+<p>このArrayBufferというのは要するに「バイナリデータが入っているオブジェクト」ということなのですが、それだけだとBlobとあまり変わりません。ArrayBufferの特徴は、実際にメモリ上に連続する領域が確保されているということです。ファイルをBlobとして得られた段階ではまだそのファイルをメモリ上に読み込んでおらず、それを実際にメモリ上に（文字列やArrayBufferの形で）読み込むのがFileReaderなのだということですね。</p>
+<p>しかし、Blobに対するFileReaderのように、<strong>さらに別のオブジェクトを使わないと内容を読むことができない</strong>という点はBlobと同じです。なかなか面倒ですね。</p>
+<p>まあでも、このArrayBufferというのは先々また出てくる、わりと汎用的なものです。そして、ArrayBufferを読み込むために使うのが<dfn>型つき配列</dfn>です。</p>
+<p>つまり、ArrayBufferというのがバイナリデータですから、それらを一定間隔で区切っていって配列にして読み込もうというというわけです。</p>
+<p>配列とはいっても、今まで扱ってきたJavaScriptの配列とはかなり違うので、別物のオブジェクトと考えたほうがよいでしょう。考え方としては、C言語とかの配列に近いです。</p>
+
+<p>型つき配列にはいくつか種類があるのですが、まずはよく使いそうな<dfn>Uint8Array</dfn>から紹介しましょう。Uint8とは、「8ビットで符号なし整数」ということです。Cでいう「unsigned char」にあたるものですね。</p>
+<p>8ビットということはすなわち1バイトですから、バッファを1バイトずつに区切って配列のようにしたものだということです。これは都合がいいですね。</p>
+<p>他に、UがないInt8Arrayは符号あり、すなわち8ビットなら-128〜127の範囲の整数になります。ほかに、Uあり・なしそれぞれに16と32があります。さらに、Float32ArrayとFloat64Arrayというのがあります。これらの型つき配列を総称して<mark>ArrayBufferView</mark>といいます。</p>
+<p>さて、それでは都合のよいUint8Arrayを例にして使い方を見ていきます。他のも使い方は同じです。</p>
+        <pre><code>var arr=new <mark>Uint8Array</mark>(buffer);</code></pre>
+<p>このように新しいUint8Arrayオブジェクトを作ります。ここで、bufferという変数はArrayBufferとします。</p>
+<p>Uint8ArrayをはじめとするArrayBufferViewについては機能がほかにもいろいろあるのですが、ここではあまりくわしく解説しません。このUint8Arrayを通してArrayBufferを操作していくのです。ここで注意すべきことは、一つのArrayBufferに対して複数のArrayBufferViewを用意した場合、一方を操作するともう一方にも反映されるということです。これは、ArrayBufferViewはArrayBufferが確保するメモリを操作するインターフェースであり、結局操作するのは同じArrayBufferだからです。</p>
+<p>それではこのArrayBufferViewの機能を見ていきますが、まずは<dfn>lengthプロパティ</dfn>で配列の長さを取得できます。Uint8Arrayならば、1要素1バイトなのでArrayBufferのバイト数（実はこれはArrayBufferのプロパティ<dfn>byteLength</dfn>で取得できます）と一致しますが、16とか32になるとまた異なってくるでしょう。</p>
+<p>そして、この場合は<code>arr[0]</code>で0番目の要素を取得できるなど、FileListなどと同じように扱います。</p>
+<p>かなり端折った説明でしたが、ここまで分かれば読み込んだファイルのバイト列を取得することができるはずです。</p>
+<p>ということで<a href="12_5_sample3.html">サンプル3</a>を見ましょう。</p>
+<p>結構長々と解説しましたが、ソースコードになるとやっていることは結構単純です。とにかくこれで、バイナリファイルの読み込みも可能になりました。</p>
+<p>型付き配列については紹介していないことがまだあります。くわしくは調べてみましょう。</p>
+
+<h3>readAsDataURL</h3>
+<p>実は、テキストとバイナリの2つだけかとおもいきや、まだ読み込み用メソッドがあります。それが<dfn>readAsDataURL</dfn>です。</p>
+<p>この<strong>DataURL</strong>というのは、http://などから始まるのではなく、<strong>data:から始まる特殊なURL</strong>のことです。これは何かというと、URLというのはそのアドレスになるリソースを示すものです。そこで、dataURLというのはその読み込んだ先にあるべきリソースのバイナリデータを直接URLに書いてしまったものです。</p>
+<p>例えば、次のようなDataURLがあるとします。</p>
+        <pre><code>data:text/html,%3c%21doctype%20html%3e%3chtml%3e%3cbody%3e%3ch1%3etest%3c/h1%3e%3c/body%3e%3c/html%3e</code></pre>
+<p>これをブラウザのアドレスバーに入力してみましょう。「test」と出ますね。ソースを表示すると次のように出るはずです。</p>
+        <pre><code>&lt;!doctype html&gt;&lt;html&gt;&lt;body&gt;&lt;h1&gt;test&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</code></pre>
+<p>つまり、「data:text/html,%3c...（略）」というURLを開いたということは、 この「&lt;!doctype...（略）」という内容のページを読み込んだのと同じ事だということです。</p>
+<p>このように、ブラウザが読み込んだとき、あたかもどこかからその内容を取ってきたかのように振る舞うのがdataURLです。</p>
+<p>さて、readAsDataURLでは、ファイルの内容をこのdataURLに変換させて読み込むことができるというのです。</p>
+<p>これの意味するところはつまり、<strong>そのURLをブラウザに読ませればブラウザ上に表示できる</strong>ということです。</p>
+<p>ということで、これも<a href="12_5_sample4.html">サンプル</a>を提示します。</p>
+<p>画像を読み込ませてやるとその内容が表示されたと思います。できたimg要素のsrc属性を調べると、長いDataURLになっていることがわかります。</p>
+<p>このように、dataURLというのはユーザーが選択したものをブラウザに読み込ませたいときに使える場合があります。</p>
+<h3>URL.createObjectURL</h3>
+<p>しかし、実際にはユーザーが選択したファイルを表示したい場合にreadAsDataURLを使うことは少ないでしょう。URLが長大になってしまい扱いにくいからです。そこで、もっと便利な方法が用意されています。それが<dfn>URL.createObjectURL</dfn>です。これはURLというオブジェクトが存在して、それが持つcreateObjectURLメソッドであることは今更言うまでもありませんね。</p>
+<p>このメソッドにBlobを引数として渡すと、オブジェクトURLと言われる特殊なURLが生成されます。これは当然その場でだけ有効なURLで、他の人に渡してもデータが渡せるわけではありません。readAsDataURLで得られたdataURLの代わりに、このcreateObjectURLで得られたオブジェクトURLをimg要素などに渡すことができます。</p>
+<p>すると、前述の通りBlobはまだ実際にはメモリ上にファイルが読み込まれていませんから、ブラウザがオブジェクトURLを処理する段階で内部処理として実際にファイルを読み込んでくれます。</p>
+<p>これは、dataURLに比べて利点があります。ひとつは、dataURLはファイルの内容を全て文字列として表す必要があるため、ファイル内容が大きくなるほど長い文字列になり、メモリも食います。</p>
+<p>それに対してcreateObjectURLでは、その段階ではまだファイルを読み込まず、img要素などで使われる段階で読み込まれます。</p>
+<p>これが特に役に立つのは、audio要素やvideo要素で音楽・動画を再生する場合です。これらはファイルサイズが非常に大きい場合があるので、普通一度に全てメモリ上にファイルを読み込むわけではなく、必要な部分を順次読み込んでいくようになっています。createObjectURLで生成されたURLではこの動作が行われますが、dataURLの場合はそれを生成する時点で全て読み込んでいる必要があるため時間がかかったりメモリを多く消費したりします。</p>
+<p>ですから、readAsDataURLを使う機会は少ないかもしれません。</p>
+<p>ちなみに、createObjectURLで得られたURLは、使い終わったら<dfn>URL.revokeObjectURL</dfn>メソッドを呼び出して（第一引数にオブジェクトURL）やるとよいでしょう。これは、そのURLはもう使い終わったとブラウザに宣言することで、ブラウザの記録から消去してやるメソッドです。わざわざそんなことをする意味ですが、ブラウザによってはcreateObjectURLで作れるURLの数に限度があり、revokeObjectURLを使用してURLを開放してやらないと新しいのを作れなくなることがあるようです。</p>
+<p>この開放という操作はBlob URLを扱う上で重要なようで、最近では<dfn>URL.createFor</dfn>というメソッドも登場しました。これはcreateObjectURLと同じ動作ですが、こちらで作ったURLは使い終わったらrevokeObjectURLしなくても自動で開放されます。ただし、createForはまだブラウザのサポートが進んでいないようです（2014年7月現在）。</p>
+
+<h3>FileReaderのその他の機能</h3>
+<p>コールバックとして、ファイルの読み込みが完了した場合を紹介しましたが、実はほかにもコールバックしてくれる場面があるので、対応するプロパティ名とともに紹介します。ちなみに、名前から分かる通りこれらは実はイベントです。</p>
+<dl>
+  <dt>onloadstart</dt>
+  <dd>ファイルの読み込みを開始したとき。</dd>
+  <dt>onprogress</dt>
+  <dd>ファイルの読み込みが進行したとき。（何度も発生する可能性があります）</dd>
+  <dt>onabort</dt>
+  <dd>ファイルの読み込みが中断したとき（後述）。</dd>
+  <dt>onerror</dt>
+  <dd>ファイルの読み込みに失敗したとき。</dd>
+  <dt>onload</dt>
+  <dd>ファイルの読み込みが正常に最後まで完了したとき。</dd>
+  <dt>onloadend</dt>
+  <dd>ファイルの読み込みが終了したとき（失敗した場合も含む）。</dd>
+</dl>
+<p>よく使いそうなのはonload,onerrorですね。あと、onprogressなんかもたまに使い道があるかもしれません。</p>
+<p>onabortですが、中断するのはどういう場合かというと、FileReaderの<dfn>abortメソッド</dfn>（引数なし）を呼ぶと中断させることができます。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="12_4.html">十二章第四回</a>
+                          |
+          <a rel="next" href="12_6.html">十二章第六回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

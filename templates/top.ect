@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+    <% if Array.isArray @page.additionalCSS : %>
+      <% for src in @page.additionalCSS : %>
+        <link href="<%= src %>" rel="stylesheet">
+      <% end %>
+    <% end %>
+    <% if Array.isArray @page.additionalJS : %>
+      <% for src in @page.additionalJS : %>
+        <script src="<%= src %>" type="text/javascript"></script>
+      <% end %>
+    <% end %>
+    <% if @page.title : %>
+      <title><%= @page.title %> &#x2014; <%= @site.name %></title>
+    <% else : %>
+    <title><%= @site.name %></title>
+    <% end %>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/"><%= @site.name %></a>
+      </h1>
+    </header>
+    <main>
+      <%- @content %>
+    </main>
+  </body>
+</html>
+    

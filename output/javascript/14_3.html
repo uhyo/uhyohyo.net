@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十四章第三回　Indexed Database2 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="14_2.html">十四章第二回</a>
+                          |
+          <a rel="next" href="14_4.html">十四章第四回</a>
+              </p>
+    </nav>
+    <h2>十四章第三回　Indexed Database2</h2>
+<h3>key</h3>
+<p>今回はまず<strong>key</strong>について説明します。</p>
+<p>keyは前回の最初の説明でも少し触れましたが、データベース内のデータを効率よく検索したりするために必要なものです。</p>
+<p>まあ大体は、データベースに入れた個々のレコードに何となく一意なID的なものをつけておけばいいと思います。</p>
+<p>では、具体的にはどのようにして、レコードに対しkeyを設定すればいいかということですが、実はkeyの付け方には二種類あります。ひとつは<dfn>in-line</dfn> keysという方法で、もう一つは<dfn>out-of-line</dfn> keysという方法です。</p>
+<p>in-line keysというのは、レコード内にkeyの情報が含まれる形です（詳しくは後述）。out-of-line keysというのは逆に、レコード本体には情報が含まれず、どこか別のところにとっておいてある形です。</p>
+<p>そしてkeyに関連して、<dfn>キージェネレータ</dfn>(key generator)というものを、オブジェクトストアに持たせることが可能です。</p>
+<p>その名の通り、自動でkeyを作ってくれる機能です。キージェネレータが作るキーは<strong>正の整数</strong>で、最初は1からスタート、2,3,...と増えていきます（ちなみに、通常ありえませんが、2<sup>53</sup>(9007199254740992)まで到達するとストップし、使えなくなります）。</p>
+<p>ただし、キージェネレータに頼らず自分でキーを付けてやることも可能で、その場合keyとしては使用可能なのは正の整数だけではありません。</p>
+
+<h4>keyの種類</h4>
+<p>どのようなものがkeyとして使用可能かについて解説します。</p>
+<p>簡単にいうと、<strong>配列</strong>、<strong>文字列</strong>、<strong>Dateオブジェクト</strong>、<strong>数値</strong>（0以下の数や小数も含む）です。</p>
+<p>ただし配列は、その要素が全て正しいkey（ここで挙げた4つのいずれか）でないといけません。もっとも実際には、配列をkeyとして使う場面がどれだけあるか分かりませんね。</p>
+<p>また、数値は、NaNはダメということになっています。InfinityはOKです。</p>
+
+<h4>keyの比較</h4>
+<p>keyは並び替えなどに使われることがあるので、keyどうしの大小関係が定められています。</p>
+<p>まず、異なる種類の値については、大きい方から、配列、文字列、Date、数値の順になっています。</p>
+<p>つまり、配列と文字列を比べると絶対に配列のほうが大きいし、Dateや数値とくらべても同様です。また、文字列は、どんなDateや数値とくらべても大きいということです。その他も同様です。</p>
+<p>さらにその中で、同じタイプどうしの比較は、文字列は文字コード順、Dateは日付順、数値は大きさ順となって問題ないですね。配列どうしの比較は次のように行います。</p>
+<p>二つの配列の、0番目、1番目、・・・どうしの要素を比較して、どちらかが大きければ、そっちの配列が大きくなります。</p>
+<p>どちらかの配列を全て見尽くすまで比較した場合は、長いほうが大きくなります。長さまで同じ場合は配列が完全に同じなので、同じということになります。例えば。</p>
+<pre><code>[1,2,3,<mark>5</mark>,4]は[1,2,3,<mark>4</mark>,5]より大きい
+[<mark>5</mark>]は[<mark>4</mark>,8,12,16,20]より大きい
+[0,1,2,3,4]は[0,1,2,3]より大きい</code></pre>
+<p>というようなことになります。</p>
+
+<h3>createObjectStoreのオプション</h3>
+<p>前回紹介したところによると、オプションにはkeyPathとautoIncrementの2つがありました。</p>
+<p>keyPathとは、<strong>keyがどこにあるか</strong>ということです。文字列で指定します。省略したり、nullやundefinedの場合はout-of-lineになります。</p>
+<p>ちゃんと文字列の場合は、in-lineになるのですが、この場合追加するレコードの中にkeyが含まれていることになるので、keyの<mark>プロパティ名</mark>を教えます。</p>
+<p>つまり、keyPathが"foo"であるオブジェクトストアに対して次のようなオブジェクトをレコードとして追加する場合を考えましょう。</p>
+<pre><code>{
+  name:"John",
+  age :32,
+  <mark>foo</mark> :1,
+}</code></pre>
+<p>この場合、fooの値である1がこのレコードのkeyとして扱われます。</p>
+<p>また、入れ子のオブジェクトをkeyPathで指定することも可能です。例えば、"foo.bar"がkeyPathの場合、fooに入っているオブジェクトのbarプロパティがkeyになります。つまり、</p>
+<pre><code>{
+  <mark>foo</mark>:{
+    <mark>bar</mark>:3,	<mark class="ins">//←これがkey</mark>
+  },
+}</code></pre>
+<p>ということです。</p>
+<p>もう一つのプロパティautoIncrementは、真偽値でしたね。分かりにくい名前ですが、trueだと<strong>キージェネレータを使う</strong>ことを意味します。逆にfalseだったり省略したりした場合は使わないことになります。</p>
+<p>キージェネレータの動作は、詳しくは後述しますが、レコードを追加するときに自動的にkeyを付加してくれます。付加する場所は、in-line keyならkeyPathの場所、out-of-lineなら目に見えないどこかです。</p>
+<p>in-lineでキージェネレータを使うことのメリットは、一意な連番を勝手にレコードに割り振ってくれることです。</p>
+
+<h3>データベースを操作する</h3>
+<p>さて、以上でcreateObjectStoreの説明も終わり、いよいよ下準備がすみました。いよいよデータベースを操作する方法を紹介していきます。</p>
+<p>データベースを操作するには<dfn>トランザクション</dfn>(transaction)を作る必要があります。データを書き込むときだけでなく、データベース中のデータを読むときにもトランザクションが必要です。</p>
+<p>トランザクションとは<strong>データベース操作のひとまとまり</strong>と考えられます。トランザクション中には複数のデータ操作を含むことができますが、ひとまとまりなので、トランザクションが失敗した場合は、トランザクション全体が無効となり、無かったことになります。だから、トランザクションはデータベースにアクセスする必要が生じるたびに作り、一旦操作が終わったら終了するのがよいでしょう。</p>
+<p>また、2つ以上のデータをセットで書き込みたいときは、同じトランザクション中で操作するようにして下さい。そうすれば、もし失敗するとまとめてトランザクションを無効にすることが容易で、問題が起こりにくくなります。</p>
+
+<p>トランザクションを作るには、IDBDatabaseの<dfn>transaction</dfn>メソッドを用います。返り値として<dfn>IDBTransaction</dfn>オブジェクトが得られます。これがトランザクションを操作するオブジェクトです。</p>
+<p>transactionは2つ引数を持ち、ひとつめは<strong>操作対象のオブジェクトストア名</strong>、もう一つは<strong>モード</strong>（省略可能）です。</p>
+<p>前にも述べたようにデータベースは複数のオブジェクトストアを持ちますから、操作対象を明示してやる必要があります。また、モードはトランザクションの使用目的を表すもので、以下の2つがあります。</p>
+<dl>
+  <dt>"readonly"</dt>
+  <dd>オブジェクトストアからデータを読み込むだけで、書き込みはしないモードです。</dd>
+  <dt>"readwrite"</dt>
+  <dd>データを読み込むほかに、データを書き込んだり削除したりできるモードです。</dd>
+</dl>
+<p>データを読むだけのときもreadwriteを使うことは可能ですが、readonlyにはメリットがあります。複数同時にデータを読みに行けることです。</p>
+<p>readwriteの場合は、データの整合性をとるために、複数のトランザクションが生じた場合順番待ちになります。それに対しreadonlyでは、順番がどうなろうとデータに変化がないため、同時に読むことができるのです。</p>
+<p>第二引数が省略された場合はreadonlyになります。</p>
+<p>また第一引数のオブジェクトストア名というのはふつう文字列ですが、配列を用いて複数のオブジェクトストア名を同時に指定することが可能です。この場合ひとつのトランザクションで複数のオブジェクトストアを同時に扱えます。もちろん、トランザクション中で、その中の個々のオブジェクトストアに対しアクセスすることが可能です。ここで指定したオブジェクトストアのことを<mark>スコープ</mark>(scope)といい、逆にいうと、トランザクションのスコープに含まれないオブジェクトストアは、そのトランザクションで操作することはできません。</p>
+
+<h4>IDBTransaction</h4>
+<p>それではこの、IDBTransactionの扱い方を紹介します。基本的なプロパティとして、<dfn>db</dfn>プロパティ（そのトランザクションが属するIDBDatabaseが得られる）、<dfn>mode</dfn>プロパティ（先述のモード（"readonly","readwrite"など））、<dfn>error</dfn>プロパティ（何かエラーが発生したときにエラーの内容が入っている）があります。</p>
+<p>また<dfn>abort</dfn>メソッド（引数無し）があり、呼び出すとトランザクションを強制的に失敗させます。前述のように、この場合そのトランザクションの操作全てが無効になります。例えば、一つのトランザクション中に複数のデータを書き込むときに、途中で失敗したら、複数のデータのうち一部だけが中途半端に書き込まれてしまい困るというときには、このabortメソッドを呼び出せば全部無効にしてくれます。</p>
+
+<p>実は、いざデータベースをいじるには、もう一段階必要です。実際にいじる対象となるのはデータベースそのものではなくその中のオブジェクトストアなので、オブジェクトストアを表すオブジェクトを取得する必要があります。これは<dfn>IDBObjectStore</dfn>というオブジェクトで、実は前回ちらっとでています。createObjectStoreの返り値ですね。</p>
+<p>トランザクションからオブジェクトストアを得るには、IDBTransactionの<dfn>objectStore</dfn>メソッドを呼び出します。引数は一つで、操作したいオブジェクトストアの名前です。返り値はIDBObjectStoreです。当然ながら、transactionメソッドでトランザクションを作るときに指定したオブジェクトストアでないと取得できません。</p>
+<p>説明が長いので、ここまでをソースでまとめてみましょう。</p>
+<pre><code>var request = indexedDB.open("test",1);	//testというデータベースをバージョン1で開く
+//データベースの更新処理
+request.addEventListener("upgradeneeded",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+  db.createObjectStore("foo");	//fooというオブジェクトストアを作る
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  <mark class="ins">//操作したい!　まずはトランザクションを作る</mark>
+  var transaction=db.<mark>transaction</mark>("foo","readwrite");	<mark class="ins">//fooというオブジェクトストアに対してreadwriteモードで操作するトランザクションを作る</mark>
+  <mark class="ins">//次にオブジェクトストアを呼び出す</mark>
+  var objectStore=transaction.<mark>objectStore</mark>("foo");
+  <mark class="ins">//次にいざobjectStoreに対して操作する</mark>
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});
+          </code></pre>
+<p><small>※今までのサンプルでtestというデータベースのバージョンを5に上げたりしていたので、このままだとopenの時点でエラーが出るかもしれません。適宜、次のコードを実行してデータベースを消去してからやり直したりしてみましょう。以後のサンプルも同様です。</small></p>
+<pre><code>//データベースtestを消去
+indexedDB.deleteDatabase("test");</code></pre>
+
+<h4>versionchangeトランザクション</h4>
+<p>ところで前回、createObjectStoreの返り値として、既にIDBObjectStoreが登場しています。このIDBObjectStoreも今回トランザクションを用いて取得したオブジェクトストアと同じで、オブジェクトストアの操作に使用できます。</p>
+<p>しかし、オブジェクトストアを操作するには必ずトランザクションを作る必要がありました。ここで注目するのが前回の<strong>versionchangeトランザクション</strong>です。</p>
+<p>これもトランザクションのひとつで、"readonly","readwrite"に続く、特別なモードである"versionchange"を持っているのです。これがversionchangeトランザクションであり、open時に必要ならば自動で作られます。</p>
+<p>つまり、upgradeneedイベント時におけるデータベース操作は、このversionchangeトランザクションを根拠として行われているのです。versionchangeトランザクションはreadwriteトランザクションの上位互換で、データベースへの読み書きが行えるほか、オブジェクトストアを作ったり消したりすることまでできます（実はまだありますが、それは後で紹介します）。</p>
+<p>versionchangeトランザクションが発生している間は、他のトランザクションを作ることができません。しかし、upgradeneededイベント時に既存のオブジェクトスコアのデータをいじりたいという場合はこのversionchangeトランザクションを利用することで可能です。</p>
+<p>前回紹介したIDBRequestは<dfn>transaction</dfn>プロパティを持っています。前回では、openメソッドで返されたIDBOpenDBRequestが、このIDBRequestの一種でした。IDBRequestはまたのちのち登場しますが、openメソッド（やdeleteDatabaseメソッド）で返されるIDBRequestでは、transactionプロパティに、このversionchangeトランザクションを表すIDBTransactionオブジェクトが入っています。これを用いて各種の操作が可能です。</p>
+<p>実は、versionchangeトランザクションのスコープはそのデータベースが持つ全オブジェクトストアとなっています。ですから既存のオブジェクトストアに対して操作することもここでは可能です。例えば次のサンプルのような感じです。</p>
+<pre><code>var request = indexedDB.open("test",2);	//testというデータベースをバージョン2で開く
+//データベースの更新処理
+request.addEventListener("upgradeneeded",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+  db.createObjectStore("bar");	//barというオブジェクトストアを作る
+
+  <mark class="ins">//以前からfooというオブジェクトストアがあると仮定して、fooを操作する</mark>
+  var transaction=request.<mark>transaction</mark>;	<mark class="ins">//IDBRequestのtransactionプロパティにIDBTransactionが入っている</mark>
+  var foo=transaction.objectStore("foo");	<mark class="ins">//versionchangeトランザクションを用いてオブジェクトストアfooを操作できる</mark>
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});
+        </code></pre>
+
+<h3>オブジェクトストアにレコードを追加する</h3>
+<p>さて、やっと本題にたどり着きました。いよいよオブジェクトストアにレコードを追加します。レコードとは、オブジェクトストアに、つまりはデータベースに保存することができる一単位のデータでしたね。</p>
+<p>まず初めに、どのようなものをレコードとしてデータベースに入れることができるかを解説します。</p>
+<p>HTML5には<mark>structured clone algorithm</mark>という規定があります。簡単にいうとオブジェクトなどを複製する方法が定められています。これにより複製できるものなら何でもデータベースに入れることができます。</p>
+<p>具体的には、プリミティブ（真偽値、数値、文字列、nullとundefined）はOKです。さらにDateオブジェクトや正規表現オブジェクト、FileやBlob、FileList（<a href="12_5.html">十二章第五回</a>）やImageData（これはまだ解説していませんが、canvasを扱うときに出てきます）もOKです。</p>
+<p>さらに、以上のものを要素としてもつ配列やオブジェクトもOKです。つまり、データとして利用できそうな大抵のものはOKです。</p>
+<p>逆にできないものは、関数や、NodeのようなDOM関係のオブジェクトです。</p>
+<p>また、オブジェクトについたゲッタやセッタ（<a href="9_6.html">第九章第六回</a>・<a href="11_4.html">十一章第四回</a>）や、enumerableなどのプロパティの属性（<a href="11_4.html">十一章第四回</a>）はコピーされず、デフォルトの状態になるので注意しましょう。まあ、そういったものはデータとしてはあまりふさわしくないので、それで困る機会はないことでしょう。</p>
+
+<p>ただし、上で紹介したkeyの種類によってはさらに制約が出てきます。上でkeyPathの話をしましたが、keyPathを用いる場合、つまりin-line keyの場合には、keyはオブジェクトのプロパティとなります。つまりプリミティブなどはプロパティを持てないのでレコードとしては不適で、エラーになります。また配列なども許可されず、オブジェクトでなければなりません（もちろん、そのオブジェクトのプロパティには上で紹介した何が入っても構いません）。</p>
+<p>逆にout-of-line keyの場合には、レコードそのものはkey情報を持たないので、レコードにこれ以上の制限はありません。</p>
+
+<h4>IDBObjectStore</h4>
+<p>上で出てきたIDBObjectStoreについて、基礎的な説明を加えておきます。</p>
+<p><dfn>name</dfn>プロパティはそのオブジェクトストアの名前です。また<dfn>keyPath</dfn>,<dfn>autoIncrement</dfn>プロパティは、createObjectStoreに渡されたオプションそのままです。これらの設定はオブジェクトストアを作ったあとは変えることはできないので、IDBObjectStoreのプロパティに代入して変更することはできません。</p>
+<p>他には、<dfn>transaction</dfn>プロパティをもち、これは現在の操作におけるトランザクションを示すIDBTransactionです。</p>
+
+<h4>レコードを追加する</h4>
+<p>それではいざ、レコードを追加しましょう。IDBObjectStoreがもつメソッドを使って追加します。</p>
+<p>レコードを追加するメソッドは2つありますが、似ているので同時に紹介します。それは<dfn>add</dfn>と<dfn>put</dfn>です。</p>
+<p>第一引数が追加するレコード、第二引数がkeyです。</p>
+<p>ただ、第二引数のkeyというのは、out-of-line keyのときしか使えません。in-lineのときは前述のように、レコード中にkeyが含まれますね。ですから、第二引数でkeyを指定できません。</p>
+<p>また、キージェネレータがある場合はキーを自動で付加してくれるからいいのですが、キージェネレータがない場合は、keyは必須ですので、キーがない場合はエラーになります。</p>
+<p>キーがない場合というのは、in-line keyの場合はレコードのkeyPathのところにキーが無いことで、out-of-line keyの場合は第二引数が指定されていない場合です。</p>
+<p>また、キージェネレータがあるにもかかわらずkeyが指定された場合は、指定されたkeyが優先され、キージェネレータは使われません。</p>
+<p>addとputの違いは、既に同じkeyのレコードがオブジェクトストアがあった場合の動作です。同じkeyのレコードはオブジェクトストア内に複数存在できません。</p>
+<p>addの場合は、既存のレコードを尊重して、エラーを出して失敗します。putの場合は新しいほうを尊重して、既存のレコードを上書きします。</p>
+
+<p>以上がadd,putの動作ですが、keyについて注意点があります。キージェネレータがある場合で、自分で数値のキーを指定した場合です。先ほど説明したようにそちらが優先されますが、値によってはキージェネレータが生み出すキーが今後重複する可能性があります。つまり、今までにキージェネレータが1,2,3,4というkeyを作ったとします。ここで、10というkeyをもつレコードを追加したとすると、そのうちキージェネレータが10というkeyを作った時に重複してしまい困ります。</p>
+<p>そこで、自分で指定したキーが正の数値だった場合は、キージェネレータの数値が「その値より大きい最小の整数」に変更されます。つまり今回の場合だとキージェネレータは、10より大きくて最小の整数である11に変更され、次にキージェネレータが生み出すkeyは11ということになります。5〜9は欠番になります。</p>
+<p>自分のkeyが0や負の数だった場合は、重複することはありませんので何もおきません。</p>
+<p>ただし、例えば8.5とか、正の小数の場合も重複はしないはずですが、この場合も上記と同様のことがおき、8.5より大きい最大の整数である9になります。数値以外のkeyを指定した場合は何も起きません。</p>
+
+<h4>IDBRequest</h4>
+<p>さて、addやputの返り値は<dfn>IDBRequest</dfn>です。これは前回も少し出て来ましたね。</p>
+<p>このような、オブジェクトストアに対するひとつひとつの操作をリクエストと呼び、その結果を知らせてくれるのがIDBRequestです。ひとつのリクエストについてひとつのIDBRequestが作られます。</p>
+<p>前回も少し触れましたが、<dfn>result</dfn>はリクエストの結果（内容は場合によって違います）、<dfn>error</dfn>は起きたエラー（エラーが起きた場合のみ）、<dfn>source</dfn>は操作対象のIDBObjectStore、<dfn>transaction</dfn>は現在操作しているIDBTransactionです。そして、<dfn>readyState</dfn>は前回紹介したように、"pending"または"done"です。</p>
+<p>IDBRequestではイベントが発生する可能性があります。成功したときは<strong>successイベント</strong>、失敗したときは<strong>errorイベント</strong>です。successイベントは次の処理に進むためによく使いますし、errorイベントは、前述のように、中途半端に失敗したらトランザクションを中断して無効にするというときに、失敗の検出をするために使えます。</p>
+
+<p>さて、addやputの場合には、IDBRequestのresultは<strong>key</strong>になります。自分でkeyを指定した場合はいいですが、キージェネレータでキーが生成された場合にも、これを用いてそのレコードのkeyを知ることができます。</p>
+<p>それでは、試しに一つレコードを追加してみるサンプルを紹介して、続きは次回にします。</p>
+<pre><code>var request = indexedDB.open("test",1);	//testというデータベースをバージョン1で開く
+//データベースの更新処理
+request.addEventListener("upgradeneeded",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //fooというオブジェクトストアを作っておく。out-of-line keyでキージェネレータを使用する。
+  db.createObjectStore("foo",{
+    autoIncrement:true
+  });
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //トランザクションを作る
+  var transaction=db.transaction("foo","readwrite");	//書き込むのでreadwriteにする
+  //オブジェクトストアを得る
+  var objectStore=transaction.objectStore("foo");
+  //値を追加してみる
+  var req=objectStore.<mark>add</mark>({
+    hello:"world"
+  });	//キージェネレータを使うので、第二引数のkeyは省略してもよい
+
+  //返り値はIDBRequest。イベントを監視して結果を得る
+  req.addEventListener("<mark>success</mark>",function(e){
+    console.log("追加に成功しました",req.result);	//resultはkey
+  });
+  req.addEventListener("<mark>error</mark>",function(e){
+    console.log("追加に失敗しました",req.error);
+  });
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});
+        </code></pre>
+<p>ちなみに、データベースの中身は、Chromeの場合だとDeveloper toolsのresourcesから見ることが可能です。試しに見てみましょう。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="14_2.html">十四章第二回</a>
+                          |
+          <a rel="next" href="14_4.html">十四章第四回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>九章第二回　prototypeの活用 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_1.html">九章第一回</a>
+                          |
+          <a rel="next" href="9_3.html">九章第三回</a>
+              </p>
+    </nav>
+    <h2>九章第二回　prototypeの活用</h2>
+<p>今回は、<dfn>prototype</dfn>というものを解説します。これは、前回の</p>
+<pre><code>//Yuushaという関数の型を作る
+function Yuusha(n){
+  this.name = n;
+  this.jikoshokai = function(){
+    console.log("私の名前は" + this.name + "です。");
+  };
+}
+
+var yuusha1 = new Yuusha("勇者1");
+
+var yuusha2 = new Yuusha("勇者2");
+
+var yuusha3 = new Yuusha("勇者3");
+
+//自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+          </code></pre>
+<p>がまだ完璧ではないということとも関連しています。</p>
+
+<p>まずどこが完璧でないかというと、関数オブジェクトが無駄だということです。基本的に、<code>function (){ 〜 }</code>とかくと、新しい関数オブジェクトが作られます。つまり、コンストラクタYuusha内で</p>
+<pre><code>this.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};</code></pre>
+<p>と書いてあると、それぞれ新しい関数オブジェクトが作られることになり、結果勇者のインスタンス1つにつき関数オブジェクトも1つということになります。どのインスタンスでも同じ関数なのだから、関数オブジェクトも1つのほうがよいので、これはよくないということになります。</p>
+<p>さて、これを解決するのが<dfn>prototype</dfn>です。prototypeとは何かというと、<strong>コンストラクタのプロパティ</strong>で、prototypeもオブジェクトです。コンストラクタとはつまり関数なので、関数ができたとき自動的にprototypeというプロパティもできています。</p>
+
+<p>このprototypeはどんな役割をするかというと、簡単にいうと、その型のオブジェクトが共通に持つプロパティやメソッドは、コンストラクタのprototypeのプロパティやメソッドとして書いておけばいいのです。とりあえずやってみましょう。</p>
+<pre><code>//Yuushaという関数の型を作る
+function Yuusha(n){
+  this.name = n;
+}
+<mark class="ins">Yuusha.<mark>prototype</mark>.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};</mark>
+
+var yuusha1 = new Yuusha("勇者1");
+var yuusha2 = new Yuusha("勇者2");
+var yuusha3 = new Yuusha("勇者3");
+
+//自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+          </code></pre>
+<p>このようにコンストラクタ（Yuusha）のprototypeにメソッドを付けておくことで、インスタンス（yuusha1〜3）から使うことができました。</p>
+<p>これはなぜかというと、あるオブジェクトのプロパティやメソッドを使おうとしてもないとき、<strong>次にコンストラクタのprototypeを探す</strong>のです。それでもなければ、本当にないということでundefinedになります。</p>
+<p>今回の場合、yuusha1のjikoshokaiというメソッドを探しますが、ありません。そこで、そのコンストラクタがYuushaなので、Yuusha.prototype.jikoshokaiを探します。そこであったので、無事自己紹介できたというわけです。</p>
+
+<p>これを利用して、ちょっと遊んでみます。</p>
+<pre><code>//Yuushaという関数の型を作る
+function Yuusha(n){
+  this.name = n;
+}
+Yuusha.<mark>prototype</mark>.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。"<mark class="ins"> + "HPは" + this.hp + "です。"</mark>);
+};
+<mark class="ins">Yuusha.<mark>prototype</mark>.hp = 100;</mark>
+
+var yuusha1 = new Yuusha("勇者1");
+
+//自己紹介してもらう
+yuusha1.jikoshokai();
+          </code></pre>
+<p>hpプロパティをprototypeで設定しました。これは、勇者（インスタンス）を何人作ってもhpは100ということですね。</p>
+
+<p>次に、これはどうでしょう。</p>
+<pre><code>//Yuushaという関数の型を作る
+function Yuusha(n){
+  this.name = n;
+}
+Yuusha.<mark>prototype</mark>.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。" + "HPは" + this.hp + "です。");
+};
+Yuusha.<mark>prototype</mark>.hp = 100;
+<mark class="ins">//攻撃する
+Yuusha.<mark>prototype</mark>.attack = function(){
+  <mark>this.hp -= 20;</mark>
+  console.log("攻撃しました。 HPが" + this.hp + "に減りました。");
+};</mark>
+
+var yuusha1 = new Yuusha("勇者1");
+
+//攻撃してもらう
+yuusha1.attack();
+yuusha1.attack();
+          </code></pre>
+<p>新しいattackというメソッドを作りました。攻撃して、HPが20減るというメソッドです。普通なら敵のHPが減りますが、敵を作るのが面倒なので、疲れて自分のHPが減るということにしましょう。</p>
+<p>ここで、<code>this.hp -= 20;</code>という一文があります。そのとおり、this.hpを20減らすのです。しかし、ここでthis.hpは無いから、かわりにYuusha.prototype.hpを見ていたのです。そこでこれをするとどうなるのでしょう。Yuusha.prototype.hpが減るのでしょうか。　実は、これは
+  <code>this.hp = this.hp - 20;</code>
+  と同じことなので、 this.hp に this.hp-20が代入されるということになります。ここで、右辺の値を計算するにはthis.hpの値を知る必要があるのでYuusha.prototype.hp（ここでは100）をみてきます。したがって、右辺は80ということになります。それをthis.hpに今度は代入するわけですが、代入なのでprototypeに頼ることはなくそのままthis.hpに入り、80になります。だから、例えば2回目は、prototypeに頼ることなく、直接this.hpに80が入っているのです。</p>
+<p>ただし、このように変動して各インスタンスに固有な値は、最初にprototypeに入れておくのではなく、コンストラクタで初期化しておくのがよいでしょう。すなわち、次のようにします。</p>
+<pre><code>function Yuusha(n){
+  this.name = n;
+  <mark class="ins">this.hp = 100;</mark>
+}</code></pre>
+<p>prototypeには、メソッドなど、どのインスタンスでも変わらないようなものを入れておきます。</p>
+<p>次回はこのprototypeがさらに活躍します。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="9_1.html">九章第一回</a>
+                          |
+          <a rel="next" href="9_3.html">九章第三回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十二章第六回　DnD API — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="12_5.html">十二章第五回</a>
+                          |
+          <a rel="next" href="13_1.html">十三章第一回</a>
+              </p>
+    </nav>
+    <h2>十二章第六回　DnD API</h2>
+<p>次に、前回のFile APIと関連するところもある<strong>DnD API</strong>を紹介します。DnDとは、 <strong>ドラッグ & ドロップ</strong>のことです。</p>
+<p>しかし、ドラッグ&amp;ドロップといっても、「つかんで自由に移動させられる」とかそういうのとは少し違います。今回は、ドラッグ（つかんで移動）してドロップ（<mark>離す</mark>）するということですから、途中の過程ではなく「どこからどこまでか」ということを大事にします。</p>
+
+<h3>ドラッグできる要素を作る</h3>
+<p>ある要素をドラッグできることを示すためには、HTML5の<strong>draggable属性</strong>を使います。</p>
+<p>ドラッグできるようにしたい要素には、<code>draggable="true"</code>という属性をつけます。単純に、trueならドラッグできて、falseならドラッグできないということです。</p>
+<p>しかし、考えてみるとcheckedみたいに<b>論理属性</b>にして、draggable属性があればドラッグできる、ないならドラッグできないというようにすればいいと思うかもしれませんが、そうもいきません。というのも、a要素やimg要素はもともとドラッグできるからです。そういう要素に対してドラッグできないということを明示するためにfalseが必要になりますから、その反対としてtrueを持ちだしてきたわけです。</p>
+<p>実際にやってみたのが<a href="12_6_sample.html">サンプル1</a>です。</p>
+
+<h3>ドラッグ先を作る</h3>
+<p>ところで、このままだと要素をつかむことができても、それをドロップする場所がありません。ということで、ドロップする場所を作りましょう。</p>
+<p>それにかかわるのが<dfn>dragenterイベント</dfn>です。これは、ドラッグしながら他の要素の上にさしかかったときに発生するイベントです。普通、ある要素の上にさしかかったら、その要素がドロップ先として認識されます。ところが、このdragenterイベントは面白い<b>デフォルトアクション</b>を持っています。デフォルトアクションというのは、「そのイベントが発生した場合にデフォルトで起こる動作」です。例えばa要素をクリックしたならばリンク先に飛ぶという動作が発生しますね。</p>
+<p>それで、dragenterイベントのデフォルトアクションは「ドロップ先をbody要素に変更する」ということです。すなわち、dragenterイベントが発生すると、どこにマウスを持って行っても全部body要素にドロップした扱いになってしまいます。</p>
+<p>DnD APIを使ってやりたいことは、やっぱり「これをここにドロップしたらこの処理をする」というようなことでしょう。ですから、どこに置いてもbody要素にドロップした扱いになるのはちょっと困ります。そこで、dragenterイベントのデフォルトアクションを無効にする必要があります（これを、イベントをキャンセルするといいます）。イベントをキャンセルするにはpreventDefaultメソッドを使うなどということは、<a href="3_5.html">三章第五回</a>で解説しました。</p>
+<p>さて、実は、もうひとつキャンセルすべきイベントがあります。それは<dfn>dragoverイベント</dfn>です。 これについては、<strong>ドラッグオペレーション</strong>というものが関係しています。ドラッグオペレーションとは、そのドラッグ&amp;ドロップにどのような効果を示す値であり。以下の4種類があります。</p>
+<dl>
+  <dt>copy</dt>
+  <dd>データがコピーされます。</dd>
+  <dt>link</dt>
+  <dd>データのリンクが張られます。</dd>
+  <dt>move</dt>
+  <dd>データが移動します。</dd>
+  <dt>none</dt>
+  <dd>何も起きません。</dd>
+</dl>
+<p>このドラッグオペレーションがどうなっているかによって、ドラッグ時の表示も変わってきます（親切なブラウザならば）。</p>
+<p>ドラッグし始めた段階では、最初は<code>"none"</code>にセットされています。実はこのままだと、ドロップしても何も起こりません。</p>
+<p>dragoverイベントは、dragenter同様にマウスが上に差し掛かったときに発生します。そのため、このタイミングでドラッグオペレーションを設定してやることで、その要素にドロップしたときの動作を示すことができます。ただし、後述しますが、実際にドロップしたときの動作はやはりJavaScriptで記述するので、ドラッグオペレーションには表示以上の意味はありません。しかし、値が<code>"none"</code>になっている場合はドラッグ&amp;ドロップ自体が無効になってしまうので、何か他の値にセットする必要があります。</p>
+<p>その方法ですが、dragenter,dragoverなどのDnD APIに関係するイベントでは、そのイベントオブジェクトは<b>DragEvent</b>といい、<strong>dataTransfer</strong>プロパティを持ちます。これを<b>DataTransfer</b>オブジェクトといい、ドラッグ&amp;ドロップに関するさまざまな情報を管理します。</p>
+<p>さて、DataTransferオブジェクトは<dfn>dropEffect</dfn>プロパティを持ち、これに代入することでドラッグオペレーションを設定できます。つまり、こういうことですね。</p>
+<pre><code>//elmは適当なHTMLElementとする
+elm.addEventListener("<mark>dragover</mark>",function(e){
+  e.<mark>dataTransfer</mark>.<mark>dropEffect</mark>="copy";
+},false);
+</code></pre>
+<p>ところで、さっきdragoverはキャンセルする必要があると述べました。それは、当然ながらdragoverのデフォルトアクションに理由があります。</p>
+<p>dragoverのデフォルトアクションは「ドラッグオペレーションを"none"にする」ということなのです。</p>
+<p>こんなデフォルトアクションがあっては、いくらこちらで書き換えてやっても意味がありません。そこで、dragoverをキャンセルしてやります。つまりこうです。</p>
+<pre><code>//elmは適当なHTMLElementとする
+elm.addEventListener("<mark>dragover</mark>",function(e){
+  e.<mark>dataTransfer</mark>.<mark>dropEffect</mark>="copy";
+  <mark class="ins">e.preventDefault();</mark>
+},false);
+</code></pre>
+
+<p>ここまでを反映した<a href="12_6_sample2.html">サンプル2</a>を見ると、なんとなくドロップに成功しているのが分かるとおもいます。</p>
+
+<h3>データを送る</h3>
+<p>さて、ドロップはできるようになりましたが、ドロップしたからには何か動作を起こしたいものです。そこで、<strong>dropイベント</strong>を使います。これは、要素に対して何かがドロップされたときにそこで発生するイベントです。</p>
+<p>当然ながら、イベントオブジェクトのtargetプロパティはドラッグ先の要素です。そうなると、そこでさらに問題が発生します。それは、<strong>ドラッグされたほうの要素はどうやって調べるのか</strong>です。</p>
+<p>実は、要素自体は調べません。ここで登場するのが、先ほどのdataTransferです。このdataTransferはdropEffectを設定できるだけではなく、データを格納しておくことができるのです。</p>
+
+<p>ドラッグ&amp;ドロップにおけるデータの流れは、「ドラッグされる側がdataTransferにデータを格納する」→「ドロップされたとき(<mark>dropイベント</mark>）にdataTransferからデータを取り出す」ということになります。</p>
+<p>では、「ドラッグされる側がdataTransferにデータを格納する」はどのようにすればいいかというと、ここで新しいイベント<dfn>dragstart</dfn>が登場します。これは当然ながら、ドラッグされる側の要素（draggable="true"の要素）で発生するイベントです。dragstartからも当然dataTransferが利用でき、dataTransferに書き込むことができます。</p>
+
+<p>そして、dataTransferは<dfn>setData</dfn>というメソッドを持っています。第一引数が<b>フォーマット</b>の文字列、第二引数がデータの文字列です。</p>
+<p>フォーマットというのは、そのデータがどんなデータが判別するための文字列なので、わかればいいということで自由に指定していいです。ただし、<b>MIMEタイプ</b>の利用が推奨されます。</p>
+<p>例えば、今回データは文字列なので"text/"から始まるとして、普通の文字列は"text/plain"というタイプになります。また、"x-"から始まる自由な文字列を設定できるので、例えば"text/x-mydata"とかです。</p>
+<p>複数のデータを格納することができますが、同じフォーマットのものは複数格納できません。</p>
+
+<p>さて、具体的にやってみましょう。</p>
+<p>例えばさっきの<a href="12_6_sample2.html">サンプル2</a>をもとにして、div要素のテキストをドラッグ先に表示してみるというサンプルを作ってみます。</p>
+<p>まず今回draggableなdiv要素は3つあるので、ひとつひとつでdragstartイベントを監視するのではなく、documentあたりでまとめて監視してみましょう。</p>
+<pre><code><mark>document</mark>.addEventListener("<mark>dragstart</mark>",function(ev){
+
+},false);</code></pre>
+<p>そして、今回はdiv要素のテキスト、すなわちtextContentをdataTransferに入れてあげましょう。</p>
+<pre><code><mark>document</mark>.addEventListener("<mark>dragstart</mark>",function(ev){
+  <mark class="ins">ev.<mark>dataTransfer</mark>.<mark>setData</mark>("text/plain",ev.target.textContent);</mark>
+},false);</code></pre>
+<p>今回は単純に、データの種類は"text/plain"としました。</p>
+<p>これでdragstart側の処理は終了です。次に、ドロップされた側（dropイベント）の処理です。</p>
+<p>こっちも同じようにaddEventListenerでイベントを付加してもいいのですが、面倒なので<code>ondrop="drop(<mark>event</mark>)"</code>のようにしてdropという関数を作ってそれに渡すことにしましょう。突如でてきたeventという変数は、<a href="3_5.html">三章第五回</a>で解説したように、イベント属性を使った場合のイベントオブジェクトです。</p>
+<p>そして肝心のdrop関数においては、dataTransferからデータを取得します。これは、<dfn>getData</dfn>メソッドを使います。引数にフォーマット文字列を渡します。</p>
+<pre><code>function drop(ev){
+  var data = ev.<mark>dataTransfer</mark>.<mark>getData</mark>("text/plain");
+}</code></pre>
+<p>これを実際にやってみたのが<a href="12_6_sample3.html">サンプル3</a>です。「div要素1」や「div要素2」などを一番下のdiv要素にドラッグ&amp;ドロップすると、そのとおりに文字が変化することが確認できるでしょう。</p>
+<p>なお、dropイベントでも最後にpreventDefaultしているのが分かると思います。これは、（2014年7月現在）Firefoxがドロップ後にページ遷移してしまうので、それを防ぐ目的があります。</p>
+
+<p>さて、今回はドラッグ&amp;ドロップによって受け渡したデータはtextContentでしたが、同様にしてさまざまなデータを渡すことができるでしょう。応用して、機械があったら試してみましょう。</p>
+
+<h3>画像のドラッグ&ドロップ</h3>
+<p>ここでは新しい事項は特にありません。今までの事項の応用と考えましょう。</p>
+<p>さて上で、「img要素はもともとドラッグ&amp;ドロップ可能である」といいました。そこで、画像をドラッグするとその画像を表示するということを考えてみましょう。</p>
+<p>ここで、画像はどのように区別するかというと、<strong>URL</strong>で区別します。つまり、逆にいうとURLさえわかれば同じ画像を表示できるということです。ですから、dataTransferでURLを送りましょう。</p>
+<pre><code>document.addEventListener("dragstart",function(ev){
+  var target = ev.target;	<mark class="ins">//ドラッグされた要素</mark>
+  if(<mark>/^img$/i</mark>.test(target.tagName)){
+    <mark class="ins">//img要素かどうか判定する</mark>
+    ev.dataTransfer.setData("<mark>text/uri-list</mark>",target.src);	<mark class="ins">//URLを渡す</mark>
+  }
+},false);</code></pre>
+<p>受け取る側はこうしましょう。</p>
+<pre><code>function drop(ev){
+  var data = ev.dataTransfer.getData("<mark>text/uri-list</mark>");
+    <mark class="ins">//新しいimg要素を作って追加する</mark>
+    var img=document.createElement("img");
+    img.src=data;
+    ev.target.appendChild(img);
+}</code></pre>
+<p>dragstartのほうで、<code>/^img$/i.test(target.tagName)</code>の部分でtargetがimg要素か判定しています。何をしているか分からない人は<a href="4_2.html">正規表現</a>を復習しましょう。</p>
+<p>今回はtext/plainではなくtext/uri-listなんてものを使ってみました。このように、URLを表すデータを格納する場合はtext/uri-listを使用することができます。なお、名前から分かるように複数のURLを改行で区切って格納することができます。</p>
+<p>これを実践したサンプルが<a href="12_6_sample4.html">サンプル4</a>です。</p>
+<p>ちなみに、text/plainやtext/uri-list以外の独自なデータをdataTransferに入れる場合は、同時にtext/plain型のデータも入れておくことが望ましいとされています。これは、例えばテキストボックスにドロップするとその内容を表示するといった、ブラウザがデフォルトで備える動作をサポートするためです。</p>
+
+<h3>ファイルのドラッグ&ドロップ</h3>
+<p>ここからが前回のFile APIとからむ所です。前回、ファイルを読み込むためにinput要素を使用しましたね。実は、ほかにも、<strong>ブラウザ内へファイルをドラッグ&ドロップする</strong>ことでもローカルにあるファイルを読み込むことができるのです。</p>
+<p>ファイルがどこからかドラッグされてきた場合、やはり<strong>dataTransfer</strong>に情報が入っています。実は、dataTransferは<dfn>files</dfn>というプロパティを持っており、これは<a href="12_5.html">前回</a>登場したFileListオブジェクトです。これを用いてファイルを取得することができます。</p>
+<p>まず、今回はdragstartはもはや要りませんね。なぜなら、ドラッグを開始するのはページ上ではないからです。では、dropイベントのほうを見てみましょう。</p>
+<pre><code>function drop(ev){
+  <mark class="ins">//ファイルが複数かもしれないので、forループで調べる</mark>
+  for(var i=0;i&lt;ev.dataTransfer.files.length;i++){
+    var file=ev.dataTransfer.files[i];
+
+    <mark class="ins">//新しいp要素を作って表示</mark>
+    var p=document.createElement("p");
+    p.textContent= file.name;
+    ev.target.appendChild(p);
+  }
+}</code></pre>
+<p>今までの説明を総合するとこんな感じになります。<a href="12_6_sample5.html">サンプル5</a>で実際に確かめましょう。</p>
+
+<p>ちなみに、紹介しそびれたdataTransferのメソッドで、<dfn>clearData</dfn>というものがあります。これはフォーマット文字列を引数にとって呼び出すことで、そのフォーマットのデータをdataTransferから削除できます。</p>
+
+<h3>参考：新しい方法</h3>
+<p>実は、今まで紹介してきたDnD APIは、実はちょっと古い方法で、最新の仕様では新しい方法が用意されています（ただし、古い方法も使用可能であると定められているのですぐに問題になるわけではありません）。</p>
+<p>今回は、（2014年7月現在）まだ新しい仕様を完全にサポートしたブラウザが無いため古い方法を重点的に解説しましたが、新しい方法についても触れておきます。</p>
+<h4>dropzone</h4>
+<p>新しい方法においては、ある要素がそこへのドロップを受け入れられることを示す方法が異なります。それは、<dfn>dropzone属性</dfn>を使う方法です。dropzone属性がある要素はドロップの受け入れ可能とみなされ、<strong>dragenterイベントとdragoverイベントをキャンセルする必要がありません</strong>。まだ、dropoverイベントで行なっていた、ドラッグオペレーションを設定する処理も書く必要がありません（dropzone属性に記述しておきます）。</p>
+<p>dropzone属性には、2つの情報を記述します。1つはドラッグオペレーション、すなわち、<code>"copy"</code>,<code>"link"</code>,<code>"move"</code>のいずれかです。こうすることで、その上にマウスを乗せるとそのドラッグオペレーションが適用されます。もう1つは、どんなフォーマットのデータが受け入れ可能かです。</p>
+<p>前述のように、DnD APIで取り扱えるデータは文字列とファイルの2種類です。文字列の受け入れは、<code>string:text/plain</code>のように、<code>string:</code>のあとにフォーマット文字列を記述します。ファイルの受け入れも同様に、<code>file:image/png</code>のように<code>file:</code>のあとにMIMEタイプを記述します。</p>
+<p>これらはスペースで区切って複数記述可能ですが、ドラッグオペレーションは1つだけです。すなわち、具体的には以下のようなdropzone属性を書くことになります。</p>
+        <pre><code>dropzone="copy string:text/uri-list string:text/plain file:text/plain"</code></pre>
+<p>この場合は、（dragstartイベントでdataTransferにセットされた）text/plain,text/uri-list型のデータと、（ブラウザ外からドラッグされてきた）テキストファイルを受け入れることを示します。</p>
+<p>これを使って<a href="12_6_sample4.html">サンプル4</a>を書きなおしたのが<a href="12_6_sample6.html">サンプル6</a>です。dragenter,dragoverの処理がないぶんすっきりしています。</p>
+
+<h4>DataTransferについて</h4>
+<p>実は、新しい方法ではDataTransferにデータを格納する方法が異なります。</p>
+<p>新しい方法ではデータのやりとりは、dataTransferの<dfn>items</dfn>プロパティに集約されます。これにはDataTransferItemListオブジェクトが入っており、このオブジェクトを通してデータをやりとりします。</p>
+<p>データをdataTransferに格納するには、このDataTransfetItemListオブジェクトの<dfn>add</dfn>メソッドを使います。setDataメソッドとは逆で、第一引数にデータ文字列、第二引数にフォーマット文字列となっています。</p>
+<p>この新しい方法の特徴は、addメソッドの第一引数に、別の方法で生成したFileオブジェクトを渡すことでdataTransferにファイルを追加することができる点です。古い方法では、ブラウザウィンドウの外からファイルをドラッグしてきた場合しか、DnD APIでファイルを扱う機会はありませんでしたが、新しい方法ではこのようなパターンもあるのです。</p>
+<p>そして、入っているデータを得る方法ですが、実はこのDataTransferItemListオブジェクトは<dfn>length</dfn>プロパティを持ちます。これだけでピンとくるかもしれません。<code>dataTransfer.items<mark>[0]</mark></code>のように、添字で入っているデータを取得できます。</p>
+<p>そのため、ループして目的のフォーマットのものを探す必要があります。getDataメソッドを使った場合は一発で取得できたのでちょっと面倒ですね。</p>
+<p>しかも、<code>dataTranser.items[0]</code>のように取得したデータは生のデータではありません。これはDataTransferItemオブジェクトというもので、このオブジェクトからさらにデータを引き出すのが少し面倒です。</p>
+<p>DataTransferItemオブジェクトは<dfn>kind</dfn>プロパティと<dfn>type</dfn>プロパティを持ち、kindプロパティは<code>"string"</code>か<code>"file"</code>のどちらかです。つまり、このデータがテキストなのかファイルなのかを示しています。typeプロパティはフォーマット文字列です。</p>
+<p>そして、文字列の場合は<dfn>getAsString</dfn>メソッドで、ファイルの場合は<dfn>getAsFile</dfn>で生のデータを取得します。getAsFileの場合は引数なしで、返り値でFileオブジェクトが得られるのですが、getAsStringメソッドの場合はさらに面倒です。このメソッドには引数で<b>コールバック関数</b>を渡す必要があり、その関数にデータが渡されます。</p>
+<p>これを踏まえて先ほどの<a href="12_6_sample6.html">サンプル6</a>を更に書き換えたのが<a href="12_6_sample7.html">サンプル7</a>です。</p>
+<p>なお、利用するフォーマットが<code>"text/uri-list"</code>だったのに<code>"text/x-src"</code>に変わっています。これは、img要素をドラッグする場合は親切にも自動的にそのURLが<code>"text/uri-list"</code>フォーマットでセットされるからです。さらに、addメソッドは、同じフォーマットのデータが既に存在している場合はエラーを発生させます（setDataは上書きします）。それを回避するためにここでは<code>"text/x-src"</code>に変えました。もともと<code>"text/uri-list"</code>型のデータが入っているのでそれをそのまま利用する方法もあります。</p>
+<p>ブラウザによってはさらに、画像ファイルのFileオブジェクトも同梱してくれたりするようです。</p>
+<p>ちなみに、さきほど何気なく説明しましたが、itemsを使う方法によりファイルも取得できるので、古い方法で使用していたDataTransferのfilesプロパティは使わなくてもよくなりました。</p>
+<p>とはいっても、やはりこの新しい方法はブラウザの対応状況がよくありません。先ほどの<a href="12_6_sample7.html">サンプル7</a>も、FirefoxはそもそもDataTransferItemListやitemsプロパティを実装していないため動きませんし、Google Chromeはdropzone属性がある要素にドロップするときもdragoverイベントのキャンセルが必要なようです（その処理を追加してやれば動きます）。</p>
+<p>なお、他にもDataTransfetItemListはremoveメソッド（除去するデータを番号で指定）やclearメソッド（引数なしで全て削除）を持ちます。</p>
+
+<h3>その他のメソッドなど</h3>
+<p>さて、以上の説明で、やりたいことはだいたいできるでしょう。ここでは、補足説明を加えます。以下の説明は古い方法も新しい方法も共通です。</p>
+<p>実は、DataTransferには、<dfn>setDragImage</dfn>というメソッドがあり、ドラッグ中に表示する画像を設定できます。例えばdragstartでこれを呼び出すと、ドラッグ中のマウス等の画像表示を変更できるでしょう。使い方は、</p>
+        <pre><code>dataTransfer.<mark>setDragImage</mark>( <mark>element</mark>, x,y)</code></pre>
+<p>elementというのは、画像として使用する要素です。一般的には<strong>img要素</strong>ですが、他にも任意の要素を指定可能です。x,yは座標で、画像のつかむ場所でしょう。</p>
+
+<p>最後に、DataTransferの<code>effectAllowed</code>プロパティを紹介します。これは、ドラッグオペレーション（copy・link・move）のうちどれが可能かを示すものです。</p>
+<p>ドラッグオペレーション、dragoverイベント時にdropEffectプロパティ指定する（または新しい方法ではdropzone属性でも指定できる）はずですが、ではeffectAllowedとは何なのでしょうか。</p>
+<p>まず、セットするタイミングが違います。effectAllowedは普通、dragstartイベント時にセットされます。これにより、今ドラッグされているものに対して許されているオペレーションを指定します。</p>
+<p>一方dropEffectというのは、ドロップ先（受け入れ先）が指定するドラッグオペレーションを示します。すると、たとえば今ドラッグしているものには"link"ドラッグオペレーションしか適さないのに、ドロップ先は"copy"を要求しているという事態が起こります。effectAllowedを適切に設定しておくことにより、こういう場合に対応することができます。</p>
+<p>具体的には、dragoverイベントがキャンセルされた場合、セットされたdropEffectとeffectAllowedを照らしあわせて最終的なドラッグオペレーションが決定されます。</p>
+<p>effectAllowedには以下の値を設定することができます。</p>
+<dl>
+  <dt>none</dt>
+  <dd>ドラッグできません。ドラッグオペレーションは必ずnoneになります。</dd>
+  <dt>copy</dt>
+  <dd>copyのみ許されます。dropEffectにmoveまたはlinkがセットされた場合はnoneになります。</dd>
+  <dt>copyLink</dt>
+  <dd>copyとlinkが許されます。dropEffectにmoveがセットされた場合はnoneになります。</dd>
+  <dt>all</dt>
+  <dd>3種類全てが許されます。</dd>
+  <dt>link</dt>
+  <dd>linkのみ許されます。dropEffectにcopyまたはmoveがセットされた場合はnoneになります。</dd>
+  <dt>linkMove</dt>
+  <dd>linkとmoveが許されます。dropEffectにcopyがセットされた場合はnoneになります。</dd>
+  <dt>move</dt>
+  <dd>moveのみ許されます。dropEffectにcopyまたはlinkがセットされた場合はnoneになります。</dd>
+  <dt>uninitialized</dt>
+  <dd>3種類全てが許されます。</dd>
+</dl>
+<p>このように、effectAllowedはドラッグオペレーションを制限する意味を持ちます。dragstartでセットされることにより、ドロップ先に関係なく実際にドラッグされているものに応じた処理をさせることができます。</p>
+<p>また、effectAllowedにはもう1つ意味があります。上のリストをよく見てみると、allとuninitializedが同じに見えます。実は、dragenterイベント及びdragoverイベントにおいては、あらかじめdropEffectプロパティが自動的にセットされています。これは、effectAllowedに基づいて決められます。</p>
+<p>例えば、effectAllowedが<code>"copy"</code>の場合はdropEffectは自動的に<code>"copy"</code>にセットされています。そのため、effectAllowedを適切に設定してやればdragoverでわざわざdropEffectを手動で設定する必要がありません。ただし、dragoverをキャンセルするのは行う必要があります。</p>
+<p>また、複数のところから異なるeffectAllowedを持つものがドラッグされてくるがこちら側では1種類または2種類のドラッグオペレーションしか受け付けないという場合には、手動で設定したりdropEffectの値を見たりしてやる必要があるでしょう。</p>
+<p>ちなみに、effectAllowedが<code>"copyMove"</code>のように複数の値が許されている場合は、ブラウザがいい感じに決めてくれます。例えばWindowsでは、普通にドラッグすると移動(move)だけどCtrlキーを押しながら移動するとコピー(copy)になります。気が利くブラウザならばそういった情報を与えてくれるでしょう。しかし、あまり期待するべきではありません。</p>
+<p>結局uninitializedとallは何が違うかというと、微妙な違いではありますが、uninitializedの場合は何をドラッグしているかによってさらに気を利かせてくれます。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="12_5.html">十二章第五回</a>
+                          |
+          <a rel="next" href="13_1.html">十三章第一回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

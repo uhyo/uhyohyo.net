@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>基礎第三回 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                  |
+          <a rel="prev" href="kiso2.html">前回</a>
+                          |
+          <a rel="next" href="kiso4.html">次回</a>
+              </p>
+    </nav>
+    <h2>基礎第三回</h2>
+<h3>条件分岐</h3>
+<p><dfn>条件分岐</dfn>とは、場合場合によって処理を変えるということです。次のサンプルを見てみましょう。</p>
+<pre><code>a = 5;
+if(a == 3){
+    alert("test");
+}</code></pre>
+<p>実行してみると、「alert("test");」という行があり、「test」とアラートが表示されるはずなのに、表示されません。</p>
+<p>「a=5;」の行は何かわかっているので、「if(a==3){」と「}」の行が関係がありそうです。</p>
+<p>「if」という関数を「a==3」という引数で呼び出そうとしているように見えますが、実は<strong>違います</strong>。</p>
+<p>これは<dfn>構文</dfn>と呼ばれるもので、<strong>文法上の決まり</strong>のようなものです。つまり、ifはJavaScriptの<strong>決まった書き方</strong>の1つなのです。</p>
+
+<p>さて、それではどういう書き方なのかですが、こうなっています。</p>
+<pre><code>if( <strong>式</strong> ){
+    文（いくつでも）
+}</code></pre>
+<p>意味は、「<strong>式</strong>の値が<dfn>真</dfn>ならば、<kbd>{ 〜 }</kbd>の中の文を処理する」というものです。逆に、<dfn>偽</dfn>ならば処理しません。</p>
+<p>真であるとは、どういうことかというと、それが<strong>正しい</strong>ということです。逆に、偽であるとは、それが<strong>正しくない</strong>ということです。</p>
+<p>では、その式ですが、「a == 3」とあります。この<kbd>==</kbd>ですが、実は新しい<strong>演算子</strong>です。代入演算子の「<kbd>=</kbd>」とは直接関係ありません。</p>
+<p>この演算子、左オペランド（左側の値）と右オペランド（右側の値）が<strong>等しければ</strong>、<dfn>true</dfn>を返し、そうでなければ<dfn>false</dfn>を返します。</p>
+<p>ここで、trueとfalseという単語が出てきました。これは、変数の名前ではなく、一つの固有の値です。</p>
+<p><strong>文字列</strong>と<strong>数値</strong>に続く第三の値で、trueとfalseの2つをあわせて<dfn>真偽値</dfn>といいます。trueは<strong>正しいこと</strong>を表し、falseは<strong>正しくないこと</strong>を表します。</p>
+<p>さて、ここでtrueがそのまま真に、falseが偽に対応します。つまり、次のようになります。</p>
+<pre><code>if(a == 3){
+  ↓
+if(<mark class="ins">false</mark>){</code></pre>
+<p>aはいま5なので、5と3は等しくないのでfalseが返されます。</p>
+<p><strong>式は偽</strong>ということになるので、<kbd>{ 〜 }</kbd>の中は飛ばされてしまいます。飛ばされた先にはもう何もないので、そこで終了します。結果、何も起こらないというわけです。</p>
+<p>もし、「a=5;」を「a=3;」にした場合、「a==3」はtrueを返すので、<kbd>{ 〜 }</kbd>の中が飛ばされずに実行され、アラートが表示されます。</p>
+
+<h4>関係演算子</h4>
+<p><kbd>==</kbd>は、<dfn>関係演算子</dfn>の一種です。算術演算子・代入演算子に続く、演算子の新しい種類です。</p>
+<p>その名の通り、2つの値の関係を確かめるものです。</p>
+<p>「<kbd>==</kbd>」のほかに、<kbd>「!=」「&gt;」「&lt;」「&lt;=」「&gt;=」</kbd>などがあります。</p>
+<p>「<kbd>!=</kbd>」は「<kbd>==</kbd>」の反対で、<strong>等しくないとき</strong>にtrueを返します。逆に等しいとfalseを返します。</p>
+<p><kbd>「&gt;」「&lt;」</kbd>は、見た目の通り不等号です。「<kbd>&gt;</kbd>」は、左が右より大きいとき、「<kbd>&lt;</kbd>」は、右が左より大きいとき、それぞれ<strong>true</strong>を返します。</p>
+<p><kbd>「&gt;=」「&lt;=」</kbd>は、つまり「≧」「≦」です。それぞれ、大きいとき以外に等しいときもtrueを返します。</p>
+<p>ちなみに、<kbd>===</kbd>と<kbd>!==</kbd>という、<kbd>==</kbd>などに似ている演算子もあります。意味も<kbd>==</kbd>などと似ていますが、型チェックをするかどうかという違いがあります。しかし難しいので、詳しくはまた今度解説します。</p>
+
+<h4>else文</h4>
+<p><dfn>else文</dfn>とは、if文とセットで使われるもので、<strong>偽の場合の処理</strong>を記述します。つまり、if文とelse文を使うことで、「真の場合はこの処理、偽の場合はこの処理」といったことが可能になります。次のサンプルを見てみましょう。</p>
+<pre><code>a = 20;
+if(a &gt;= 10){
+    alert(a + "は10以上です");
+}else{
+    alert(a + "は10より小さいです");
+}</code></pre>
+<p>やってみると、「a &gt;= 10」はtrueを返すので、「20は10以上です」というアラートが出ます。aの値をいろいろ変えて試してみましょう。</p>
+<p>これは、</p>
+<pre><code>if(a &gt;= 10){
+    alert(a + "は10以上です");
+}</code></pre>
+<p>と</p>
+<pre><code>else{
+    alert(a + "は10より小さいです");
+}</code></pre>
+<p>の部分に分けることができます。</p>
+<p>ちなみに、<kbd>{ 〜 }</kbd>の中が右に寄っているのは、左側に半角スペースを並べて右に寄せています。これは<dfn>インデント</dfn>というもので、プログラムを見やすくするための方法です。一般に、<kbd>{ 〜 }</kbd>の中は一段インデントします。</p>
+<p>ifの部分は<kbd>a &gt;= 10</kbd>、つまりaが10以上のときの処理で、elseの部分は<strong>そうでないとき</strong>の処理です。ifの部分の処理をしたときは、当然elseの部分の処理は飛ばされます。</p>
+<p>また、elseはなくても構いません。</p>
+
+<h4>加算演算子による文字列の連結</h4>
+<p>上のサンプルで、<code>alert(a + "は10以上です");</code>のような処理があります。alertの引数が「<code>a + "は10以上です"</code>」なのはいいですが、少し不可解な部分があります。</p>
+<p>aの中身は数値ですが、右にあるのは明らかに<strong>文字列</strong>です。数値と文字列を足すということは不可能なはずです。例えば実際に「3＋『あ』＝」なんて問題を出されたら答えようがありません。</p>
+<p>では何をやっているのかというと、加算演算子<kbd>+</kbd>は、<strong>2つの文字列を連結する</strong>機能も持っています。連結するとは、くっつけるということです。だから、例えば<code>"abc" + "def"</code>は<kbd>"abcdef"</kbd>を返します。</p>
+<p>今回は数値と文字列という組み合わせですが、実は、片方が文字列の場合、数値が文字列に<strong>変換</strong>されて文字列どうしになります。変換といっても、3だったなら"3"、5だったなら"5"というような単純なものです。</p>
+<p>したがって、上のサンプルでは、aが15なら「15は10以上です」、aが25なら「25は10以上です」といった文ができるわけです。</p>
+
+<h4>else if文</h4>
+<p>実はまだ種類があります。<dfn>else if文</dfn>です。空白で2つに分かれていますが、2つでセットにします。</p>
+<pre><code>a = 18;
+if(a &gt;= 20){
+    alert(a + "は20以上です");
+}else if(a &gt;= 15){
+    alert(a + "は15以上です");
+}else if(a &gt;= 10){
+    alert(a + "は10以上です");
+}else if(a &gt;= 5){
+    alert(a + "は5以上です");
+}else{
+    alert(a + "は5より小さいです");
+}</code></pre>
+<p><kbd>if(...){ 〜 }</kbd>と<kbd>else{ 〜 }</kbd>の間に、<kbd>else if(...){ 〜 }</kbd>が3つ挟まっています。また、else ifの括弧の中にもifと同じように式が記述されています。</p>
+<p>else if文とは、<strong>ifで偽だった場合に再び条件分岐する</strong>というものです。</p>
+<p>流れとしては、まず最初のifの式を判断します。<strong>真</strong>だった場合その中の処理を実行し、一連の処理を終わります。</p>
+<p><strong>偽</strong>だった場合、次のelse ifの式を判断し、同じように真だった場合は処理を実行して終わります。</p>
+<p>こうして真になるまでどんどん進んでいき、最終的にずっと偽でelseまでたどり着いた場合にelseの処理を実行します。</p>
+<p>もちろん、ifとelse ifだけでelseが無いという形でも構いません。</p>
+<p>このelse if文についてはもっと詳しい文法的説明もできるのですが、ここではしません。そういうものだと覚えておきましょう。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                  |
+          <a rel="prev" href="kiso2.html">前回</a>
+                          |
+          <a rel="next" href="kiso4.html">次回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

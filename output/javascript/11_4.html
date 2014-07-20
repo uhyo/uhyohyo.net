@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十一章第四回　Objectとプロパティ — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="11_3.html">十一章第三回</a>
+                          |
+          <a rel="next" href="11_5.html">十一章第五回</a>
+              </p>
+    </nav>
+    <h2>十一章第四回　Objectとプロパティ</h2>
+<p>今回から、第十一章においては、<strong>ECMAScript5</strong>に基づいた説明をしていきます。</p>
+<p>これは、現在（2012年）一番新しいJavaScriptの仕様を規定するものです。ECMAScript5は2010年頃に登場し、現在までに主要ブラウザの対応がほぼ完了しています（IE除く）。</p>
+<p>また、ECMAScript Harmonyと呼ばれるさらに進化したECMAScript（必然的にJavaScriptに取り入れられるでしょうが）が策定中です。</p>
+
+<p>それで、今回紹介するのはECMAScript5において登場した、オブジェクトやプロパティについてのあれこれを紹介します。これらによって、JavaScirptのオブジェクトをより深く詳細に操れるようになりました。</p>
+<h3>プロパティの一覧を取得する</h3>
+<p>例えば、</p>
+<pre><code>var obj={
+  <mark>foo</mark>:"bar",
+  <mark>baz</mark>:3,
+};</code></pre>
+<p>というようにしてオブジェクトを作ったとき、このオブジェクトにはfooとbazという2つのプロパティがあります。</p>
+<p>このように、そのオブジェクトが持っているプロパティを全て調べるということが必要になる機会は少なくないでしょう。</p>
+<p>このとき実は、古典的な方法としては<strong>for-in文</strong>があります。これは、</p>
+<pre><code>for(<mark>変数名</mark> <strong>in</strong> <mark>オブジェクト</mark>){
+}</code></pre>
+<p>の形で、左の変数に、右のオブジェクトが持っているプロパティの<storng>名前</strong>が入り、全てのプロパティについてループします。例えば次のコードを実行してみましょう。</p>
+        <pre><code>var obj={
+  <mark>foo</mark>:"bar",
+  <mark>baz</mark>:3,
+};
+
+for(var <mark>key</mark> <strong>in</strong> <mark>obj</mark>){
+  console.log(key);
+}
+        </code></pre>
+<p>実行すると、</p>
+<pre><code>foo
+baz</code></pre>
+<p>と出ることでしょう。つまり、変数keyに"foo"が入った状態で1回、"baz"がはいった状態で1回、内部の文が呼ばれたことになります。</p>
+<p>これを使えばプロパティごとに処理をすることが可能です。従来はこの方法しかありませんでした。</p>
+<p>もちろん、プロパティ名ではなくその値が欲しいならば次のようにします。</p>
+<pre><code>for(var <mark>key</mark> <strong>in</strong> <mark>obj</mark>){
+  console.log(<mark>obj[key]</mark>);
+}
+      </code></pre>
+<p>しかし、ECMAScript5においては新しい方法が用意されました。</p>
+<p>それには<dfn>Object.keys</dfn>メソッドを使います。これは、引数として渡されたオブジェクトのもつプロパティ名を配列にして返すメソッドです。ちなみに、このときの順番はfor-in文で列挙される順番と同じことが保証されています。</p>
+<p>これを使って上のfor-in文と同じことをしたければ、こうです。</p>
+<pre><code>var obj={
+  foo:"bar",
+  baz:3,
+};
+
+var names=<mark>Object.keys</mark>(obj);
+
+console.log(names);	// ["foo","baz"] のように出力される
+
+names.forEach(function(name){
+  console.log(obj[name]);
+});
+      </code></pre>
+<p>しかし実は、for-in文とObject.keysには1つ決定的な違いがあります。そこで、<a href="9_3.html">九章第三回</a>で説明した継承の場合を考えましょう。</p>
+<p>このサンプルを思い出しましょう。</p>
+<pre><code>//敵を作る
+function Teki(n){
+  this.name = n;
+}
+//現れる
+Teki.prototype.appear = function(){
+  console.log(this.name+"が あらわれた！");
+};
+//攻撃
+Teki.prototype.attack = function(){
+  console.log(this.name+"のこうげき！ダメージをうけた！");
+};
+
+var <mark>zako</mark> = new Teki("ザコ");
+      </code></pre>
+<p>ここで、zakoが持つプロパティについて考えましょう。</p>
+      <pre><code>console.log(Object.keys(zako));</code></pre>
+<p>結果は<code>["<mark>name</mark>"]</code>です。つまり、Tekiコンストラクタ内で代入されたnameプロパティのみが存在すると言われています。</p>
+<p>しかし、ここですこし考えるべきことがあります。</p>
+<p>このオブジェクトzakoがnameプロパティしか持っていないならば、appearメソッドやattackメソッドはどうなるのでしょう。</p>
+      <pre><code>console.log(zako.appear,zako.attack);</code></pre>
+<p>このようにすると、ちゃんと関数が表示されることが確認できますから、appearやattackも、zakoのプロパティとして利用できるはずです。</p>
+<p>ここで、nameと、appearやattackの間にある違いは、「オブジェクトの<strong>自分自身の(<span lang="en">own</span>)プロパティかどうか</strong>」という点ですね。</p>
+<p>appearやattackというのは、直接「zako.appear=...」のようにして代入したものではないですね。以前やった通り、<strong>prototypeを介してアクセスしている</strong>のです。</p>
+<p>つまり、appearやattackというのは実はzakoそれ自体がもつプロパティではなく、あくまでTeki.prototypeが持っているプロパティであって、zakoからはそれを間接的に（しかし透過的に）参照できるということです。</p>
+<p>この違いは、以前はあまり気にするようなことではなかったですが、ECMAScript5の時代になって気にすることが増えたような気がします。この違いを頭に入れておきましょう。</p>
+<p>さて一方、for-in文で同じことをやってみるとしましょう。</p>
+<pre><code>for(var key in <mark>zako</mark>){
+  console.log(key);
+}
+      </code></pre>
+<p>今度は、nameだけでなくappearやattackも表示されることが確認できたと思います。つまり、<strong>for-in文はそのオブジェクト自身がもつプロパティだけでなくprototypeを介して参照するプロパティも列挙する</strong>ということです。</p>
+<p>しかし、ここで新たな疑問が生じます。上で示した次のサンプルを思い出しましょう。</p>
+<pre><code>var obj={
+  foo:"bar",
+  baz:3,
+};
+
+for(var key in obj){
+  console.log(key);
+}</code></pre>
+<p>これはfor-in文ですから、objに結びついたprototypeを遡っているということです。ここで、{ 〜 }で作られるようなただのオブジェクトは、<a href="1_1.html">一章第一回</a>で解説したようにObjectのインスタンスですから（つまりここで紹介しているObject.keysはコンストラクタであるObjectがメソッドを持つというわりと珍しい例です）、当然Object.prototypeをさかのぼって探しに行くはずです。</p>
+<p>たとえばObject.prototypeがもつプロパティとしては、toStringなどがあります。</p>
+      <pre><code>console.log(Object.prototype.toString);</code></pre>
+<p>したがって、さきほどのobjもtoStringメソッドを持っています。</p>
+      <pre><code>console.log(obj.toString);</code></pre>
+<p>ではなぜ、prototypeまでさかのぼって列挙するはずのfor-in文でも、このtoStringなど（他にもいろいろありますが）は列挙されなかったのでしょうか。それが次の話題です。</p>
+
+<h3>プロパティの属性</h3>
+<p>実は、すべてのプロパティには<strong>属性</strong>というものが付属しています。それがプロパティの特性に関係しています。</p>
+<p>まず紹介するのが<dfn>enumerable属性</dfn>です。日本語にすると「数えられる」とかそういう感じです。これは論理属性（trueかfalse）で、<strong>enumerableがfalseの属性はfor-in文やObject.keysで列挙されない</strong>のです。</p>
+<p>普通にプロパティに代入したりすると、enumerable属性はtrueのプロパティが作られます。しかし、Object.prototypeが持つメソッドとか、JavaScriptの言語仕様としてすでに存在しているようなプロパティは、基本的に列挙のじゃまにならないようにenumerableがfalseです。さっき発生した謎の答えはこれです。</p>
+<p>属性は全部で3つあります。<dfn>writable</dfn>, <dfn>enumerable</dfn>, <dfn>configurable</dfn>で、いずれも論理属性です。</p>
+<p>デフォルトは全てtrueで、普通にプロパティに代入するだけでは全てtrueのプロパティしか作れません。</p>
+<p>writableは「書き込み可能かどうか」ということで、writableがfalseのプロパティは書き換えられません。また、configurableは「設定可能かどうか」です。この2つの具体的な動作は後述します。</p>
+
+<h3>プロパティデスクリプタ</h3>
+<p>以前のJavaScriptにおいてはこれらの属性は完全に内部的なもので、スクリプト側からどうこうすることはできませんでした。しかしECMAScript5ならば、属性に干渉することができます。</p>
+<p>属性（など）をいじるには、<dfn>プロパティデスクリプタ</dfn>を使います。これはただのオブジェクトです。これを得るには、<dfn>Object.getOwnPropertyDescriptor</dfn>メソッドを使います。</p>
+      <pre><code>var desc = <mark>Object.getOwnPropertyDescriptor</mark>(obj, "foo");</code></pre>
+<p>第一引数のobjというのは、プロパティを持つオブジェクトで、第二引数はプロパティ名です。つまり、この呼び出しによって、</p>
+      <pre><code><mark>obj</mark>["<mark>foo</mark>"]</code></pre>
+<p>についての情報を要求しているわけです。結果は返り値で戻ってきます。</p>
+<p>先ほどの</p>
+<pre><code>var obj={
+  foo:"bar",
+  baz:3,
+};</code></pre>
+<p>のobjのプロパティfooについて、Object.getOwnPropertyDescriptor(obj,"foo")の結果は次のようなオブジェクトです。</p>
+<pre><code>{
+  <mark>writable</mark>: true,
+  <mark>enumerable</mark>: true,
+  <mark>configurable</mark>: true,
+  <mark>value</mark>: "bar"
+}</code></pre>
+<p>これは本当に、ただのオブジェクトです。ただ情報をひとまとめにしただけで、特別な機能は何もありません。</p>
+<p>見てわかるように、さきほどの3つの属性についての情報が入っていて、全てtrueであることがわかります。もうひとつ<strong>valueプロパティ</strong>があって、これがプロパティの値となっています。</p>
+<p>試しにもうひとつやってみましょう。</p>
+      <pre><code>console.log(Object.getOwnPropertyDescriptor(Object.prototype,"toString"));</code></pre>
+<p>Object.prototypeがもつtoStringメソッドです。これの結果はこうなります。</p>
+<pre><code>{
+  <mark>writable</mark>: true,
+  <mark>enumerable</mark>: <strong>false</strong>,
+  <mark>configurable</mark>: true,
+  <mark>value</mark>: function toString() { [native code] }
+}</code></pre>
+<p>やはりenumerableがfalseになっていることが分かります。valueのfunction toString() { [native code] }というのは、これがtoStringの本体にあたりますが、この先はブラウザの内部処理なのでJavaScriptでは表現できないという意味です。</p>
+<p>ちなみに、メソッド名にOwnと入っていることからも分かる通り、オブジェクト自身のプロパティしか得られません。このように、基本的にプロパティをいじるときはそのオブジェクト自身のプロパティが対象になります。</p>
+<p>それでは、このプロパティデスクリプタをいじれば、プロパティの属性を書き換えられるということは想像がついたと思います。</p>
+<p>実は、書き換えるというより新しいプロパティデスクリプタをまるごと用意してあげるというほうが正しいですが、それには<dfn>Object.defineProperty</dfn>メソッドを使います。</p>
+<p>例えば、writable属性がfalseであるプロパティhogeを、objに追加する場合を考えます。</p>
+<pre><code><mark>Object.defineProperty</mark>(obj,"<mark>hoge</mark>",{
+  writable:<strong>false</strong>,
+  enumerable:true,
+  configurable:true,
+  value:"hogehoge"
+});</code></pre>
+<p>このように3つの引数をとります。第一引数、第二引数はgetOwnPropertyDescriptorと同じですが、第三引数に<strong>新しいプロパティデスクリプタ</strong>が追加されます。definePropertyを呼び出すと、その新しいプロパティデスクリプタにしたがってプロパティが書き換えられます。</p>
+<p>それではwritableの効果を確かめてみましょう。</p>
+<pre><code>var obj={
+  foo:"bar",
+  baz:3,
+};
+
+Object.defineProperty</mark>(obj,"<mark>hoge</mark>",{
+  writable:<strong>false</strong>,
+  enumerable:true,
+  configurable:true,
+  value:"hogehoge"
+});
+
+console.log(obj.hoge);	//"hogehoge"と表示される
+
+obj.hoge="piyopiyo";	//代入してみる
+
+console.log(obj.hoge);	//結果は…?
+      </code></pre>
+<p>結果をみるとわかると思いますが、obj.hogeに違うものを代入したはずなのに変わりません。これがwritableをfalseにしたことの効果です。<small>注：strictモードの場合エラーが出ますが、それについてはまた今度解説します。</small></p>
+<p>それでは最後にconfigurableについて解説しますが、configurableは日本語に訳すと「設定可能」といった感じです。</p>
+<p>これはすごい力をもっていて、ひとたびconfigurableがfalseになると、もうそのプロパティの属性はいじれません。すなわち、definePropertyしようとするとエラーになります。</p>
+<p>加えてwritableもfalseにしておけば、もはやそのプロパティの内容は絶対に不変であることが保証されたようなものです。</p>
+<p>たとえば、Object.prototypeなどは、これが変わってしまったらたいへん困るので、writable,enumerable,configurableが全てfalseになっています。</p>
+<p>ちなみに、definePropertyのときにwritable,enumerable,configurableが省略された場合falseとして扱われます。</p>
+
+<p>また、<a href="9_6.html">九章第六回</a>で紹介したゲッタとセッタについても、このdefinePropertyを用いて設定できます。</p>
+<p>というのも、その時は既存のオブジェクトにゲッタ・セッタを設定するのに__defineGetter__と__defineSetter__という2つのメソッドを使っていましたが、これは名前が明らかに怪しいことからもわかるように、実は<strong>非公式</strong>のメソッドでした。それが、ECMAScript5において、definePropertyを用いた正式な設定方法が用意されたのです。</p>
+<p>ゲッタやセッタを設定したいときは、プロパティデスクリプタのget,setというプロパティに関数を入れてやります。例えば、</p>
+<pre><code>var obj = { _a : 0 };
+obj.__defineGetter__("a", function(){ return this._a; });
+obj.__defineSetter__("a", function(n){
+  if(n===true || n===false){
+  this._a = n;
+  }
+});</code></pre>
+<p>このサンプルをdefinePropertyで書きなおしたならば、次のようにします。</p>
+<pre><code>var obj = { _a : 0 };
+Object.defineProperty(obj,"a",{
+  enumerable:true,
+  configurable:true,
+  <mark>get</mark>:function(){ return this._a; },
+  <mark>set</mark>:function(n){
+    if(n===true || n===false){
+      this._a = n;
+    }
+  }
+});</code></pre>
+<p>getとsetがある場合、writableは無視されるので、ここでは省略しました。もちろん、ゲッタとセッタがあるのでvalueも要りません。</p>
+
+<h3>その他のメソッド</h3>
+<p>さて、属性の説明が一段落したところで、その他の関連メソッドを紹介します。</p>
+<p>まず<dfn>Object.defineProperties</dfn>です。さっきのdefinePropertyが複数形になっただけであることからもわかるように、複数のプロパティのプロパティデスクリプタを一斉に変更できます。つまりこんな感じです。</p>
+<pre><code><mark>Object.defineProperties</mark>(obj,{
+  <mark>foo</mark>:{
+    value: "bar",
+    configurable:true
+  },
+  <mark>bar</mark>:{
+    value:3,
+    enumerable:true
+  }
+});</code></pre>
+<p>第一引数は親となるオブジェクトです。第二引数はオブジェクトで、設定したいプロパティ名をキーにしてプロパティデスクリプタを値としてもつ辞書オブジェクトとなっています。</p>
+<p>さらに、Object.keysに関連して、<dfn>Object.getOwnPropertyNames</dfn>を紹介します。これは、基本はObject.keysと同じですが、<strong>enumerableがfalseのプロパティも列挙する</strong>という点で違いがあります。どちらを使うかは場合によりますが、たいていはObject.keysで事足りることと思います。</p>
+
+<p>さて、今まではObjectが直接持っているメソッドを紹介してきましたが、ここからはObjectのインスタンスがもつメソッド（すなわちObject.prototypeがもつメソッド）を紹介します。</p>
+<p>紹介するのは<dfn>hasOwnProperty</dfn>です。これはプロパティの名前を引数として渡すと、そのプロパティを持っているかどうかを真偽値で返すということです。</p>
+<pre><code>//敵を作る
+function Teki(n){
+  this.name = n;
+}
+//現れる
+Teki.prototype.appear = function(){
+  console.log(this.name+"が あらわれた！");
+};
+//攻撃
+Teki.prototype.attack = function(){
+  console.log(this.name+"のこうげき！ダメージをうけた！");
+};
+
+var zako = new Teki("ザコ");
+
+console.log(zako.<mark>hasOwnProperty</mark>("name"));	//true
+console.log(zako.<mark>hasOwnProperty</mark>("appear"));	//false
+console.log(zako.<mark>hasOwnProperty</mark>("attack"));	//false
+      </code></pre>
+<p>見てわかるように、prototypeチェーンを遡ったりしないことは、Ownと名前に入っていることからも明らかです。また、このメソッドはenumerableがfalseなプロパティであっても正しく判定してくれます。</p>
+<p>対照的に、<strong>in演算子</strong>というのがあって、これも同じような動作をしますが、prototypeチェーンまでさかのぼって探すという違いがあります。</p>
+<pre><code>//敵を作る
+function Teki(n){
+  this.name = n;
+}
+//現れる
+Teki.prototype.appear = function(){
+  console.log(this.name+"が あらわれた！");
+};
+//攻撃
+Teki.prototype.attack = function(){
+  console.log(this.name+"のこうげき！ダメージをうけた！");
+};
+
+var zako = new Teki("ザコ");
+
+console.log("name" <mark>in</mark> zako);	//true
+console.log("appear" <mark>in</mark> zako);	//true
+console.log("attack" <mark>in</mark> zako);	//true
+      </code></pre>
+<p>for-in文のinとは関係ないので注意しましょう。</p>
+<p>次に<dfn>propertyIsEnumerable</dfn>です。読んで字の如しというようなメソッド名ですが、hasOwnProperty同様にプロパティを渡すと、そのプロパティがenumerableであるかどうかをtrueかfalseで返します。そもそもプロパティがない場合はfalseです。</p>
+
+<p>以上で、オブジェクトのプロパティや属性に関する説明は終了です。しかし次回も似たような話が続きます。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="11_3.html">十一章第三回</a>
+                          |
+          <a rel="next" href="11_5.html">十一章第五回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HTML5 Web Messagingのサンプル</title>
+</head>
+<body>
+<h1>送る側</h1>
+<p>ウィンドウが開かれると自動的に親のウィンドウに対してMessagePortを送信します。</p>
+<form onsubmit="send(event)">
+<p><input type="text" name="message" size="50"><input type="submit" value="送信"></p>
+</form>
+<script>
+//まず親ウィンドウへMessagePortを送る
+var channel=new MessageChannel();
+//port1を自分が持って、port2を親に渡す
+//実はwindow.openされたとき、親ウィンドウはwindow.openerに入っている
+window.opener.postMessage({},"*",[channel.port2]);
+//port1を利用可能にする
+channel.port1.start();
+
+//onsubmit（フォームが送信されたとき）に呼び出される
+function send(ev){
+	//evはイベントオブジェクト。
+	var form=ev.target;
+	
+	//MessagePortを使ってメッセージを送る
+	channel.port1.postMessage(form.elements["message"].value);
+	
+	//フォームの送信は中止する
+	ev.preventDefault();
+	//フォームは空の状態に戻す
+	form.reset();
+}
+</script>
+</body>
+</html>

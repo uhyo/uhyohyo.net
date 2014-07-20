@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DnD APIのサンプル</title>
+<style>
+div.d{
+	padding:10px;
+	margin:20px;
+	width:100px;
+	border:4px dotted black;
+}
+</style>
+</head>
+<body>
+<p>ここにファイルをドロップしてください。</p>
+<div class="d" id="dropzone">ここ</div>
+
+<script>
+//idが"dropzone"のdivにイベントを設定する
+var dropzone=document.getElementById('dropzone');
+//dragenterイベントをキャンセル
+dropzone.addEventListener('dragenter',function(e){
+  e.preventDefault();
+},false);
+//dragoverイベントでドラッグオペレーションを設定
+dropzone.addEventListener('dragover',function(e){
+  e.dataTransfer.dropEffect="copy";
+  e.preventDefault();
+},false);
+dropzone.addEventListener('drop',function(ev){
+  //ファイルが複数かもしれないので、forループで調べる
+  for(var i=0;i<ev.dataTransfer.files.length;i++){
+    var file=ev.dataTransfer.files[i];
+
+    //新しいp要素を作って表示
+    var p=document.createElement("p");
+    p.textContent= file.name;
+    ev.target.appendChild(p);
+  }
+  ev.preventDefault();
+},false);
+</script>
+</body>
+</html>

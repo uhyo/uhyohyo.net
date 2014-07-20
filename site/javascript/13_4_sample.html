@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HTML5 Web Messagingのサンプル</title>
+<style>
+div{
+	border:6px dashed black;
+	padding:15px;
+	margin:10px;
+}
+</style>
+</head>
+<body>
+<script>
+var channel=new MessageChannel();	//チャンネルを作成
+
+//ポート2つをメッセージ受信可能にする
+channel.port1.start();
+channel.port2.start();
+
+
+//port1がメッセージを受信したときのイベント
+channel.port1.addEventListener('message',function(e){
+	console.log("port1がメッセージを受信しました",e.data);
+});
+//port2がメッセージを受信したときのイベント
+channel.port2.addEventListener('message',function(e){
+	console.log("port2がメッセージを受信しました",e.data);
+});
+
+//port1からport2へメッセージを送る
+channel.port1.postMessage("test1");
+
+//port2からport1へメッセージを送る
+channel.port2.postMessage("foobar");
+
+</script>
+</body>
+</html>

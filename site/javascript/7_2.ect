@@ -1,0 +1,256 @@
+<% @page.title="七章第二回　ノードどうしの位置関係を知る"
+@page.prev=[7,1]
+@page.next=[7,3] %>
+<h2>七章第二回　ノードどうしの位置関係を知る</h2>
+<p>今回はあるひとつのメソッドを紹介します。それは、題にある通り、ノードどうしの位置関係を知るというものです。いきなりサンプルを見てみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="p1"&gt;p1&lt;/p&gt;
+    &lt;p id="p2"&gt;p2&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var <mark>p1</mark> = document.getElementById('p1');
+      var <mark>p2</mark> = document.getElementById('p2');
+
+      console.log(<mark>p1</mark>.<dfn>compareDocumentPosition</dfn>(<mark>p2</mark>) );
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>4が表示されます。</p>
+<p>ここで登場したメソッド<dfn>compareDocumentPosition</dfn>が、ノードどうしの位置関係を表します。やってみて分かるように、返り値は数値です。</p>
+<p>引数は一つで、</p>
+        <pre><code><mark>node</mark>.compareDocumentPosition(<mark>other</mark>)</code></pre>
+<p>（nodeとotherはノードのオブジェクト）という書き方があったとき、「<strong>nodeから見たotherの位置</strong>」を結果として返します。この関係を覚えるのがなかなかややこしくて面倒だったりもします。それでは、この「4」はどんな位置であることを表しているのでしょうか。</p>
+<p>ここで木構造を見てみます。</p>
+<pre><code>body
+｜
+├―― p1　　←<mark>node</mark>
+｜
+└―― p2　　←<mark>other</mark>
+          </code></pre>
+<p>otherは、<strong>nodeより後ろ</strong>にあります。実は、このことをこの数値「4」が表しています。</p>
+<p>しかし、4といわれても何のことかすぐには把握できません。そこで、<strong>定数</strong>があります。定数とは何かというと、<a href="5_2.html">五章第二回</a>で解説したもので、ある意味をもつ数値に名前をつけて、意味が分かりやすいようにしたものです。</p>
+<p>この4はotherがnodeより後ろにあるという意味で、<strong><code>DOCUMENT_POSITION_FOLLOWING</code></strong>という定数になっています。この定数は、<strong>任意のノードのプロパティ</strong>としてJavaScriptから参照できます。だから、</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="p1"&gt;p1&lt;/p&gt;
+    &lt;p id="p2"&gt;p2&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p1 = document.getElementById('p1');
+      var p2 = document.getElementById('p2');
+
+      console.log(p1.compareDocumentPosition(p2) == p1.<mark>DOCUMENT_POSITION_FOLLOWING</mark> );
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>今回は任意のノードとして、当事者(?)であるp1を使用しました。もちろんp2でもいいし他のでもいいです。</p>
+<p>この結果がtrueだから、DOCUMENT_POSITION_FOLLOWINGが4であることが分かります。このように、結果と定数を比較することで、そのノードがどのような位置関係であるかが分かります。今回のようにDOCUMENT_POSITION_FOLLOWINGで比較すれば、「otherがnodeの後ろにある」ということがわかります。</p>
+<p>定数は、次のものがあります。括弧内の数字は、具体的な数値です。</p>
+<dl>
+  <dt>DOCUMENT_POSITION_PRECEDING</dt>
+  <dd>otherはnodeより<strong>前</strong>にあります。 (2)</dd>
+  <dt>DOCUMENT_POSITION_FOLLOWING</dt>
+  <dd>otherはnodeより<strong>後</strong>にあります。 (4)</dd>
+  <dt>DOCUMENT_POSITION_CONTAINS</dt>
+  <dd>otherはnodeを<strong>含んで</strong>います。 (8)</dd>
+  <dt>DOCUMENT_POSITION_CONTAINED_BY</dt>
+  <dd>otherはnodeに<strong>含まれて</strong>います。 (16)</dd>
+
+  <dt>DOCUMENT_POSITION_DISCONNECTED</dt>
+  <dd>otherとnodeは、<strong>同じ木構造にありません</strong>。 (1)</dd>
+  <dt>DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC</dt>
+  <dd>位置関係は<strong>実装依存</strong>です。 (32)</dd>
+</dl>
+<p>ちなみに、</p>
+<pre><code>AAA
+｜
+├―― BBB　　←<mark>node</mark>
+｜
+└―― CCC
+　　　　 ｜
+　　　　 └―― DDD　　←<mark>other</mark>
+          </code></pre>
+<p>のように、nodeとotherが同じ親をもつ兄弟でなくてもよいです。</p>
+        <pre><code>&lt;AAA&gt;&lt;<mark>BBB</mark>&gt;&lt;/BBB&gt;&lt;CCC&gt;&lt;<mark>DDD</mark>&gt;&lt;/DDD&gt;&lt;/CCC&gt;&lt;/AAA&gt;</code></pre>
+<p>のようにタグで見ると、DDDがBBBより後にあるというのが分かりやすいです。</p>
+
+<p>また、DOCUMENT_POSITION_CONTAINS、DOCUMENT_POSITION_CONTAINED_BYの2つは、含む・含まれるという関係です。つまり、</p>
+<pre><code>AAA　　←<mark>other</mark>
+｜
+├―― BBB　　←<mark>node</mark>
+｜
+└―― CCC
+　　　　 ｜
+　　　　 └―― DDD
+          </code></pre>
+<p>のような場合、otherはnodeを含んでいます。つまり、DOCUMENT_POSITION_CONTAINSです。逆に、</p>
+<pre><code>AAA　　←<mark>node</mark>
+｜
+├―― BBB　　←<mark>other</mark>
+｜
+└―― CCC
+　　　　 ｜
+　　　　 └―― DDD
+          </code></pre>
+<p>のような場合、otherが含まれる側だから、DOCUMENT_POSITION_CONTAINED_BYです。実際にやってみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="p1"&gt;p1&lt;/p&gt;
+    &lt;p id="p2"&gt;p2&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p1 = document.getElementById('p1');
+
+      console.log( document.body.compareDocumentPosition(p1) );
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>この場合、</p>
+<pre><code>body　　←<mark>node</mark>
+｜
+├―― p1　　←<mark>other</mark>
+｜
+└―― p2
+          </code></pre>
+<p>という関係で、otherがnodeに含まれているから、DOCUMENT_POSITION_CONTAINED_BYの16に当てはまります。</p>
+<p>しかし、返ってくる値は<strong>20</strong>です。20とはなんでしょう。上の定数一覧のなかには20という定数はありません。実は、これは2つの定数が組み合わさった形です。</p>
+<p>これは、なぜあの定数が「1,2,3,4,5...」という順番ではなく「1,2,4,8,16,32」というように飛んでいるのかということと関わってきます。</p>
+<p>実はこれらの数値は<strong>二進数</strong>で表すと、「000001(1)」「000010(2)」「000100(4)」「001000(8)」「010000(16)」「100000(32)」というようになっています。それぞれ1桁だけ1になっています。</p>
+<p>このような値の特徴は、複数足し合わされてももとの値に分解できるということです。例えば「001101」は、「001000」「000100」「000001」の3つが同時に入った数だといえます。</p>
+<p>compareDocumentPositionもこの方式をとっています。今回の20は、二進数だと「010100」です。これは、「010000(16)」「000100(4)」の2つがあるということを表しています。</p>
+<p>つまり、DOCUMENT_POSITION_CONTAINED_BYとDOCUMENT_POSITION_FOLLOWINGの両方があてはまる、つまりotherはnodeに含まれていて、かつnodeよりも後ろにあるということです。これがなぜかは、次のようにタグにしてみると分かりやすいです。</p>
+        <pre><code>&lt;<mark>body</mark>&gt;&lt;<mark>p</mark>&gt;&lt;/p&gt; &lt;p&gt;&lt;/p&gt;&lt;/body&gt;</code></pre>
+<p>p(other)は、body(node)より後ろにありますね。ですから、DOCUMENT_POSITION_CONTAINED_BYだけではなくDOCUMENT_POSITION_FOLLOWINGも成り立ったのです。</p>
+
+<h3>ビット演算</h3>
+<p>さて、プログラムでこれを判定するにはどうすればよいのでしょうか。20は16を含んでいますが、値自体は別なので、<kbd>==</kbd>では判定できません。実は、こういうとき<strong>ビット演算</strong>を使います。</p>
+<p>そのうちのひとつ、<strong>ビットごとの論理積</strong>は、2つの値を比較し、ビット（2進数の1桁）がどちらも立っている（1である）ビットのみが立った値を返します。例えば、20と16を比較したら、</p>
+<pre><code>0<mark>1</mark>0100 (20)
+0<mark>1</mark>0000 (16)
+-----------
+0<mark>1</mark>0000 (16)
+          </code></pre>
+<p>となり、結果は16です。このように、2つの値で両方が1のビットのみ1になります。</p>
+<p>ここで、1,2,4,8,16,32といった定数の値は、<strong>ひとつのビットのみが立っている値</strong>です。だから、任意の値とこのような値の論理積をとったとき、任意の値のそのビットが立っていれば結果のそのビットが立ち、立っていなければそのビットは立たず結果として全ての桁が立たない（0である）から、<strong>0になります</strong>。</p>
+<p>これはif文の判定に利用できます。どこかのビットが立っていれば0ではないから<strong>真</strong>で、立っていなければ0だから<strong>偽</strong>となり、処理を分岐させることが出来ます。</p>
+<p>さて、このビットごとの論理積は、JavaScriptでは、2つの値をとって1つの値を返すから、<strong>演算子</strong>です。<strong><code>&amp;</code></strong>という演算子を使います。まとめると、otherがnodeに含まれているかどうか調べるには、</p>
+        <pre><code>node.compareDocumentPosition(other) <mark>&amp;</mark> node.DOCUMENT_POSITION_CONTAINED_BY</code></pre>
+<p>これをif文の条件に利用します。</p>
+
+<h4>ビットごとの論理和</h4>
+<p>また、論理積とセットで、<strong>ビットごとの論理和</strong>というものもあります。論理積が両方とも1のときのみ1になるのに対し、論理和は、片方でも1であれば1になります。例えば、</p>
+<pre><code>0<mark>1</mark>0000 (16)
+000<mark>1</mark>00 (4)
+-----------
+0<mark>1</mark>0<mark>1</mark>00 (20)
+          </code></pre>
+<p>という感じです。ここで、ビットが1つしか立っていない値どうしの論理和をとると、その両方を表す値ができます。この例はそういう例です。上で「複数の値が足し合わされた」と表現したものは、正確には論理和をとった値であるといえます。このように重複して立つビットがない場合、足すことと論理和をとることは同じ結果になります。演算子は<strong><code>|</code></strong>です。</p>
+
+<h4>排他的論理和</h4>
+<p>もはや今回の内容とは関係ありませんが、ついでにもう1つ紹介しておきます。それは<strong>排他的論理和</strong>です。これは論理和と似ていますが、排他的論理和は、「片方<strong>のみ</strong>のビットが立っているときその1」という処理を行います。例えば、</p>
+<pre><code>0<mark>1</mark>1001 (25)
+001<mark>1</mark><mark>1</mark>1 (15)
+-----------
+0<mark>1</mark>0<mark>1</mark><mark>1</mark>0 (22)
+          </code></pre>
+<p>両方のビットが立っているときは0になります。演算子は<strong><code>^</code></strong>です。</p>
+<p>面白い性質として、ある値との排他的論理和ととった値があるとき、もう一度同じ値で排他的論理和をとると、もとの数値に戻ります。</p>
+<pre><code>0<mark>1</mark>0110 (22)
+00<mark>1</mark>11<mark>1</mark> (15)
+-----------
+0<mark>1</mark><mark>1</mark>00<mark>1</mark> (25)
+          </code></pre>
+<p>上の25^15で得られた22で、 もう一度22^15として15と排他的論理和をとると25に戻っています。これは、m^n^nとしたとき、m^(n^n)=m^0=mという性質によるものです。</p>
+
+<p>さて、話をcompareDocumentPositionに戻します。これの結果がある値に当てはまるかを知りたいときは、ビットごとの論理積を使うようにしましょう。</p>
+<p>また、DOCUMENT_POSITION_PRECEDING、DOCUMENT_POSITION_FOLLOWINGについても注意が必要です。これが含まれていても、片方がもう片方を含んでいるという可能性があります。そういう場合でもOKという場合ならいいですが、そうでない場合もあると思います。</p>
+<p>そういう場合、「DOCUMENT_POSITION_PRECEDINGを含み、かつDOCUMENT_POSITION_CONTAINSを含まない」などといった処理が必要になってくるので、注意しましょう。だから、例えばこうです。</p>
+<pre><code>var res = node.compareDocumentPosition(other);
+if(res &amp; node.DOCUMENT_POSITION_PRECEDING <mark>&amp;&amp;</mark> <mark>!</mark>(res &amp; node.DOCUMENT_POSITION_CONTAINS)){
+}
+          </code></pre>
+<p>ここで、よく使うのに今ごろやっと出てきた演算子<kbd>&amp;&amp;</kbd>を紹介します。上の&amp;1個のやつと似ていますね。こっちは「<strong>論理積</strong>」です。1個のほうは「ビットごとの論理積」なので区別しましょう。これは単純で、左右には2つの条件が来ます。これらが<strong>2つとも真から真になる</strong>という演算子です。つまり、このif文全体では、</p>
+        <pre><code>res &amp; node.DOCUMENT_POSITION_PRECEDING</code></pre>
+<p>と</p>
+        <pre><code>!(res &amp; node.DOCUMENT_POSITION_CONTAINS)</code></pre>
+<p>が両方真であればこのif文が真になるということです。とてもよく使います。</p>
+<p>また、何気なく出てきた演算子<code>!</code>ですが、これは否定演算子で、ある値の前につけて、その値が真なら偽になり、偽なら真になります。つまり、<strong>真偽を逆にする演算子</strong>です。これは単項演算子の一種です。つまり<code>&amp;</code>などと違って、左右に値があるわけではなく、値は右のみに付けます。</p>
+<p>したがって、<code>!(res &amp; node.DOCUMENT_POSITION_CONTAINS)</code>の意味は、「resが<code>node.DOCUMENT_POSITION_CONTAINS</code>を含まない」ということになりますね。</p>
+
+<p>また、同じようにただの論理和<kbd>||</kbd>もあります。これは、条件のどちらか片方が真から真というものです。</p>
+
+<p>さて、他の定数についても説明します。DOCUMENT_POSITION_DISCONNECTEDは、文字通り同じ木構造にない場合です。例えば、createElementで作ったばかりとか、removeChildで木構造から除去されたノードは木構造にありません。そういう場合はこれになります。同じ木構造に属していないので、どちらが前かといった位置関係が定義できないわけです。また、別のdocumentに属するノードでもこうなります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="p1"&gt;p1&lt;/p&gt;
+    &lt;p id="p2"&gt;p2&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newp = document.createElement('p');
+
+      console.log( document.body.compareDocumentPosition(newp) );
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このサンプルでは、木構造上に存在するbody要素と、新しく作ったばかりのp要素を比較しています。返ってくる値は33です（ブラウザによっては1かもしれません）。</p>
+<p>33は1と32に分けられるから、DOCUMENT_POSITION_DISCONNECTED(1)がちゃんとあることが分かります。</p>
+<p>もうひとつの32は、最後に解説する定数のDOCUMENT_POSITION_IMPLEMENTATION_SPECIFICです。これは「実装依存」ということですが、それはつまり「特に定められていない」ということです。今回の場合、同じ木構造上にないなら当然位置関係なんて分からないし、定められません。だから、この「実装依存」にも当てはまるのです。</p>
+<p>今回解説したこのメソッドは便利で、例えば要素がクリックされたときのイベントで、ある要素よりも下の要素で発生した場合のみ処理を行いたい場合などは、このcompareDocumentPositionで判定すれば楽に判定できます。使える機会があれば使ってみましょう。</p>
+
+<h2>論理演算子について</h2>
+<p>最後に、今回登場した<code>|| &amp;&amp; !</code>という3つの演算子について少し追加で解説しておきます。これらを文中で「真になる」とか「偽になる」とかいう言い方をしましたが、演算子である以上ある値を返すはずです。これらの返り値は何なんでしょうか。</p>
+<p>真・偽といわれると、真偽値を思い出しますね。つまりtrueとfalseです。</p>
+<p><code>!</code>に関してはそれが正しいです。つまり、<code>!a</code>というような式があった場合、<code>a</code>が真なら<code>!a</code>はfalseを返します。逆に<code>a</code>が偽なら<code>!a</code>はtrueを返します。そのため、「<code>a</code>が真ならtrue、偽ならfalse」という処理（真偽値への変換）を行いたい場合に、<code>!!a</code>と書く場合もあります。これは<code>!a</code>の結果をもう一度<code>!</code>で処理するということですね。</p>
+<p>ただし、<code>||</code>や<code>&amp;&amp;</code>は動作が違います。これらが返すのは真偽値ではありません。これらの動作は次のように決められています。すなわち、<code>a || b</code>は「aが真ならaを返し、aが偽ならbを返す」と決められています。また、<code>a &amp;&amp;</code>は逆に「aが真ならbを返し、aが偽ならaを返す」と決められています。これらをよく考えてみれば、さっき説明したような動作になっていることが分かります。</p>
+<p>また、この2つの演算子には<strong>短絡実行</strong>という特徴があります。これは何かというと、例えば<code>a || b</code>でaが真のときはaを返しますので、bは何でもいいわけです。この場合、<strong>bは評価されません</strong>。評価されないとはどういうことかというと、計算されないということです。ですから、もしbに関数呼び出しが含まれていたら、aが偽の場合関数呼び出しも行われません。同様に、<code>a &amp;&amp; b</code>でaが偽のときもbは評価されません。</p>
+<p>短絡実行が役立つ場面は多いです。例えば、簡易的なif文として使われることがあります。</p>
+<pre><code>var a=10;
+a&gt;5 <mark>&amp;&amp;</mark> console.log(a);</code></pre>
+<p>という文は次のif文と同じ意味になります。</p>
+<pre><code>var a=10;
+if(a&gt;5){
+    console.log(a);
+}</code></pre>
+<p>この場合、&amp;&amp;の文の返り値自体は興味がなくて、その短絡実行という性質を用いているわけです。</p>
+<p>また、返り値に興味がある場合も、短絡実行を有効に使える場合があります。例えば、オブジェクトのプロパティを条件判定する場合です。すなわち、</p>
+<pre><code>function check(obj){
+    if(obj.value&gt;10){
+        console.log("valueは10より大きいです");
+    }
+}</code></pre>
+<p>というような関数があった場合、引数にnullを渡したらどうなるでしょうか。これは実は、nullに対してそのプロパティを参照することはできないため、<strong>エラーになります</strong>。これは回避したいですね。</p>
+<p>そのためには、objがnullかどうか判定しなければいけません。objがnullの場合は何もしないことにすれば、次のようにかけます。</p>
+<nav>
+  <pre><code>function check(obj){
+    if(<mark class="ins">obj!=null &amp;&amp; </mark>obj.value&gt;10){
+        console.log("valueは10より大きいです");
+    }
+}</code></pre>
+<p>こうすれば、nullを渡しても何も起きないだけで、エラーにはならなくなります。</p>
+<p>実はこれは、短絡実行のおかげです。もし短絡実行がない場合（ちゃんとどんな場合も<code>a &amp;&amp; b</code>のaとbを両方評価する場合）は、これでもobjがnullだったらやはりエラーになります。</p>
+<p>次に<code>||</code>の短絡実行の活用法としては、デフォルト値があります。例えば次のような感じです。</p>
+<pre><code>function check(obj){
+    <mark class="ins">obj = obj || {a:100};</mark>
+    if(obj.value&gt;10){
+        console.log("valueは10より大きいです");
+    }
+}</code></pre>
+<p>新しく1行追加されました。この場合、objがnullの場合objに<code>{a:100}</code>が代入されて、if文が真になります。このように、ちゃんとした値が渡されなかった場合にデフォルト値を用いるようにしたい場合、<code>||</code>が有効にはたらきます。</p>
+<p>ただしこの例の場合、objがnullやundefinedのときばかりでなく、0や""の場合も反応してしまうので注意しましょう。より適切な使用例もたくさん存在するので、探してみましょう。</p>

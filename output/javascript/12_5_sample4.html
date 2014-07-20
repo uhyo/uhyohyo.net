@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>File APIのサンプル</title>
+</head>
+<body>
+<p>下のフォームで画像ファイルを選択してみて下さい。</p>
+<p><input type="file" onchange="change(event)"></p>
+<script>
+// ファイルが選択されたらchange関数が呼び出される
+function change(ev){
+	//evにはイベントオブジェクトが入っている
+	
+	var files=ev.target.files;	//FileListオブジェクトを取得
+	
+	var file=files[0];	//最初のファイルを取得
+	if(!file)return;	//ファイルがなかったらやめる
+
+
+	//FileReaderを作る
+	var reader=new FileReader();
+	reader.onload=function(e){
+		var buffer=reader.result;	//DataURLが入っている
+		
+		var img=document.createElement("img");	//新しい画像を作る
+		img.src=buffer;	//URLなのでsrc属性に入れる
+		document.body.appendChild(img);	//その画像を表示する
+	};
+	reader.readAsDataURL(file);	//Fileオブジェクト（つまりBlob）を渡す
+}
+
+</script>
+</body>
+</html>

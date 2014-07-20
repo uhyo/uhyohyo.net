@@ -1,0 +1,191 @@
+<% @page.title="三章第一回　イベントプロパティ"
+@page.prev=[2,14]
+@page.next=[3,2] %>
+<h2>三章第一回　イベントプロパティ</h2>
+<p>今回は要素の<dfn>イベントプロパティ</dfn>について解説します。</p>
+
+<h3>HTMLのイベント属性</h3>
+<p>この内容は<a href="kiso5.html">基礎第五回</a>でも解説しました。HTML要素にイベントに対応した属性をつけるというものでした。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p <mark>onclick="console.log('click');"</mark>&gt;test&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このようにonclick属性をつけた場合、その要素が<strong>クリック</strong>された場合にその中身が実行されます。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p onclick="aaa();"&gt;test&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このように、別の場所にあるscript要素で関数などを作って、それをonclickで呼び出すことも可能です。</p>
+
+<h4>さまざまなイベント</h4>
+<p>さて、イベントには、クリックのほかにもさまざまな種類があります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p style="background-color:yellow" <mark>onmouseover</mark>="aaa();"&gt;test&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>この<strong>onmouseover</strong>という属性のイベントが実行されるタイミングは、<strong>その要素の上にマウスが乗ったとき</strong>です。どこまでがp要素の範囲か分かりやすいように、スタイルシートで色をつけてみました。</p>
+
+<p>逆に、その要素から<strong>マウスが離れたとき</strong>のイベントもあります。
+  <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p style="background-color:yellow" <mark>onmouseout</mark>="aaa();"&gt;test&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>ここで、どの属性にも属性名の最初に「on」がついています。実は、このonの後ろがイベント名です。つまり、click、mouseover、mouseoutなどになります。</p>
+<p>だから、「onclick」という属性は、「clickが起きたとき」という意味にとらえることができます。</p>
+
+<p>他にも、さまざまなイベントがあります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body <mark>onload</mark>="aaa();"&gt;
+    &lt;p&gt;test&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>body要素にonloadという属性がついています。つまり、イベント名は「load」であるということが分かります。</p>
+<p>このloadイベントは、主にbody要素につけて<strong>ページの読み込みが完了したとき</strong>を意味します。ユーザー側が特に何か行動を起こすというわけではありませんが、これもイベントの一種です。</p>
+<p>loadイベントを使うことで、head要素内に書かれた関数などを、ページの読み込みが完了してから呼び出すことができます。</p>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;form action="http://www.google.com/" <mark>onsubmit</mark>="aaa();"&gt;
+      &lt;p&gt;
+        &lt;input type="submit" value="送信"&gt;
+      &lt;/p&gt;
+    &lt;/form&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>今度は、form要素にsubmitというイベントがついています。これは、<strong>送信されたとき</strong>です。送信ボタンを押すと、aaa関数によってログが表示された後ページが切り替わります。</p>
+
+<h3>イベントプロパティ</h3>
+<p>さて、ではイベントプロパティの説明に入ります。これは、JavaScriptから上のイベントを操作する、簡単な方法です。</p>
+<p>サンプルを見てみます。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+      p.<mark>onclick</mark> = aaa;
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このスクリプトでは、getElementByIdでp要素のHTMLElementを取得しています。そして、その<dfn>onclick</dfn>というプロパティに、aaaを代入しています。</p>
+<p>ここで、aaaは、関数のオブジェクトであることは、<a href="1_4.html">一章第四回</a>で解説しました。それを、onclickに代入しています。</p>
+<p>名前からも想像がつく気がします。このプロパティが、この要素のclickというイベントを表しているのです。</p>
+<p>それでは、具体的にどんな動作をするのかというと、これに関数を代入すると、<strong>イベントが発生したときに、その関数が実行されます</strong>。今回は、onclick、つまりクリックのイベントだから、p要素がクリックされたときに関数aaaが実行されるようになるというわけです。</p>
+<p>onclickがあるから、他にonmouseover、onmouseoutなど、なんでもありえます。このとき、このonclickなどのプロパティが、イベントプロパティと呼ばれたりします。</p>
+
+<p>しかし、実は、このようにイベントプロパティを使うのは<strong>よくないやり方</strong>です。せっかくJavaScriptから操作できるようになったのに、何がよくないかというと、例えば次のような場合です。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+      p.onclick = aaa;
+
+      <mark class="ins">var newp = p.cloneNode(true);
+      document.body.appendChild(newp);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>さっきと同じようにpにonclickを設定したあと、cloneNode（<a href="2_7.html">二章第七回</a>）で同じp要素を作っています。</p>
+<p>そのあと、それをbody要素に追加しています。結果、bodyにはp要素が2つ含まれることになります。</p>
+
+<p>さて、1つめの（上の）p要素にはonclickプロパティを設定したため、クリックすると関数aaaが呼ばれます。では、cloneNodeでつくった2つめのほうはどうでしょうか。</p>
+<p>なんと、<strong>関数が呼ばれない</strong>はずです。ノードをそっくりコピーしてしまうはずのcloneNodeでも、<strong>イベントプロパティはコピーされない</strong>のです。</p>
+
+<p>また、他にも簡単に上書きされてしまうという欠点もあります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+      &lt;script type="text/javascript"&gt;
+        function aaa(){
+            console.log('aaa!');
+        }
+
+        var p = document.getElementById('abcd');
+        p.onclick = aaa;
+
+        <mark class="ins">p.onclick = function(){
+            console.log('bbb!');
+        };</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>pのonclickに関数aaaを設定したあと、今度は関数bbbを設定しています。プロパティだから、当然<strong>上書きされてしまいます</strong>。そのため、クリックすると関数aaaは実行されず、関数bbbだけが実行されます。</p>
+<p>さすがにここまで露骨には上書きしないでしょうが、別々の処理でどちらの処理でもイベントを設定したい場合など、知らないところで上書きしてしまう可能性はあります。</p>
+
+<p>さて、それではどうするのが良い方法なのでしょうか。次回はそれを解説します。</p>

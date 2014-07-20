@@ -1,0 +1,211 @@
+<% @page.title="二章第三回　基本的な操作とテキストノード"
+@page.prev=[2,2]
+@page.next=[2,4] %>
+<h2>二章第三回　基本的な操作とテキストノード</h2>
+<p>今回から、いよいよWebページにも多少動きが出てきます。</p>
+<h3>innerHTML</h3>
+<p>前回、ちらっと「innerHTML」というプロパティが出てきました。実は、HTMLElementなら何でも持っているプロパティです。</p>
+<p>そのタグの中身が（文字列で）そのまま代入されているというものでした。</p>
+<p>それでは、今度はそこに新しい中身を代入したらどうなるでしょう。なんと、<strong>実際に書きかわります</strong>。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      p.innerHTML = "書き換えました";
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>このサンプルを実行してみると、pの中身は「t&lt;strong&gt;es&lt;/strong&gt;t」だったはずなのに、「書き換えました」と変わってしまっています。そう、JavaScript側がinnerHTMLに新しい中身を代入したからです。</p>
+<p>動きのあるWebページへの第一歩という感じですね。ちなみに、HTMLタグももちろん使えます。いろいろ入れる中身を変えてみると面白いと思います。</p>
+
+<p>しかし、実は、この方法もまだまだ原始的な方法です。なぜなら、上のサンプルで、p要素は次のような構造を持っていました。</p>
+<pre><code> p
+<mark>｜
+└――strong</mark>
+        </code></pre>
+<p>線が1本しかないので何か格好悪いですが、これでも立派な木構造です。</p>
+<p>ここで、innerHTMLは、pより下の木構造を全部<strong>壊して</strong>、新しい木構造を1から作っているということになります。木構造を慎重に扱う姿勢のDOMとしては、こんな方法は原始的です。</p>
+
+<h3>テキストノード</h3>
+<p>それでは、どんな方法なら原始的でないのでしょうか。それは、まとめて壊さずちゃんとひとつずつ外してひとつずつ付けたり、あるいは壊さずに書き換えたりするという方法です。</p>
+<p>今回の場合は、p要素の中身を書き換えたいのでした。上の木構造を見ても分かる通り、p要素の中にあるのはstrong要素だけのようです。</p>
+<p>しかし、実際のHTMLを見てみると、p要素の中にはstrong要素の他にも「文字列」があります。この木構造では、ただの文字列の部分が表されていません。そこで、ただの文字列も表すと、次のようになります。</p>
+<pre><code> p<mark class="ins">
+｜
+├――#text
+｜</mark>
+├――strong<mark class="ins">
+｜　　　｜
+｜　　　└――#text
+｜
+└――#text</mark>
+        </code></pre>
+<p>「#text」というのが、文字列です。こういう謎の書き方をするのは、これもDOMで定められているからです。</p>
+<p>さて、前はpとstrongしかなかった木構造ですが、少し賑やかになりました。</p>
+<p>pの子が「strong」だけだったのに、「#text」「strong」「#text」の3つに増えました。また、strongにも子ができました。</p>
+<p>木構造では子は順番に並んでいるので、p要素の中身は「t」「&lt;strong&gt;es&lt;/strong&gt;」「t」に区切られ、タグがあればその要素が子に、タグがなければその文字列が子になります。</p>
+<p>つまり、一番上の#textの中身は「t」で、STRONGの子の#textの中身は「es」で、その下のは「t」であることが分かります。</p>
+<p>このような文字列もノードの一種で、<dfn>テキストノード</dfn>といいます。前回の要素ノード（HTMLElement）と並んでよく使うノードの種類です。</p>
+<p>それでは、これを踏まえて、p要素の書き換え方を解説していきます。</p>
+
+<h3>親と子の取得</h3>
+<h4>親の取得</h4>
+<p>あるノードのオブジェクトがあるとき、その親や子を取得する方法があります。次のサンプルを見てみましょう。
+  <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      console.log(p.<dfn>parentNode</dfn>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>「HTMLBodyElement」のように表示されます。</p>
+<p>今回、getElementByIdでp要素を取得して、それが持つ「<dfn>parentNode</dfn>」というプロパティを表示しています。</p>
+<p>英語で、「parent」とは「親」、「Node」はノードです。つまり、「親ノード」ということになります。そのままですね。つまり、このプロパティparentNodeは、そのノードの親ノードが代入されているということになります。</p>
+<p>ただし、このparentNodeは<strong>書き換えられません</strong>。このparentNodeに別のノードを代入したりしても、親が替わったりしません。<strong>見るだけ</strong>です。このように、ノードのプロパティには、書き換えるとそれが反映されるものと、書き換えられないものがあります。注意しましょう。書き換えると反映されるものの代表例が先に紹介したinnerHTMLでした。</p>
+<p>pの親を別の親にするには、まずもとの親から切り離して、それを別の親の下にくっつけるという丁寧な手続きが必要になるのです。</p>
+
+<p>さて、getElementByIdで取得したpの親はbody要素なので、p.parentNodeはbody要素のHTMLElementだったというわけです。HTMLBodyElementといいます。</p>
+<p>ちなみに、HTMLElementなら、「tagName」というプロパティにタグの名前が入っています。これも書き換え不可です。</p>
+        <pre><code>console.log(p.parentNode.<dfn>tagName</dfn>);</code></pre>
+<p>「BODY」と出ますね。</p>
+
+<h3>子の取得</h3>
+<p>さて、今回の目的はp要素の中身を書き換えることなので、p要素より上の部分（親）はあまり関係ありません。関係あるのは子のほうです。</p>
+<p>それでは、子の取得の仕方を解説します。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      console.log(p.<dfn>childNodes</dfn>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>NodeListと表示されます。</p>
+<p>「child」は「子」で「Nodes」はノードなので、childNodesというプロパティはそのまま「子ノード」であることが分かります。</p>
+<p>しかし、実は今回childNodesに代入されているのは<strong>HTMLElementではありません</strong>。</p>
+<p>なぜなら、前にも解説したように<strong>子は複数ある可能性がある</strong>からです。今回の場合も、pは3つの子ノードを持っていますね。#text、strong、#textです。</p>
+<p>そこで、childNodesには、「子ノードの<strong>リスト</strong>（一覧）」が入っています。これは<dfn>NodeList</dfn>（ノードリスト）というオブジェクトで、ノードとはまた別のものです。</p>
+<p>つまり、このNodeListの扱い方がわかれば子ノードを取得できるというわけです。</p>
+
+<h4>NodeList</h4>
+<p>まず、NodeListは<dfn>length</dfn>というプロパティを持っています。これは、<strong>NodeListにあるノードの数</strong>です。今回の場合、pの子ノードの数ということになります。これは配列変数と似たような感じですね。</p>
+<p>また、<dfn>item</dfn>というメソッドも持っています。このメソッドは数値の引数を1つとり、(引数)番目のノードを返します。</p>
+<p>というのも、NodeListでは、ノードは0番目,1番目,2番目....のように番号がついて順番に並んでいます。ノードはlength個あるので、最後のノードは(length-1)番目ということになります。</p>
+<p>このあたりは、本当に配列とよく似ています。</p>
+<p>とりあえず、実際に見てみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      <mark class="ins">var children = p.childNodes;
+      console.log(children.<strong>length</strong>);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>このサンプルでは、p.childNodesをchildrenに代入しています。NodeListもオブジェクトの一種なので、childrenとp.childNodesは同じものを指しています。</p>
+<p>つまり、children.lengthを表示しているということは、p.childNodes.lengthを表示しているのと同じというわけです。</p>
+<p>「3」が表示されます。p.childNodesはp要素の子ノードのリストなので、p要素の子ノードが3個あるということを示しています。これは正しいですね。</p>
+<p>次に、</p>
+        <pre><code>console.log(children.<strong>item</strong>(0));</code></pre>
+<p>としてみましょう。「0番目のノード」、つまりp要素の0番目の子ノードを表示することになります。</p>
+<p>「Text」のように表示されます。「Text」とは、テキストノードのことです。つまり、0番目のノードはテキストノードであるというわけです。これも正しいですね。</p>
+<p>同様に、1番目はHTMLElement、2番目はTextです。1番目が「HTMLElement」なのでHTML要素ですが、何の要素かを知るには上で紹介したtagNameプロパティを使いましょう。<code>console.log(children.item(1)<mark class="ins">.tagName</mark>);</code></p>
+<p>「"STRONG"」と出るので、ちゃんとstrong要素であることが分かります。ちなみに、tagNameプロパティの中身が大文字になっているかもしれませんが、理由は歴史的経緯によります（HTML5の前まではタグ名は大文字で定義されていました）。</p>
+<p>ちなみに、関数呼び出しの<code><var>関数名</var>()</code>の直後にプロパティの<code>.<var>プロパティ名</var></code>がきていますが、これは問題ありません。</p>
+<p>まず関数呼び出しが処理されて、その戻り値のオブジェクト（この場合は1番目のノード）に対してプロパティを参照しています。</p>
+
+<p>さて、これでNodeListから子ノードを得る方法が分かりました。同時に、親ノードを通して子のテキストノードを得ることもできるようになりました。</p>
+
+<h4>テキストノードの操作</h4>
+<p>それでは、このテキストノードについて詳しく解説していきます。</p>
+<p>次のサンプルを見てみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      var children = p.childNodes;
+      <mark class="ins">var textnode = children.item(0);	<mark class="comment">//テキストノード</mark>
+      console.log(textnode.<dfn>nodeValue</dfn>);
+      textnode.nodeValue = "書き換えました";</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>変数textnodeには、children.item(0)を代入しています。childrenは上と同じでpの子ノードのNodeListなので、textnodeは、そのNodeListの0番目の要素、つまりpの0番目の（最初の）子ということになります。</p>
+<p>要するにテキストノードが代入されています。</p>
+<pre><code> p
+｜
+├――<mark>#text</mark>　　　　　←これ
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text
+｜
+└――#text
+        </code></pre>
+<p>ですね。</p>
+<p>さて、これの<dfn>nodeValue</dfn>というプロパティをまず表示しています。このプロパティは、テキストノードの場合、その中身、つまり<strong>そのテキストノードが持つ文字列</strong>を表します。</p>
+<p>つまり、「t」が表示されました。</p>
+<pre><code> p
+｜
+├――<mark>#text</mark>　　　　　　… "<mark>t</mark>"
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text　　… "es"
+｜
+└――#text　　　　　　… "t"
+        </code></pre>
+<p>こういう状態です。</p>
+その後、そのnodeValueに代入しています。このnodeValueは<strong>書き換え可能</strong>なプロパティで、書き換えた内容が反映されます。つまり、ここに代入したことで、</p>
+        <pre><code> p
+｜
+├――<mark>#text</mark>　　　　　　… "<mark class="ins">書き換えました</mark>"
+｜
+├――strong
+｜　　　｜
+｜　　　└――#text　　… "es"
+｜
+└――#text　　　　　　… "t"
+      </code></pre>
+<p>こういうようになったということです。</p>
+<p>その結果、「書き換えました<strong>es</strong>t」と表示されています。</p>
+<p>これは、まったく木構造を汚さず、ただその木構造の末端のテキストノードを書き換えただけです。これは原始的ではない方法です。</p>
+
+<p>しかし、最終的に書き換わったp要素は「書き換えましたest」です。innerHTMLのときと比べて「est」が余計ですね。これは、「est」は今回操作したノードとは別のノードの部分だから、影響を受けていないことによります。strong要素の子のテキストノードと、p要素の2つめのテキストノードのnodeValueを""（空）にしてしまってもよいのですが、それだと中身のないテキストノードが残ってしまうことになります。やはりそれはよくないです。</p>
+<p>そこで、木構造から<strong>ノードそのもの</strong>を消し去るという作業が必要になってきます。次回はこれについて解説します。</p>

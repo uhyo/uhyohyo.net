@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>localStorageのサンプル</title>
+</head>
+<body>
+<!-- ここに表示 -->
+<p id="result"></p>
+<p>カウントをリセットしたいときなどは、自分でlocalStorage.clear()などを実行しましょう。</p>
+<script>
+//ページ表示時にカウントを1ふやす
+var value=localStorage.sample14_1;
+if(!value){
+	//valueに何も入っていなかったら
+	value=1;
+}else{
+	value=parseInt(value)+1;
+}
+localStorage.sample14_1=value;
+disp(value);
+
+//他のページでlocalStorageが更新されたら反映する
+window.addEventListener("storage",function(e){
+	if(e.key=="sample14_1"){
+		//sample14_1が更新された
+		disp(e.newValue);
+	}
+},false);
+
+function disp(val){
+	document.getElementById('result').textContent="あなたは"+val+"回目の訪問です";
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>九章第一回　オブジェクト指向とは — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="8_4.html">八章第四回</a>
+                          |
+          <a rel="next" href="9_2.html">九章第二回</a>
+              </p>
+    </nav>
+    <h2>九章第一回　オブジェクト指向とは</h2>
+<p>九章では、DOMから少し離れて<strong>オブジェクト指向</strong>について解説します。</p>
+
+<h3>オブジェクト指向とは</h3>
+<p>オブジェクトそのものについては、<a href="1_1.html">一章</a>で少し解説しました。では、オブジェクト指向とは何なのでしょう。</p>
+<p>オブジェクト指向とは、大まかにいうと、プログラムをそれぞれの動作をする<strong>部品</strong>にわけ、部品の組み合わせでプログラムをつくるというものです。このそれぞれの部品がオブジェクトというわけです。</p>
+<p>例えば、RPGを作りたい場合を考えてみましょう。RPGにはいろいろなものが登場します。それら1つ1つが部品なのです。例えば、「勇者」がいます。「敵」もいます。「アイテム」とか「武器」というのもありますね。RPGはこれらの組み合わせで動いているのです。</p>
+
+<p>これらをオブジェクトとして作り、それを使ってプログラムを作ればよいのです。ちょっとやってみましょう。</p>
+<pre><code>var yuusha = new Object();
+yuusha.name = "勇者";	//勇者の名前
+yuusha.power = 10;	//勇者の攻撃力
+
+var teki = new Object();
+teki.name = "ザコ敵";	//敵の名前
+teki.hp = 100;		//敵のHP
+
+//攻撃する
+console.log(yuusha.name + "は　"+ teki.name + "に" + yuusha.power + "ダメージをあたえた！");
+        </code></pre>
+<p>実行すると「勇者は　ザコ敵に10ダメージをあたえた！」と出ます。</p>
+<p>この例では「勇者」と「ザコ敵」の情報がそれぞれオブジェクトに入ってます。オブジェクトの作り方は、まずnew Object()として空のオブジェクトを作り、そこにプロパティをくっつけるというやり方です。</p>
+
+<p>また、オブジェクトは、「情報」だけでなく「機能」をもつこともできます。すなわち、プロパティだけでなく<strong>メソッド</strong>も持てるということです。</p>
+<pre><code>var yuusha = new Object();
+yuusha.name = "勇者";	//勇者の名前
+
+//自己紹介してもらう
+yuusha.jikoshokai = function(){
+  console.log("私の名前は" + <strong>this</strong>.name + "です。");
+};
+
+yuusha.jikoshokai();
+          </code></pre>
+<p>「私の名前は勇者です。」と出ます。</p>
+<p>さて、今回は、勇者オブジェクトにjikoshokaiというメソッドをもたせました。勇者に自己紹介をしてもらうメソッドです。今回、<strong>this</strong>という謎のものが出ています。これを解説します。コードと結果を比べると、 this.name が "勇者"、すなわちyuusha.nameを表しています。ということは、thisはyuushaです。</p>
+<p>これは何かというと、あるオブジェクトのメソッドが呼び出されたときに、thisは<strong>そのオブジェクト自体</strong>を表します。jikoshokaiはyuushaのメソッドだから、thisはyuushaになったのです。だから、今回の場合thisがyuushaであるのはjikoshokaiの中だけです。</p>
+
+<p>さて、これまで解説してきましたが、まだまだこれは本当のオブジェクト指向ではありません。例えば、「勇者」が5人いたとしたらどうでしょう。勇者も1人で1つの部品ですから、オブジェクトは5つになります。今回自己紹介もしてもらいましょう。</p>
+<pre><code>var yuusha1 = new Object();
+yuusha1.name = "勇者1";
+yuusha1.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha2 = new Object();
+yuusha2.name = "勇者2";
+yuusha2.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha3 = new Object();
+yuusha3.name = "勇者3";
+yuusha3.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha4 = new Object();
+yuusha4.name = "勇者4";
+yuusha4.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha5 = new Object();
+yuusha5.name = "勇者5";
+yuusha5.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+
+//みんなに自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+yuusha4.jikoshokai();
+yuusha5.jikoshokai();
+          </code></pre>
+<p>ちゃんとそれぞれオブジェクトを作って、nameプロパティとjikoshokaiプロパティを作っています。</p>
+<p>しかし、何だか格好悪い気がしませんか？ここで、あることに気づくかもしれません。<strong>jikoshokaiは5人とも全く同じメソッドである</strong>ということです。thisのおかげでjikoshokaiの中にyuusha1〜yuusha5の変数が出てきてませんから、全部共通になっています。そこで、こうしようと思うかもしれません。</p>
+<pre><code><mark class="ins">//先に自己紹介を作っておく
+  var jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+  };</mark>
+
+var yuusha1 = new Object();
+yuusha1.name = "勇者1";
+yuusha1.jikoshokai = jikoshokai;
+var yuusha2 = new Object();
+yuusha2.name = "勇者2";
+yuusha2.jikoshokai = jikoshokai;
+var yuusha3 = new Object();
+yuusha3.name = "勇者3";
+yuusha3.jikoshokai = jikoshokai;
+var yuusha4 = new Object();
+yuusha4.name = "勇者4";
+yuusha4.jikoshokai = jikoshokai;
+var yuusha5 = new Object();
+yuusha5.name = "勇者5";
+yuusha5.jikoshokai = jikoshokai;
+
+//みんなに自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+yuusha4.jikoshokai();
+yuusha5.jikoshokai();
+          </code></pre>
+<p>これは、みんな同じ関数なんだから、関数は最初に1個作っておいて、勇者1〜5にはそれぞれ代入するだけで済ませようということです。「yuusha1.jikoshokai=jikoshokai;」というようにjikoshokaiが2つ出てきていてややこしいですが、前者は勇者のオブジェクトのプロパティ名、後者は変数名で別物です。</p>
+<p><small>注：さっき<q>jikoshokaiはyuushaのメソッドだから、thisはyuushaになった</q>と述べましたが、ここではjikoshokaiは全く同じメソッドなのにそれぞれでthisが異なっています。これは、jikoshokaiメソッド自体がthisの情報を持っているのではなく、「<code>yuusha1.jikoshokai();</code>」のようにメソッドが呼び出されたときに、どのオブジェクトのメソッドとして呼び出されたか（この場合<code>yuusha1</code>）の情報がメソッドに伝えられることによります。</small></p>
+<p>さて、これでも確かによくなりました。しかし、もっとよい方法があります。</p>
+
+<p>それではどうすればよいのでしょう。実はまだ、いままでのやり方では、yuusha1〜yuusha5という<strong>別々のオブジェクト</strong>を、同じプロパティ名を持つように気をつけて作っているだけです。</p>
+<p>yuusha1〜yuusha5は同じ「勇者」なのですから、<strong>同じ種類のオブジェクト</strong>はまとめて統一的に扱いたいですね。それがオブジェクト指向のキモともいえる部分です。</p>
+<p>具体的にどうするかというと、まず「勇者」というオブジェクトの<strong>型</strong>を作ってしまうのです。そして、その「型」からいくつも勇者を作ります。「型紙」とか「金型」とかの型を想像しましょう。<small>注：この型というのは他の言語でいう「クラス」に相当するものです。JavaScriptにおいても、将来的(ES6)にはクラスが機能として提供されるそうです。</small></p>
+<p>それで、その型とはなにかというと、実は<strong>関数</strong>です。関数がそのまま型になります。例えば、勇者の型を作るなら、</p>
+<pre><code>function Yuusha(){
+            }</code></pre>
+<p>という感じです。中に何を書けばいいかはあとで解説します。</p>
+<p>当然、型を作ったら使います。ここで出てくるのが<strong>new演算子</strong>です。「new Object()」とかのあのnewです。<a href="1_1.html">一章第一回</a>にも出てますが、あまり詳しく説明していませんでした。</p>
+<p>実はこれ、演算子の一種ということになっています。といっても特殊な形をもつ演算子です。new Object()の例を見て分かるように、</p>
+        <pre><code><strong>new</strong> <mark>関数名</mark>(引数)</code></pre>
+<p>という形になります。今までnew Object()とかのように引数が出てきた形はありませんが、実は関数なので引数をつけることもできます。これも後で解説します。とにかくこの形で「型」を使ってオブジェクトを作るということが大事なことです。</p>
+<p>ではやってみましょう。</p>
+<pre><code>//Yuushaという関数の型を作る
+function <mark>Yuusha</mark>(){
+}
+
+var yuusha1 = new <mark>Yuusha</mark>();
+var yuusha2 = new <mark>Yuusha</mark>();
+var yuusha3 = new <mark>Yuusha</mark>();
+          </code></pre>
+<p>勇者を3人作ってみました。new演算子の返り値は、その<strong>型</strong>を用いて作った<strong>オブジェクト</strong>になります。これなら、誰が見てもこの3人の勇者は間違いなく同じ種類のオブジェクトです。</p>
+<p>さて、さっきと同じく自己紹介でもしてもらうためにはどうすればよいでしょう。当然、さっきと同じようにプロパティやメソッドを持たせればよいということになります。</p>
+<pre><code>//Yuushaという関数の型を作る
+function <mark>Yuusha</mark>(){
+}
+
+var yuusha1 = new <mark>Yuusha</mark>();
+<mark class="ins">yuusha1.name = "勇者1";
+yuusha1.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};</mark>
+var yuusha2 = new <mark>Yuusha</mark>();
+<mark class="ins">yuusha2.name = "勇者2";
+yuusha2.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};</mark>
+var yuusha3 = new <mark>Yuusha</mark>();
+<mark class="ins">yuusha3.name = "勇者3";
+yuusha3.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};</mark>
+
+<mark class="ins">//自己紹介してもらう
+  yuusha1.jikoshokai();
+  yuusha2.jikoshokai();
+  yuusha3.jikoshokai();</mark>
+          </code></pre>
+<p>これでちゃんと自己紹介してくれました。</p>
+
+<p>さて、ここであることに気づくはずです。さっきと何も変わっていません。ObjectがYuushaになって同じ種類のオブジェクトだと示せただけで、効率の悪さは変わっていませんね。上で紹介した最初に作っておく方法もありますが、もっとこの「型」を活かした方法があります。</p>
+<p>それには、第一に<dfn>コンストラクタ</dfn>を利用します。コンストラクタとは、要するに型となる関数のことです。今回の場合Yuushaですね。</p>
+<p>実は、new演算子でオブジェクトを作ったとき、関数は呼び出されています。</p>
+<pre><code>function Yuusha(){
+<mark class="ins">	console.log("コンストラクタ");</mark>
+}</code></pre>
+<p>のようにするとわかります。</p>
+<p>さて、それではどうするかですが、ここでまた<strong>this</strong>が活躍します。実は、コンストラクタが呼び出されたとき、thisは<strong>今から作られるオブジェクト</strong>を表すのです。つまり、このコンストラクタでthisをいじればよいのです。まず、自己紹介のメソッドをこのコンストラクタの中で設定してみましょう。</p>
+<pre><code>//Yuushaという関数の型を作る
+function <mark>Yuusha</mark>(){
+<mark class="ins">	<strong>this</strong>.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+  };</mark>
+}
+
+var yuusha1 = new <mark>Yuusha</mark>();
+yuusha1.name = "勇者1";
+
+var yuusha2 = new <mark>Yuusha</mark>();
+yuusha2.name = "勇者2";
+
+var yuusha3 = new <mark>Yuusha</mark>();
+yuusha3.name = "勇者3";
+
+//自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+          </code></pre>
+<p>コンストラクタは勇者を作るときに毎回呼ばれるので、すべての勇者がちゃんとjikoshokaiというメソッドを持っていることになります。</p>
+<p>ちなみに、コンストラクタから作られた個々のオブジェクトを<dfn>インスタンス</dfn>といいます。今回の場合、勇者1〜3がそれぞれ「勇者」のインスタンスというわけですね。</p>
+
+<p>さて、まだnameの設定がすっきりしていません。こればかりは個々のインスタンスで違うものだから仕方ないという気がしますが、コンストラクタの<strong>引数</strong>を使えばもう少しすっきりさせられます。コンストラクタは関数なので、引数を持てるのでした。すなわち、</p>
+<pre><code>//Yuushaという関数の型を作る
+function <mark>Yuusha</mark>(<mark class="ins">n</mark>){
+<mark class="ins">	<mark>this</mark>.name = n;</mark>
+<mark>this</mark>.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+}
+
+var yuusha1 = new <mark>Yuusha</mark>(<mark class="ins">"勇者1"</mark>);
+
+var yuusha2 = new <mark>Yuusha</mark>(<mark class="ins">"勇者2"</mark>);
+
+var yuusha3 = new <mark>Yuusha</mark>(<mark class="ins">"勇者3"</mark>);
+
+//自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+          </code></pre>
+<p>これは、コンストラクタの1行目で、引数に渡した名前をそのままプロパティnameに代入しています。</p>
+<p>これで、個々の勇者を作るのはnew演算子の1行だけになりました。</p>
+
+<p>しかし、まだ完璧というわけではありません。そのあたりを次回解説します。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="8_4.html">八章第四回</a>
+                          |
+          <a rel="next" href="9_2.html">九章第二回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DnD APIのサンプル</title>
+<style>
+div.d{
+	padding:10px;
+	margin:20px;
+	width:100px;
+	border:4px dotted black;
+}
+</style>
+</head>
+<body>
+<p>下のdiv要素はドラッグできます。</p>
+<div class="d" draggable="true">div要素1</div>
+<div class="d" draggable="true">div要素2</div>
+<div class="d" draggable="true">div要素3</div>
+
+<p>ここにドロップできます。</p>
+<div id="dropzone" class="d">div要素</div>
+<script>
+  //idが"dropzone"のdivにイベントを設定する
+  var dropzone=document.getElementById('dropzone');
+  //dragenterイベントをキャンセル
+  dropzone.addEventListener('dragenter',function(e){
+    e.preventDefault();
+  },false);
+  //dragoverイベントでドラッグオペレーションを設定
+  dropzone.addEventListener('dragover',function(e){
+    e.dataTransfer.dropEffect="copy";
+    e.preventDefault();
+  },false);
+</script>
+</body>
+</html>

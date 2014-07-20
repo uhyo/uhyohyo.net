@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>二章第八回　テーブルの操作 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="2_7.html">二章第七回</a>
+                          |
+          <a rel="next" href="2_9.html">二章第九回</a>
+              </p>
+    </nav>
+    <h2>二章第八回　テーブルの操作</h2>
+<p>テーブルとは、こういうやつのことです。</p>
+<pre><code>&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td&gt;test1&lt;/td&gt;
+    &lt;td&gt;test2&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;test3&lt;/td&gt;
+    &lt;td&gt;test4&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</code></pre>
+
+<h3>テーブルの木構造</h3>
+<p>上のテーブルの木構造は、次のようだと考えられます。</p>
+<pre><code>table
+｜
+├――tr
+｜　　｜
+｜　　├――td
+｜　　｜　　｜
+｜　　｜　　└――#text
+｜　　└――td
+｜　　　　　｜
+｜　　　　　└――#text
+└――tr
+　　　｜
+　　　├――td
+　　　｜　　｜
+　　　｜　　└――#text
+　　　└――td
+　　　　　　｜
+　　　　　　└――#text
+</code></pre>
+<p>見づらいので、タグとタグの間の改行によって生じるテキストノードは省略しています。</p>
+<p>しかし、実際は違います。</p>
+<pre><code>table
+｜
+└――<mark>tbody</mark>
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　└――tr
+　　　　　　　｜
+　　　　　　　├――td
+　　　　　　　｜　　｜
+　　　　　　　｜　　└――#text
+　　　　　　　└――td
+　　　　　　　　　　｜
+　　　　　　　　　　└――#text
+        </code></pre>
+<p>table直下にあるのはtbodyという要素で、trはその下にあります。</p>
+<p>また、他にもthead,tfootという要素もtableの子として存在する可能性があり、また、tbodyは複数存在する可能性があり、これらのせいでtr要素やその下のtd要素がいろいろな要素の子に分散してしまい、普通にノードを操作してはうまく操作できない可能性があります。thead,tfoot,tbodyについては次回で解説します。</p>
+
+<p>そこで、特別なプロパティやメソッドを使って、テーブルを操作します。</p>
+<h3>HTMLTableElement</h3>
+<p>table要素のHTMLElementは、HTMLTableElementと呼ばれます。これは、いくつもの独自のプロパティやメソッドを持っています。</p>
+
+<h4>rows</h4>
+<p>そのうちの1つが、<dfn>rows</dfn>プロパティです。これは、そのテーブルが持つTR要素<strong>全て</strong>がまとめて集まっています。これを通してテーブルのtr要素を操作します。</p>
+<p>要素がいくつも集まっているということからNodeListが思い浮かぶと思いますが、このオブジェクトは<dfn>HTMLCollection</dfn>といいます。HTML要素専用のNodeListという感じで、NodeListと同じように使うことができます（逆にNodeListにHTML要素以外の要素が入るのかというと、XMLを扱う場合に違いがでます。詳しくは第六章で解説します）。</p>
+<p>例えば、</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;table <mark class="ins">id="aaaaa"</mark>&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test1&lt;/td&gt;
+        &lt;td&gt;test2&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test3&lt;/td&gt;
+        &lt;td&gt;test4&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var table = document.getElementById('aaaaa');
+
+      var collection = table.<strong>rows</strong>;
+
+      console.log(collection.item(0).tagName);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>この場合、いつものようにgetElementByIdでtable要素を取得し、rowsを変数collectionに代入し、その0番目のノードのtagNameを表示しています。rowsはtr要素の集まりなので、当然TRが表示されます。</p>
+
+<p>こうして、テーブルのうちのtr要素を取得する方法がわかりました。</p>
+
+<h3>HTMLTableRowElement</h3>
+<p>tr要素のHTMLElementは、HTMLTableRowElementといいます。</p>
+<p>これもいろいろなプロパティやメソッドを持っています。</p>
+
+<h4>cells</h4>
+<p><dfn>cells</dfn>プロパティは、rowsプロパティのtd版という感じです。そのtr要素が持つtd要素（とth要素）のHTMLCollectionです。</p>
+<p>ちなみに、入っている順は、単に左からです。一番左が0番目、次が1番目・・・のようになっています。総じてHTMLCollectionは、文書順（タグが先にくる順）で入っています。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;table id="aaaaa"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test1&lt;/td&gt;
+        &lt;td&gt;test2&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test3&lt;/td&gt;
+        &lt;td&gt;test4&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var table = document.getElementById('aaaaa');
+
+      var collection = table.<strong>rows</strong>;
+
+      <mark class="ins">var tr = collection.item(0);
+      var td = tr.cells.item(0);
+
+      td.firstChild.nodeValue = "tttttttt";</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>左上のtd要素の中身が"tttttttt"に変わりました。</p>
+<p>collectionの0番目のtr要素を変数trに代入し、プロパティcellsを通して0番目のtd要素を変数tdに代入しています。</p>
+<p>tdのfirstChildはテキストノードなので、そのnodeValueを変更することで左上のtd要素が変更されました。</p>
+
+<h3>テーブルの操作</h3>
+<p>さて、これで、テーブルの行やセル（1つ1つのtdやth要素のこと）をたどって、末端のテキストノードくらいは操作できるようになりました。</p>
+<p>次に、行を増やしたり、セルを増やしたりといったテーブル自体の操作について解説していきます。</p>
+
+<h4>列・セルの追加</h4>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;table id="aaaaa"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test1&lt;/td&gt;
+        &lt;td&gt;test2&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test3&lt;/td&gt;
+        &lt;td&gt;test4&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var table = document.getElementById('aaaaa');
+
+      var newtr = table.<dfn>insertRow</dfn>( table.rows.length );
+
+      for(var i=0;i&lt;2;i++){
+        var newtd = newtr.<dfn>insertCell</dfn>( newtr.cells.length );
+        newtd.appendChild( document.createTextNode('testtest'+i) );
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>insertRow,insertCellという2つの新しいメソッドが登場しています。insertRowはtable要素のHTMLTableElementが、insertCellはtr要素のHTMLTableRowElementが持つメソッドだということがわかります。</p>
+
+<p>insertRowは、テーブルに新しい列(tr要素）を追加して、そのtr要素を返すメソッドです。つまり、</p>
+<pre><code>table
+｜
+└――tbody
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　｜
+　　　　└――<mark class="ins">tr</mark>　　　　　　　　　　<mark>←これ</mark>（新しく追加されたtr）
+        </code></pre>
+<p>を返すということになります。</p>
+<p>createElementやappendChildなどをしなくても、insertRowを行った時点でもうtr要素が新しく作成されて、追加するところまでやってくれるわけですね。そして、これをいじれば、それがそのままテーブルに反映されるわけです。</p>
+
+<p>また、appendChildは一番最後でしたが、insertRowは好きな場所に列を挿入することができます。入れる場所は、引数で<strong>数値</strong>で指定します。</p>
+<p>指定のしかたは、その要素が「何番目になるか」というふうに指定します。今回は、<code>table.rows.length</code>です。table.rowsはtr要素のリストなので、要するにtr要素の数です。今回の場合も最初は0番から数えるので、もともと0〜(length-1)番目のTR要素があることになります。したがって、length番目に追加すると一番最後になるというわけです。</p>
+
+<p>こうしてできたtr要素は、その下にtd要素などは持っていません。そこで、tr要素にセルを追加します。</p>
+
+<p>さて、それでは、追加している部分はその下のfor文です。このfor文は何をしているかというと、「2回繰り返す」ということになります。iが0,iが1のときに処理が行われ、2回処理が行われて<code>i++</code>によってiが2になり終了します。</p>
+<p>これは、同じような処理を2回書くのが面倒なので、for文で繰り返すようにしたというだけです。</p>
+
+<p>それでは、for文の中身を見てみると、ここでinsertCellが出てきています。これは、insertRowと同じく、tr要素にtd要素を追加して、それを返すというものです。引数も、insertRowと同じように指定します。</p>
+<p>つまり、newtdには新しくできた</p>
+<pre><code>table
+｜
+└――tbody
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　｜
+　　　　└――tr<mark class="ins">
+  　　　　　　　｜
+  　　　　　　　└――td</mark>　　　　　　　<mark>←これ</mark>
+        </code></pre>
+<p>が代入されるということになります。</p>
+<p>これも、insertRowと同じく空なので、中身のテキストノードを追加する必要があります。その処理が次の行です。td要素にappendChildで、createTextNodeで作ったテキストノードが追加されています。中身であるcreateTextNodeの引数は、「<code>'testtest'+i</code>」で、この変数iはループのカウンタだから、1回目（iが0）は'testtest0'、2回目（iが1）は'testtest1'となります。</p>
+<p>つまり、最終的に</p>
+<pre><code>table
+｜
+└――tbody
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　├――tr
+　　　　｜　　｜
+　　　　｜　　├――td
+　　　　｜　　｜　　｜
+　　　　｜　　｜　　└――#text
+　　　　｜　　└――td
+　　　　｜　　　　　｜
+　　　　｜　　　　　└――#text
+　　　　｜
+　　　　<mark class="ins">└――tr
+　　　　　　　｜
+　　　　　　　├――td
+　　　　　　　｜　　｜
+　　　　　　　｜　　└――#text　　　　　　"testtest0"
+　　　　　　　└――td
+　　　　　　　　　　｜
+　　　　　　　　　　└――#text　　　　　　"testtest1"</mark>
+      </code></pre>
+<p>が代入されるということになります。画面の結果を見るとそのとおりになっているのがわかります。</p>
+
+<h4>列・セルの削除</h4>
+<p>逆に、列やセルを削除する方法もあります。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;table id="aaaaa"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test1&lt;/td&gt;
+        &lt;td&gt;test2&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;test3&lt;/td&gt;
+        &lt;td&gt;test4&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var table = document.getElementById('aaaaa');
+
+      table.<dfn>deleteRow</dfn>(0);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+      </code></pre>
+<p>「test1」「test2」の行が消えてしまいました。</p>
+<p>これは、2行しかありませんね。1行目はtable要素の取得で、2行目で<dfn>deleteRow</dfn>というメソッドを呼び出しています。</p>
+<p>引数は数字ですね。このメソッドは、(引数)番目の行を<strong>消す</strong>というものです。消すといっても、removeChildなどと同じで、オブジェクトそのものは残っていて、木構造からなくなるということです。</p>
+<p>今回は引数が0なので、0番目の行、つまり最初の行が消えたというわけです。removeChildなどと同じように、子ノードがあってもまとめて消えます。</p>
+
+<h4>列の番号</h4>
+<p>removeChildなどでは引数として消すノードのオブジェクトを渡したのに、insertRowやdeleteRowでは番号を引数として渡しています。これは、たまに、特にdeleteRowで不都合となることがあります。</p>
+<p>先に消したいtr要素のHTMLElementが手に入った場合など、どうするのでしょう。</p>
+<p>実は、それを解決してくれる<dfn>rowIndex</dfn>というプロパティをtr要素は持っています。ずばり、テーブルの中でそのtrが何番目かを表します。一番最初は例のごとく0番目です。これを使えば、簡単に何番目か知ることができます。</p>
+
+<p>さて、列も同じように削除することができます。tr要素のオブジェクトが持つ<dfn>deleteCell</dfn>を使います。deleteRowと同じように番号を引数に渡します。</p>
+<p>ちなみに、tr要素ではrowIndexだった自身の番号は、td,th要素では<dfn>cellIndex</dfn>にあたります。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="2_7.html">二章第七回</a>
+                          |
+          <a rel="next" href="2_9.html">二章第九回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十一章第一回　配列 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="10_5.html">十章第五回</a>
+                          |
+          <a rel="next" href="11_2.html">十一章第二回</a>
+              </p>
+    </nav>
+    <h2>十一章第一回　配列</h2>
+<p>第十一章では、<strong>新しいJavaScript</strong>について解説します。</p>
+<p>とはいっても、実はこの第十一章は「第一篇　古典的なJavaScript」に入っています。実は、古典的なJavaScriptの中では新しいほうであるということにとどまります（この章を書いた当時は新しかったのですが、書き進めるうちにさらに新しいものを紹介したくなったのでこうなりました）。そもそも、新しいものでも時間がたつと古くなってしまいます。この記事が最初に書かれたのは2010年ですが、「JavaScript初級者から中級者になろう」をリニューアルした2014年現在ではもはや新しくもなんでもありません。ですから、その程度のものと考えましょう。</p>
+<p>しかしそもそも、新しいJavaScriptとは何なのでしょう。これには諸説あると思いますが、自分の中では、（これを書いた2010年時点では）「IEで動くか動かないか」が1つの基準になっていると考えていました。当時IEの最新バージョンは8でした（リニューアルした2014年時点での最新は11）。</p>
+<p>このIE8というのが今からしたらひどいブラウザで、 最初で「IEをやめよう」と書いた通り、このサイトで解説している<strong>DOM</strong>には、IE8では動かないものはたくさんありました。しかし、それはIEがあくまでDOMに対応していないだけで、<strong>JavaScriptそのものの文法・仕様</strong>については、特にIE非対応ということはありませんでした。</p>
+<p>つまり、DOM部分は高度なものであっても、それは古いJavaScriptの上に乗っかったものであったのです。</p>
+
+<p>この基準はなかなか大事なもので、広くみんなに見てもらいたいサイトを作る場合には、残念ながら世の中にはIEを使うようなユーザーもいるので、「新しいJavaScript」を利用するには少し抵抗がありました。そういう点により、古いJavaScriptよりは普及度合いが低いと思われます。2014年現在でも、古いIEを使う厄介なユーザーが一定数存在します。</p>
+<p>ちなみに、IEでもバージョン11ともなると、だいぶ他のブラウザに近いクオリティになってきています（ただし前章で解説したXPathは未だに非対応です）。</p>
+
+<p>それで、実は今まで解説してきたのは全てこの古いJavaScriptで（実は<a href="9_6.html">ゲッタとセッタ</a>だけは新しいほうに入りますが）、第十一章では、この「新しいJavaScript」、つまり「IE8では動かないようなJavaScript」について解説していきます。</p>
+
+<p>具体的には、実はJavaScriptにも<strong>バージョン</strong>というのがあり、最新は2.0ということになっています。ずっと昔は1.0とかの時代もありましたが、だいたい、1.6以上が新しいJavaScriptという感じだと自分は解釈しています。</p>
+<p>バージョンというのは、新しいほど機能が追加されたり改良されたりしているということですね。</p>
+
+<p>そして、今回の題名は「<strong>配列</strong>」です。配列といえば、<a href="kiso6.html">基礎第六回</a>で解説しましたが、基礎の基礎しか解説していませんでした。もうすこし早く解説していれば良かったのですが、ここまで伸びてしまいました。実は、古いJavaScriptでももうちょっといろいろあるので、まずはそれを解説します。</p>
+
+<h3>古いJavaScriptにおける配列</h3>
+<p>今までに配列について解説したのは、次のような感じです。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	<mark class="ins">//←このように配列を作る</mark>
+
+console.log(<mark>array[1]</mark>);	<mark class="ins">//←添字を用いて要素を参照できる</mark>
+</code></pre>
+<p>配列の作り方と、各要素の参照の仕方です。また、<strong>length</strong>というプロパティをもち、これが要素の数なのでした。</p>
+<pre><code>for(var i=0;i&lt;array.<mark>length</mark>;i++){
+  console.log(array[i]);
+}</code></pre>
+<p>こうすることで、配列の全ての要素がログに表示されます。</p>
+
+<p>さて、ここで、lengthを<strong>プロパティ</strong>と言ったことからも分かるように、配列は実は<strong>オブジェクト</strong>の一種なのですね。これは、配列が</p>
+        <pre><code>var array = <mark>new</mark> Array('麻生太郎','鳩山由紀夫','菅直人');</code></pre>
+<p>のように作ることができることからも分かります。</p>
+<p>では、<code>array[i]</code>というように、[]を使って要素を参照する表現は何なのでしょう。</p>
+<p>今まで紹介したかどうか分かりませんが、実はこれは<strong>プロパティを参照する表現</strong>なのです。</p>
+<p>どういうことかというと、例えばarray.lengthはarray["length"]としても参照可能です。[]内が<strong>文字列</strong>であることに注意して下さい。</p>
+<p>こうすることで、配列以外でも、プロパティ名に変数を使うことが可能です。しかし、ここで変数iは数値ですから、文字列ではありません。こういう場合単純で、文字列に変換されます。</p>
+<p>したがって、例えばarray[0]はarray["0"]となっているということです。だからといって、数字だけの場合、array.0というようにドットを使った参照はできません。</p>
+
+<p>さて、そこで、実は配列を操作するために便利な<strong>メソッド</strong>があります。これらのメソッドは、<strong>Array.prototype</strong>にあることが予想できますね。</p>
+
+<p>さて、まず紹介するのが<strong>pushとpop</strong>です。pushは、配列の最後に要素を追加するものです。追加する要素は引数で指定します。逆に、popは最後の要素を取り除きます。取り除いた要素は戻り値となります。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫'];
+
+array.<mark>push</mark>("菅直人");
+console.log(array);	//麻生太郎,鳩山由紀夫,菅直人 と表示される
+
+var a = array.<mark>pop</mark>();	//配列は 麻生太郎,鳩山由紀夫　になる
+console.log(a);	//戻り値は菅直人
+        </code></pre>
+<p>逆に、最初に要素を追加するのもあります。それが<strong>unshift</strong>です。逆に、最初の要素を取り出すのが<strong>shift</strong>です。</p>
+<pre><code>var array=['鳩山由紀夫','菅直人'];
+
+array.<mark>unshift</mark>("麻生太郎");
+console.log(array);	//麻生太郎,鳩山由紀夫,菅直人
+
+var a = array.<mark>shift</mark>();	//配列は 鳩山由紀夫,菅直人　になる
+console.log(a);	//麻生太郎
+        </code></pre>
+<p>もう1つ便利なのが、<strong>splice</strong>メソッドです。これは、途中の要素を抜き出すメソッドです。</p>
+<p>引数は最低2つで、1つ目は抜き出し開始位置（添字と同じで最初が0なので注意）、2つ目は抜き出す数です。</p></p>
+      <pre><p>例えば、さっきの
+          <code>var array=['麻生太郎','鳩山由紀夫','菅直人'];</code></pre>
+<p>という配列の場合、真ん中の鳩山由紀夫だけを抜き出したい場合、鳩山由紀夫は<strong>1番目</strong>の要素で、抜き出したい数は1つなので、</p>
+        <pre><code>array.<mark>splice</mark>(1,1);</code></pre>
+<p>とします。例えば、「菅直人」も一緒に抜き出したい場合、抜き出す数は2つになるので</p>
+        <pre><code>array.<mark>splice</mark>(1,2);</code></pre>
+<p>とします。</p>
+
+<p>そして、「引数は最低2つ」といったのは、3つ以上でもいいということです。3つめ以降の引数があると、抜き出した部分に代わりにそれを要素として挿入します。例えば、</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];
+array.<mark>splice</mark>(1,1<mark class="ins">,"小沢一郎"</mark>);</code></pre>
+<p>とした場合、splice後の配列は</p>
+        <pre><code>['麻生太郎',<mark class="ins">'小沢一郎'</mark>,'菅直人']</code></pre>
+<p>となるわけです。引数を4つとか、挿入すべき要素を2つ以上渡すと、それが全部挿入されます。</p>
+<p>また、第二引数（抜き出す数）を0にすることで、抜き出さずに挿入だけするということも可能です。</p>
+
+<p>そしてもう1つ、<strong>reverse</strong>を紹介します。これは引数がなく、配列を逆にします。つまり、</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];
+array.<mark>reverse</mark>();
+
+console.log(array);	<mark class="ins">// 菅直人,鳩山由紀夫,麻生太郎</mark>
+          </code></pre>
+
+<p>そして次に<strong>sort</strong>です。これは、配列のソートです。つまり、並び替えるということです。やってみましょう。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];
+array.<mark>sort</mark>();
+
+console.log(array);	<mark class="ins">// 菅直人,鳩山由紀夫,麻生太郎</mark>
+          </code></pre>
+<p>なんと偶然reverseと同じ結果になりましたが、reverseとは違います。文字列の場合、その文字のコード（コードポイント値）を利用して、小さい順に並び替えています。</p>
+<p>分かりにくいので、数値でやってみましょう。</p></p>
+      <pre><code>var array=[5,8,0,2,7,1,4,3,9,6];
+array.<mark>sort</mark>();
+
+console.log(array);	<mark class="ins">// 0,1,2,3,4,5,6,7,8,9</mark>
+        </code></pre>
+<p>これは分かりやすいですね。小さい順に並んでいます。</p>
+<p>文字列でも、日本語だと分かりにくいですが、アルファベットなら分かりやすいかもしれません。</p>
+<pre><code>var array=["dog","cat","rabbit","elephant","dolphin"];
+array.<mark>sort</mark>();
+
+console.log(array);	<mark class="ins">// cat,dog,dolphin,elephant,rabbit"</mark>
+        </code></pre>
+<p>これはいわゆる「辞書順」というやつですね。さっき文字のコードポイントで判定されていると言いましたが、英数字の場合単純で、コードポイント値も辞書順に並んでいるのです。だからこのような結果になります。</p>
+
+<p>ところが、また数値に戻って、2桁の数が混ざってくると様子が違ってきます。</p>
+<pre><code>var array=[5,2,10,365,8];
+array.<mark>sort</mark>();
+
+console.log(array);	<mark class="ins">// 10,2,365,5,8</mark>
+        </code></pre>
+<p>なんと、順番がでたらめです。これは何かと思いますが、実は、数値も<strong>文字列に変換</strong>されているのです。つまり、<code>[5,2,10,365,8]</code>を並び替えるときには、<code>["5","2","10","365","8"]</code>という配列を並び替えるのと同様に扱われます（実際に配列の値が文字列に変わったりはしませんが）。ここで、数字も文字の一種ですから、コードポイント値というものがあり、数字が小さいほどコードポイント値も小さくなります。</p>
+<p>ですから、数として大きいかどうかは関係なく、文字列を辞書順で並び替えたときにどうなるかということになっているわけです。</p>
+
+<p>しかし、数値順に並び替えたいということもあるかもしれません。そこで、sortを用いる場合に、並び替えの方法を指定してやることができます。ここで使うのが、<strong>コールバック関数</strong>です。これはつまり、sortの<strong>引数</strong>に<strong>関数</strong>を渡そうということです。</p>
+<p>そうすると、その関数がソート中に呼ばれます。この関数は何をするかというと、<strong>2つの値を比べること</strong>です。sort関数は状況に応じて2つの値を比べようとします。そのときの動作を関数の形で指定してやることで、結果的にソート結果をいじることができるというわけです。</p>
+<p>その関数には、次のような形になります。</p>
+<pre><code>function compare(<mark>a</mark>, <mark>b</mark>){
+}</code></pre>
+<p>2つの引数が渡されていますね。引数の名前はなんでもいいのですが、一般的にはaとbが使われるようです。</p>
+<p>比較結果を通知するのには<strong>戻り値</strong>を使います。<strong>0未満</strong>なら<strong>aのほうがbより小さい</strong>（bより前）、<strong>0より大きい</strong>なら<strong>aのほうがbより大きい</strong>（bより後）、0なら<strong>同じ</strong>ということになります。</p>
+<p>つまり、数値比較用の関数を作るとなると、次のようにするとよいでしょう。</p>
+<pre><code>function compare(<mark>a</mark>, <mark>b</mark>){
+  if(a&lt;b){
+    //aのほうが小さい（aのほうが前）
+    return <mark>-1</mark>;
+  }else if(a&gt;b){
+    //aのほうが大きい（aのほうが後）
+    return <mark>1</mark>;
+  }else{
+    //同じ
+    return <mark>0</mark>;
+  }
+}</code></pre>
+<p>これを用いてやってみましょう。</p>
+<pre><code>var array=[5,2,10,365,8];
+array.sort(<mark>compare</mark>);
+
+console.log(array);	<mark class="ins">// 2,5,8,10,365</mark>
+
+function compare(a, b){
+  if(a&lt;b){
+    //aのほうが小さい（aのほうが前）
+    return -1;
+  }else if(a&gt;b){
+    //aのほうが大きい（aのほうが後）
+    return 1;
+  }else{
+    //同じ
+    return 0;
+  }
+}</code></pre>
+<p>正しい結果になりました。</p>
+<p>ただ、実はこんなに難しくする必要はありません。次のような形で十分です。</p>
+<pre><code>function compare(a, b){
+  return <mark>a-b</mark>;
+}</code></pre>
+<p>これは、aがbより小さければ負、大きければ正の値、そして同じならば0を返します。</p>
+<p>また、これならもう無名関数にしてしまってsortの引数に直接書いてもよいでしょう。</p>
+        <pre><code>array.sort(function(a,b){return a-b});</code></pre>
+<p>他に、もっと複雑な並び替えをしたいときなどにsortは役立ちます。</p>
+
+<p>さて、いままで紹介してきたメソッドはいずれも<strong>破壊的</strong>なメソッドでした。破壊的とは、配列のメソッドを呼び出せば、その配列そのものが変化するというものです。しかし、ここから先はそうではありません。</p>
+<p>そんな中、次に紹介するのは<strong>concat</strong>です。これは、配列に他の配列や値をつなげるというものです。さっきも言ったとおりconcatは破壊的でない（<strong>非破壊的</strong>といいます）ので、concatを呼び出しても配列そのものは変化せず、<strong>戻り値</strong>として新しい配列が返されます。</p>
+<pre><code>
+var array1 = ['小泉純一郎','安倍晋三','福田康夫','麻生太郎'];	//配列1
+var array2 = ['鳩山由紀夫','菅直人'];	//配列2
+
+var newarray = array1.<mark>concat</mark>(array2);
+console.log(newarray);	//小泉純一郎,安倍晋三,福田康夫,麻生太郎,鳩山由紀夫,菅直人
+          </code></pre>
+<p>2つの配列をつなぎあわせて、新しい配列をつくっています。ここで、</p>
+        <pre><code>console.log(array1);</code></pre>
+<p>として配列1を表示してみても、変わっていないことが分かります。</p>
+<p>また、配列以外を直接追加させることもできます。</p>
+<pre><code>var array1 = ['小泉純一郎','安倍晋三','福田康夫','麻生太郎'];	//配列1
+
+var newarray = array1.<mark>concat</mark>('鳩山由紀夫','菅直人');
+console.log(newarray);	//小泉純一郎,安倍晋三,福田康夫,麻生太郎,鳩山由紀夫,菅直人
+          </code></pre>
+<p>引数に配列以外を渡してやると、それがそのまま追加されます。</p>
+<p>また、引数に配列を複数渡すとそれを全部つなぎあわせてくれるなど、なかなか応用がききます。</p>
+
+<p>次に紹介するのは<strong>join</strong>です。これは、配列を全部つなぎあわせて文字列にして返します。引数で、要素の間にはいる文字（区切り文字）を指定できます。具体的には、次のような形です。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];
+console.log(array.<mark>join</mark>("→"));	<mark class="ins">// "麻生太郎→鳩山由紀夫→菅直人"</mark>
+          </code></pre>
+<p>これも使いどころがあると思います。</p>
+
+<p>次に紹介するのは<strong>slice</strong>です。これはspliceと同様配列の一部を抜き出しますが、非破壊的なのでもとの配列を変更せず、その部分が新しい配列となって返ってきます。</p>
+<p>ただ、引数は2つですが、spliceと少し違います。1つ目の引数は抜き出し始めの添字であり同じですが、第二引数では抜き出し終了位置を指定します。第二引数が省略された場合は最後までとなっています。</p>
+<p>この抜き出し終了位置も添字ですが、その要素の1つ前までを抜き出します。たとえば、</p>
+        <pre><code>array.slice(1,4)</code></pre>
+<p>だったとしたら、1番目から3番目まで（0から数えることに注意）を抜き出します。</p>
+
+<h3>新しいJavaScript</h3>
+<p>以上で、古いJavaScriptにおける配列処理用のメソッドの紹介は終了です。</p>
+<p>ここからが本題です。新しいJavaScriptでは、配列処理用の新しいメソッドが追加され、結構便利になりました。</p>
+
+<h3>配列の各要素に対する処理</h3>
+<p>今あなたは、配列をもとにしてul要素・li要素によるリストを作成したいとします。例えば、</p>
+        <pre><code>['麻生太郎','鳩山由紀夫','菅直人']</code></pre>
+<p>という配列があったならば、これをもとにして</p>
+<pre><code>&lt;ul&gt;
+  &lt;li&gt;麻生太郎&lt;/li&gt;
+  &lt;li&gt;鳩山由紀夫&lt;/li&gt;
+  &lt;li&gt;菅直人&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<p>を作りたいということです。配列というのもリストのようなものですから、このような機会はなかなか多いと思います。</p>
+
+<p>普通にやってみると、次のようになります。見ないで自分で作れるといいですね。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+var ul=document.createElement("ul");	//まずul要素を作る
+
+//配列の要素数だけ繰り返す
+for(var i=0;i&lt;array.length;i++){
+  var li=document.createElement("li");	//li要素を作る
+  li.textContent=array[i];	//li要素の中身を array[i]のテキストにする
+
+  ul.appendChild(li);	//li要素をul要素に追加する
+}
+
+document.body.appendChild(ul);	//一応ul要素をbody要素の最後に追加しておこう
+        </code></pre>
+<p>さて、今回の場合、配列の要素1つずつに対して「li要素をつくってul要素に追加する」という処理をしています。これは今までの場合、このようにfor文でループを回すのが定石でしたね。しかし、これをもっと楽にすることができます。</p>
+<p>そこで登場するのが、<strong>forEach</strong>というメソッドです。これは<strong>コールバック関数</strong>を引数に取り、配列の各要素に対して順番にその関数を実行するというものです。</p>
+<p>そして、今配列のどの要素を処理しているかが分かるように、そのコールバック関数の引数として現在の要素が渡されます。これを踏まえてコードを書くと、このようになります。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+var ul=document.createElement("ul");	//まずul要素を作る
+
+//配列の要素数だけ繰り返す
+<mark class="ins">array.<strong>forEach</strong>(function(<mark>x</mark>){
+  var li=document.createElement("li");
+  li.textContent=<mark>x</mark>;
+  ul.appendChild(li);
+});</mark>
+
+document.body.appendChild(ul);	//一応ul要素をbody要素の最後に追加しておこう
+        </code></pre>
+<p>forEachの引数として、次のような無名関数が渡されています。</p>
+<pre><code>
+function(<mark>x</mark>){
+  var li=document.createElement("li");
+  li.textContent=<mark>x</mark>;
+  ul.appendChild(li);
+}
+        </code></pre>
+<p>引数xをとっていることが分かります。これに現在の要素が入っていることになりますから、forEachの効果により、この関数が引数にそれぞれ"麻生太郎"、"鳩山由紀夫"、"菅直人"をとって3回呼ばれるということになります。</p>
+<p>この方法の利点は、カウンタ変数（for文を使ったさっきのサンプルの場合、変数i）がいらないという点などです。配列の各要素に対する処理を簡単に書けるためとても便利です。</p>
+<p>また、実はコールバック関数に渡される引数は、現在の要素以外にもあります。第二引数は<strong>現在の添字</strong>、第三引数は<strong>現在処理している配列そのもの</strong>です。</p>
+<p>第二引数の現在処理している添字というのは、この配列の場合だと、「麻生太郎」のときは0、「鳩山由紀夫」のときは1、「菅直人」のときは2ということです。</p>
+<p>第三引数引数ですが、上のサンプルの場合だと、現在処理している配列は変数arrayなので、いちいち第三引数を使わなくても変数arrayをそのまま使えばいいと思うかもしれません。</p>
+<p>しかし、コールバック関数を複数の配列で使い回す場合などに必要になることもあります。</p>
+<p>ちなみに、配列の要素1つずつに対して毎回関数呼び出しが発生するので、for文を使った方法に比べて処理速度が遅いと言われています。そのため、処理速度が求められる場面ではforEachが避けられることがあります。</p>
+
+<h3>配列をもとにして新しい配列を作る</h3>
+<p>ある配列のデータを利用して、新しい配列を作りたい場合があるとおもいます。</p>
+<p>例えば、さっきの</p>
+        <pre><code>['麻生太郎','鳩山由紀夫','菅直人']</code></pre>
+<p>という配列の各要素に「氏」をつけて、</p>
+        <pre><code>['麻生太郎氏','鳩山由紀夫氏','菅直人氏']</code></pre>
+<p>という配列を新しく作りたいとしましょう。普通に考えるとこうなりますね。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+
+var newarray=[];	//結果の配列を作っておく
+
+//配列の要素数だけ繰り返す
+for(var i=0;i&lt;array.length;i++){
+  newarray.push(array[i]+"氏");
+}
+
+console.log(newarray);	//麻生太郎氏,鳩山由紀夫氏,菅直人氏
+        </code></pre>
+<p>もとの配列の要素1個につき、新しい配列に要素1個を追加するわけです。</p>
+<p>これを楽にしてくれるのが、<strong>map</strong>メソッドです。これも同じく<strong>コールバック関数</strong>を引数に渡します。これはforEachと同じですね。</p>
+<p>forEachと同様に、各要素ごとにコールバック関数が呼ばれます。その際の引数も同じです。</p>
+<p>forEachと違う点は、そのコールバック関数が、<strong>その要素に対する処理結果</strong>を返し、mapメソッドそのものも、最終的に<strong>処理結果からなる新しい配列</strong>を返すという点です。</p>
+<p>要するに、こういうことです。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+
+//配列の要素数だけ繰り返す
+<mark class="ins">var newarray = array.<strong>map</strong>(function(<mark>x</mark>){return <mark>x</mark>+"氏";});</mark>
+
+console.log(newarray);	//麻生太郎氏,鳩山由紀夫氏,菅直人氏
+        </code></pre>
+<p>これは何が起こっているかというと、mapの引数に渡された関数の動きを見てみましょう。</p>
+<p>配列の各要素ごとに関数が呼ばれますから、まず"麻生太郎"を引数にとって関数が呼ばれます。するとこの関数は"麻生太郎氏"を返しますね。次は同様に"鳩山由紀夫氏"、"菅直人氏"と続きます。そして、これらを集めた新しい配列がmapの返り値となっているのです。</p>
+<p>さらにこれは、一回使うだけならいちいち変数に代入する必要もありませんね。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+
+console.log(<mark class="ins">array.<strong>map</strong>(function(<mark>x</mark>){return <mark>x</mark>+"氏";})</mark>);	//麻生太郎氏,鳩山由紀夫氏,菅直人氏
+        </code></pre>
+<p>さて、これに、さっき紹介したjoinを組み合わせて、各要素に「氏」を付けた上で「→」で結びたい場合はどうしましょう。一度変数にいれて、次のようにするのが考えられます。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+
+//配列の要素数だけ繰り返す
+<mark class="ins">var newarray = array.<strong>map</strong>(function(<mark>x</mark>){return <mark>x</mark>+"氏";});</mark>
+
+console.log(newarray.<mark>join</mark>("→"));	//麻生太郎氏→鳩山由紀夫氏→菅直人氏
+        </code></pre>
+<p>しかしやはりこれも、いちいち変数に代入するのは面倒なので、こうできます。</p>
+<pre><code>var array=['麻生太郎','鳩山由紀夫','菅直人'];	//配列名はarrayとする
+
+console.log(<mark class="ins">array.<strong>map</strong>(function(<mark>x</mark>){return <mark>x</mark>+"氏";})</mark>.<mark>join</mark>("→"));	//麻生太郎氏→鳩山由紀夫氏→菅直人氏
+        </code></pre>
+<p>まずmapメソッドを呼んで、その返り値が配列なのでそのまま.（ドット）を付けてjoinメソッドを呼び出しています。</p>
+
+<h3>条件を満たす要素のみを集める</h3>
+<p>ここから先は、<strong>条件</strong>を満たすかどうかという話になってきます。</p>
+<p>配列の中で、特定の条件を満たすもののみを集めたいという場合があると思います。例えば、数値の配列があって、5以下のもののみを抜き出したいとします。例によって普通にfor文でやると、こうです。</p>
+<pre><code>var array=[3,8,2,10,5,9,8];	//配列名はarrayとする
+
+var newarray=[];	//結果の配列を作っておく
+
+//配列の要素数だけ繰り返す
+for(var i=0;i&lt;array.length;i++){
+  if(<mark>array[i]&lt;=5</mark>){	//条件を満たすもののみ
+    newarray.push(array[i]);
+  }
+}
+
+console.log(newarray);	//3,2,5
+        </code></pre>
+<p>これを楽に行ってくれるのが、<strong>filter</strong>メソッドです。これも、条件を判定するコールバック関数を渡す必要があり、コールバック関数の仕様はforEachやmapと同じです。</p>
+<p>条件は「満たす」か「満たさない」ですから、コールバック関数は<strong>真偽値</strong>、すなわちtrueかfalseを返します。とはいっても、それ以外の値でも真偽値に変換されます。</p>
+<p>そうすると、filterメソッドは、true（真）が返された要素のみを集めて新たな配列として返します。すなわち、こうします。</p>
+<pre><code>var array=[3,8,2,10,5,9,8];	//配列名はarrayとする
+
+<mark class="ins">var newarray= array.<strong>filter</strong>(function(<mark>x</mark>){return x&lt;=5;});</mark>
+
+console.log(newarray);	//3,2,5
+          </code></pre>
+<p>かなりすっきりしましたね。もちろん、この場合はいちいち変数にいれないでも可能です。</p>
+
+<h3>配列から条件を満たす要素を探す</h3>
+<p>配列があって、「その中のどれか1つでも条件を満たせばOK」とか「全て条件を満たせばOK」という状況があります。それをするメソッドが、<strong>some</strong>（どれか）・<strong>every</strong>（全部）です。</p>
+<p>コールバック関数はfilterと同じく「条件」ですから、filterと全く同様のものでOKです。</p>
+<p>someは、要素全部について調べて、コールバック関数がtrue（真）を返すものが1つでもあればtrueを返し、1つもなければfalseを返します。everyは、全部trueだったならtrueを返し、1つでもfalseがあればfalseを返します。</p>
+<p>例えば、5以下の数値が1つでもあるかどうか調べたい場合、</p>
+<pre><code>var array=[3,8,2,10,5,9,8];	//配列名はarrayとする
+
+console.log(array.<strong>some</strong>(function(<mark>x</mark>){return <mark>x</mark>&lt;=5;}));	//true
+          </code></pre>
+<p>とします。これをeveryにすると、6以上のものもあるのでfalseとなるわけです。</p>
+
+<p>ここまで紹介してきたメソッドは、JavaScript1.6と呼ばれる世代で追加されたメソッドです。</p>
+
+<h3>配列の各値に関数を適用して1つの値を作る</h3>
+<p>分かりにくい見出しですが、最後に紹介するのは<strong>reduce</strong>です。これはJavaScript1.8で追加されたものです。</p>
+<p>例えば、「配列の各値を全部足したい」という場合はどうしますか。次のようにすることでしょう。</p>
+<pre><code>var array=[3,8,2,10,5,9,8];	//配列名はarrayとする
+
+var sum=0;	//合計
+
+//配列の要素数だけ繰り返す
+for(var i=0;i&lt;array.length;i++){
+  sum+=array[i];
+}
+
+console.log(sum);	//45
+          </code></pre>
+<p>しかし、変数sumを使わないでもいい方法があるのです。それがreduceです。さっきの例をreduceで書き直すと、次のようになります。</p>
+<pre><code>var array=[3,8,2,10,5,9,8];	//配列名はarrayとする
+
+<mark class="ins">var sum=array.<strong>reduce</strong>(function(<mark>x</mark>,<mark>y</mark>){
+  return <mark>x+y</mark>;
+});</mark>
+
+console.log(sum);	//45
+          </code></pre>
+<p>いったい何が起こったかですが、まずreduceに渡されたコールバック関数に注目しましょう。最終的にやりたいことは「配列の値を全部足す」ですが、これを見ると「2つの値を足す」ということをしています。</p>
+<p>実は、reduceの動作は、まず0番目と1番目について計算を行い、その計算結果と2番目を計算、　さらにその計算結果と3番目…というように順番に進んでいきます。</p>
+<p>そして最後まで進んだときの結果がreduceの戻り値となるのです。</p>
+<p>今回の場合、まず最初は0番目と1番目だから、コールバック関数に、xは3,yは8が代入されて呼び出されます。したがって返り値は11です。</p>
+<p>すると、次の呼び出しでは、xには結果の11がyには2番目の要素である2が代入され、戻り値は13です。</p>
+<p>以下 x=13,y=10 → x=23,y=5 → x=28,y=9 → x=37,y=8 → 結果は45となり、45が返されます。</p>
+<p>理解するのは大変だと思いますが、使いどころを見つければ便利です。</p>
+<p>ちなみに、右から（後ろから）順番にこれを行う、reduceRightもあります。</p>
+<p>また、reduceにはコールバック関数以外にも引数を渡すことができます。それは「デフォルト値」です。</p>
+<p>デフォルト値がある場合、普通まず最初は「0番目と1番目」なのが、「デフォルト値と0番目」、「0番目と1番目」、・・・というように進んでいきます。</p>
+<p>例えば、実はreduceは、要素が1つしかない配列に適用した場合は「0番目と1番目」の計算すらできませんが、その場合は0番目のをそのまま返すことになっています。</p>
+<p>ところが、要素が0個の場合はどうしようもなくてエラーを発生させます。これではまずいことがありますね。</p>
+<p>そこでこのデフォルト値を指定してやると、前述のような動作に加えて「配列の要素が1つも無い場合はデフォルト値をそのまま返す」という動作をしてくれます。</p>
+<p>例えば上の例だと、要素がひとつもない配列の場合だと0が返されるのが妥当でしょうから、デフォルト値に0を指定して次のようになるでしょう。</p>
+<pre><code>var array=[3,8,2,10,5,9,8];	//配列名はarrayとする
+
+var sum=array.<strong>reduce</strong>(function(<mark>x</mark>,<mark>y</mark>){
+  return <mark>x+y</mark>;
+}<mark class="ins">,0</mark>);
+
+console.log(sum);	//45
+      </code></pre>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="10_5.html">十章第五回</a>
+                          |
+          <a rel="next" href="11_2.html">十一章第二回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

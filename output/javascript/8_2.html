@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>八章第二回　Rangeの機能 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="8_1.html">八章第一回</a>
+                          |
+          <a rel="next" href="8_3.html">八章第三回</a>
+              </p>
+    </nav>
+    <h2>八章第二回　Rangeの機能</h2>
+<p>前回は、Rangeの作り方を解説しました。今回は、Rangeを使ってできることを解説します。</p>
+
+<h3>deleteContents</h3>
+<p>まず、Rangeが持つ<dfn>deleteContents</dfn>というメソッドを解説します。これは、Rangeの示す範囲にあるものを残さず<strong>削除する</strong>というものです。引数も戻り値もありません。例えば、</p>
+<pre><code>AAA
+｜
+├――BBB
+｜　　｜　　　　<mark>←開始点</mark>
+｜　　└――CCC
+｜
+├――DDD
+｜　　　　　　　<mark>←終了点</mark>
+└――EEE
+          </code></pre>
+<p>というRangeがあったとき、deleteContentsをすると</p>
+<pre><code>AAA
+｜
+├――BBB
+｜　　　　　<mark>←開始点</mark>
+｜　　　　　<mark>←終了点</mark>
+└――EEE
+          </code></pre>
+<p>という状態になります。間の部分が見事に消えました。このとき、開始点と終了点の間がすべてなくなったので、当然このRangeの開始点と終了点は同じに（つぶれた状態に）なります。</p>
+<p>また、今回の場合点がノードとノードの間だったので簡単ですが、テキストの途中の場合でも同じです。</p>
+<pre><code>AAA
+｜
+├――BBB
+｜　　｜
+｜　　└――#text　"aaa<mark><strong>|</strong>bbb</mark>"
+<mark>｜　　　　　　　　　　 ↑開始点
+├――DDD
+｜</mark>
+└――#text　　"<mark>ccccc<strong>|</strong></mark>dd"
+　　　　　　　　　　 <mark>↑終了点</mark>
+          </code></pre>
+<p>という範囲の場合、</p>
+<pre><code>AAA
+｜
+├――BBB
+｜　　｜
+｜　　└――#text　"aaa"
+｜
+└――#text　　"dd"
+          </code></pre>
+<p>のようにうまく処理されます。</p>
+
+<h3>cloneContents</h3>
+<p>さて、今度は<dfn>cloneContents</dfn>というメソッドがあります。これは、選択部分をまるまるコピーしてその部分だけ得るというメソッドです。戻り値で結果が得られます。例えば、</p>
+<pre><code>AAA
+｜　　　　　　　<mark>←開始点</mark>
+├――BBB
+｜　　｜
+｜　　└――CCC
+｜
+├――DDD
+｜　　　　　　　<mark>←終了点</mark>
+└――EEE
+          </code></pre>
+<p>というRangeでcloneContentsした場合、</p>
+<pre><code>├――BBB
+｜　　｜
+｜　　└――CCC
+｜
+└――DDD
+          </code></pre>
+<p>という部分を取得できます。メソッドの名前の通りあくまで「クローン」なので、選択されているほうには<strong>変化はありません</strong>。</p>
+<p>もちろん、テキストでもOKです。</p>
+<pre><code>AAA
+｜
+├――BBB
+｜　　｜
+｜　　└――#text　"aaa<mark><strong>|</strong>bbb</mark>"
+<mark>｜　　　　　　　　　　↑開始点
+├――DDD
+｜</mark>
+└――#text　　"<mark>ccccc<strong>|</strong></mark>dd"
+　　　　　　　　　　<mark>↑終了点</mark>
+          </code></pre>
+<p>の場合は、</p>
+<pre><code>｜
+├――BBB
+｜　　｜
+｜　　└――#text　"bbb"
+｜
+├――DDD
+｜
+└――#text　　"ccccc"
+          </code></pre>
+<p>というものを取得できます。わかりにくければ、タグで表わしてみるといいかもしれません。</p>
+        <pre><code>&lt;AAA&gt;&lt;BBB&gt;aaa<mark>bbb&lt;/BBB&gt;&lt;DDD /&gt;ccccc</mark>dd&lt;/AAA&gt;</code></pre>
+<p>というようになっていて、強調部分が選択範囲です。これを抜き出すと</p>
+        <pre><code>bbb&lt;/BBB&gt;&lt;DDD /&gt;ccccc</code></pre>
+<p>となります。ここで、最初のbbbはもともとBBBタグの中にあったから、</p>
+        <pre><code><mark class="ins">&lt;BBB&gt;</mark>bbb&lt;/BBB&gt;&lt;DDD /&gt;ccccc</code></pre>
+<p>のようにうまいこと補います。こうすると、上の木構造の図と同じになりました。</p>
+
+<p>さて、木構造の一部ですから、取得した部分もまたこのような構造を持っています。しかし、これらはよく見ると<strong>親がありません</strong>。そういうとき、どうするのでしょう。実は、ここで<a href="7_4.html">七章第四回</a>の<strong>documentFragment</strong>が出てきます。つまり、</p>
+<pre><code><strong>DocumentFragment</strong>
+｜
+├――BBB
+｜　　｜
+｜　　└――#text　"bbb"
+｜
+├――DDD
+｜
+└――#text　　"ccccc"
+        </code></pre>
+<p>ということです。cloneContentsの戻り値はDocumentFragmentだったのです。</p>
+<p>また、ここで、サンプルで「全体がAAAタグに囲まれていたのだから、最後にAAAタグが補われるのではないか」と考えた人もいると思います。しかし、あるタグの完全に内側の範囲でcloneContentsした場合、そこより外側は考慮されないことになっています。もし、範囲がAAAの外にまでわたっていれば、AAAの中と外を区別する必要があるので、AAAも返り値に出てきます。</p>
+
+<h3>extractContents</h3>
+<p>さて、次に解説する<dfn>extractContents</dfn>は、上の2つを合わせたようなメソッドです。どういうことかというと、このメソッドは、そのRangeの範囲の部分を<strong>抜き出して</strong>、それを返すというものです。抜き出すとは、つまり木構造から除去するということです。これは、deleteContentsと同じですね。そして、その部分を戻り値として得ることが同時にできるのです。つまり、cloneContentsをしたときと同じ戻り値を得ることができます。使うときに使えば結構便利かもしれません。</p>
+
+<h3>compareBoundaryPoints</h3>
+<p>今度は、<dfn>compareBoundaryPoints</dfn>を解説します。これは、<strong>2つのRangeの位置を比較する</strong>というものです。</p>
+        <pre><code><mark>range</mark>.<strong>compareBoundaryPoints</strong>(how, <mark>sourceRange</mark>)</code></pre>
+<p>というように使います。引数が2つありますね。rangeとsourceRangeの2つが、比較するRangeです。さて、もう一つあるhowという引数は<strong>定数</strong>です。これは、比較の仕方を表すものです。</p>
+<p>というのも、二つのRangeを比較するさい、基準にする点を「開始点」にする方法と「終了点」にする方法の二種類あります。そこで、これをどうするかを定数で決めるのです。</p>
+<p>定数の説明に移る前に、このメソッドの比較の仕方ですが、「sourceRangeから見たrangeの位置」を、-1,0,1のいずれかの数で返します。rangeがsourceRangeより前なら-1、位置が同じなら0、後なら1が返ります。</p>
+<p>さて、定数の説明ですが、定数は4種類あります。</p>
+<dl>
+  <dt>START_TO_START</dt>
+  <dd>開始点どうしを比べます。</dd>
+  <dt>START_TO_END</dt>
+  <dd>sourceRangeの開始点と、rangeの終了点を比べます。</dd>
+  <dt>END_TO_START</dt>
+  <dd>sourceRangeの終了点と、rangeの開始点を比べます。</dd>
+  <dt>END_TO_END</dt>
+  <dd>終了点どうしを比べます。</dd>
+</dl>
+<p>これらの定数は、<strong>Range</strong>オブジェクトのプロパティとして使用できます。</p>
+        <pre><code><mark>Range</mark>.START_TO_START</code></pre>
+<p>という感じで使います。</p>
+<p>例えば、</p>
+<pre><code>range      : <mark>|------|</mark>
+            abcdefghijklmnopqrstuvwxyz
+sourceRange:             <mark>|-------|</mark>
+          </code></pre>
+<p>というように、rangeがsourceRangeより完全に前にあるのを判定するには、どうすればいいでしょう。</p>
+        <pre><code><mark>range</mark>.compareBoundaryPoints(Range.<mark>START_TO_END</mark>,<mark>sourceRange</mark>) <mark>&lt;= 0</mark></code></pre>
+<p>というようにします。</p>
+<p>START_TO_ENDで、</p>
+<pre><code>range      : |------<strong>|</strong><mark>　←rangeの終了点</mark>
+            abcdefghijklmnopqrstuvwxyz
+sourceRange:             <strong>|</strong>-------|
+　　 <mark>sourceRangeの開始点↑</mark>
+          </code></pre>
+<p>の2つを比べます。rangeの終了点がsourceRangeの開始点からみて前にあればいいので、-1ということになります。ところが、上をみると、「0以下」なので-1のほか0でもいいことになります。これは、0（位置が同じ）場合にも、完全に前にあるとみなせるということです。そう見なしたくなければ、-1のみで判定するようにしましょう。</p>
+<p>また、比較が2回以上必要な場合もあります。例えば、</p>
+<pre><code>range      : <mark>|---------------|</mark>
+            abcdefghijklmnopqrstuvwxyz
+sourceRange:     <mark>|-------|</mark>
+          </code></pre>
+<p>のように、sourceRangeがrangeに完全に囲まれている場合を判定したい場合は、「rangeの開始点がsourceRangeの開始点より前」「rangeの終了点がsourceRangeの終了点より後」という2つの条件を満たす必要があります。これをJavaScriptで表すには、<strong>論理積</strong>演算子の<code>&amp;&amp;</code>（<a href="7_2.html">七章第二回</a>）を使います。</p>
+    <pre><code>range.compareBoundaryPoints(Range.<mark>START_TO_START</mark>, sourceRange) <mark> &lt;= 0</mark> <mark>&&</mark> range.compareBoundaryPoints(Range.<mark>END_TO_END</mark>, sourceRange) <mark>&gt;= 0</mark></code></pre>
+<p>というようになりますね。そのほか、自分で必要に応じてやってみましょう。</p>
+
+<h3>insertNode</h3>
+<p>さて、まだまだ解説します。次は<dfn>insertNode</dfn>です。これは、ノードを引数にとり、そのRangeの開始点の位置にノードを挿入するということです。例えば、</p>
+<pre><code> <mark>|-----|</mark>
+a<mark>bcdefgh</mark>ijklmn
+          </code></pre>
+<p>というRangeがあり、この開始点に</p>
+        <pre><code>&lt;AAA&gt;123&lt;/AAA&gt;</code></pre>
+<p>というノードを追加したとき、結果は</p>
+        <pre><code>a<mark class="ins">&lt;AAA&gt;123&lt;/AAA&gt;</mark>bcdefghijklmn</code></pre>
+<p>となります。</p>
+<p>これはこのようにタグで見ると単純な動作ですが、木構造で見ると</p>
+<pre><code>｜
+└――#text "abcdefghijklmn"
+          </code></pre>
+<p>が</p>
+<pre><code>｜
+├――#text "a"
+｜
+├――AAA
+｜　　 ｜
+｜　　 └――#text "123"
+｜
+└――#text "bcdefghijklmn"
+          </code></pre>
+<p>というようになり、もとのテキストノードが2つに分断されています。これは、多少面倒ですよね。これをRangeを使って簡単にできるというのは、なかなかいい点です。</p>
+<p>ただし、この場合Rangeの表す範囲は関係なく、開始点だけが関わっているので、Rangeのメソッドとしてはちょっと特殊です。</p>
+
+<h3>cloneRange</h3>
+<p><dfn>cloneRange</dfn>は、その名の通りRangeを複製するメソッドです。返り値は新しくできたRangeで、引数はありません。</p>
+
+<h3>toString</h3>
+<p><dfn>toString</dfn>は、Rangeの範囲を全てテキストにして返すメソッドです。引数はありません。</p>
+<pre><code> <mark>|---------|</mark>
+a<mark>bcde&lt;em&gt;fgh</mark>ij&lt;/em&gt;klmn
+          </code></pre>
+<p>というRangeならば、返り値は"bcdefgh"ということになります。</p>
+
+<h3>detach</h3>
+<p><dfn>detach</dfn>は、そのRangeを<strong>破棄</strong>するメソッドです。破棄というのは、そのRangeを使えない状態にするということです。</p>
+<p>そもそもRangeは、ある目的に使い終わったらまた開始点や終了点を再設定して使いまわすことができます。しかし、このメソッドを使用した場合、もうそのRangeは使うことができません。</p>
+<p>わざわざそんなことをする意義は、おそらくメモリ解放などでしょう。Range1つ程度で大した差はないのではとも思いますが。</p>
+<p>実際よく分かりませんが、とりあえずあるのだから使いましょう。Rangeを使い終わったら、そのRangeをdetachするとよいです。引数も返り値もありません。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="8_1.html">八章第一回</a>
+                          |
+          <a rel="next" href="8_3.html">八章第三回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

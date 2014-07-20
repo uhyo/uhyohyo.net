@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>七章第一回　複数のドキュメントを扱う — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="6_3.html">六章第三回</a>
+                          |
+          <a rel="next" href="7_2.html">七章第二回</a>
+              </p>
+    </nav>
+    <h2>七章第一回　複数のドキュメントを扱う</h2>
+<p>この第七章では、章立てするほど大規模ではないが役立つさまざまな機能について解説します。</p>
+<p>まず第一回では、「複数のドキュメントを扱う」ということを解説していきます。</p>
+<p>複数のドキュメントを扱うとは、こういう感じのことです。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      <mark>&lt;iframe src="test.html"&gt;&lt;/iframe&gt;</mark>
+    &lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>これは、<strong>インラインフレーム</strong>を使用した文書です。インラインフレームとは、そこに別の文書を表示するしくみです。この文書では、その文書の中に、test.htmlという別のページを表示しているのがわかります。</p>
+<p>このページ全体もひとつの文書ですが、表示されるtest.htmlもまたひとつの文書です。そこで、JavaScriptではそれを扱う方法もあります。</p>
+
+<h3>documentの取得</h3>
+<p>JavaScriptで文書を操作するのは、<strong>document</strong>を使うのでした。iframeで読み込んだ文書も一つの文書だから、その文書に対応する<strong>documentがあります</strong>。それを取得する方法を説明します。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="test.html" <mark class="ins">id="iframe"</mark>&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+    var iframe = document.getElementById('iframe');
+
+    var doc = iframe.<dfn>contentDocument</dfn>;
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このサンプルは、iframe要素のHTMLElement（HTMLIFrameElement）のプロパティ<dfn>contentDocument</dfn>をdocに代入しています。このcontentDocumentがiframe要素で読み込まれた文書のdocumentです。</p>
+<p>もっと具体的な操作をしてみましょう。そのために、読み込むtest.htmlは、</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;aaaaaaa&lt;/p&gt;
+    &lt;p&gt;bbbbbbb&lt;/p&gt;
+    &lt;p&gt;ccccccc&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>ということにしておきます。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="test.html" id="iframe"&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var iframe = document.getElementById('iframe');
+
+      var doc = iframe.contentDocument;
+
+      console.log(doc.getElementsByTagName('p').item(0).firstChild.nodeValue);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>console.logの文が追加されました。docには、読み込まれたほうの文書のdocumentが入っています。そのgetElementsByTagName('p')だから、読み込まれるほうの文書からpが探されます。その0番目、つまり最初だから、<code>&lt;p&gt;aaaaaaa&lt;/p&gt;</code>になっています。そのfirstChildは唯一の子ノードであるテキストノードです。nodeValueはその値だから、"aaaaaaa"がログされます。</p>
+
+<p>ちなみに、これでよそのサイトをiframeで表示してJavaScriptでカスタマイズして表示・・・なんてことを考えるかもしれませんが、それはもともと<strong>できません</strong>。</p>
+<p>試してみましょう。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="<mark>http://google.com/</mark>" id="iframe"&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var iframe = document.getElementById('iframe');
+
+      var doc = iframe.contentDocument;
+      console.log(doc.getElementsByTagName('input').length);
+      console.log(doc.getElementsByTagName('img').length);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>iframeで表示しているのはGoogleです。getElementsByTagNameでinput要素とimg要素の一覧をそれぞれ取得し、lengthを表示してみています。</p>
+<p>ブラウザによって結果は違うかもしれませんが、自分がOperaで試した場合、inputのほうは0に（明らかにinput要素はあるのに）、imgに至ってはエラーになりました。</p>
+<p>これは、セキュリティ的に危険なことをさせないためです。これが可能であると、例えば見えないiframeで会員制サイトのログイン画面を表示してみましょう。便利なように、ユーザーIDや、最悪パスワードもクッキーで表示されるかもしれません。そうなれば、関係のないサイトからJavaScriptでそれらの情報を得ることができ、しかもそれを別の場所に送信したりすることもたやすいことです。</p>
+<p>このように、ユーザーIDなどの大事な情報を、関係のない人が盗み出すことも可能になるのです。このようなことを防ぐために、JavaScriptでは自分のサイトのdocumentしか（正しくは、同じオリジンのサイトのdocumentしか）自由に扱えません。</p>
+
+<h3>documentとノードの関係</h3>
+<p>さて、基本的に、ノードはdocumentに<strong>属しています</strong>。例えば、ある文書のノードは、全てその文書のdocumentに属しています。また、上のiframeの例だと、iframeがある側のページのノードはdocumentに、iframeで読み込まれる側のページのノードはiframe.contentDocumentに属しているということになります。</p>
+<p>ノード側から、そのノードがどのdocumentに属しているかを知ることができます。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      console.log(document.body.<mark>ownerDocument</mark> == <mark>document</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>これはtrueが表示されることから、その文書のノード（今回はbody要素）が持つ<dfn>ownerDocument</dfn>というプロパティが、そのノードが属するdocumentを表しているということがわかります。</p>
+
+<p>さて、これがどんなことに役立つかですが、実は、何かのノードを使ってある文書（document）を操作する際、<strong>そのノードがそのdocumentに属していないといけない</strong>のです。逆に言うと、documentを操作するとき、違う文書に属するノードは使えないということです。例えば、
+  <pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="test.html" id="iframe"&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var iframe = document.getElementById('iframe');
+      var doc = iframe.contentDocument;
+
+      var p = doc.getElementsByTagName('p').item(0);
+      document.body.appendChild(p);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このサンプルは、変数docに代入するところまでは同じです。その後、読み込まれた側の0番目のP、つまりさっきと同じ<code>&lt;p&gt;aaaaaaa&lt;/p&gt;</code>を取得し、それをdocument（読み込む側）に追加しようとしています。</p>
+<p>しかし、上記のように、このpは違う文書に属しているためにうまくいきません。</p>
+<p>そこで、このようなことを行う方法はちゃんとあります。</p>
+<pre><code>var iframe = document.getElementById('iframe');
+var doc = iframe.contentDocument;
+var p = doc.getElementsByTagName('p').item(0);
+document.body.appendChild( <mark class="ins">document.<dfn>importNode</dfn>(<mark>p</mark>, true)</mark> );
+            </code></pre>
+<p>このようにします。今度はちゃんと正しく動作します。ここで、<dfn>importNode</dfn>という新しいメソッドが出てきました。これが何かをしたのです。</p>
+<p>これはdocumentが持つメソッドです。このメソッドは、<strong>他の文書に属するノードを自分に属するノードにする</strong>というものです。</p>
+<p>つまり、このimportNodeによって、他の文書に属していたPがこのdocumentに属するようになり、その結果appendChildが成功したのです。</p>
+<p>ただし、実は、このメソッドはもとのノードに影響を与えません。今回の場合、このp要素は読み込む側に属したから読み込まれる側から消えてしまったかというと、そうではありません。ちゃんと残っています。実は、正確にはこのメソッドは「他の文書に属するノードを見て、自分に属するそれと同じノードを作成する」というものなのです。つまり動作としては、cloneNode（<a href="2_7.html">二章第七回</a>）と少し似ています。できたノードは戻り値で返されます。</p>
+<p>それでは引数をみてみます。2つありますね。ひとつめの引数がもとのノードです。今回の場合、docに属するpですね。2つめの引数は、その要素の子以下もまとめて処理するかどうかです。これもcloneNodeと同じで、これがfalseだと<code>&lt;p&gt;&lt;/p&gt;</code>だけのノードができます。</p>
+
+<h3>文書に依存しない処理をつくる</h3>
+<p>次に、文書に依存しない処理をつくることについて考えてみます。次のような関数を考えます。</p>
+<pre><code>function wrapDiv(node){
+    var wrapdiv = <mark>document</mark>.createElement('div');
+    wrapdiv.appendChild(node);
+    if(node.parentNode){
+        //親がある場合
+        node.parentNode.replaceChild(wrapdiv, node);
+    }
+    return wrapdiv;
+}</code></pre>
+<p>これは、あるノードを引数とって、それをDIV要素で囲むという関数です。</p>
+<pre><code>BODY
+  ｜
+  └―― <mark>P</mark>
+</code></pre>
+<p>のPが引数に渡されたら、</p>
+<pre><code>BODY
+  <mark class="ins">｜
+  └―― DIV</mark>
+　　　　｜
+　　　　└―― <mark>P</mark>
+          </code></pre>
+<p>というようになります。</p>
+<p>しかし、これにはひとつ問題があります。それは何だか分かりますか。</p>
+<p>この関数では、包むdiv要素を作るときに<strong>document</strong>が使われています。</p>
+<p>何がまずいかというと、引数のノードがそのdocumentに所属しているとは限らないのです。上のiframeの例で、フレーム内の文書のあるノードを読み込む側が持つ関数wrapDivで加工したいという場合があるかもしれません。</p>
+<p>しかし、その場合でも、document.createElementを使うとdocumentに所属する要素ができるので、もとのノードはifame内の文書に所属しているのに、それを包むdivはべつの文書に所属しているということが起きます。これだとうまくいきません。</p>
+<p>どうすればいいかというと、囲まれるノードと同じ文書に所属させればいいのです。それはつまり、そのノードが所属するdocumentのcreateElementを呼び出せばいいから、こうなります。</p>
+<pre><code>function wrapDiv(node){
+    var wrapdiv = <mark>node.ownerDocument</mark>.createElement('div');
+    wrapdiv.appendChild(node);
+    if(node.parentNode){
+        //親がある場合
+        node.parentNode.replaceChild(wrapdiv, node);
+    }
+    return wrapdiv;
+}</code></pre>
+<p>これで、他の文書のノードが引数に来ても正しく処理できます。つまり、この関数は<strong>文書に依存しなくなった</strong>のです。どの文書のノードも処理できます。</p>
+<p>こうすると、汎用性が高くなりいいです。こういう関数は、普段から意識して作るといいでしょう。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="6_3.html">六章第三回</a>
+                          |
+          <a rel="next" href="7_2.html">七章第二回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

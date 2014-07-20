@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>二章第十一回　スタイルシートの操作 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="2_10.html">二章第十回</a>
+                          |
+          <a rel="next" href="2_12.html">二章第十二回</a>
+              </p>
+    </nav>
+    <h2>二章第十一回　スタイルシートの操作</h2>
+<p>今回は、スタイルシートの変更について解説します。といっても、簡単な表面部分だけです。また、今回スタイルシートというのはCSSのことです。JavaScriptでは、CSSの変更がサポートされています。</p>
+<p>CSSの書き方までは今回解説しません。</p>
+
+<h3>要素のスタイルを変更する</h3>
+<p>今回解説するのは、ひとつひとつの要素のスタイルを変更することです。ひとつひとつの要素のスタイルとは、</p>
+        <pre><code>&lt;p <mark>style="background-color:yellow"</mark>&gt;test&lt;/p&gt;</code></pre>
+<p>のように、HTMLで書く場合タグのstyle属性で書くものです。</p>
+
+<p>非常に簡単で、HTMLElementが<dfn>style</dfn>というプロパティを持っています。これをいじることで、スタイルを操作できます。</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p style="background-color:yellow"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementsByTagName('p').item(0);
+
+      p.<dfn>style</dfn>.<mark>border</mark> = "10px solid black";
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>これを実行すると、p要素の周りに太い枠が出来ます。これは、p要素のborderプロパティが変更されたからです。</p>
+<p>このサンプルで、一行目で変数pにp要素を代入しています。p要素が1つしかないので、例のstyle属性を持ったp要素であることがわかります。</p>
+<p>さて、上で紹介したstyleプロパティの、borderというプロパティを変更しています。文字列で指定します。そうすると、その内容がそのままCSSのborderプロパティに反映されます。つまり、</p>
+        <pre><code>&lt;p style="background-color:yellow;<mark class="ins">border:10px solid black</mark>"&gt;test&lt;/p&gt;</code></pre>
+<p>というような状態になります。</p>
+<p>つまり、HTMLElementが持つstyleの、変更したいCSSのプロパティ（今回の場合border）と同じ名前のプロパティを変更すると、それがそのまま反映されるというわけです。</p>
+<p>ちなみに、"background-color"のような場合、JavaScriptでは変数名やプロパティ名にハイフンを使えないため、"backgroundColor"のように、ハイフンを無くして、ハイフンの直後の文字を大文字にして書きます。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="2_10.html">二章第十回</a>
+                          |
+          <a rel="next" href="2_12.html">二章第十二回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

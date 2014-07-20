@@ -1,0 +1,434 @@
+<% @page.title="十四章第四回　Indexed Database4"
+@page.prev=[14,4]
+@page.next=[15,1] %>
+<h2>十四章第四回　Indexed Database4</h2>
+<h3>インデックス</h3>
+<p>いよいよ<dfn>インデックス</dfn>(index)を解説します。インデックスとは、日本語に直すと「索引」ということになります。</p>
+<p>索引は、一般的にあいうえお順とかabc順に並んでいて、欲しいものを探しやすくなっています。そこで、オブジェクトストアに対してインデックスを作ると、key以外のもので検索したり絞り込むことが可能になります。</p>
+<p>簡単にいうとインデックスとは、属するオブジェクトストア中の各レコードのオブジェクトの、別のプロパティを擬似的にkeyとして扱うことで、その擬似keyを用いて並べたり検索したりすることを可能にする機能をもつものです。</p>
+<p>この擬似keyのことを、インデックスが持つkeyといいます。例えば、次のように、id,name,ageという3つのプロパティを持つオブジェクトをレコードとして保存する場合を考えましょう。</p>
+<pre><code>{
+  id: 1,		<mark class="ins">//←これがオブジェクトストアにおけるkey</mark>
+  name: "John Smith",
+  age:26
+}</code></pre>
+<p>コメントで示した通り、オブジェクトストアのキーがin-lineで、keyPathが"id"だとすると、今まで解説したように、このidを用いて検索することができました。</p>
+<p>ところが、今度は年齢順に並べたくなったとしましょう。そのときには、このオブジェクトストアに対して、新たにageをkeyPathとするインデックスを作ってそれを使えばいいのです。</p>
+<p>今keyPathという用語が出ましたが、実はインデックスは自身のkeyPathを持ちます。keyPathは、オブジェクトストアの設定でin-line keyとするときに使ったものですね。あれと同様です。</p>
+<p>また、keyPathが登場することからも分かるように、インデックスは基本的に、レコードがオブジェクトでないと効果を発揮しません。</p>
+
+<p>それではまず、インデックスの作り方から解説します。</p>
+
+<h4>インデックスを作る</h4>
+<p>インデックスというのはオブジェクトストアの初期設定のようなもので、<strong>versionchangeトランザクションの最中しか作れません</strong>。</p>
+<p>インデックスを作るには、IDBObjectStoreのメソッドである<dfn>createIndex</dfn>を呼び出します。返り値として、インデックスを表す<dfn>IDBIndex</dfn>オブジェクトが得られます。</p>
+<p>インデックスも複数存在し得るので、名前を付けます。第一引数はインデックスの名前（文字列）です。第二引数は上で述べた、インデックスのkeyPathです。通常は文字列です。そして第三引数にオプションです。これはcreateObjectStoreの第二引数と同じように、複数のプロパティをもつオブジェクトです。プロパティは<dfn>unique</dfn>と<dfn>multiEntry</dfn>の2つでいずれも真偽値、省略された場合デフォルトはfalseです。例えば次のような感じですね。</p>
+<pre><code>{
+  <mark>unique</mark>:true,
+  <mark>multiEntry</mark>:false,
+}</code></pre>
+<p>uniqueがtrueのときは、そのインデックスにおいてkeyが重複してはいけなくなります。というのも、レコードのもともとのkeyは重複してはいけないのは当然ですが、それ以外については特に定められていませんでしたね。ですから、インデックス内で他のプロパティをkeyとして扱った場合に、それらが重複することが起こりえます。uniqueがtrueであるインデックスでは、それは許可されません。重複するレコードをオブジェクトストアに追加しようとすると失敗します。</p>
+<p>multiEntryは、インデックスを用いた検索時に、keyとして扱われるプロパティが配列だった場合の扱われ方が変わります。falseのときは通常通り、配列は配列として扱われます。前に解説したとおり、keyとしては、文字列、Date、数値のいずれよりも大きいものでしたね。</p>
+<p>multiEntryがtrueになると、検索時の配列の挙動が変わります。配列の要素のうち、どれか一つでも条件を満たせば当てはまるようになるのです。つまり、例えば"age"をkeyPathにもつインデックスで検索した場合、</p>
+<pre><code>{
+  id: 1,
+  name: "John Smith",
+  age:[<mark>0</mark>, <mark>10</mark>, <mark>20</mark>, <mark>30</mark>, <mark>40</mark>, <mark>50</mark>, <mark>60</mark>]
+}</code></pre>
+<p>というデータがあった場合、この人物は、0歳、10歳、20歳、30歳、40歳、50歳、60歳という複数の顔を持ち、その中のどれか一つでも条件に当てはまれば出てくるという変な人になるのです。</p>
+<p>ではインデックスの扱い方に移る前に、対になるメソッド<dfn>deleteIndex</dfn>も紹介しておきます。引数はインデックス名だけで、そのインデックスを削除します。ちなみに返り値はありません。</p>
+
+<h3>インデックスを使用する</h3>
+<p>さて、いざインデックスを使用して検索してみましょう。まずIDBObjectStoreを用意するところまでは同じです。IDBObjectStoreは、<dfn>index</dfn>というメソッドを持っていて、これを用いてインデックスを取得できます。引数はインデックス名だけで、返り値が<strong>IDBIndex</strong>です。</p>
+
+<p>まずIDBIndexのプロパティを紹介します。全て書き換えできません。</p>
+<dl>
+  <dt>name</dt><dd>インデックス名です。</dd>
+  <dt>objectStore</dt><dd>検索対象のオブジェクトストアです。</dd>
+  <dt>keyPath</dt><dd>作るときに指定されたkeyPathです。</dd>
+  <dt>multiEntry</dt><dd>オプションそのままです。</dt>
+  <dt>unique</dt><dd>これもオプションそのままです。</dt>
+</dl>
+<p>そして次にIDBIndexのメソッドを紹介します。まず紹介するのは<dfn>get</dfn>です。IDBObjectStoreにもありましたね。</p>
+<p>それとかなり似たメソッドで、返り値はIDBRequestで、key（またはkey range）を引数に渡すと、結果として当てはまる最初のレコードが得られます。ただし、ここでいうkeyはオブジェクトストアのkeyではなくて、インデックスに定められたほうです。基本的にインデックスの説明でkeyといったら、インデックスの検索で使用されるほうの擬似keyであると考えて構いません。</p>
+
+<p>といった直後に登場するのは<dfn>getKey</dfn>メソッドです。</p>
+<p>これもgetと同様にkeyを引数に取りIDBRequestを返すのですが、結果として得られるものが違います。当てはまったレコードそのものではなく、そのレコードが持つ本来のkey（オブジェクトストアで定められたほうのkey）です。ややこしいですが理解しましょう。</p>
+
+<p>そしてもう一つ<dfn>count</dfn>というのもあります。これはIDBObjectStoreのもつcountと動作は全く同じです。ただしkey（またはkey range）が与えられた場合、使われるのはインデックスのほうのkeyです。</p>
+
+<p>そしてここからが本命です。<dfn>openCursor</dfn>メソッドです。</p>
+<p>といっても動作は実は、前回紹介したIDBObjectStoreのopenCursorと同じです。カーソルの扱い方なども全て同じなのでもう一度解説はしません。何度も繰り返しますが、違うのはkeyが、オブジェクトストアではなくインデックスのkeyが用いられる点だけです。</p>
+<p>ただ、ここで意味を帯びるのが、IDBCursorの<dfn>primaryKey</dfn>というプロパティです。インデックスにおけるカーソルでは、そのkeyプロパティが、オブジェクトストアの本来のkeyではなく、インデックスのkeyPathに対応したkeyになるのはさんざん説明した通りですが、そこで本来のkeyを得たい場合はこのprimaryKeyに入っています。</p>
+<p>ちなみにインデックスではない普通のオブジェクトストア上のカーソルの場合でもprimaryKeyは使えますが、ただのkeyプロパティと同じです。</p>
+<p>また、前回紹介した"nextunique"や"prevunique"というのは、このインデックスにおけるカーソルの場合に意味を持ってきます。オブジェクトストアのkeyとは違うので、keyが重複する可能性が出てくるからです。詳しい動作は前回を参照して下さい。</p>
+
+<p>ちなみに<dfn>openKeyCursor</dfn>というほとんど同じような動作をするメソッドがあります。</p>
+<p>違いは、それで得られたカーソルが、valueプロパティが使えないという点です。下位互換なのであまり使う機会はないかと思います。</p>
+
+<p>以上でインデックスの使用法の話は終わりです。同時に、indexedDBの基本的な使い方を説明し終えたということです。次のような政治家をいくつか登録して、特定の政党に所属する人だけ抜き出すサンプルです。</p>
+<pre><code>{
+name:"小泉進次郎",	<mark class="ins">//名前</mark>
+party:"自民党"		<mark class="ins">//政党</mark>
+}</code></pre>
+<pre><code>var request = indexedDB.open("test2",1);	//test2というデータベースをバージョン1で開く
+//データベースの更新処理
+request.addEventListener("upgradeneeded",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //fooというオブジェクトストアを作っておく。out-of-line keyでキージェネレータを使用する。
+  var store=db.createObjectStore("foo",{
+    autoIncrement:true
+  });	//返り値はIDBObjectStore
+  <mark class="ins">//partyIndexというインデックスも作っておく。partyプロパティをkeyとして使用する</mark>
+  store.<mark>createIndex</mark>("partyIndex","party",{
+    <mark>unique</mark>:false,	//同じ政党の人が複数いてもいいのでfalse
+    <mark>multiEntry</mark>:false,	//複数の政党に所属する人もいないので・・・
+  });
+  //とりあえず最初にいくつかレコードを追加しておく
+  store.add({
+  name:"小泉純一郎",
+  party:"自民党",
+  });
+  store.add({
+  name:"安倍晋三",
+  party:"自民党",
+  });
+  store.add({
+  name:"福田康夫",
+  party:"自民党",
+  });
+  store.add({
+  name:"麻生太郎",
+  party:"自民党",
+  });
+  store.add({
+  name:"鳩山由紀夫",
+  party:"民主党",
+  });
+  store.add({
+  name:"菅直人",
+  party:"民主党",
+  });
+  store.add({
+  name:"野田佳彦",
+  party:"民主党",
+  });
+  store.add({
+  name:"安倍晋三",
+  party:"自民党",
+  });
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //トランザクションを作る
+  var transaction=db.transaction("foo","readonly");
+  //オブジェクトストアを得る
+  var objectStore=transaction.objectStore("foo");
+  <mark class="ins">//インデックスを得る インデックスはIDBIndex</mark>
+  var index=objectStore.<mark>index</mark>("partyIndex");
+  <mark class="ins">//インデックスを用いて検索するカーソルを得る keyを指定して絞る</mark>
+  //返り値はIDBCursor
+  var req=index.<mark>openCursor</mark>("自民党","next");
+  req.addEventListener("success",function(e){
+    if(req.result==null){
+      //終了
+      console.log("終了しました。");
+    }else{
+      //req.resultにIDBCursorが入っている
+      var cursor=req.result;
+      console.log(cursor.value.name);
+      cursor.advance(1);	//次へ進む
+    }
+  });
+
+  req.addEventListener("error",function(e){
+    console.error(req.error);
+  });
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});</code></pre>
+<p>実行すると</p>
+<pre><code>小泉純一郎
+安倍晋三
+福田康夫
+麻生太郎
+安倍晋三
+終了しました。</code></pre>
+<p>という結果になるはずです。インデックスを用いて、本来のkeyではなくpartyという別のプロパティで絞り込むことができました。また、"自民党"を"民主党"に変えると以下の様な結果になることでしょう。</p>
+<pre><code>鳩山由紀夫
+菅直人
+野田佳彦
+終了しました。</code></pre>
+<p>今までのサンプルではオブジェクトストアを作るときにデータを全部登録してしまいましたが、実際はユーザーの操作に応じて途中でデータを登録することで、実用的なものを作ることができます。</p>
+
+<h3>補足</h3>
+<p>以上で基本は全部説明し終えたので、ここからは補足的な内容をいくつか紹介して終わりにします。</p>
+<h4>インデックスに配列のkeyPath</h4>
+<p>実はインデックスのkeyPathには、文字列の他に、複数のkeyPathを並べた配列も許可されています。オブジェクトストアのkeyPathはそれは許可されていません。また、インデックスでも、multiEntryがtrueのときはできません。</p>
+<p>keyPathが配列のとき何が起こるかというと、その配列のそれぞれの要素に対応するkeyを配列でまとめたものがそのレコードのkeyとなります。</p>
+<p>分かりにくいと思うので具体例で説明すると、例えば次のようなレコードを考えましょう。</p>
+<pre><code>{
+  name:"麻生太郎",
+  party:"自民党",
+  age:72
+}</code></pre>
+<p><small>（情報は2013年3月現在のものです）</small></p>
+<p>もしインデックスのkeyPathが次のような配列だったとします。</p>
+        <pre><code>["party","age"]</code></pre>
+<p>このとき、このインデックスにおけるさっきのレコードのkeyは次の配列になります。</p>
+        <pre><code>["自民党",72]</code></pre>
+<p>つまり、うまく配列の大小関係を用いてやれば複数の条件を同時に指定することが可能かもしれません。ただ、完全一致ならうまくいきますが、範囲指定になると活用するのは難しいのではないかと思います。もし機会があれば活用しましょう。例えば、2つのプロパティが目的と一致するレコードを探し出すサンプルを紹介しておきます。</p>
+<pre><code>var request = indexedDB.open("test3",1);	//test3というデータベースをバージョン1で開く
+//データベースの更新処理
+request.addEventListener("upgradeneeded",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //fooというオブジェクトストアを作っておく。in-line keyでキージェネレータを使用する。
+  var store=db.createObjectStore("foo",{
+    keyPath:"id",
+    autoIncrement:true
+  });	//返り値はIDBObjectStore
+  <mark class="ins">//partyAndAgeというインデックスも作っておく</mark>
+  store.<mark>createIndex</mark>("partyAndAge",<mark>["party","age"]</mark>,{
+    unique:false,
+    multiEntry:false,
+  });
+  //最初にいくつかレコードを追加しておく
+  store.add({
+    name:"小泉純一郎",
+    party:"自民党",
+    age:71,
+  });
+  store.add({
+    name:"安倍晋三",
+    party:"自民党",
+    age:58,
+  });
+  store.add({
+    name:"福田康夫",
+    party:"自民党",
+    age:76,
+  });
+  store.add({
+    name:"麻生太郎",
+    party:"自民党",
+    age:72,
+  });
+  store.add({
+    name:"鳩山由紀夫",
+    party:"民主党",
+    age:66,
+  });
+  store.add({
+    name:"菅直人",
+    party:"民主党",
+    age:66,
+  });
+  store.add({
+    name:"野田佳彦",
+    party:"民主党",
+    age:55,
+  });
+  store.add({
+    name:"安倍晋三",
+    party:"自民党",
+    age:58,
+  });
+});
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //トランザクションを作る
+  var transaction=db.transaction("foo","readonly");
+  //オブジェクトストアを得る
+  var objectStore=transaction.objectStore("foo");
+  //インデックスを得る
+  var index=objectStore.index("partyAndAge");
+
+  //返り値はIDBCursor
+  var req=index.openCursor(<mark>["自民党",71]</mark>,"next");	<mark class="ins">//自民党でしかも71歳の人を探す</mark>
+  req.addEventListener("success",function(e){
+    if(req.result==null){
+      //終了
+      console.log("終了しました。");
+    }else{
+      //req.resultにIDBCursorが入っている
+      var cursor=req.result;
+      console.log(cursor.value.name);
+      cursor.advance(1);	//次へ進む
+    }
+  });
+
+  req.addEventListener("error",function(e){
+    console.error(req.error);
+  });
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});</code></pre>
+<p>小泉純一郎だけが結果として現れるはずです。</p>
+<p>さらに、二つのパラメータで同時に範囲指定するのは難しいですが、一つだけなら可能です。例えば次のサンプルは、Key Rangeを用いて、自民党で70歳以上80歳未満の人を探すサンプルです。上のサンプルで用いたデータベースと同じデータベースや同じインデックスなどを用いるので、上のサンプルに続けて実行してみて下さい。</p>
+<pre><code>var request = indexedDB.open("test3",1);	//test3というデータベースをバージョン1で開く
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //トランザクションを作る
+  var transaction=db.transaction("foo","readonly");
+  //オブジェクトストアを得る
+  var objectStore=transaction.objectStore("foo");
+  //インデックスを得る
+  var index=objectStore.index("partyAndAge");
+
+  <mark class="ins">//まずKeyRangeを作る</mark>
+  var range=IDBKeyRange.bound(<mark>["自民党",70]</mark>,<mark>["自民党",80]</mark>,false,true);
+  //返り値はIDBCursor
+  var req=index.openCursor(range,"next");	<mark class="ins">//IDBKeyRangeを渡す</mark>
+  req.addEventListener("success",function(e){
+    if(req.result==null){
+      //終了
+      console.log("終了しました。");
+    }else{
+      //req.resultにIDBCursorが入っている
+      var cursor=req.result;
+      console.log(cursor.value.name);
+      cursor.advance(1);	//次へ進む
+    }
+  });
+
+  req.addEventListener("error",function(e){
+    console.error(req.error);
+  });
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});</code></pre>
+<p>結果は次のようになります。</p>
+<pre><code>小泉純一郎
+麻生太郎
+福田康夫
+終了しました。</code></pre>
+<p>ここで注目すべきは、年齢が低い順に並び替えられていることですね。keyによりソートされているのでこうなります。配列の大小の定義からいって、年齢よりも前にある政党によるソートが優先するはずですが、今回は"自民党"だけなので年齢によるソートだけになっています。試しに次のソースで、全員をpartyAndAgeインデックスによって並び替えてみましょう。
+  <pre><code>var request = indexedDB.open("test3",1);	//test3というデータベースをバージョン1で開く
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //トランザクションを作る
+  var transaction=db.transaction("foo","readonly");
+  //オブジェクトストアを得る
+  var objectStore=transaction.objectStore("foo");
+  //インデックスを得る
+  var index=objectStore.index("partyAndAge");
+
+  //返り値はIDBCursor
+  var req=index.openCursor(<mark>null</mark>,"next");	<mark class="ins">//今回は全員なのでkeyはnull</mark>
+  req.addEventListener("success",function(e){
+    if(req.result==null){
+      //終了
+      console.log("終了しました。");
+    }else{
+      //req.resultにIDBCursorが入っている
+      var cursor=req.result;
+      console.log(cursor.value.name);
+      cursor.advance(1);	//次へ進む
+    }
+  });
+
+  req.addEventListener("error",function(e){
+    console.error(req.error);
+  });
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});</code></pre>
+<p>結果はこうです。</p>
+<pre><code>野田佳彦
+鳩山由紀夫
+菅直人
+安倍晋三
+安倍晋三
+小泉純一郎
+麻生太郎
+福田康夫
+終了しました。</code></pre>
+<p>まず民主党が来て、次に自民党がきていることがわかります。これは配列の0番目のほうが、1番目よりも大小比較に強い影響を与えるからです。文字列比較では"民主党"は"自民党"より小さいことが分かります。各党の中では年齢順になっています。</p>
+<p>このように、範囲指定では使いにくいかもしれませんが、並び替えのためなら配列のkeyPathも使い道があるかもしれません。</p>
+
+<h4>トランザクションのイベント</h4>
+<p>実はトランザクション（IDBTransaction）にもイベントが発生します。</p>
+<p>発生するイベントは<strong>abort</strong>,<strong>complete</strong>,<strong>error</strong>の3つです。</p>
+<p>abortとはトランザクションが中断されたとき、completeはトランザクションが正しく終了したとき、errorはエラーが発生したときです。</p>
+<p>completeで、トランザクションが正しく終了したというのは、そのトランザクションを用いたリクエストが全て終了したときを指します。具体的には、そもそもプログラムというのは基本的には上から下に進みますが、最後まで進んでしまったら当然終了します（もちろん、その後何かイベントなどが発生して関数が呼び出されたら始まりますが、それもそのうち終わります）。終了してすることが何も無くなった状態を、イベントループに戻ったなどといいます。この状態になって、なおかつもう処理すべきリクエストが残っていないときが、トランザクションが終了したときです。</p>
+<p>簡単にいえば、処理が全部終わったときと考えて差し支えありません。これを、さっきのサンプルに追加して試してみましょう。</p>
+<pre><code>var request = indexedDB.open("test3",1);	//test3というデータベースをバージョン1で開く
+//成功したときのイベントハンドラ
+request.addEventListener("success",function(e){
+  var db=request.result;	//resultにはIDBDatabaseが入っている
+
+  //トランザクションを作る
+  var transaction=db.transaction("foo","readonly");
+  <mark class="ins">//トランザクションに対してイベントを登録する
+  transaction.addEventListener("<mark>complete</mark>",function(e){
+    console.log("トランザクションが終了しました。");
+  });</mark>
+  //オブジェクトストアを得る
+  var objectStore=transaction.objectStore("foo");
+  //インデックスを得る
+  var index=objectStore.index("partyAndAge");
+
+  //返り値はIDBCursor
+  var req=index.openCursor(null,"next");
+  req.addEventListener("success",function(e){
+    if(req.result==null){
+      //終了
+      console.log("終了しました。");
+    }else{
+      //req.resultにIDBCursorが入っている
+      var cursor=req.result;
+      console.log(cursor.value.name);
+      cursor.advance(1);	//次へ進む
+    }
+  });
+
+  req.addEventListener("error",function(e){
+    console.error(req.error);
+  });
+});
+//失敗したとき
+request.addEventListener("error",function(e){
+  console.error(request.error);
+});</code></pre>
+<p>結果は次のようになり、確かに全部終わってからcompleteイベントが発生していることが分かります。</p>
+<pre><code>野田佳彦
+鳩山由紀夫
+菅直人
+安倍晋三
+安倍晋三
+小泉純一郎
+麻生太郎
+福田康夫
+終了しました。
+<mark>トランザクションが終了しました。</mark></code></pre>
+<p>このcompleteイベントは、処理が全部終了してから次に進みたいときなど、使いどころがあるかもしれません。今回の場合はreq.resultがnullだったときに全部終了したとはっきりしていますが、複数のカーソルを同時に動かしたりした場合など、どちらが先に終わるのかわからないので面倒です。その場合はcompleteイベントが役に立ちます。</p>
+
+<h4>cmpメソッド</h4>
+<p>実は<a href="14_2.html">十四章第二回</a>で、<mark>IDBFactory</mark>は3つのメソッドを持つといいましたが、openとdeleteDatabaseの2つしか紹介していません。3つ目を紹介します。</p>
+<p>3つ目は<dfn>cmp</dfn>メソッドです。2つのkeyを引数にとって、大小を比較して結果を数値で返してくれます。</p>
+<p>同じなら0、第一引数が第二引数より大きいなら1,第一引数が第二引数より小さいなら-1です。いくつか試してみましょう。</p>
+<pre><code>console.log(indexedDB.<mark>cmp</mark>(5,0));	<mark class="ins">// 1（数値どうしの比較）</mark>
+console.log(indexedDB.<mark>cmp</mark>("文字列",Infinity));	<mark class="ins">// 1（文字列は数値より大きい）</mark>
+console.log(indexedDB.<mark>cmp</mark>(new Date(),"string"));	<mark class="ins">// -1（文字列はDateより大きい）</mark>
+console.log(indexedDB.<mark>cmp</mark>([5],[4,8,12,16,20]));	<mark class="ins">// 1（配列どうしの比較）</mark></code></pre>
+
+<p>以上で説明は全て終了です。Indexed Databaseは、検索などの機能が他の本格的データベースに比べて貧弱な気がします。範囲指定しかできませんし、複数の条件を同時に指定するのは難しいです。とりあえずKey Rangeで一次的に絞り込んで、その後は検索結果に対してif文などで絞り込んでいくという形になるでしょう。</p>
+<p>それでも、localStorageよりははるかに強力な機能を持っています。ぜひ使いこなしましょう。</p>

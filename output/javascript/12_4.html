@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十二章第四回　dataset — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="12_33.html">十二章第三十三回</a>
+                          |
+          <a rel="next" href="12_5.html">十二章第五回</a>
+              </p>
+    </nav>
+    <h2>十二章第四回　dataset</h2>
+<p>今回はちょっと息抜きで、簡単ですが便利な<dfn>dataset</dfn>を紹介します。</p>
+<p>HTML5には<strong>独自データ属性</strong>というものがあり、簡単にいうと、要素に好きな属性をつけられるというものです。</p>
+<p>ただ、完全に自由に属性に名前をつけていては大変なので、data-という接頭辞をつけた属性を勝手に自分で作っていいことになっています。つまり、具体的には例えばこうです。</p>
+        <pre><code>&lt;div <mark>data-test="foo"</mark>&gt;</code></pre>
+<p>data-testという独自データ属性をつけてみました。</p>
+<p>もちろん自分で勝手に作ったので、HTML的には何の意味もありません。じゃあ何に使うのかというと、そう、<strong>JavaScript側から利用できる</strong>のです。</p>
+<p>例えば以前<a href="4_1.html">四章第一回</a>で、画像の説明にtitle属性を使いました。</p>
+<pre><code>&lt;img src="aaa.gif" alt="aaa" width="100" height="100" <mark class="ins">title="aaaの画像です。"</mark>&gt;
+&lt;img src="bbb.gif" alt="bbb" width="100" height="100" <mark class="ins">title="bbbの画像です。"</mark>&gt;
+&lt;img src="ccc.gif" alt="ccc" width="100" height="100" <mark class="ins">title="cccの画像です。"</mark>&gt;</code></pre>
+<p>title属性にはもともと「説明」的な意味があるからいいのですが、ぜんぜんHTML的には関係ないデータを入れたい場合とか、あとデータを何種類も入れたい場合など、title属性を使っていては不都合な場合もあることでしょう。そこで、今回はこれを独自データ属性を使って書いてみましょう。</p>
+<p>要するにこうです。</p>
+<pre><code>&lt;img src="aaa.gif" alt="aaa" width="100" height="100" <mark>data-description="aaaの画像です。"</mark>&gt;
+&lt;img src="bbb.gif" alt="bbb" width="100" height="100" <mark>data-description="bbbの画像です。"</mark>&gt;
+&lt;img src="ccc.gif" alt="ccc" width="100" height="100" <mark>data-description="cccの画像です。"</mark>&gt;</code></pre>
+<p>このようにdata-descriptionという独自データ属性を用意しました。</p>
+<p>それではこれを読み込むほうはこんな感じでしょうか。</p>
+<pre><code>//elementを問題のimg要素とすると
+element.getAttribute('data-description');</code></pre>
+<p>これでも読めることは読めるのですが、わざわざ独自データ属性として用意されているからには、実はもっと便利な方法があるのです。それがこれです。</p>
+        <pre><code>element.<mark>dataset</mark>.description;</code></pre>
+<p>要素の<dfn>dataset</dfn>というプロパティが出現しました。これは<dfn>DOMStringMap</dfn>という名前のついたオブジェクトの一種ですが、特に特別な何かがあるわけでもありません。</p>
+<p>このdatasetが持つプロパティが独自データ属性に対応していて、descriptionプロパティがdata-description属性に対応していて（要するにdata-を取った部分がプロパティ名になっています）、参照することができたのです。ちなみに、これには代入して属性を書き換えることもできます。</p>
+<p>このdatasetを用いることで、HTML側からJavaScript側へ情報を楽に渡すことができるのです。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="12_33.html">十二章第三十三回</a>
+                          |
+          <a rel="next" href="12_5.html">十二章第五回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    

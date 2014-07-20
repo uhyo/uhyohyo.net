@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十章第一回　XPathとは — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+      </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="11_2.html">十一章第二回</a>
+                          |
+          <a rel="next" href="11_4.html">十一章第四回</a>
+              </p>
+    </nav>
+    <h2>十一章第三回　console</h2>
+<p>次に紹介するのが<dfn>console</dfn>です。これは、<strong>デバッグ</strong>時に大いに役立つものです。</p>
+<p>consoleと言われたら、<a href="2_1.html">二章第一回</a>に紹介して以来ずっと使ってきたconsole.logを思い浮かべますね。</p>
+<p>実はconsole.logの他にも似たような便利メソッドがあるので、今回はそれを紹介します。</p>
+<p>console.logというのも、実はconsoleオブジェクトが持つlogというメソッドであることがわかります。consoleというのはもともとある変数名で、いくつかのメソッドを持ったオブジェクトです。</p>
+
+<h3>console.info, console.warn, console.error</h3>
+<p>実は、やはりconsoleで一番使うのはconsole.logで、それ以外のメソッドは使用頻度が結構劣ります。所詮デバッグ用ですから、console.logだけで事足りる場合が多いのです。しかし、ある以上は紹介しておきましょう。まず紹介するのは3つのメソッドです。</p>
+<p>info,warn,errorとありますが、「表示する」という基本機能は同じですので、引数も同じです。それでは違いは、logはただ表示するだけでしたが、infoは<strong>「情報」っぽく</strong>、<strong>warnは「警告」っぽく</strong>、<strong>errorは「エラー」っぽく</strong>表示します。それだけです。</p>
+<p>ブラウザによって結構微妙なところですが、例えばChromeだとちゃんとアイコンを変えて表示してくれたりします。</p>
+
+<h3>console.debug, console.dir,console.dirxml</h3>
+<p>これも引数はlogなどと同じで、debugは「ログが発生したソースコードの地点へジャンプしやすいようになっている」そうです。ただ、これもまたChromeの場合ですが（Chromeが一番コンソールが便利なように感じるので）、ただのlogでも同じように簡単にジャンプできるので、Chromeの場合は違いはありませんでした。まあどれもそんなものでしょう。</p>
+<p>console.dirは、「オブジェクトの場合にそのプロパティ一覧を表示する」というようになっていますが、大抵のブラウザのコンソールは、オブジェクトをコンソールに表示すると自動的にそのプロパティ一覧は見られるようになりますので、あまり意味はありません。</p>
+<p>dirxmlはXMLオブジェクトを表示しているのに特化しているらしいですが、よくわかりません。</p>
+
+<h3>console.assert</h3>
+<p>これは引数がちょっと違います。第一引数に<strong>条件</strong>、第二引数以降が今まで同様の表示するものです。</p>
+<p>これは、いわゆる<strong>テスト</strong>というものです。第一引数の条件というのを判定して、trueならOK、falseならダメです。OKならそのまま何も起こりません（コンソールにも表示されません）が、falseならテストクリアならずということで、第二引数以降の内容を表示しつつ<strong>エラーを発生させて停止します</strong>（<a href="9_8.html">九章第八回</a>で紹介したthrowと同じ感じです）。</p>
+<p>たまに活躍する場面があるかもしれません。</p>
+
+<h3>console.trace</h3>
+<p>これは引数なしで、コンソールに現時点でのコールスタックを表示します。詳しいデバッグができるかもしれません。</p>
+
+<h3>console.group, console.groupCollapsed, console.groupEnd</h3>
+<p>console.groupは、コンソールに表示されるログを<strong>グループ化</strong>します。console.group自体にも引数を指定して表示されることができます。</p>
+<p>console.groupが呼び出された後に続くログは、そのconsole.groupのログを親としてまとめられ（グループ化）、まとめて折りたたんだりできるようになります。</p>
+<p>このグループ化は、console.groupEnd（引数なし）が呼び出されるまで続きます。例えば、こんな感じのを実行してみると、複数のログをまとめてたたんだりできるのが確認できます。</p>
+<pre><code>console.<mark>group</mark>("group start");
+console.log(1);
+console.log(2);
+console.log(3);
+console.<mark>groupEnd</mark>();
+          </code></pre>
+<p>実際にやってみると、なんとなく動作が分かると思います。</p>
+<p>ちなみに、groupCollapsedというのはgroupと同じですが、最初からそのグループが閉じてまとまった状態で表示されます。</p>
+<p>これらをうまく使うと、大量のデバッグログをうまくまとめられるかもしれません（しかし自分は使ったことはありません）。</p>
+
+<h3>console.profile, console.profileEnd</h3>
+<p>これはまた面白いメソッドですが、コンソールに表示するという他のメソッドとはちょっと違います。</p>
+<p>おおまかに言うと、profileが呼ばれてからprofileEndが呼ばれるまでの、実行時間などのデータを取得できます。</p>
+<p>例えば処理にやけに時間がかかるときなど、その部分全体をconsole.profile()〜console.profileEnd()で囲むと、その処理内での関数ごとの実行時間などがくわしく把握できるので、デバッグに役立つかもしれません。</p>
+<p>ちなみにprofileには引数を指定することができ、あとで結果を表示するときにそのタイトルとなります。複数profile〜profileEndがあるときに区別できます。</p>
+
+<h3>console.time, console.timeEnd</h3>
+<p>もう一つ時間が関係するのが、console.time〜console.timeEndです。</p>
+<p>これは要するにタイマーで、timeが呼ばれてからtimeEndが呼ばれるまでの時間を測定します。</p>
+<p>注意すべきことは、timeは引数に<strong>タイマーの名前</strong>を指定して呼び出し、timeEndも同じ引数で呼び出すということです。</p>
+<p>たとえば時間がかかる処理の前後にtimeとtimeEndを置いて時間を測定したりなどできます。測定結果は、timeEndのときにコンソールに出力されます。</p>
+
+<h3>console.count</h3>
+<p>次はcountです。これはカウンタで、console.countが呼ばれるたびに数字を1増やして出力します。ある処理の回数を数えるのに使えるかもしれません。</p>
+<p>これもtime同様に第一引数にカウンタの名前を指定できます。異なる名前で呼び出されたカウンタは異なる系列となり、また1からになります。再度もとと同じ名前で呼び出すと、もとのやつのカウントが継続されます。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="11_2.html">十一章第二回</a>
+                          |
+          <a rel="next" href="11_4.html">十一章第四回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    
