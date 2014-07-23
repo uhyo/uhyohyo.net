@@ -51,13 +51,16 @@ em,var,dfn {
 
 //page header
 body > header > h1 {
-  font-size:2em;
-  color:#444444;
-  font-family:sans-serif;
-  border:none;
+  margin:0;
+  padding:0;
   box-shadow:none;
+
   a {
-    text-decoration:none;
+    display:block;
+    width:300px;
+    height:60px;
+    text-indent:-9999px;
+    background-image: url(/images/toptitle.png);
   }
   a:link, a:visited {
     color:#444444;

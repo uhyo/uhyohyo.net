@@ -40,13 +40,15 @@ em, var, dfn {
   font-weight: bold; }
 
 body > header > h1 {
-  font-size: 2em;
-  color: #444444;
-  font-family: sans-serif;
-  border: none;
+  margin: 0;
+  padding: 0;
   box-shadow: none; }
   body > header > h1 a {
-    text-decoration: none; }
+    display: block;
+    width: 300px;
+    height: 60px;
+    text-indent: -9999px;
+    background-image: url(/images/toptitle.png); }
   body > header > h1 a:link, body > header > h1 a:visited {
     color: #444444; }
 
