@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十五章第三回　Performance Timeline — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+        <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-46093038-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="15_2.html">十五章第二回</a>
+                          |
+          <a rel="next" href="15_4.html">十五章第四回</a>
+              </p>
+    </nav>
+    <h2>十五章第三回　Performance Timeline</h2>
+<p>今回紹介する<dfn>Performance Timeline</dfn>は、<a href="15_2.html">前回</a>のNagivation Timingを拡張したもので、またもや時間に関する話です。</p>
+<p>前回は、performanceのtimingプロパティにPerformanceTimingプロパティが入っており、それでページの表示に要した時間の情報が得られるというものでした。</p>
+
+<h3>PerformanceEntry</h3>
+<p>実は、このような時間計測の情報を複数Performanceオブジェクトに登録することができます。1つ1つの情報は<dfn>PerformanceEntry</dfn>オブジェクトで表されます。このPerformanceEntryは以下のプロパティを持ちます。</p>
+<dl>
+  <dt>name</dt>
+  <dd>そのPerformanceEntryオブジェクトに付けられた名前です。</dd>
+  <dt>entryType</dt>
+  <dd>PerformanceEntryオブジェクトの種類です。</dd>
+  <dt>startTime</dt>
+  <dd>そのPerformanceEntryオブジェクトで最初に記録された時間です。</dd>
+  <dt>duration</dt>
+  <dd>そのPerformanceEntryオブジェクトでの一連の時間計測が終了するまでの時間です。</dd>
+</dl>
+<p>ここで、「時間」というのは数値で表されています。この数値はミリ秒単位で表されていて、0.001ミリ秒単位で計測されることになっています。ただし、実際の精度はブラウザやハードウェアに依存するでしょう。</p>
+<p>こう見ると、なんだか抽象的でどんな情報が得られるかよく分かりません。それもそのはず、具体的な情報は、PerformanceEntryを継承したオブジェクトにより表されるのです。いくつかの種類のオブジェクトが存在するため、それらをまとめて扱うためにこのPerformanceEntryのプロパティを使うことができます。</p>
+<p>nameプロパティというのも、実際にどういう名前がつけられるかはPerformanceEntryオブジェクトの種類に依存します。</p>
+
+<p>さて、Performanceオブジェクトに登録されたPerformanceEntryオブジェクトを見るには、<dfn>getEntries</dfn>メソッドを使用します。これは<dfn>PerformanceEntryList</dfn>オブジェクトなのですが、端的に言えばPerformanceEntryの配列です。getEntriesメソッドは引数がなく、Performanceオブジェクトに登録されている全てのPerformanceEntryオブジェクトが得られます。</p>
+<p>他に、引数に文字列を指定することでentryTypeによる絞り込みができる<dfn>getEntriesByType</dfn>メソッドと、同じくnameによる絞り込みができる<dfn>getEntriesByName</dfn>メソッドがあります。さらにgetEntriesByNameメソッドの場合、第二引数によりentryTypeによる絞り込みもできます。</p>
+
+<p>以上でPerformanceEntryオブジェクトの取得方法は分かりましたね。しかし、具体的にどんな種類のPerformanceEntryがあるのかを知らないと役に立ちそうにありません。というわけで、次回からはPerformanceEntryの種類を解説していきます。</p>
+
+<p>短いですが導入編ということで、今回はこれで終わりです。</p>
+
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="15_2.html">十五章第二回</a>
+                          |
+          <a rel="next" href="15_4.html">十五章第四回</a>
+              </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    
