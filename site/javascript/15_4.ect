@@ -1,10 +1,10 @@
 <% @page.title="十五章第四回　Resource Timing"
 @page.prev=[15,3]
-@page.next=null %>
+@page.next=[15,5] %>
 <h2>十五章第四回　Resource Timing</h2>
 <p><a href="15_3.html">前回</a>の続きです。前回はPerformanceEntryオブジェクトの扱い方を紹介しました。今回はその具体例です。</p>
 
-<p>Resource Timingという仕様では、Webページからimg要素やlink要素によって読み込まれたリソースについて、それにかかった時間などを知ることができます。これは、<a href="15_1.html">一五章第一回</a>で紹介したnavigation Timingと似ていますね。あちらはページ本体に読み込みにかかった時間であり、本体が読み込み完了してHTMLのパース・DOMの構築まで終わったら読み込み完了としていたので、外部リソースに読み込みにかかった時間までは測れませんでした。</p>
+<p>Resource Timingという仕様では、Webページからimg要素やlink要素によって読み込まれたリソースについて、それにかかった時間などを知ることができます。これは、<a href="15_2.html">一五章第二回</a>で紹介したnavigation Timingと似ていますね。あちらはページ本体に読み込みにかかった時間であり、本体が読み込み完了してHTMLのパース・DOMの構築まで終わったら読み込み完了としていたので、外部リソースに読み込みにかかった時間までは測れませんでした。</p>
 
 <h3>PerformanceRequestTiming</h3>
 <p>Resource Timingでは、ページから読み込まれた外部リソース一つ一つについて<dfn>PerformanceRequestTiming</dfn>オブジェクトが作成され、Performanceオブジェクトに登録されます。このPerformanceRequestTimingというのは、前回紹介したPerformanceEntryを継承したオブジェクトです。このページもCSSなどを読み込んでいますので、試しに次のコードを実行してみると、PerformanceRequestTimingオブジェクトがいくつも入った配列が得られるのがわかります。<small>注：現在（2014年7月）対応しているのはGoogle Chrome, Opera, IE11でした。</small></p>
@@ -36,7 +36,7 @@
   <dt>responseEnd</dt>
   <dd>サーバーからレスポンスを最後まで受信した瞬間です。</dd>
 </dl>
-<p>こうしてみると<a href="15_1.html">十五章第一回</a>を思い出しますね。さらに、PerformanceEntryにもともとあるプロパティがどのような値をとるかを次で紹介します。</p>
+<p>こうしてみると<a href="15_2.html">十五章第二回</a>を思い出しますね。さらに、PerformanceEntryにもともとあるプロパティがどのような値をとるかを次で紹介します。</p>
 <dl>
   <dt>name</dt>
   <dd>nameプロパティには、<b>リソースのURL</b>が入っています。</dd>
@@ -48,7 +48,7 @@
   <dd>responseEndとstartTimeの差です。</dd>
 </dl>
 <p>つまり、そのリソースを取得するのにどれだけ時間がかかったかを調べるには結局durationの値を見れば十分なわけですね。より細かく遅い原因を調べたいときなど、他のプロパティの値を調べることがあるかもしれません。</p>
-<p>ちなみに、時間というのは、リソースの取得元のページへのナビゲーションが開始した瞬間を0とするミリ秒単位の時間で表されます。なので、これらの値を単体で利用することにはあまり意味がないかもしれません。基本的には2つの値の差をとって使います。</p>
+<p>ちなみに、時間というのは、<code>performance.timing.navigationStart</code>（<a href="15_2.html">十五章第二回</a>で紹介）の時刻を0とするミリ秒単位の時間で表されます。なので、これらの値を利用して絶対時間を求めることが可能ですが、基本的には2つの値の差をとって使います。</p>
 <p>また、initiatorTypeプロパティについて補足しておくと、例えばimg要素で画像を読み込む場合はこの値は<code>"img"</code>になるし、link要素でCSSファイルを読み込む場合は<code>"link"</code>です。また<code>"iframe"</code>などもありえます。CSSのbackground-imageなどで画像ファイルを読み込む場合は、CSSファイル経由で読み込まれているので<code>"css"</code>ですね。</p>
 <p>ただ、やはりJavaScript他の<b>オリジン</b>の情報には厳しくて、他のオリジンのリソースの場合にはfetchStartとresponseEndの値以外は軒並み0になってしまいます。この2つが有効なのでdurationなどは取得することができますが、他の値は役に立ちません。ただし、リソースをHTTPで読み込む際に<code>Timing-Allow-Origin</code>ヘッダがある場合は、他のオリジンであっても時間の情報を取得することができます。これは、<a href="13_1.html">十三章第一回</a>で紹介したAccess-Control-Allow-Originヘッダと似ています。</p>
 

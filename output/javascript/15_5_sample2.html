@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>User Timingのサンプル</title>
+</head>
+<body>
+<script>
+//まずinnerHTMLを書き換える用のdiv要素を作って追加する
+var div=document.createElement("div");
+document.body.appendChild(div);
+//書き換え回数を決めておく
+var number=10000;
+var p;
+
+//ここから計測開始（開始点のマークを作る）
+performance.mark("start");
+//繰り返す
+for(var i=0;i<number;i++){
+  //まずdivの中身を消去する
+  while(div.hasChildNodes()){
+    div.removeChild(div.firstChild);
+  }
+  //次にpを作ってdivに追加する
+  p=document.createElement("p");
+  p.textContent="これは"+(i+1)+"回目の書き換えです。";
+  div.appendChild(p);
+  p=document.createElement("p");
+  p.textContent="でも多分書き換えている最中は目に見えません。";
+  div.appendChild(p);
+}
+//終了点のマークを作る
+performance.mark("end");
+
+//startとendの間を計測する
+performance.measure("test","start","end");
+//testという名前のPerformanceEntry(PerformanceMeasure)を取得する
+var measure=performance.getEntriesByName("test")[0];
+//結果をさっきのdivに表示してみる
+div.innerHTML="<p>"+number+"回の書き換えを"+measure.duration.toFixed(2)+"ミリ秒で行いました。";
+</script>
+</body>
+</html>
