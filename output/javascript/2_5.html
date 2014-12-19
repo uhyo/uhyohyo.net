@@ -129,7 +129,7 @@ ga('send', 'pageview');
         </code></pre>
 <p>この場合、追加するのは新しく作ったp要素、つまりnewelementに代入されているものです。</p>
 <p>これをbody要素の子ノードに追加するので、こうなります。
-  <code>body
+<pre><code>body
     ｜
     ├――　p
     ｜　　　｜
@@ -148,7 +148,7 @@ ga('send', 'pageview');
     <mark class="ins">｜</mark>　　　└――#text<mark class="ins">
       ｜
       └―― p</mark>
-</code></p>
+</code></pre>
 <p>しかし、画面には何の変化もありません。それは、p要素がテキストノードを持っていないからです。p要素の中身が空なのでは、<code>&lt;p&gt;&lt;/p&gt;</code>を追加したのと同じです。</p>
 
 <p>つまり、追加するp要素に、さらにテキストノードの子ノードを持たせる必要があるわけです。次は、これを解説します。</p>
