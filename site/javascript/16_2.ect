@@ -51,8 +51,7 @@ while(true){
   console.log(arr);
 }</code></pre>
 <p>というコードを実行すると、次のようなログがでます。</p>
-<pre><code>
-[0,"foo"]
+<pre><code>[0,"foo"]
 [1,"bar"]
 [2,"baz"]</code></pre>
 
@@ -121,6 +120,16 @@ console.log(ps.length);
 document.body.appendChild(document.createElement("p"));
 console.log(ps.length);</code></pre>
 <p>Array.fromで配列に変換した場合、もとのオブジェクトとは切り離されるので、その後に元のオブジェクトが変更されたとしても当然反映されません。</p>
+
+<h3>補足</h3>
+<p>上のArray#entriesの例で次のようなコードがあったのに気づいたでしょうか。</p>
+<pre><code>for(var arr of ["foo","bar","baz"].<mark>entries</mark>()){
+  console.log(arr);
+}</code></pre>
+<p>for-of文に渡すのはiterableであってイテレータ自体を渡すのではないと説明したのに、ここでfor-of文にイテレータを渡しています。</p>
+<p>実はこのように、配列や文字列などの組み込みのiterableから得られるイテレータはそれ自体iterableになるように作られています（すなわち、@@iterateなるメソッドが備わっているということです）。当然、対応するイテレータは自分自身になります。</p>
+<p>このように、iterableから得られるちゃんとしたイテレータは、それ自体がiterableとなっているのが望ましいですね。先にも述べたように、そのようなiterableの作り方はまた今度です。</p>
+
 <hr>
 
 <p>今回は以上です。ここではイテレータの例として配列と文字列しかやっていないので、なんだか当たり前でイテレータの凄さが分かりにくいかもしれませんが、イテレータは色々と応用がききます。後々紹介できるといいですね。</p>
