@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ja-jp">
+  <head>
+    <meta charset="UTF-8">
+    <link href="/css/css.css" rel="stylesheet">
+                  <link href="/css/js.css" rel="stylesheet">
+                        <title>十六章第三回　代入 — JavaScript初級者から中級者になろう &#x2014; uhyohyo.net</title>
+        <script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-46093038-1', 'auto');
+ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">uhyohyo.net</a>
+      </h1>
+    </header>
+    <main>
+      
+<article> 
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="16_2.html">十六章第二回</a>
+                      </p>
+    </nav>
+    <h2>十六章第三回　代入</h2>
+<p>ES6では、代入が進化しました。</p>
+<p>従来代入といえば、</p>
+<pre><code>a = 3;
+var b = "foo";</code></pre>
+<p>のように変数に代入するか、あるいは</p>
+<pre><code>var obj={};
+obj.c=true;
+obj["d"]=null;</code></pre>
+<p>のようにプロパティに代入するかの2通りでしたね。</p>
+<p>ES6でも基本は変わりませんが、オブジェクトや配列を展開して代入するということが可能になりました。</p>
+
+<h3>destructuring assignment</h3>
+<p>具体的には、次の例を見てください。</p>
+<pre><code>var [a, b] = ["foo", "bar"];</code></pre>
+<p>左辺が変数ではなく何か配列っぽい感じになっています。どういう動作になるかは何となく直感的に分かると思います。この例では<code>a</code>に<code>"foo"</code>が入り、<code>b</code>に<code>"bar"</code>が入ります。なお、</p>
+<pre><code>var [a, b, c] = ["foo","bar"];</code></pre>
+<p>のように要素の数が合わない場合、余った変数にはundefinedが入ります。この場合はcですね。逆に右辺の配列のほうが長い場合、余ったところは捨てられます。</p>
+<p>また、ここでは右辺に配列リテラルを直接書きましたが、もちろん任意の配列を与えることができます。関数の返り値なども当然指定できますから、配列を用いて関数が擬似的に複数の値を返すとか、そういうことも可能ですね。</p>
+<p>また、配列っぽい感じのほかに、オブジェクトっぽい感じの代入も可能です。</p>
+<pre><code>var {c,d} = {
+  c:"foo",
+  d:"bar"
+};</code></pre>
+<p>オブジェクトっぽい感じで変数名を書いて、右辺に同じ名前のプロパティを持つオブジェクトを渡せば、各変数に入ります。</p>
+<p>オブジェクトのプロパティ名とは違う名前の変数に入れたいという場合、次のように書きます。</p>
+<pre><code>var {c<mark>:foo</mark>, d} = {
+  c:"foo",
+  d:"bar"
+};</code></pre>
+<p>この場合、cではなくfooという変数にオブジェクトのcプロパティの値が入ります（すなわち、変数fooに<code>"foo"</code>が入り、変数dに<code>"bar"</code>が入ります）。</p>
+<p>この場合も、与えられたオブジェクトに該当のプロパティがない場合はundefinedが入ります。</p>
+<p>ここまではvar文で説明しましたが、別にvar文でなくても代入可能です。例えば次の文も動作します。</p>
+<pre><code>[e,f]=[1,2];</code></pre>
+<p>ただし注意しなければいけないのは、次は文法エラーになります。</p>
+<pre><code>{g,h}={g:3, h:4};</code></pre>
+<p>その理由は、最初に<code>{</code>が現れた時点でブロック文と解釈され、<code>=</code>のところでエラーが生じるからです。ブロック文と誤認されないように例えば次のように書けば動作します。</p>
+<pre><code><mark>(</mark>{g,h}={g:3, h:4}<mark>)</mark>);</code></pre>
+<p>なお、<code>=</code>は演算子という話を以前にしました。このような代入文の場合でも、演算子の返り値は右辺の値になります。</p>
+<p>このように代入演算子の左辺に配列っぽいものやオブジェクトっぽいものを持ってくる方法を<dfn lang="en">destructuring assignment</dfn>（分解代入？）といいます。</p>
+<p>さらに、配列やオブジェクトをネストさせることが可能です。同じ形のオブジェクトを渡せばそのとおりに値が入ります。</p>
+<pre><code>var [a, b, [c, d]] = [0, 1, [2, 3]];</code></pre>
+<p>また、左辺が配列っぽい形のときは、右辺は実はiterableである必要があります。iterableでなければエラーが発生します。逆に言えば、iterableならば配列でなくてもOKです。例えば文字列がiterableであることを利用すると、次のようなことが可能です。</p>
+<pre><code>[a,b,c,d,e] = "foobar";</code></pre>
+<p>他にも、変数名を書かないことでその部分を飛ばすことができます。</p>
+<pre><code>[a,,b]= [1,2,3];</code></pre>
+<p>この例ではaには1が、bには3が入ります。もっとも、このように<code>,</code>を連続させて配列リテラルを構成することは、代入文に限らずもともと可能です。例えば、</p>
+<pre><code>console.log([1,,,2]);</code></pre>
+<p>としてみれば分かりますが、これは<code>[1,undefined,undefined,2]</code>という配列と同等です。</p>
+
+<p>最後に、配列の「残りの部分」をまとめて得る方法というのがあります。これは次のように書きます。</p>
+<pre><code>[a,b,<mark>...</mark>c] = [1,2,3,4,5];</code></pre>
+<p>こうすると、aには1が、bには2が、cには<code>[3,4,5]</code>という配列が入ります。このように配列っぽいやつの最後に<code>...</code>をつけた変数名を書くと、そこに配列が入ります。何も残っていない場合は空の配列ですね。なお、右辺が配列ではないiterableの場合でも、ここで得られるのは配列です。</p>
+
+<h3>destructuring assignmentの応用</h3>
+<p>以上で説明したことは、単なる代入文以外の場面でも使う機会があります。例えばfor-in文やfor-of文です。</p>
+<pre><code>var arr=["foo","bar","baz"];
+for(var <mark>[i,val]</mark> of arr.entries()){
+  console.log(i+": "+val);
+}</code></pre>
+<p>この結果は次のようになります。</p>
+<pre><code>0: foo
+1: bar
+2: baz</code></pre>
+<p>前回紹介したArray#entriesと組み合わせることで、for-of文で添字付きで配列を回すのが簡単になります。</p>
+
+<p>さらに、これは関数の引数にも使うことができます。次のように宣言した関数を考えます。</p>
+<pre><code>function foo(<mark>{a, b, c}</mark>){
+  console.log(a, b, c);
+}</code></pre>
+<p>この関数fooは次のように使うことができます。</p>
+<pre><code>foo({
+  a: 3,
+  b: "bar",
+  c: false
+});</code></pre>
+<p>結果として<code>3 "bar" false</code>のようにコンソールに表示されることでしょう。このように、関数宣言の引数に配列っぽいものやオブジェクトっぽいものを入れてやると、その部分に渡された引数が展開されて入ります。上の例では、変数a,b,cは通常の引数と同様にローカル変数になります。</p>
+
+<p>ほかに、destructuring assignmentとは直接関係ありませんが、先ほど紹介した<code>...</code>の記法は引数にも使うことができます。引数の最後をこの記法にすると、残りの引数が配列として得られます。</p>
+<pre><code>function bar(a,b,<mark>...c</mark>){
+  console.log(a,b,c);
+}
+bar(1,2,3,4,5);</code></pre>
+<p>このコードの場合は、<code>1 2 [3,4,5]</code>と表示されるでしょう。3つ目以降の引数が配列としてまとめられて引数cに入ったことになります。これにより、任意個の引数をとる関数などが書きやすくなります。</p>
+<p>さらに、ES6では関数の引数に<b>初期値</b>を設定できるようになりました。これは、引数が与えられなかった場合、undefinedが入る代わりに初期値として指定しておいた値を入れるものです。引数名のあとに<code>=</code>を続けて書くことで初期値を指定します。</p>
+<pre><code>function baz(a<mark> = 5</mark>,b<mark> = 3</mark>){
+  console.log(a,b);
+}
+baz(0);</code></pre>
+<p>この例では、関数bazに2つ目の引数bが与えられなかったので、初期値の3が入ります。よって結果は<code>0 3</code>となります。なお、引数としてundefinedを渡した場合は引数が渡されなかった扱いになり初期値が適用されます。nullの場合はされません。</p>
+<p>もちろん、一部の引数にだけ初期値を設定することも可能です。いかなる場合も、関数に与えられた引数は前の引数から順に適用されます。</p>
+
+<p>ここでやっと話が戻るのですが、この初期値はdestructuring assignment的な引数と組み合わせることができます。すなわちこうです。</p>
+<pre><code>function quux({a,b<mark>=3</mark>,c} <mark>={}</mark>){
+  console.log(a,b,c);
+}
+quux({a:5});</code></pre>
+<p>結果は<code>5 3 undefined</code>です。ここでは初期値が二段構えになっていることに注意してください。まず<code>{a,b=3,c}</code>に対する初期値が<code>{}</code>です。これにより、quuxが引数なしで呼び出された際に、引数<code>{}</code>で呼び出されたのと同様になります。さらに、その引数を展開して変数a,b,cを代入しています。</p>
+<p>さらに話を戻すと、実はこの初期値の指定は関数の引数に限らず行うことができます。すなわち、</code>
+<pre><code>var {a,b=3,c} = obj;</code></pre>のようなことができます。</p>
+
+<h3>let宣言とconst宣言</h3>
+<p>さて、ここで新しい文法を紹介します。それは<dfn>let宣言</dfn>(<span lang="ja">Let declaration</span>)です。これはvar文とほぼ同様の文法を持ちます。varをletに変えるとlet宣言になります。</p>
+<p>let宣言はvar文と同様にローカル変数を宣言するのですが、そのスコープ（範囲）が違います。</p>
+<p>var文は、そのスコープは関数内ということになっています。つまり、関数内ならどこにvar文を書いても関数内全体で通用します（そして、関数の外には影響を与えません）。例えば、</p>
+<pre><code>function foo(a){
+  if(a){
+    <mark>var</mark> x=5;
+  }
+  console.log(x);
+}</code></pre>
+<p>この関数は、aがtrueなら5を、aがfalseならundefinedを出力します。</p>
+<p>関数に入った時点でその中のvar文が全て調べられて、その関数内をスコープとして変数が初期化されます。この場合は変数xですね。ただし値が実際に代入されるのはvar文が実行された時点なので、この時点では変数xが作られただけで、その値はundefinedです。aが真のときはif文に入り、xに5が代入されます。この関数の動作はこのように説明できます。</p>
+<p>さて、let宣言の場合は、スコープが<strong>ブロック内</strong>に狭められています。ブロックとは、<code>{ }</code>で囲まれたコードです。関数宣言の<code>{ }</code>は少し違いますが、letで作った変数も関数の外に漏れることはありません。他にも、if文の<code>{ }</code>がブロックです。そこで、前の関数のvarをletに変えた場合を考えます。</p>
+<pre><code>function foo(a){
+  if(a){
+    <mark>let</mark> x=5;
+  }
+  console.log(x);
+}</code></pre>
+<p>この場合、fooを実行するとconsole.logのところでエラーが発生します。let文でxを宣言した場合はそのスコープはif文のところのブロックにとどまり、その外には見えないのでconsole.logのところではxは宣言されていないことになるからです。次の例を考えましょう。</p>
+<pre><code>function foo(a){
+  <mark>let x=3;</mark>
+  if(a){
+    <mark>let</mark> x=5;
+  }
+  console.log(x);
+}</code></pre>
+<p>この場合、aが真だろうと偽だろうと、表示されるのは3です。こえは、if文のところのブロックの中のlet宣言で宣言されたxが、外のxに影響を及ぼさないからです。</p>
+<p>let文により、変数のスコープをより細かく管理することができます。</p>
+<p>ちなみに、if文などがなくてもブロックを作ることができます。</p>
+<pre><code>
+let x=3;
+<mark>{</mark>
+  let x=5;
+<mark>}</mark>
+console.log(x);</code></pre>
+<p>これが<b>ブロック</b>と呼ばれるもので、文と同様に扱われます。ブロックの働きはもちろん、中の文を全て実行することです。</p>
+<p>本来if文やfor文などは処理部分を1文しか書くことができません。その1文にブロックを当てはめることで複数の文を処理させているのです。if文には</p>
+<pre><code>if(a==null)a={};</code></pre>
+<p>のようにブロックを使わない書き方もありますが、これはそういう理由によるものです。</p>
+<hr>
+<p>さて、let宣言の他に<dfn>const宣言</dfn>というのもあります。これは、letをconstに変えただけです。</p>
+<p>constとは定数のことで、const宣言により作られた変数は値が変わらなくなります。すなわち、値を代入しても変わりません（strictモードのときはエラーになります）。スコープはlet宣言と同じです。</p>
+<p>const宣言にはある変数が定数であると分かりやすくする効果があります。</p>
+<pre><code>function foo(){
+  <mark>const</mark> a=3;
+  a=5;
+  console.log(a);
+}
+foo();</code></pre>
+<p>これの実行結果は3となります。</p>
+<p>なお、注意すべきなのは、オブジェクトをconstで宣言してもオブジェクトの中身は変わる可能性があるということです。</p>
+<pre><code>function bar(){
+  const obj={a:3,b:5};
+  obj.a=6;
+  console.log(obj);
+}
+bar();</code></pre>
+<p>こうすると、<code>{a:6,b:5}</code>という結果になるでしょう。これは、obj自体に代入しなければOKだからです。</p>
+
+<p>なお、for文でvarの代わりにletを使うことも可能です。</p>
+<pre><code>for(<mark>let</mark> i=1;i&lt;=10;i++){
+  console.log(i);
+}</code></pre>
+<p>こうすると、1から10まで表示されます。</p>
+<p>このletは特別で、スコープはそのfor文の中になります。すなわち、<code>let i=1;</code>と<code>i&lt;=10</code>と<code>i++</code>というforを構成する各式及び<code>{ console.log(i); }</code>という本体部分にわたってこの<code>i</code>が使用可能です。その外にはもれないので、for文が終わるとiはなくなります。これはvarの場合と対照的です。</p>
+<pre><code>for(var i=1;i&lt;=10;i++){
+}
+console.log(i); //11が表示される</code></pre>
+<p>varの場合は、for文で宣言したものであってもスコープはやはり関数内となり、for文が終わっても変数を参照可能です。</p>
+<p>ちなみに、ここもletの代わりにconstを使うことができますが、特に意味はないでしょう。</p>
+        <nav>
+      <p>
+        <a href="index.html" rel="bookmark">戻る</a>
+                            |
+          <a rel="prev" href="16_2.html">十六章第二回</a>
+                      </p>
+    </nav>
+  </article>
+
+    </main>
+  </body>
+</html>
+    
