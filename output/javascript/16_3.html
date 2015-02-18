@@ -41,7 +41,9 @@ ga('send', 'pageview');
         <a href="index.html" rel="bookmark">戻る</a>
                             |
           <a rel="prev" href="16_2.html">十六章第二回</a>
-                      </p>
+                          |
+          <a rel="next" href="16_4.html">十六章第四回</a>
+              </p>
     </nav>
     <h2>十六章第三回　代入</h2>
 <p>ES6では、代入が進化しました。</p>
@@ -80,7 +82,7 @@ obj["d"]=null;</code></pre>
 <p>ただし注意しなければいけないのは、次は文法エラーになります。</p>
 <pre><code>{g,h}={g:3, h:4};</code></pre>
 <p>その理由は、最初に<code>{</code>が現れた時点でブロック文と解釈され、<code>=</code>のところでエラーが生じるからです。ブロック文と誤認されないように例えば次のように書けば動作します。</p>
-<pre><code><mark>(</mark>{g,h}={g:3, h:4}<mark>)</mark>);</code></pre>
+<pre><code><mark>(</mark>{g,h}={g:3, h:4}<mark>)</mark>;</code></pre>
 <p>なお、<code>=</code>は演算子という話を以前にしました。このような代入文の場合でも、演算子の返り値は右辺の値になります。</p>
 <p>このように代入演算子の左辺に配列っぽいものやオブジェクトっぽいものを持ってくる方法を<dfn lang="en">destructuring assignment</dfn>（分解代入？）といいます。</p>
 <p>さらに、配列やオブジェクトをネストさせることが可能です。同じ形のオブジェクトを渡せばそのとおりに値が入ります。</p>
@@ -220,7 +222,9 @@ console.log(i); //11が表示される</code></pre>
         <a href="index.html" rel="bookmark">戻る</a>
                             |
           <a rel="prev" href="16_2.html">十六章第二回</a>
-                      </p>
+                          |
+          <a rel="next" href="16_4.html">十六章第四回</a>
+              </p>
     </nav>
   </article>
 
