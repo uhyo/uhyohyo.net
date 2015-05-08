@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MutationObserverのサンプル</title>
+</head>
+<body>
+  <p><a href="17_1.html">戻る</a></p>
+  <p><input type="button" onclick="addTime()" value="このボタン">を押すと新しいtime要素が追加されます。「今日」の部分にマウスを載せてtitle属性がついていることを確認してみてください。</p>
+<script>
+  //ボタンが押されたときの処理
+  function addTime(){
+    var p=document.createElement("p");
+    var time=document.createElement("time");
+    time.setAttribute("datetime",(new Date()).toISOString());
+    time.textContent="今日";
+    p.textContent="ああ、";
+    p.appendChild(time);
+    p.appendChild(document.createTextNode("もいい天気だなあ。"));
+    document.body.appendChild(p);
+  }
+
+  //Mutation Observerの処理
+  var mo = new MutationObserver(function(records){
+    records.forEach(function(record){
+      //typeが"childList"だったら……（今回は他のは監視していないけど一応）
+      if(record.type==="childList"){
+        //addedNodesを確認する
+        for(var i=0;i<record.addedNodes.length;i++){
+          if(record.addedNodes[i].querySelectorAll){
+            //ノードの中身からtime要素を探す
+            var times=record.addedNodes[i].querySelectorAll("time");
+            for(var j=0;j<times.length;j++){
+              addTitle(times[j]);
+            }
+          }
+        }
+      }
+    });
+  });
+  mo.observe(document,{
+    childList:true,
+    subtree:true
+  });
+
+  //time要素にtitleを加える処理
+  function addTitle(time){
+    var date=new Date(time.getAttribute("datetime"));
+    time.title=date.toString();
+  }
+
+</script>
+</body>
+</html>
