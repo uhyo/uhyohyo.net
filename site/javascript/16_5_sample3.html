@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PromiseとXHRのサンプル3</title>
+</head>
+<body>
+  <p><a href="16_5.html">戻る</a></p>
+  <!-- 結果表示用の場所 -->
+  <pre id="resultarea"></pre>
+  <script>
+  // XHRで非同期通信をするPromiseを返す関数
+  function xhrPromise(url){
+    return new Promise(function(fulfill,reject){
+      var xhr=new XMLHttpRequest();
+      xhr.open("GET",url);
+      xhr.send(null);
+
+      xhr.addEventListener("loadend",function(e){
+        // loadendイベントはリクエストが成功した場合も失敗した場合も呼び出される
+        if(xhr.status===0){
+          //失敗した場合はstatusが0。ここではとりあえずエラー内容は文字列で
+          reject("failed");
+        }else{
+          //statusが0以外の場合リクエスト成功
+          fulfill(xhr.responseText);
+        }
+      });
+    });
+  }
+
+  //Promise.raceに3つのPromiseを渡す
+  var p=Promise.race([xhrPromise("/index.html"), xhrPromise("/javascript/"), xhrPromise("/javascript/17_3.html")]);
+  p.then(function(result){
+    // 一番早く通信完了したどれかのソースが得られる
+    document.getElementById('resultarea').textContent=result;
+  },function(err){
+    // 失敗
+    console.error(err);
+  });
+  </script>
+</body>
+</html>
