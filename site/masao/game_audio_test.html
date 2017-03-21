@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>まさお コンストラクション  サンプルゲーム</title>
+<script src="./CanvasMasao.js"></script>
+</head>
+<body bgcolor="silver">
+<center>
+<script type="text/javascript">
+new CanvasMasao.Game({
+  	"map0-11": "............................................................",
+	"map0-12": ".......G",
+	"map0-14": ".....................Q......Q",
+	"map0-16": ".Q........Q",
+	"map0-17": ".................Q..........................................",
+	"map0-18": "..................................Q.........................",
+	"map0-19": "...........................................Q................",
+	"map0-20": "...........................EQ...........................Q...",
+	"map0-21": ".......................Q..E.................................",
+	"map0-22": "......5......Q...........E<d.....................Q..........",
+	"map0-23": "......V.R........EEEEEEEE<dd.........G.Q....................",
+	"map0-24": "Q....G....X......ddddddddddd.P.....G.E.....................Q",
+	"map0-25": ".....d....U..................P.....E.>......................",
+	"map0-26": "....I.F......................P.....K........EEEEEEEEEEEEEEEE",
+	"map0-27": "......F......................P......[[[[[[[[[[[[[[[[[[[[[[[[",
+	"map0-28": "A.....F......................P.........I....................",
+	"map0-29": "H.....Q..N...QQQQQQQQQQQQQQQQQQQQ...I.......................",
+	"map1-11": "................E",
+	"map1-17": "............................................................",
+	"map1-18": "............................................................",
+	"map1-19": "..........Q.........Q.....................Q......Q....Q",
+	"map1-20": "...Q................................QE......................",
+	"map1-21": "...................................FE.......................",
+	"map1-22": "...............Q............Q.....FE.<.........G............",
+	"map1-23": "......................Q..........FE.<d........GE.....QEEEEEE",
+	"map1-24": ".....Q..........................FE.<dd...P....E<............",
+	"map1-25": "...............................FE.<ddd...P....K.......4...4.",
+	"map1-26": "EEEEEEEEEEEE.B.....EEE........F..<dddd...P.....[[[[[[[[[[[[[",
+	"map1-27": "[[[[[[[[[[[[.<....Uddd......QF.E<ddddd..........RR..........",
+	"map1-28": "..............F..........EEEEEE<dddddd......................",
+	"map1-29": "................dN....Q.dddddddddddddd..Q........QQQQQQQQQQQ",
+	"map2-17": ".............Q",
+	"map2-18": "..........................Q",
+	"map2-20": "Q..................Q..........Q",
+	"map2-21": ".....Q",
+	"map2-22": ".......................<",
+	"map2-23": "EEEEEEE....Q..........<d..F....G",
+	"map2-24": "....................W<dd..F....Q",
+	"map2-25": "..4...4...4........Udddd..F....KQQQQQQQQQQQQQQQQQQQQQQQ",
+	"map2-26": "[[[[[[[[[[[[[...Nn........F...........EEEEEEEEEEEEEEEEEEEEE",
+	"map2-27": "..........................F.....GG.GGG.GGG.GGG.GGG.GGG.GGG8",
+	"map2-28": "...............................N[[[[[[[[[[[[[[[[[[[[[[[[[[[",
+	"map2-29": "QQQQQQQQQQQQQ...dNN...QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ",
+	"j_tokugi": "19",
+	"j_add_tokugi": "1",
+	"j_add_tokugi2": "1",
+	"j_add_tokugi3": "1",
+	"j_add_tokugi4": "1",
+	"scroll_area": "1",
+	"view_move_type": "1",
+	"clear_type": "1",
+	"time_max": "0",
+	"scroll_mode": "1",
+	"fx_bgm_switch": "2",
+	"se_switch": "1",
+	"dossunsun_type": "7",
+	"firebar1_type": "77",
+	"firebar2_type": "78",
+	"ugokuyuka1_type": "92",
+	"ugokuyuka2_type": "1",
+	"ugokuyuka3_type": "1",
+	"coin1_type": "1",
+	"coin3_type": "1",
+	"dokan1_type": "1",
+	"dokan2_type": "1",
+	"dokan3_type": "1",
+	"dokan4_type": "1",
+	"control_parts_visible": "1",
+	"mcs_haikei_visible": "2",
+	"layer_mode": "1",
+	"now_loading": "Now Loading..............................................................................",
+	"easy_mode": "2",
+	"score_v": "1",
+	"jibun_left_shoki": "1",
+	"pause_switch": "2",
+	"j_equip_grenade": "0",
+	"j_tail_hf": "1",
+	"j_tail_type": "3",
+	"j_fire_equip": "1",
+	"j_fire_type": "1",
+	"j_fire_mkf": "2",
+	"j_enemy_press": "1",
+	"grenade_type": "1",
+	"poppie_attack": "1",
+	"mizutaro_attack": "1",
+	"chikorin_attack": "9",
+	"mariri_attack": "1",
+	"yachamo_kf": "9",
+	"dengeki_mkf": "2",
+	"airms_kf": "1",
+	"taiking_attack": "1",
+	"kuragesso_attack": "1",
+	"boss_type": "1",
+	"boss2_type": "1",
+	"boss3_type": "1",
+	"boss_destroy_type": "1",
+	"boss_hp_max": "20",
+	"j_tail_ap_boss": "4",
+	"suberuyuka_hkf": "1",
+	"door_score": "30",
+	"dokan_mode": "2",
+	"backcolor_red": "64",
+	"backcolor_green": "0",
+	"backcolor_blue": "64",
+	"scorecolor_red": "255",
+	"scorecolor_green": "255",
+	"scorecolor_blue": "128",
+	"moji_score": "",
+	"moji_highscore": "　　　　　　　　　　　　　　　　　　　　　　　　　　　（←謎の空白（何）",
+	"moji_size": "30",
+  "game_speed": "35",
+}, null, {
+});
+</script>
+</center>
+
+<br>
+<br>
+<hr>
+<br>
+<p>Web Audio APIを用いた効果音再生と従来の効果音再生の比較用正男です。</p>
+<p>これは<b>Web Audio API版</b>です。</p>
+<p style="font-size: 1.6em">Web Audio API版 / <a href="./game_audio_test2.html">従来版</a></p>
+<p>※ 正男は<a href="http://bi.81.la/masao/hokanozidou/hokanozidou78.html">生き残る光線 - !のウェブサイト</a>です。</p>
+<p>※ 効果音は<a href="http://bi.81.la/masao/sound.html">Canvasまさおの効果音について</a>で配布されているものです。</p>
+
+
+<h2>キーボード操作</h2>
+
+<dl>
+<dt>（←），（４）
+<dd>左へ歩く。素早く２回押すと走る。
+<dt>（→），（６）
+<dd>右へ歩く。素早く２回押すと走る。
+<dt>（スペース），（Ｚ）
+<dd>ジャンプする。
+<dt>（Ｔ）
+<dd>タイトル画面に戻る。
+</dl>
+
+ゲーム画面をマウスでクリックすると、ゲーム開始です。<p>
+
+
+<br>
+<hr>
+<br>
+
+
+<h2>遊び方</h2>
+
+ゲーム画面をマウスでクリックすると、ゲーム開始です。赤い人は正義の味方で、主人公です。カーソルキーまたはテンキーで、左右に動きます。素早く２回押すと、走ります。スペースキーで、ジャンプします。彼の趣味は、お金を拾う事です。それと、亀を踏んづける事です。彼の夢は、マップの右の方にある星を取る事です。<p>
+
+
+<br>
+<hr>
+<br>
+
+
+<a href = "http://www.t3.rim.or.jp/~naoto/j_con/index.html">サポートページ</a>へ移動する。<p>
+</body>
+</html>

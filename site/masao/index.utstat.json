@@ -1,9 +1,0 @@
-{
-    "template":"../../templates/top.ect",
-    "renderer":{
-        "type":"normal",
-        "static":[".html",".gif",".js"]
-    },
-    "ignores":["*.swp"]
-}
-

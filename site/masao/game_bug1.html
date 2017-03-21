@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<HTML>
+
+
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<TITLE>まさお コンストラクション  サンプルゲーム</TITLE>
+
+<script type="text/javascript" src="./CanvasMasao_fix.js"></script>
+<script type="text/javascript">
+
+</script>
+
+
+</HEAD>
+
+
+<BODY BGCOLOR="silver">
+
+  <h1>test</h1>
+<CENTER>
+  <script type="text/javascript">
+    let gm = new CanvasMasao.Game({
+      layer_mode: '2',
+      'map0-12': 'a...........................................................',
+      'map0-13': 'a...........................................................',
+      'map0-14': 'a...........................................................',
+      'map0-15': 'a...........................................................',
+      'map0-16': 'a...........................................................',
+      'map0-17': 'a..a........................................................',
+      'map0-18': 'a..a...8....................................................',
+      'map0-19': 'a..a.....aaaaaaaaaaaaaaa....................................',
+      'map0-20': 'a..a..aaa..............a....................................',
+      'map0-21': 'a..aaa.................a....................................',
+      'map0-22': 'a......................a....................................',
+      'map0-23': 'a...........555........a....................................',
+      'map0-24': 'aaaaaaaaaaaaaaa.9......a....................................',
+      'map0-25': '............................................................',
+      'map0-26': '...............9............................................',
+      'map0-27': 'a......b....................................................',
+      'map0-28': '..A...<aaa>.B.9..........S..................................',
+      'map0-29': 'aaaaaa.aaaaaaaaaaaaaaaaaaaaaaa..............................',
+      'airms_kf': '2',
+      'boss_type': '1',
+      'j_enemy_press': '3',
+    },
+    null,
+    {
+      userJSCallback: makeUserJSCallback(),
+    });
+    function makeUserJSCallback(){
+      var flag = false;
+      var i = null;
+      var j = null;
+      return userJSCallback;
+
+      function userJSCallback(g, mode, mx, my, app){
+        if (mode<100 || 200<=mode){
+          return;
+        }
+        if (app.getJSMes()){
+          i = app.newChipImage('pattern.gif', 32, 32, 10, 25);
+          app.makeReverseChipImage(i);
+          app.setJSMes(0);
+
+          app.setFontSize(180);
+          app.setAthletic(5, 28, 7);
+        }
+        app.addScore(1);
+        g.drawImage(app.getChipImage(i, 140, 2), 32, 32);
+      }
+    }
+  </script>
+</CENTER>
+
+<BR>
+<BR>
+<HR>
+<BR>
+
+
+<H2>キーボード操作</H2>
+
+<DL>
+<DT>（←），（４）
+<DD>左へ歩く。素早く２回押すと走る。
+<DT>（→），（６）
+<DD>右へ歩く。素早く２回押すと走る。
+<DT>（スペース），（Ｚ）
+<DD>ジャンプする。
+<DT>（Ｔ）
+<DD>タイトル画面に戻る。
+</DL>
+
+ゲーム画面をマウスでクリックすると、ゲーム開始です。<P>
+
+
+<BR>
+<HR>
+<BR>
+
+
+<H2>遊び方</H2>
+
+ゲーム画面をマウスでクリックすると、ゲーム開始です。赤い人は正義の味方で、主人公です。カーソルキーまたはテンキーで、左右に動きます。素早く２回押すと、走ります。スペースキーで、ジャンプします。彼の趣味は、お金を拾う事です。それと、亀を踏んづける事です。彼の夢は、マップの右の方にある星を取る事です。<P>
+
+
+<BR>
+<HR>
+<BR>
+
+
+<a href = "http://www.t3.rim.or.jp/~naoto/j_con/index.html">サポートページ</A>へ移動する。<P>
+
+
+</BODY>
+
+
+</HTML>
