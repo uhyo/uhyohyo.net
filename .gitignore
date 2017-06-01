@@ -1,3 +1,4 @@
 output/
 .sass-cache
-.dependencies.utstat.json
+.myst.cache.json
+

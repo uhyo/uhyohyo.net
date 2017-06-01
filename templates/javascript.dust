@@ -1,0 +1,34 @@
+{>"$PROJ/templates/top.dust" page_title=page_title page_title_suffix="JavaScript初級者から中級者になろう"/}
+{<additionalHead}
+  <link href="/css/js.css" rel="stylesheet">
+  <link href="/css/prism.css" rel="stylesheet">
+{/additionalHead}
+{<content}
+  <h1>JavaScript初級者から中級者になろう</h1>
+  <aside class="ad-javascript">
+    <!-- Google Adsense -->
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:inline-block;width:180px;height:150px"
+     data-ad-client="ca-pub-1080533149094679"
+     data-ad-slot="7536196754"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+  {?navlinks}
+    <nav>
+      <p>{navlinks|s}</p>
+    </nav>
+  {/navlinks}
+  <section class="language-javascript">
+    <h2>{page_title}</h2>
+    {+js_content/}
+  </section>
+  {?navlinks}
+    <nav>
+      <p>{navlinks|s}</p>
+    </nav>
+  {/navlinks}
+  <script src="/js/prism.js"></script>
+{/content}

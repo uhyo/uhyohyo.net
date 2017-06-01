@@ -10,16 +10,31 @@ ul.recent {
   }
 }
 
+/*
 pre {
   display:block;
   white-space:pre;
 
-  background-color:#e4e4e4;
-  padding:6px;
-
   max-width: 100%;
   overflow-x: auto;
 }
+code {
+  display: inline-block;
+  border: 1px solid #d3d3d3;
+  margin: 0 2px;
+  padding: 1px;
+
+  font-weight: normal;
+}
+pre code {
+  display: block;
+  padding: 6px;
+  border-radius: 3px;
+
+  background-color:#f6f6f6;
+
+}
+*/
 mark {
   color:#cc0000;
   background-color:transparent;
