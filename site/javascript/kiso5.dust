@@ -2,20 +2,26 @@
 <p>今回は<dfn>イベント</dfn>について解説します。イベントといっても、お祭りとかではありません。</p>
 <p>今まではJavaScriptの文法等について解説してきましたが、今回はちょっと毛色が違い、HTMLとかウェブに関連する内容です。JavaScriptでのイベントとは、<strong>何かが起こったときにJavaScriptが動くこと</strong>です。</p>
 <p>何かが起こるとは、例えばクリックしたとか、そういうことです。サンプルを見てみましょう。今回はHTMLが絡んでくるので久しぶりにHTMLを全部示します。</p>
-<pre><code>&lt;!doctype html&gt;
+<pre class="language-html"><code>&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;title&gt;test&lt;/title&gt;
+    &lt;style&gt;
+      p {
+        width: 200px;
+        height: 200px;
+        background-color: #ffff00;
+      }
+    &lt;/style&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;p style="width:200px;height:200px;background-color:#ff0" <mark class="ins">onclick="alert('click');"</mark>&gt;test&lt;/p&gt;
+    &lt;p <mark class="ins">onclick="alert('click');"</mark>&gt;test&lt;/p&gt;
   &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 <p>実行してみても、黄色い長方形があるだけで何も起こりません。</p>
-<p>サンプルも、いつもとは何か違うようです。まず、script要素がありませんね。そして、pタグに2つも属性がついています。style属性とonclick属性です。</p>
-<p>このstyle属性は、スタイルシートの設定をしているので、今回あまり関係ありません。このスタイルシートによって、p要素が黄色い四角として表示されています。</p>
-<p>重要なのは、その次の<dfn>onclick属性</dfn>です。onclick属性の中には、JavaScriptが書かれています。</p>
-<p>実は、このonclick属性の中身が、<strong>クリックされると実行されます</strong>。</p>
+<p>サンプルも、いつもとは何か違うようです。そもそもscript要素がありませんね。しかし、pタグにonclick属性という属性がついています。</p>
+<p>なお、黄色い長方形はp要素です。style要素で設定したスタイルシートによってこのように表示されています。</p>
+<p>今回重要なのは<dfn>onclick属性</dfn>です。onclick属性の中にはJavaScriptが書かれています。実は、このonclick属性の中身が、<strong>クリックされると実行されます</strong>。</p>
 <p>今回、このonclick属性はpタグについているので、p要素をクリックしたときに実行されるというわけです。これはクリックされる度に何回でも実行されます。</p>
 <p>一応中身を見てみます。</p>
 <pre><code>alert('click');</code></pre>
@@ -25,7 +31,7 @@
 <p>HTMLの属性が<kbd>"</kbd>で囲まれているので、その中で再び<kbd>"</kbd>を使うとわからなくなってしまいます。そこで、異なる記号を使うようにしているのです。</p>
 
 <p>また、次のサンプルを見てみましょう。</p>
-<pre><code>&lt;!doctype html&gt;
+<pre class="language-html"><code>&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;title&gt;test&lt;/title&gt;
@@ -62,7 +68,7 @@ function aaa(){
 }</code></pre>
 <p>それでは、while文のはたらきを解説します。</p>
 <p>while文は、与えられた<b>式</b>が真である間、中の文を繰り返し実行します。</p>
-<p>より詳しく説明すると、while文の行に来ると、まず括弧の中の<b>式</b>が計算されます。そして、<strong>真</strong>だった場合<kbd>{ 〜 }</kbd>の文を実行し、<strong>偽</strong>だった場合、<kbd>{ 〜 }</kbd>の中を飛ばして処理を終了します。</p>
+<p>より詳しく説明すると、while文の行に来ると、まず括弧の中の<b>式</b>が計算されます。そして、<strong>真</strong>だった場合<kbd>{ 〜 }</kbd>の文を実行し、<strong>偽</strong>だった場合、そのまま処理を終了します。</p>
 <p>真の場合に<kbd>{ 〜 }</kbd>の処理を全て実行すると、再び<b>式</b>の評価に戻ります。</p>
 <p>そしてまた条件を判断し、真の場合実行してまた戻ります。条件に使う式が同じだと永遠に繰り返すように見えますが、そういうわけでもありません。判断に使う式に変数などを使えば、結果が変わる可能性があります。上のサンプルがその例です。</p>
 
@@ -76,7 +82,7 @@ function aaa(){
 <p>iが4になるまで繰り返してアラートが4を表示したところから追ってみましょう。</p>
 <p><code>i++;</code>の文により、iが5になります。再び条件式を評価すると、<kbd>i &lt; 5</kbd>がfalseを返すためここで処理が終了します。よって、5のアラートは表示されることなくwhile文は終了します。</p>
 <p>このようにwhile文を使うと同じ処理を何度も繰り返すことができます。</p>
-<p>ただし、while文を使う場合<strong>必ず処理がいつか終わるようにしましょう</strong>。いつまでも式が真のままで繰り返し続けると、ブラウザがJavaScriptの処理にかかりきりになりフリーズしてしまうことがあり危険です。</p>
+<p>ただし、while文を使う場合<strong>必ず処理がいつか終わるようにしましょう</strong>。いつまでも式が真のままで繰り返し続けると、JavaScriptの処理がいつまでたっても終わらず、結果としてブラウザがフリーズしてしまうことがあり危険です。</p>
 
 <h3>インクリメント・デクリメント</h3>
 <p>さっき出てきた<code>i++;</code>の解説をします。実は、<code>++</code>が新しい演算子で、<dfn>インクリメント演算子</dfn>といいます。</p>

@@ -1,0 +1,170 @@
+<p>今回はDOMから少し離れて、<dfn>null</dfn>と<dfn>undefined</dfn>について解説します。実はこれらはオブジェクトではなく<strong>プリミティブ値</strong>で、文字列、数値、真偽値に続く、第四・第五の値です。</p>
+<p>「true」「false」と書くとその名の変数ではなくプリミティブである真偽値を表すのと同様に、「null」「undefined」と書くとそれぞれnull,undefinedという個別の値を表します。</p>
+
+<h3>null</h3>
+<p>意味的には、nullは「<strong>何もない</strong>」ということを意味します。「何もないということを教えるための値」ともいうことができます。</p>
+<p>例えば、nullは次のような時に出現します。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var nodelist = document.getElementsByTagName('p');
+
+      console.log(nodelist.item(<mark>100</mark>));
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>「null」と表示されます。</p>
+<p>このサンプルでやっていることは、まずp要素のNodeListを変数nodelistに代入し、その「100番目」を取得しようとしています。</p>
+<p>しかし、このサンプルにはp要素はひとつしかありません。当然、100番目なんてあるわけがありません。つまり、「<strong>存在しない</strong>」ということになります。</p>
+<p>こういうときにnullが活躍します。このように存在しない場合、itemメソッドは<strong>nullを返します</strong>。これは、NodeListでもHTMLCollectionでも同じです。</p>
+<p>他にもさまざまな場面で出てきます。例えば、getElementByIdで該当するidを持つ要素が無かったときもnullを返しますし、各種フォームコントロールが持つformプロパティで、そのコントロールがform要素に所属していなかった場合もnullです。</p>
+<p>他に、次のような場合もあります。</p>
+<pre><code>
+var newelement = document.createElement('p');
+
+console.log(newelement.<mark>parentNode</mark>);
+</code></pre>
+<p>これは、createElementで新しくp要素を作り、それのparentNode、つまり親要素を表示しています。</p>
+<p>しかし、createElementで作った要素は、まだ木構造には加わっていないのでした。つまり、<strong>親が無い</strong>ということになります。こういう場合にもnullが返るのです。</p>
+<p>さらに、firstChildやlastChild（<a href="2_4.html">二章第四回</a>）も、子ノードが1つもない場合は存在しないのでnullです。previousSiblingやnextSibling（<a href="2_7.html">二章第７回</a>）も、存在しない場合があり、そういう場合nullです。</p>
+
+<p>また、自分からnullを使う場合もあります。例えば、insertBefore（<a href="2_6.html">二章第六回</a>）では、第二引数にノードの代わりに<strong>null</strong>を渡すことができます。こうすると、そのノードは<strong>一番最後</strong>に追加されます。普通にappendChildでいいような気もしますが、この仕様は次のような場合に役に立ちます。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+    &lt;script type="text/javascript"&gt;
+      var newp = document.createElement('p');
+
+      document.body.<mark>insertBefore</mark>(newp, document.body.<mark>firstChild</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>p要素を作り、それをinsertBeforeでbody要素に追加しているだけです。</p>
+<p>第二引数がdocument.bodyのfirstChild、つまり最初の子ノードです。それよりも前にだから、つまりは<strong>先頭</strong>に追加しようとしていることがわかります。</p>
+<p>ここで、<strong>もしbodyに子ノードが無かったら</strong>どうでしょう。firstChildは上で解説した通り<strong>null</strong>です。ここで、insertBeforeの第二引数が、「nullだったらどこに追加したら分からないから追加しない」のような仕様だった場合、結局追加されずに終わってしまいます。</p>
+<p>ところが、この仕様があることで一番最後に追加されます。子ノードがないということは、一番最初に追加するのと一番最後に追加するのは同じで、目的が達成できたことになります。</p>
+
+<h3>undefined</h3>
+<p>undefinedは、直訳すると「<strong>定義されていない</strong>」という意味です。これは、定義する必要がない、つまり、普通触れられない、触れることを想定されていないというものです。</p>
+<p>例えば、</p>
+<pre><code>
+var a = {};
+console.log(a.<mark>aaa</mark>);  // undefined
+</code></pre>
+<p>という場合があります。aという空のオブジェクトをつくり、そのaaaというプロパティを表示しようとしています。aにはaaaというプロパティが存在しません。存在しないプロパティを取得しようとした場合、undefinedが返ります。</p>
+
+<p>また、次のような場合もundefinedが出てきます。</p>
+<pre><code>function a(){
+}
+var b = a();
+console.log(b);
+</code></pre>
+<p>何もしないaという関数をつくり、bにその<strong>戻り値</strong>を代入しています。しかし、関数aはreturnで何か値を返しているわけではありません。このように、何も返さない関数は、実はundefinedを返しています。<code>return;</code>のように、return文で返す値を省略した場合も同じです。</p>
+
+<p>あと2例ほど紹介します。まず、定義だけされた変数です。以下のように、ローカル変数を定義するときに定義だけして、あとから代入することができるのを覚えているでしょうか。</p>
+<pre><code>
+function foo(){
+  var x;
+
+  // ...
+
+  x = 3;  // xを3で初期化
+}
+foo();
+</code></pre>
+<p>ここで、ローカル変数として定義はされたが、まだ中身がない変数の値はどうなっているでしょうか。お察しの通り、undefinedです。</p>
+<pre><code>
+function foo(){
+  var x;
+
+  <mark>console.log(x);</mark>  // undefined
+
+  // ...
+
+  x = 3;  // xを3で初期化
+}
+foo();
+</code></pre>
+<p>最後に、関数の引数が足りない場合です。</p>
+<pre><code>
+function func(a, b){
+  console.log(a);
+  console.log(b);
+}
+func(5);
+</code></pre>
+<p>ここで定義された関数funcは、aとbという2つの引数を取ります。しかし、呼び出し時には引数を1つしか渡していません。</p>
+<p>この場合、渡されたなかった引数にはundefinedが入っています。上の例ではaに5が入りbはundefinedとなるため、「5」「undefined」の順にログが表示されます。</p>
+
+<h3>if文</h3>
+<p>さて、少し話は変わります。今までif文には、真偽値を渡してきました。例えば、</p>
+<pre><code>
+if(<mark>a == 3</mark>){
+ // 〜
+}
+</code></pre>
+<p>という場合、<code>a == 3</code>はtrueかfalseを返します。それがifに渡され、trueなら真、falseなら偽というものでした。</p>
+<p>では、ifの条件部分に真偽値以外の値を渡したらどうなるのでしょう。</p>
+<pre><code>
+if(<mark>10</mark>){
+    console.log("真");
+}else{
+    console.log("偽");
+}</code></pre>
+<p>この場合、「真」が表示されるので、10という数値は真であることが分かります。他にもいろいろ試してみましょう。</p>
+<p>実は、ifに渡すと偽になる値は限られています。<strong>0</strong>と<strong>NaN</strong>（これについて詳しくは<a href="11_6.html">第十一章第六回</a>で説明します）、<strong>空文字列</strong>（つまり<code>""</code>）、<strong>false</strong>、<strong>null</strong>、<strong>undefined</strong>。</p>
+<p>これ以外の値は、全て真です。また、オブジェクトも全て真です。</p>
+<p>これを活用したのが、次の例です。</p>
+<pre><code>
+// 変数nodeは何かのノード
+if(node.<mark>firstChild</mark>){
+    処理
+}
+</code></pre>
+<p>このコードでは、<strong>nodeが子ノードを持っているかどうか</strong>を判定しています。もちろん、以前紹介したhasChildNodes（<a href="2_4.html">二章第四回</a>）を使えばこの判定はできます。しかし、こちらの方法でも問題なく判定できます。</p>
+<p>なぜなら、ノードが1つでも子ノードを持っていれば、「最初の子ノード」が必ずあるため、node.firstChildにはノードのオブジェクトが代入されています。つまり、真となります。</p>
+<p>対して、子ノードがひとつもない場合は、上で述べた通り<strong>null</strong>です。nullは偽だから、子ノードが1つもない場合は偽ということになります。</p>
+
+<div class="sidenote">
+  <p>すこし発展的な余談になりますが、nullとundefinedはどちらもプリミティブである点は同じですが、プログラム上に書いたときの扱いが少し異なります。</p>
+  <p>実は、nullはリテラルであるのに対しundefinedは「undefinedが入った変数」です。ただし、変数undefinedは書き換えできない変数なので、次のようにしてもundefinedを変えることはできません（無視されるか、strictモードではエラーとなります）。</p>
+  <pre><code>
+    undefined = 5;  // すでにある変数undefinedに新しい値を代入
+    console.log(undefined); // 5を代入したはずなのにundefinedが表示される（書き換え不可）
+  </code></pre>
+
+  <p>一方、nullはリテラルなので、変数名などにできません。つまり、次のコードは文法エラーです。</p>
+  <pre><code>
+    null = 5;  // nullは変数ではないのでこれは文法エラー
+    console.log(null);
+  </code></pre>
+
+  <p>undefinedは書き換えできませんが、新しいスコープでundefinedという変数を新しく作ることは、実はできてしまいます。</p>
+  <pre><code>
+    var func = function(){
+      var undefined = 5; // このスコープ内で新しい変数undefinedを定義
+      console.log(undefined); // 5が表示される
+    };
+    func();
+  </code></pre>
+  <p>つまり、場合によっては、undefinedと書いてもundefinedを取得できない可能性があります。これの対策として、どんな場合でも確実にundefinedが取得できる方法を使う場合があります。</p>
+  <p>よく使うのは次のような書き方です。</p>
+  <pre><code>console.log(<mark>void 0</mark>);</code></pre>
+  <p>このように、<code>void 0</code>と書くとundefinedになります。これは、新しく登場した<em>演算子</em>「void」の効果によるものです。voidは与えられた値を無視して常にundefinedを返すような演算子です。</p>
+  <p><code>void 0</code>の0は、voidによって無視されるために与えられた値で、0であることに特に意味はありません。例えば<code>void "Hey!"</code>とか<code>void null</code>とかでも問題はありません。慣例的にここには0を置くことが多いようです。0は1文字なので最短で書けることも理由のひとつと思われます。</p>
+  <p>undefinedが欲しい場面で<code>undefined</code>と書くか<code>void 0</code>は人によって別れるようです。これらは、変数undefinedに他の値を入れるというバカなことをしなければ同じことです。</p>
+</div>
+

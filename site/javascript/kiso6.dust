@@ -2,7 +2,7 @@
 <p>今回は前回より本格的にHTMLとの連携をしてみましょう。</p>
 <p>今回は、その中でも簡単なほうである<strong>フォーム</strong>の操作をします。フォームとは、次のようなやつです。</p>
 <p><small>（ただし、みんな入門でこれをやるので紹介していますが、ここで紹介するやり方ははっきり言って良くないので使わないほうがいいです。動いて喜んだらそれで終わりにしておきましょう。詳しいことは第二章で紹介します。）</small></p>
-<pre><code>&lt;!doctype html&gt;
+<pre class="language-html line-numbers"><code>&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;title&gt;test&lt;/title&gt;
@@ -18,15 +18,15 @@
 &lt;/html&gt;</code></pre>
 <p>入力ボックスやボタンがありますね。</p>
 <p>これとJavaScriptが提携します。次のサンプルを見てみましょう。</p>
-<pre><code>&lt;!doctype html&gt;
+<pre class="language-html line-numbers" data-line="5-9"><code>&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;title&gt;test&lt;/title&gt;
-    <mark class="ins">&lt;script type="text/javascript"&gt;
+    &lt;script type="text/javascript"&gt;
     function aaa(){
       <strong>document.form1.input1.value</strong> = "test";
     }
-    &lt;/script&gt;</mark>
+    &lt;/script&gt;
   &lt;/head&gt;
   &lt;body&gt;
     &lt;form action="#" <mark class="ins">name="form1"</mark>&gt;
@@ -90,7 +90,7 @@ alert(aa.<dfn>length</dfn>);</code></pre>
 <pre><code>[ 0番目, 1番目, 2番目 ... ]</code></pre>
 <p>つまり、上のサンプルの文は</p>
 <pre><code>aa = new Array("aaa","bbb");</code></pre>
-<p>とほぼ同じ意味だということです。</p>
+<p>と同じ意味だということです。</p>
 <p>さて、次の行で<code>aa.length</code>というものをアラートで表示しています。「2」が出るので、どうやらこれは2を表しているようです。</p>
 <p>実は、これはaa（に代入されている配列）の<dfn>長さ</dfn>を表しています。長さとは、要素がいくつあるかということです。</p>
 <p>つまり、この場合、配列変数aaには2つの要素があるから、「2」が表示されたというわけです。</p>
@@ -102,7 +102,7 @@ alert(aa.<dfn>length</dfn>);</code></pre>
 <p>ここで、<dfn>コメント</dfn>というものを解説しておきます。コメントとは、スクリプト中に書いておくメモのようなものです。大規模なプログラムになってくると、この部分ではどんなことをしているとか、そういったメモ書きが不可欠です。コメントがあるとないとでは、後で見た時のわかりやすさがかなり違います。特に複数人で製品を開発する場合、コメント無しではとても立ち行かないでしょう。</p>
 <p>コメントはプログラムに影響を与えません。実行時には無視されます。</p>
 <p>それでは、コメントの書き方を解説します。</p>
-<pre><code>var a = 3;	<mark class="comment">// aに3を代入</mark>
+<pre class="line-numbers"><code>var a = 3;	<mark class="comment">// aに3を代入</mark>
 <mark class="comment">// コメント
 /* コメント
 コメント　コメント */</mark>
@@ -113,7 +113,7 @@ alert(a);</code></pre>
 <p>もう1種類は、<code>/*</code>と<code>*/</code>で囲んだ間もコメントになります。</p>
 <p>前者は仕様上1行しかコメントを書けませんが、後者は複数の行にまたがることができます。</p>
 <p>サンプルでは、1行目では文の後ろにコメントが、2行目は行の先頭からコメントで、3〜4行目は2行にまたがるコメントであることがあります。5行目もコメントです。</p>
-<p>ところで、1行目のコメント「aに3を代入」はあまりよいコメントではありません。なぜなら、aに3を代入しているのはプログラムを読めば分かるのでコメントに書く必要がないからです。コメントには、その処理の意図などを書くといいでしょう。他にも、JSDocと呼ばれる、決まった書式でコメントを書くことでドキュメントを生成できるやつが使われることもあります。</p>
+<p>ところで、余談ですが、1行目のコメント「aに3を代入」はあまりよいコメントではありません。なぜなら、aに3を代入しているのはプログラムを読めば分かるのでコメントに書く必要がないからです。コメントには、その処理の意図（なぜaに3を代入するのか）などを書くといいでしょう。他にも、JSDocと呼ばれる、決まった書式でコメントを書くことでドキュメントを生成できるやつが使われることもあります。</p>
 
 <h3>配列の利用</h3>
 <p>それでは、話を配列に戻しましょう。コメントを紹介したので、これからはコメントによる解説も交えていきます。</p>

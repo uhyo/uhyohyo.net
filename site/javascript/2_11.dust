@@ -1,0 +1,37 @@
+<p>今回は、スタイルシートの変更について解説します。といっても、簡単な表面部分だけです。また、今回スタイルシートというのはCSSのことです。JavaScriptでは、CSSの変更がサポートされています。</p>
+<p>ただし、CSSの書き方までは今回解説しません。CSSの基礎は知っているという前提で進めていきます。</p>
+
+<h3>要素のスタイルを変更する</h3>
+<p>今回解説するのは、ひとつひとつの要素のスタイルを変更することです。ひとつひとつの要素のスタイルとは、</p>
+<pre class="language-html"><code>
+&lt;p <mark>style="background-color:yellow"</mark>&gt;test&lt;/p&gt;
+</code></pre>
+<p>のように、HTMLで書く場合タグのstyle属性で書くものです。</p>
+
+<p>非常に簡単で、HTMLElementが<dfn>style</dfn>というプロパティを持っています。これをいじることで、スタイルを操作できます。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p style="background-color:yellow"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementsByTagName('p').item(0);
+
+      p.<dfn>style</dfn>.<mark>border</mark> = "10px solid black";
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>これを実行すると、p要素の周りに太い枠が出来ます。これは、p要素に付加されたCSSのborderプロパティが変更されたからです。</p>
+<p>このサンプルで、一行目で変数pにp要素を代入しています。p要素が1つしかないので、例のstyle属性を持ったp要素であることがわかります。</p>
+<p>さて、上で紹介したstyleプロパティの、borderというプロパティを変更しています。文字列で指定します。そうすると、その内容がそのままCSSのborderプロパティに反映されます。つまり、</p>
+<pre class="language-html"><code>
+&lt;p style="background-color:yellow;<mark class="ins">border:10px solid black</mark>"&gt;test&lt;/p&gt;
+</code></pre>
+<p>というような状態になります。</p>
+<p>つまり、HTMLElementが持つstyleの、変更したいCSSのプロパティ（今回の場合border）と同じ名前のプロパティを変更すると、それがそのまま反映されるというわけです。</p>
+<p>ちなみに、"background-color"のような場合、"backgroundColor"のように、ハイフンを無くして、ハイフンの直後の文字を大文字にして書きます。</p>
+

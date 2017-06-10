@@ -1,0 +1,240 @@
+<h3>兄弟ノード</h3>
+<p>DOMには、兄弟ノードを取得する方法もあります。</p>
+<p>ここで、兄弟ノードとは、同じ親を持つノードのことです。例えば、</p>
+<div class="tree">
+AAA
+<ul>
+  <li>BBB
+  <li>CCC
+  <li>DDD
+</ul>
+<p>という木構造があったとき、BBB,CCC,DDDは全て、同じAAAという親を持つ兄弟ノードです。</p>
+<p>あるノードの兄弟ノードを取得するには、プロパティ<dfn>previousSibling</dfn>と<dfn>nextSibling</dfn>を使います。</p>
+<p>previousSiblingはそのノードの1つ前の兄弟、nextSiblingは1つ後の兄弟です。</p>
+<p>実際のサンプルで見てみましょう。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;strong&gt;a&lt;/strong&gt;&lt;em id="aaa"&gt;b&lt;/em&gt;&lt;ins&gt;c&lt;/ins&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var aaa = document.getElementById('aaa');
+
+      var prev = aaa.<dfn>previousSibling</dfn>;
+      var next = aaa.<dfn>nextSibling</dfn>;
+
+      console.log(prev.tagName);
+      console.log(next.tagName);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このサンプルの木構造はこうです。</p>
+<div class="tree">
+p
+<ul>
+  <li>strong
+    <ul>
+      <li>#text
+    </ul>
+  <li><mark>em</mark>
+    <ul>
+      <li>#text
+    </ul>
+  <li>ins
+    <ul>
+      <li>#text
+    </ul>
+</ul>
+</div>
+<p>ここで、変数aaaには、"aaa"というidを持つ要素、つまりem要素のノードを代入しています。</p>
+<p>prevとnextには、それぞれpreviosSiblingとnextSiblingが代入されています。</p>
+<p>つまり、</p>
+<div class="tree">
+p
+<ul>
+  <li><mark>strong</mark>  <em>← previousSibling</em>
+    <ul>
+      <li>#text
+    </ul>
+  <li>em
+    <ul>
+      <li>#text
+    </ul>
+  <li><mark>ins</mark>  <em>← nextSibling</em>
+    <ul>
+      <li>#text
+    </ul>
+</ul>
+</div>
+<p>このようになっているから、prevにはstrong要素のノード、nextにはins要素のノードが代入されているはずです。</p>
+<p>それを確かめているのが次の2行で、tagNameを表示しています。予想通り、「STRONG」と「INS」が表示されるはずです。</p>
+<p>ちなみに、兄弟ノードを全てまとめて（NodeListの形で）取得することは、今までの知識でもできます。<code>aaa.parentNode.childNodes</code>ですね。</p>
+
+<p>このpreviosuSiblingとnextSiblingですが、少し不便な場合もあります。それは、間にテキストノードがある場合です。次のサンプルを見てください。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;段落1です。&lt;/p&gt;
+    &lt;p id="abc"&gt;段落2です。&lt;/p&gt;
+    &lt;p&gt;段落3です。&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('abc');
+
+      var prev = p.<dfn>previousSibling</dfn>;
+      var next = p.<dfn>nextSibling</dfn>;
+
+      console.log(prev);
+      console.log(next);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>変数pに、3つあるうちの真ん中のp要素を代入しました。このとき、前後のp要素を取得したくても、previousSiblingやnextSiblingに入っているのはテキストノードです。なぜなら、上のHTMLではp要素の間に改行があり、それがテキストノードとして現れているからです。このテキストノードは厄介な場合があります。まず、空白とか改行によって発生するテキストノードは作成者が意識していない場合が多く、プログラムのバグにつながります。また、近年、HTMLを最小化（余計な空白や改行を全部取り除く）してから配信することも行われています。この場合、最小化の前後でテキストノードの有無が変わってしまいます。</p>
+<p>このような問題に対処できる便利なプロパティが、<dfn>previousElementSibling</dfn>と<dfn>nextElementSibling</dfn>です。これは、それぞれ「前の要素ノード」「次の要素ノード」を取得できます。つまり、間にあるテキストノード等を無視してくれます。これを用いれば、前のサンプルでも前後のp要素を取得できます。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;段落1です。&lt;/p&gt;
+    &lt;p id="abc"&gt;段落2です。&lt;/p&gt;
+    &lt;p&gt;段落3です。&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('abc');
+
+      var prev = p.<mark>previousElementSibling</mark>;
+      var next = p.<mark>nextElementSibling</mark>;
+
+      console.log(prev);
+      console.log(next);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h3>replaceChild</h3>
+<p>次に紹介する<dfn>replaceChild</dfn>は、<strong>ノード</strong>が持つプロパティで、そのノードが持つある子ノードを、別のノードに<strong>置き換えます</strong>。より正確には、もともとあった子ノードを除去し、その位置に新しいノードを挿入します。</p>
+<p>実際のサンプルを見てみましょう。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+
+      var newnode = document.createElement('em');
+      newnode.appendChild(document.createTextNode('置き換えるノード'));
+
+      p.<dfn>replaceChild</dfn>(newnode, p.firstChild);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>このサンプルでは、P要素の最初の子ノードと、新しくつくったem要素を置き換えています。</p>
+<p>まず、getElementByIdで</p>
+<div class="tree">
+<mark>p</mark> 　　　　 <em>← これ</em>
+<ul>
+  <li>#text
+  <li>strong
+    <ul>
+      <li>#text
+    </ul>
+  <li>#text
+</ul>
+</div>
+<p>を取得します。</p>
+<p>その後、新しいem要素をcreateElementで作り、newnodeに代入しています。その後、そのem要素にdocument.createTextNodeで作ったテキストノードを子として追加しています。</p>
+<p>つまり、</p>
+<div class="tree">
+em
+<ul>
+  <li>#text <code>"置き換えるノード"</code>
+</ul>
+</div>
+<p>を作って変数newnodeに代入したということですね。</p>
+<p>その後、いよいよp.replaceChildを呼び出しています。1つめの引数が新しく作ったノードで、2つめの引数は、p.firstChild、つまり</p>
+<div class="tree">
+p
+<ul>
+  <li><mark>#text</mark> 　　　<em>←これ</em>
+  <li>strong
+    <ul>
+      <li>#text
+    </ul>
+  <li>#text
+</ul>
+</div>
+<p>ですね。</p>
+<p>replaceChildは、1つめの引数が置き換え後のノードで、2つめの引数が置き換え前のノードです。</p>
+<p>つまり、この呼び出しでは、p.firstChildをnewnodeに置き換えるという処理をしているわけです。つまり、次のようになります。</p>
+<div class="tree">
+p
+<ul>
+  <li>#text <code>"t"</code>
+  <li>strong
+    <ul>
+      <li>#text <code>"es"</code>
+    </ul>
+  <li>#text <code>"t"</code>
+</ul>
+</div>
+<p> ↓↓↓</p>
+<div class="tree">
+p
+<ul>
+  <li>em
+    <ul>
+      <li>#text <code>"置き換えるノード"</code>
+    </ul>
+  <li>strong
+    <ul>
+      <li>#text <code>"es"</code>
+    </ul>
+  <li>#text <code>"t"</code>
+</ul>
+</div>
+<p>画面の実行結果をみても、この通りになっていることが分かります。</p>
+
+<h3>cloneNode</h3>
+<p>ノードは、<dfn>cloneNode</dfn>というメソッドを持っています。これは、ノードをコピーするためのものです。</p>
+<p>というのも、ノードもオブジェクトの一種だから、<code>var b = a;</code>のようにしてしも、bとaは同じノードを指してしまい、うまくいきません。</p>
+<p>また、あるノードは木構造中の1箇所にしか入れることができます。同じノードを複数箇所に配置するということはできないのです。そのようなことをしたい場合、既にあるノードと全く同じ形のノードを<em>新しく作る</em>必要があります。これを行ってくれるのがcloneNodeです。</p>
+
+<p>サンプルを見てみましょう。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+
+      var newnode = p.<dfn>cloneNode</dfn>(<mark>true</mark>);
+
+      document.body.appendChild(newnode);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>やっていることは簡単で、変数pにp要素を代入し、pのcloneNodeで同じノードをもう1つつくってnewnodeに代入し、それをbody要素にappendChildで追加しています。</p>
+<p>その結果、同じ（だがノードとしては別々の）p要素が新しくページの最後に追加されました。</p>
+<p>では、cloneNodeの引数であるtrueは何なのでしょう。実は、cloneNodeには引数としてtrueまたはfalse（すなはち、真偽値）を与えることができます。この引数にtrueを指定すると、<strong>子ノードも全てコピーします</strong>。対して、falseを指定すると、<strong>そのノードしかコピーしません</strong>。つまり、子ノードは全くない状態で新しいノードが作られます。HTMLタグでいうと、<code class="language-html">&lt;p&gt;&lt;/p&gt;</code>の部分だけコピーするようなものです。用途に応じて使い分けましょう。</p>
+

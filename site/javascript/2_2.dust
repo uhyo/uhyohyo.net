@@ -1,0 +1,49 @@
+<p>今回から、しばらく「DOM」について解説していきます。DOMとは、「<strong>Document Object Model</strong>」のことで、プログラムでHTML（やXML）を扱うための仕様です。（ブラウザ上で実行される）JavaScriptはこのDOMに対応していて、DOMの仕様にそってHTMLを操作することができます。</p>
+
+<h3>仕様書</h3>
+<p>DOMには「仕様書」があります。「こういう操作をするにはこういうメソッドを使って、こういう場合にはこうこう……」といった具体的な方法が書いてあります。ここに書いてあることがDOMの全てだといえます。</p>
+<p>仕様書はいくつもあります。例えば、一番初歩的なのは<a href="http://www.w3.org/TR/REC-DOM-Level-1/">DOM Level 1という仕様書</a>です。これは一番基本的な部分について記述してあります。実は、これを読んで理解できればこんなサイトを見る必要はありません。しかし、仕様書を読んで理解するのはなかなか簡単なことではありません。そんな皆さんのためにこのサイトがあるといえます。とにかく、DOMに関して一番正確なことが書いてあるのが各種の仕様書であるということは覚えておいて損はないでしょう。<small>（ちなみに、DOM以外にも様々なものに関する仕様書が存在します（例えばHTML、JavaScriptなど）。これらはW3CやWHATWGをはじめとする団体によって管理されています。）</small></p>
+
+<p>とりあえず、次のサンプルを見てみましょう。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var a = document.getElementById('aaaaa');
+      console.log(a);
+      console.log(a.innerHTML);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+<p>まず、一番気になるのは、script要素の場所ですね。いつもなら、title要素のすぐ後、つまりhead要素内にありました。しかし、今回は一番下にあります。p要素の下なので、明らかにbody要素の中です。</p>
+<p>別にここにあること自体は問題ありません。では、なぜここにしたかというと、HTMLは上からどんどん読み込まれていきます。そして、実はJavaScriptは、それが書いてあるscript要素が<strong>読み込まれた時点で即座に実行されます</strong>。つまり、いつものようにhead要素の中にあると、肝心のbody要素が読み込まれないうちに実行してしまい、body要素の中身を操作できないからです。今回のようにbody要素の最後に置くと、body要素が全て読み込まれたあとに実行することができます。</p>
+
+<p>さて、DOMではもともとある<strong>とても重要なオブジェクト</strong>があります。</p>
+<p>それは<dfn>document</dfn>です。日本語で「文書」という意味の単語ですね。DOMのほとんどがここから始まるという、重要なオブジェクトです。</p>
+<p>documentは数多くのメソッドやプロパティを持ち、それらを使ってHTML文書を操作するわけです。</p>
+
+<h3>getElementByIdメソッド</h3>
+<p>1行目では、documentが持つ<dfn>getElementById</dfn>というメソッドが使われています。大文字小文字を区別するので、注意しましょう。</p>
+<p>このメソッドは、引数で与えられたidを持つ要素を返すメソッドです。要素が持つidとは、すなわち<strong>id属性</strong>のことです。上のサンプルでは、p要素が「aaaaa」というidを持っているのが分かります。id属性とは、それぞれ個別の要素を区別するためのものです。</p>
+<p>そして、getElementByIdに渡した引数も'aaaaa'だったから、同じid「aaaaa」を持つp要素が返されるというわけです。</p>
+<p>ちなみに、当てはまるidを持つ要素が2つ以上あったらどうなるのかという疑問があるかもしれませんが、そういった状況はそもそもありえません。なぜなら、HTMLでは同じIDを複数の要素が持つことは禁止されているからです。もしそういったHTMLを書いたとしてもそれは仕様違反なので、何が起きても知ったことではありません。</p>
+
+<h3>ノード</h3>
+<p>さて、getElementByIdは「<strong>要素</strong>を返す」と上で解説しました。要素とはなんでしょう。それを確かめるために、getElementByIdの次の行で返り値が代入された変数aを表示してみています。</p>
+<p>要素とは、特殊なオブジェクトです。ブラウザによって差異があるかもしれませんが、変数aは「HTMLParagraphElement」などと表示されます。Paragraphとは、段落、つまりp要素のことです。つまりここでは「p要素のオブジェクト」が返ったことになります。p要素のオブジェクトはHTMLParagraphElementという名前が付いています。</p>
+<p>次の行では、それが持つ「innerHTML」というプロパティを表示しています。このinnerHTMLは、<code class="language-html">t&lt;strong&gt;es&lt;/strong&gt;t</code>などと表示されます。pタグの中身が表示されているのです。</p>
+
+<p>実はこのような要素のオブジェクトは<dfn>ノード</dfn>の一種です。ノードとは、文書（document）を構成するもののことです。</p>
+<p>文書を構成するそのほとんどがノードだと言っても過言ではありません。なんと、ノードは12種類あります。しかし、それらを全て使いこなせとは言いません。よく使うのは、せいぜい数種類です。</p>
+<p>ノードのうち、<b>要素</b>を表すオブジェクトは<dfn>HTMLElement</dfn>と呼ばれます。これはさらに要素の種類により細分化されています。先ほどでてきたHTMLParagraphElementはそのうちの1つで、実はHTMLElementの一種ということになります。DOMでは要素をいじることが多いですから、このHTMLElementが一番よく使う種類のノードということになります。</p>
+<p>なお、当然ながら、<strong>ノードもある種のオブジェクトです</strong>。第一章で紹介したオブジェクトの性質はノード（及び、この先登場するさまざまなDOM関連のオブジェクト）にも成り立ちます。注意していきましょう。</p>
+
+<h3>まとめ</h3>
+<p>まとめると、<strong>document.getElementById</strong>で取得した要素のオブジェクトは、<strong>HTMLElement</strong>という種類の<strong>ノード</strong>だということです。今回は、HTMLElementが持つプロパティの1つとしてinnerHTMLが登場しました。</p>
+

@@ -1,0 +1,124 @@
+<p>今回は、いろいろなHTML要素の扱い方を紹介します。</p>
+
+<h3>img要素</h3>
+<p>img要素のHTMLElementは、HTMLImageElementといいます。imgタグは、空要素であるため、開始タグしかなく、終了タグがありませんが、扱い方は変わりません。例えば、</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;<mark>&lt;img src="aaaa.gif" alt="aaaa"&gt;</mark>&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>というHTMLの場合、木構造は</p>
+<div class="tree">
+html
+<ul>
+  <li>head
+    <ul>
+      <li>title
+    </ul>
+  <li>body
+    <ul>
+      <li>p
+        <ul>
+          <li><mark>img</mark>
+        </ul>
+    </ul>
+</ul>
+</div>
+<p>となります（テキストノードは省略しています）。</p>
+<p>他の要素と同じ感じですね。ただ、空要素は中身がない要素です。これは、木構造として見ると子要素がないことに対応します。</p>
+
+<h4>プロパティ</h4>
+<p>さて、HTMLImageElementでよく使うプロパティは、<dfn>src</dfn>や<dfn>alt</dfn>などがあります。それぞれ、そのままimg要素のsrc属性、alt属性を表します。例によってこれらは文字列で、代入もできます。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;img src="aaaa.gif" alt="aaaa" <mark class="ins">id="abcd"</mark>&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var img = document.getElementById('abcd');
+
+      console.log(img.<mark>src</mark>);
+      console.log(img.<mark>alt</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ちゃんと、src属性、alt属性が表示されていることが分かります。ただし、タグで書いた値そのままでない場合もあります。例えば、URLの場合、絶対URLに変換されているすることがあります。</p>
+<p>また、img要素はHTMLで「画像」を表す要素であることはご存知のとおりですが、DOMにおいては、img要素は単に木構造に挿入して画像を表示するという用途の他に、「画像」を扱うためのオブジェクトとしての役割も持ちます。例えば、JavaScriptからcanvas要素に対して画像を描画する場合、描画したい画像を持つimg要素を引数として渡します。これについては機会があれば紹介します。</p>
+
+<h3>text</h3>
+<p>さて、実は、title要素やscript要素には、<dfn>text</dfn>というプロパティがあります。これは、<strong>その中身</strong>です。すなわち、その要素の子ノードのテキストノードの値と同じです。また、書き換えも可能です。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var title = document.getElementsByTagName('title').item(0);
+      console.log(title.<mark>text</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このように、タイトルが表示されます。</p>
+<p>ちなみに、今回はいつものgetElemetByIdではなくgetElementsByTagNameでtitle要素を取得しています。</p>
+
+<h3>属性の操作</h3>
+<p>さて、ある要素の属性を取得したり操作したいとき、その多くは上のように要素のプロパティを使って操作します。しかし、どんな属性でも使える汎用的な機能があります。それが、ノートが持つ<dfn>getAttribute</dfn>と<dfn>setAttribute</dfn>メソッドです。</p>
+
+<h4>getAttribute</h4>
+<p>getAttributeは、ある属性を取得するときに使います。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;img src="aaaa.gif" alt="aaaa" id="abcd"&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var img = document.getElementById('abcd');
+
+      console.log(img.<dfn>getAttribute</dfn>("src"));
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p><code>img.getAttribute("src")</code>を表示しているのが分かります。ここで、getAttributeに引数がありますが、これが<strong>取得する属性の名前</strong>です。文字列で指定します。</p>
+<p>つまり、これは変数imgに入っている要素のsrcという属性を取得するということになります。返り値は当然ながら文字列です。</p>
+
+<h4>setAttribute</h4>
+<p>対して、setAttributeは、ある属性を変更するときに使います。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;img src="aaaa.gif" alt="aaaa" id="abcd"&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var img = document.getElementById('abcd');
+
+      img.<dfn>setAttribute</dfn>("alt", "zzzz");
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>見た目にはわかりにくいですが、img要素のalt属性が"zzzz"に変更されます。</p>
+<p>引数の1つめは<strong>変更する属性の名前</strong>で、2つめは<strong>変更する値</strong>です。どちらも文字列です。</p>
+<p>つまり、このサンプルでは変数imgに入っている要素の、srcという属性を"zzzz"に変更しているというわけです。</p>
+
+<p>このように便利なgetAttributeとsetAttributeですが、ちゃんとそれぞれ専用のプロパティを使うようにしたほうが見通しもよくなりおすすめです。</p>
+

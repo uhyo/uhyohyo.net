@@ -1,0 +1,147 @@
+<p>今回は、木構造からノードをまるまる除去してしまう方法を解説します。</p>
+
+<h3>removeChild</h3>
+<p>それには、<dfn>removeChild</dfn>というメソッドを使います。これは、<strong>ノード</strong>が持つメソッドです。</p>
+<p>まず使用例を見てみましょう。サンプルには、前回と同様のものを使います。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      var children = p.childNodes;
+      var textnode = children[0];	//テキストノード
+      p.<strong>removeChild</strong>(textnode);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>実行すると、画面には「<strong>es</strong>t」と表示されています。最初の「t」が消えてしまいました。</p>
+<p>これは、実はこういうことです。</p>
+<div class="tree">
+p
+<ul>
+  <li>#text <code>"t"</code></li>
+  <li>strong
+    <ul>
+      <li>#text <code>"es"</code></li>
+    </ul>
+  </li>
+  <li>#text <code>"t"</code></li>
+</ul>
+</div>
+<p>↓↓↓</p>
+<div class="tree">
+p
+<ul>
+  <li>strong
+    <ul>
+      <li>#text <code>"es"</code></li>
+    </ul>
+  </li>
+  <li>#text <code>"t"</code></li>
+</ul>
+</div>
+<p>最初のテキストノードが消えてしまいました。</p>
+<p>removeChildは、「自身の子ノードのうち、引数のノードが表すノードを除去する」というメソッドです。</p>
+<p>上のサンプルで、引数はtextnodeで、textnodeはpの子ノードの0番目のノードでした。つまり、引数のノードが表すノードとは、pの0番目の子ノードということになりますね。従って、それが除去されたというわけです。</p>
+
+<p>ちなみに、除去されたノードは木構造から取り除かれただけであり、即座に消滅したわけではありません。これはどういうことかというと、除去したノードは、また別の場所で使ったりできるということです。これは、また別の機会に解説します。</p>
+
+<p>さて、innerHTMLでやったような書き換えを実現するには、strong要素がまだ余計です。同様にしてこれも除去してしまいましょう。</p>
+<pre><code>var p = document.getElementById('aaaaa');
+var children = p.childNodes;
+var textnode = children[0];	//テキストノード
+p.removeChild(textnode);
+<mark class="ins">var strong = children[0];  //strong要素
+p.removeChild(strong);</mark>
+</code></pre>
+<p>ここで注意すべき点は、strong要素を取得するのに再び<code>children[0]</code>としていることです。最初の木構造ではstrong要素はpの1番目の子でしたが、削除後はpの0番目の子に変化しています。</p>
+<p>実際、次のように、ノードを除去する前にstrong要素を取得するならば、1番目となります。</p>
+<pre><code>var p = document.getElementById('aaaaa');
+var children = p.childNodes;
+var textnode = children[0];	//テキストノード
+<mark>var strong = children[1];  //strong要素</mark>
+p.removeChild(textnode);
+p.removeChild(strong);
+</code></pre>
+
+<p>ちなみに、さらに子を持つ要素を除去すると（今回の場合strongがさらに#textを子に持っていますね）、その子ごとまとめてなくなります。よって、strong要素を除去したあとの木構造は次のようになります。</p>
+<div class="tree">
+p
+<ul>
+  <li>#text <code>"t"</code></li>
+</ul>
+</div>
+<p>このようになります。</p>
+<p>だから、上のサンプルを実行すると「t」だけ残りました。このとき、この#textはまた<strong>0番目</strong>です。そこで、</p>
+<pre><code>var p = document.getElementById('aaaaa');
+var children = p.childNodes;
+var textnode = children[0];	//テキストノード
+p.removeChild(textnode);
+var strong = children[0]
+p.removeChild(strong);
+
+<mark class="ins">children[0].<strong>nodeValue</strong> = "書き換えました";</mark>
+</code></pre>
+<p>のようにしてこれを書き換えれば、</p>
+<div class="tree">
+p
+<ul>
+  <li>#text <code>"書き換えました"</code></li>
+</ul>
+</div>
+<p>となって、見事p要素の中身は「書き換えました」だけになるわけです。</p>
+
+<h4>子ノードの全除去</h4>
+<p>今回の場合、p要素の中身を#textひとつだけ残しましたが、要素の子ノードを全部なくしたいということもよくあります。基本的には今回のremoveChildを使って1つずつ除去することになります。<small>（第八章で紹介する方法を使って全部まとめて除去する方法も一応あります。）</small></p>
+<p>練習問題のような感じになりますが、これをやってみましょう。</p>
+<p>まず、子ノードが何個あるか分からないから繰り返しの文を使うということは分かります。今回は<a href="kiso5.html">while文</a>を使います。</p>
+<pre class="language-html line-numbers" data-lines="13-15"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;これは1つ目の段落です。&lt;/p&gt;
+    &lt;p id="aaaaa"&gt;t&lt;strong&gt;es&lt;/strong&gt;t&lt;/p&gt;
+    &lt;p&gt;これは3つ目の段落です。&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('aaaaa');
+      var children = p.childNodes;
+
+      while( p.<dfn>hasChildNodes</dfn>() ){
+        p.removeChild( children.item(0) );
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ページを開くと、「これは1つ目の段落です。」と「これは3つ目の段落です。」の間には何も表示されません。これは、真ん中のp要素の中身が全部消えたことを示しています。</p>
+<p>まず、一つ新しいメソッドが出ています。<dfn>hasChildNodes</dfn>です。これは<strong>ノード</strong>が持つメソッドです。引数はありません。</p>
+<p>このメソッドは簡単で、<strong>そのノードが子ノードを持っていればtrueを返し、持っていなければfalseを返します</strong>。</p>
+<p>つまり、このwhileは、p要素が子ノードを持っている限り繰り返し続けるというわけです。</p>
+<p>さて、繰り返される処理は1文だけです。childrenはp要素の子ノードのNodeListなので、removeChildでp要素の0番目（最初）の要素を除去しているというわけです。</p>
+<p>実は、NodeListは木構造の変化を常に反映します。よって、pが子ノードを持っている限り「0番目の子ノード」は存在します。最後の子ノードをremoveChildで除去した後、hasChildNodesはfalseを返すため、そこでwhileが終了します。</p>
+
+<h4>firstChild</h4>
+<p>実は、ノードは<dfn>firstChild</dfn>というプロパティを持っています。意味は「最初の子」、つまり「<strong>0番目の子ノード</strong>」です。だから、当然代入されているのはノードです。書き換えはできません。これを使えば、childNodesを通さずに直接0番目の子を取得できます。つまり、上のサンプルはこう書き換えられます。</p>
+<pre><code>while( p.hasChildNodes() ){
+    p.removeChild( children.item(0) );
+}
+
+↓↓↓
+
+while( p.hasChildNodes() ){
+    p.removeChild(<mark>p.firstChild</mark>);
+}
+</code></pre>
+<p>また、余談ですが、<code>p.hasChildNodes()</code>は、<code>p.childNodes.length==0</code>としても同じ事ができます。</p>
+<p>ついでに紹介すると、<dfn>lastChild</dfn>というプロパティもあります。これは「一番最後の子」です。</p>
+
