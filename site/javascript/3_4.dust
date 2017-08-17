@@ -1,0 +1,119 @@
+<p>いきなりですが、次のサンプルを見てください。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="aaa"&gt;
+      &lt;p onclick="console.log('p');"&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var div = document.getElementById('aaa');
+
+      div.addEventListener('click',function(){
+          console.log('div');
+      }, <mark>true</mark>);
+
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>p要素にonclick属性がついています。</p>
+<p>また、script要素内では、変数divにgetElementByIdでdiv要素を取得して代入し、そのaddEventListenerを呼び出しています。今までと違うのは3つ目の引数です。3つめの引数は、<a href="3_2.html">三章第二回</a>で「とりあえずfalseにしておきましょう」といったものですが、<strong>trueになっています</strong>。これが今回の鍵です。</p>
+
+<p>さて、このサンプルを実行してみます。onclick属性があり、またaddEventListenerでも「click」を登録しているので、とりあえずp要素をクリックしてみます。木構造は</p>
+<div class="tree">
+div
+<ul>
+  <li>p
+</ul>
+</div>
+<p>ですね。ここで、前回解説したイベントバブリングの仕様に従って考えてみましょう。p要素をクリックすると、まずp要素でイベントが発生し、onclick属性で設定された<code>console.log('p');</code>が実行されて「p」のログが表示されるでしょう。</p>
+<p>その後、親要素であるdivに伝わり、divでイベントが発生します。divにはaddEventListenerで</p>
+<pre><code>function(){
+    console.log('div');
+}</code></pre>
+<p>が登録してあるので、それが実行されて「div」が表示されるはずです。</p>
+<p>まとめると、「p」がまず表示されて、その後「div」が表示されると予想できます。</p>
+
+<p>しかし、<strong>実際は違います</strong>。クリックしてみると、なんと先に「div」が表示されて、その後「p」が表示されます。ここに、今回の話題である<dfn>イベントキャプチャリング</dfn>が関わってきます。</p>
+<p>イベントキャプチャリングとは、<strong>イベントバブリングの前に、親要素から子要素に向けてイベントが伝わる</strong>というものです。</p>
+<p>つまり、今回の場合、イベントバブリングで「p → div」という子から親の流れの<strong>前</strong>に、「div → p」という親から子の流れがあったということです。</p>
+<p>そして、実はaddEventListenerの3つめの引数は、そのイベントリスナ（関数）を<strong>イベントキャプチャリングで処理するならtrue</strong>、<strong>イベントバブリングで処理するならfalse</strong>ということになっています。ちなみに、イベント属性で登録されたイベント（今回のサンプルだとp要素のonclick属性で登録されたイベント）は、イベントバブリングで処理されることになっています。</p>
+
+<p>より具体的に見ていくと、まず、</p>
+<div class="tree">
+div
+<ul>
+  <li>p <mark>←ここ</mark>
+</ul>
+</div>
+<p>でイベントが<strong>発生</strong>したとします。すると、<strong>イベントキャプチャリング</strong>の仕様にしたがって、まず</p>
+<div class="tree">
+div <mark>←ここ</mark>
+<ul>
+  <li>p
+</ul>
+</div>
+<p>から処理されます（もちろん、本当は一番上のhtml要素から順番に降りてきていますが、今回は省略しています）。ここで見られるのは、イベントキャプチャリングで処理するように登録された、つまりaddEventListenerの第三引数が<strong>true</strong>で登録されたものです。</p>
+<p>今回、'div'をconsole.logする関数がこれにあたるので、ここでまず先に「div」が表示されたというわけです。</p>
+<p>そのあと、親から子へイベントが伝わり、p要素が処理されます。しかし、p要素のイベント属性はイベントバブリングのほうで処理されるので、ここでp要素が処理するものはありません。よって、何も起こらず次に進みます。</p>
+<p>ここからは前回解説したイベントバブリングです。まず</p>
+<div class="tree">
+div
+<ul>
+  <li>p <mark>←ここ</mark>
+</ul>
+</div>
+<p>が処理されます。上と同じp要素ですが、今度はイベントバブリングだから、イベント属性の処理が処理され、「p」が表示されます。その後、子から親へイベントが伝わりdiv要素が処理されます。しかし、div要素にはイベントバブリングで処理されるものはないので、何も起こらず、終了します。これが一連の流れです。</p>
+
+<p>さて、ここで、上のサンプルを</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="aaa" <mark>onclick="console.log('div2');"</mark>&gt;
+      &lt;p onclick="console.log('p');"&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var div = document.getElementById('aaa');
+
+      div.addEventListener('click',function(){
+        console.log('div');
+      },true);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>のようにしてみたら、どうなるか分かりますか？　そう、div要素についたイベント属性はバブリングフェーズで処理されるから、p要素の「p」よりも後、つまり、「div」「p」「div2」の順番でログが表示されます。</p>
+
+<h3>フェーズ</h3>
+<p>さて、いまイベント処理の一連の処理をみてきましたが、実はこの流れは3つの段階に分けることができます。そのひとつひとつはフェーズと呼ばれます。</p>
+<p>まず、イベントが発生して、イベントキャプチャリングの仕様にそって親から子へイベントを見ていく処理があります。この処理は、<dfn>キャプチャリングフェーズ</dfn>といいます。</p>
+<p>その後、発生源の要素に到達し、その要素の処理を行います。これは今までイベントバブリングに含めていましたが、厳密にはここだけを抜き出して<dfn>ターゲットフェーズ</dfn>といいます。</p>
+<p>そして、イベントバブリングの仕様に従って、発生源から親へイベントを見ていく段階が<dfn>バブリングフェーズ</dfn>です。</p>
+<p>この3段階になっています。この一連の流れを、全部あわせて<dfn>イベントフロー</dfn>といいます。</p>
+<p>今回はイベントキャプチャリングを紹介しましたが、使う機会はそれほど多くありません。ほとんどの場合はイベントバブリングだけで事足ります。イベントキャプチャリングは、イベントバブリングで処理される本処理の前にちょっと準備処理のようなものが必要だという場合に使われることがあるようです。</p>
+
+<h3>addEventListenerの第3引数について</h3>
+<p>今回みたように、addEventListener（やremoveEventListener）の第3引数は、イベントをキャプチャリングフェーズに登録するならtrue、バブリングフェーズに登録するならfalseということでした。</p>
+<p>しかし、これは実は少し古い書き方です。より最近の書き方<small>（具体的にはいわゆるDOM4）</small>では、次のようにオブジェクトで指定することができます。</p>
+<pre><code>
+div.addEventListener('click', function(){
+  console.log('div');
+}, <mark>{
+  capture: true
+}</mark>);
+</code></pre>
+<p><code>capture</code>プロパティを持つオブジェクトを第3引数として渡すことで、そのプロパティがtrueかfalseかで登録フェーズを変えることができます。</p>
+<p>ただし、この書き方は、新しい書き方のためまだ対応ブラウザに不安がある（古いブラウザでは動かない可能性がある）ので、現時点<small>（2017年7月現在）</small>では使用は避けたほうがいいかもしれません。</p>
+<p>このように真偽値ではなくオブジェクトで指定する書き方が新しく登場した理由は、このオブジェクトに<code>capture</code>以外のオプションも設定できるようにするためです。具体的には、<code>passive</code>および<code>once</code>というオプションを設定できます。この詳細はここでは扱いませんので、気になる人は調べてみてください。</p>
+<p>最後になりますが、実はaddEventListenerの第3引数は省略できます（false扱いになります）。</p>
+

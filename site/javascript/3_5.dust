@@ -1,0 +1,223 @@
+<p><dfn>イベントオブジェクト</dfn>というものが存在します。実は、イベントが発生したときはイベントオブジェクトを通してイベントの様々な情報を得ることができます。</p>
+
+<h3>イベントオブジェクトの取得</h3>
+<p>では、そのイベントオブジェクトはどうすれば手に入るかというと、実は、addEventListenerで登録した<strong>イベントリスナ</strong>（<a href="3_2.html">三章第二回</a>）の<strong>第一引数</strong>（最初の引数）に、イベントオブジェクトが渡されます。つまり、</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementsByTagName('p').item(0);
+
+      var listener = function(<mark>ev</mark>){
+                             //↑これ
+      };
+      p.addEventListener('click', listener, false);
+
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このソースコードでいうと引数<code>ev</code>です。これを通して、さまざまな情報を得ることができます。</p>
+<p>ちなみに、HTML要素に対して属性（例えば<code>onclick</code>）として記述されたイベントハンドラの場合は関数になっていませんが、この場合は「event」という変数にイベントオブジェクトが代入されています。</p>
+
+<h3>targetとcurrentTarget</h3>
+<p>まず、イベントオブジェクトが持つ<dfn>target</dfn>と<dfn>currentTarget</dfn>という2つのプロパティを紹介します。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      div{
+        background-color:aqua;
+      }
+      p{
+        background-color:yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;div&gt;
+      &lt;p&gt;test&lt;/p&gt;
+      &lt;p&gt;test&lt;/p&gt;
+      &lt;p&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var listener = function(<mark>ev</mark>){
+          console.log("target:", <mark>ev</mark>.<dfn>target</dfn>, "currentTarget:", <mark>ev</mark>.<dfn>currentTarget</dfn>);
+      };
+
+      document.body.addEventListener('click', listener, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>styleという要素がありますが、これはスタイルシートです。div要素には水色、p要素には黄色の色をつけています。addEventListenerでclickイベントを登録していることが分かるので、いろいろクリックしてみましょう。</p>
+<p>前解説したイベントバブリングによって、p要素やdiv要素をクリックしても、body要素に登録したイベントリスナがしっかりと呼び出されていることが分かります。</p>
+<p>さて、イベントリスナとしてlistenerという関数を登録していますが、その関数がやっていることは簡単です。第一引数、つまりevがイベントオブジェクトです。この関数ではconsole.logで<code>ev.target</code>と<code>ev.currentTarget</code>を表示しています。</p>
+<p>さて、いろいろ試してみると、<code>ev.currentTarget</code>は常にbody要素（のHTMLElement）であることがわかります。</p>
+<p>実は、currentTargetプロパティは<strong>そのイベントリスナが登録されている要素</strong>を表します。今回の場合、addEventListenerでイベントを登録した対象はdocument.body、すなわちbody要素でした。よって、<code>ev.currentTarget</code>にはbodyが入っていたのです。</p>
+
+<p>一方、<code>ev.target</code>は常に同じではないはずです。これは、p要素の部分（黄色の部分）をクリックしたらそのp要素が、div要素の部分（水色の部分）をクリックしたらdiv要素が表示されたはずです。これはもう分かりますね。</p>
+<p><code>ev.target</code>は、<strong>実際にイベントが起きた要素</strong>（のHTMLElement）を表しているのです。</p>
+<p>このtargetは非常に有用です。例えば、親要素に設定したイベントの中で、実際にイベントが起こった要素によって処理を変更したりできるのです。具体的には、例えばp要素がクリックされたときのみログを出したい場合は、次のようにします。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      div{
+        background-color:aqua;
+      }
+      p{
+        background-color:yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;div&gt;
+      &lt;p&gt;test&lt;/p&gt;
+      &lt;p&gt;test&lt;/p&gt;
+      &lt;p&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var listener = function(<mark>ev</mark>){
+          if(<mark>ev</mark>.target.tagName == "P"){
+              console.log('p');
+          }
+      };
+
+      document.body.addEventListener('click', listener, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このサンプルでは、イベントリスナ自体はbody要素に登録されていますが、イベントオブジェクトのtargetプロパティを調べて、そのtagNameが"P"であるとき、つまりtargetプロパティがp要素であるときのみログを表示しています。</p>
+
+<h3>ルートノード</h3>
+<p>さて、このように、親要素にひとつだけイベントを登録して、そこからtargetなどを利用して処理する方法は、とてもよく使われます。そこで、今回のようにbody要素にイベントを登録してもいいのですが、これにはひとつ欠点があります。それは、head要素中に記述されたスクリプトで<code>document.body</code>を参照できないという点です。<small>（HTMLは上から読みこまれるので、head要素の中身が読まれている時点ではまだbody要素は読みこまれておらず、したがって<code>document.body</code>は存在しないことになります。）</small></p>
+<p>そこで、body要素よりさらに上のhtml要素に登録するというのはひとつの手です。当然、HTML文書では一番上の要素はhtml要素です。ちなみに、このように一番上の要素を<dfn>ルート要素</dfn>といい、documentが持つ<dfn>documentElement</dfn>プロパティで取得できます。例えば次のようにするとhtml要素が表示されるでしょう。</p>
+<pre><code>console.log(document.<mark>documentElement</mark>);</code></pre>
+<p>実は、DOMではhtml要素の上にもさらに親がいます。</p>
+<pre><code>console.log(document.documentElement.<mark>parentNode</mark>);</code></pre>
+<p>このようにすると、documentと表示されるはずです。これは実際、今まで触ってきた<strong>document</strong>です。次のサンプルを実行すると確かめることができます。。</p>
+<pre><code>console.log(document.documentElement.parentNode == document);</code></pre>
+<p>trueが表示されるはずです。つまり、html要素の親はdocumentであるということです。ちなみに、document.parentNodeを表示するとnullなので、documentが正真正銘の木構造の一番上です。</p>
+<p>このように、HTML文書としては木構造の一番上はhtml要素ですが、DOMの世界ではそのさらに上にdocumentが鎮座しています。前回までに解説したイベントバブリングは、木構造の一番上のdocumentまでたどり着きます。ですから、ページ全体でイベントを拾いたい場合、documentにイベントを登録することがよく行われます。上のサンプルは次のように書き換えることができます。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      div{
+        background-color:aqua;
+      }
+      p{
+        background-color:yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;div&gt;
+      &lt;p&gt;test&lt;/p&gt;
+      &lt;p&gt;test&lt;/p&gt;
+      &lt;p&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+
+      &lt;script type="text/javascript"&gt;
+        var listener = function(ev){
+            if(ev.target.tagName == "P"){
+                console.log('p');
+            }
+        };
+
+        <mark>document</mark>.addEventListener('click', listener, false);
+      &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>のようにすることができます。なお、このサンプルではscript要素の中で<code>document.body</code>を使用していないので、script要素をhead要素内に移動させても動作させることができます。</p>
+
+<h3>イベントオブジェクトのメソッド</h3>
+<p>イベントオブジェクトは、プロパティの他にメソッドも持っています。その中でもよく使うものを紹介します。</p>
+
+<h4>preventDefault</h4>
+<p><dfn>preventDefault</dfn>というメソッドを紹介します。これは、<strong>デフォルトアクションを中止する</strong>というものです。デフォルトアクションとは、イベントが発生したときに起こるもともとの動作ということです。よく分からないと思うので、次のサンプルを見てみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;a href="http://google.com/"&gt;test&lt;/a&gt;&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var listener = function(ev){
+          console.log('listener');
+      };
+
+      document.getElementsByTagName('a').item(0).addEventListener('click', listener, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ページのa要素にクリックイベントを登録するだけのサンプルです。イベントリスナは、ログを表示するだけですね。なお、復習ですが、<code>document.getElementsByTagName('a').item(0)</code>というのはページ内に存在する0番目（最初）のa要素ということです。</p>
+<p>a要素というのはリンクでした。リンクというは、クリック<small>（スマートフォン等ではタップですが）</small>したらリンク先のページに移動しますね。つまり、リンクにおいては「クリック」という動作に対して「リンク先に移動する」という動作がもともと定められているのがわかります。これこそが<strong>デフォルトアクション</strong>です。</p>
+<p>デフォルトアクションがあるのはa要素だけに限りません。例えば、フォームの送信ボタンを押せばフォームが送信されるのもデフォルトアクションです。</p>
+<p>さて、JavaScriptがイベントを登録しても、デフォルトアクションは構わず実行されます。ただし、JavaScriptのイベントのほうがデフォルトアクションより先に実行されます。つまり、上のサンプルでは、a要素をクリックすると、イベントによってログが表示された後に、デフォルトアクションによってリンク先に移動します。<small>（実際にはページが移動するとコンソールが消去されるため、ログはほとんど見えないでしょう。）</small></p>
+<p>これでは困る場合は多々あります。そこで、デフォルトアクションを中止するメソッド、preventDefaultの出番です。このメソッドには引数はありません。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;a href="http://google.com/"&gt;test&lt;/a&gt;&lt;/p&gt;
+    &lt;script type="text/javascript"&gt;
+      var listener = function(ev){
+          console.log('listener');
+          <mark class="ins">ev.<strong>preventDefault</strong>();</mark>
+      };
+
+      document.getElementsByTagName('a').item(0).addEventListener('click', listener, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>こうすると、ログが表示されたあとでpreventDefaultによってデフォルトアクションが中止され、移動しなくなります。このメソッドはかなりよく使うので、ぜひ覚えておきましょう。</p>
+
+<h4>stopPropagation</h4>
+<p>さらに、<dfn>stopPropagation</dfn>というメソッドがあります。同じく引数はありません。これは、<strong>イベントフローを中断する</strong>というものです。これを呼び出すと、イベントフローはその要素で中断し、それ以降先に進まずに終了します。ただ、あくまでイベントフローが終了するだけなので、前述のデフォルトアクションは実行されます。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body onclick="console.log('body');"&gt;
+
+    &lt;div onclick="console.log('div');"&gt;
+      &lt;p onclick="console.log('p');<mark>event</mark>.<dfn>stopPropagation</dfn>();"&gt;test&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>今回はaddEventListenerを使わずにイベント属性だけにしてみました。eventという変数は、上で説明した通り、イベント属性の中でイベントオブジェクトを表す変数です。</p>
+<p>前回説明したイベントバブリングにより、p要素をクリックすると、p→div→bodyの順番で処理されるはずですが、p要素の処理で「p」が表示されたきりで、その後に表示されるはずの「div」「body」は<strong>表示されません</strong>。</p>
+<p>これが、まさにp要素でログの後で呼び出しているstopPropagationによるものです。p要素を処理した時点でイベントバブリングが終わってしまうのです。</p>
+<p>一応紹介しましたが、このメソッドは滅多に必要になることはないでしょう。イベントフローを止めるということはまったく別の場所で登録されたイベントハンドラが実行されなくなるかもしれないということであり、明らかにバグの元です。百害あっても一利くらいしかありません。</p>
+

@@ -1,0 +1,138 @@
+<h3>addEventListener</h3>
+<p>前回はJavaScriptから要素にイベントを登録する（イベントが起こったとき関数が呼ばれるようにする）方法として、イベントプロパティによる方法を紹介しました。</p>
+<p>しかし、それは諸々の点から推奨されない方法でした。今回はよりDOM的にイベントを登録する方法として<dfn>addEventListener</dfn>を紹介します。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+
+      p.<dfn>addEventListener</dfn>(<mark>'click'</mark>, aaa, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>このサンプルで、p要素をクリックすると、aaa関数が実行されます。これは、もちろんaddEventListenerによるものです。</p>
+<p>これは<strong>ノード</strong>が持つメソッドで、見て分かるように3つの引数をとります。</p>
+<p>一つ目の引数は<strong>イベント名</strong>です。今回の場合'click'ですね。「onclick」のように<strong>onはつかない</strong>ことに注意しましょう。ここで指定したイベントの種類について、イベントが登録されます。つまり、今回の場合、クリックした場合のイベントを登録しています。</p>
+<p>二つ目の引数は<dfn>イベントリスナ</dfn>です。イベントリスナとは、要するに呼び出される関数のことです。関数の<strong>オブジェクト</strong>（<a href="1_4.html">一章第四回</a>）を渡しています。</p>
+<p>さて、三つめの引数はフェーズの設定です。これについては<a href="3_4.html">三章第四回</a>で説明するので、今はとりあえずfalseにしておきましょう。</p>
+<p>まとめると、この関数はイベントが発生したときに呼ばれる関数を登録します。今回の場合は「clickが起こったとき（クリックされたとき）に関数aaaを呼ぶ」という設定をしているのでした。</p>
+<p>これは、<code>p.<mark>onclick</mark> = aaa;</code>と同じような動作をしますね。</p>
+
+<h3>利点</h3>
+<p>さて、このメソッドを使うことにどんな利点があるかを紹介したいと思います。一つに、<strong>複数登録できる</strong>ということがあります。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+      &lt;script type="text/javascript"&gt;
+        function aaa(){
+            console.log('aaa!');
+        }
+        function bbb(){
+            console.log('bbb!');
+        }
+
+        var p = document.getElementById('abcd');
+
+        p.addEventListener('click', <mark>aaa</mark>, false);
+        p.addEventListener('click', <mark>bbb</mark>, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>addEventListenerで関数aaaを登録したあと、続けて関数bbbも登録しています。</p>
+<p>このサンプルでp要素をクリックしてみると、なんと<strong>ログが2回表示されます</strong>。これから、関数aaaとbbbが<strong>両方呼ばれた</strong>ことが分かります。</p>
+<p>これは、前回のイベントプロパティを使う方法とは異なる点のひとつです。</p>
+<pre><code>p.onclick = aaa;
+p.onclick = bbb;</code></pre>
+<p>のように2回関数を<strong>代入</strong>すると上書きされてしまうことは、前回説明しました。</p>
+<p>つまり、addEventListenerを使えば<strong>上書きされずに追加される</strong>ということです。これなら前回説明した問題点を解消することができます。</p>
+<p>JavaScriptからイベントを登録するときは、このaddEventListenerを使うようにしましょう。</p>
+
+<h3>removeEventListener</h3>
+<p>反対に、登録されているイベントをなくすというメソッドもあります。それが<dfn>removeEventListener</dfn>です。使い方はaddEventListenerと同じで、まったく同じ引数3つを渡します。</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      function aaa(){
+          console.log('aaa!');
+      }
+
+      var p = document.getElementById('abcd');
+
+      p.addEventListener('click', aaa, false);
+      <mark class="ins">p.<dfn>removeEventListener</dfn>('click', aaa, false);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>上のほうのサンプルにremoveEventListenerの一行を追加したことで、p要素をクリックしてもログが表示されなくなりました。引数はまったく同じです。</p>
+<p>なお、2つめの引数はaddEventListenerに渡したのと<strong>同じ関数オブジェクトである必要があります</strong>。例えば、次のように無名関数を使ってイベントを登録・削除しようとしてもうまくいきません。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('abcd');
+
+      // イベントを登録
+      p.addEventListener('click', function(){
+        console.log('aaa!');
+      }, false);
+
+      // イベントを解除したつもり
+      p.removeEventListener('click', function(){
+        console.log('aaa!');
+      }, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>この例を実行してp要素をクリックするとログが表示されます。つまり、removeEventListenerでイベントリスナの登録を解除できていないということです。なぜかというと、<code>function(){ 〜 }</code>という式はその場で新しい無名関数を作るので、addEventListenerに渡された無名関数とremoveEventListenerに渡された無名関数は処理が全く同じであっても別々の関数オブジェクトになるからです。removeEventListenerには登録時と同じ関数オブジェクトを渡さないといけないので、これでは消えません。この例のように、いちど無名関数を登録してしまったら消せません。消す予定がないならそれでも構いませんが、あとで消したいものには名前をつける（変数に入れて参照できるようにする）必要があります。</p>
+
+<p>removeEventListenerの活用例のひとつは、1回だけ実行されるようなイベントを作ることです。これを実現するには、一度イベントが呼ばれたらイベントリスナの登録を解除すればよいのです。具体的には、次のようにします。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="abcd"&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementById('abcd');
+
+      // イベントリスナ
+      var handler = function(){
+        console.log('foo!');
+        p.removeEventListener('click', handler, false);
+      };
+      
+      p.addEventListener('click', handler, false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
