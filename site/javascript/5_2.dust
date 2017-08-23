@@ -1,0 +1,354 @@
+<p>ご存知の通り、CSSは独自の文法を持っおり、したがって独自の構造を持っています。今回から、その構造と操作について解説します。</p>
+
+<h3>CSSStyleSheet</h3>
+<p>CSSを構成するさまざまな要素はDOMでは全てオブジェクトで表されます。まずは、そのうち<dfn>CSSStyleSheet</dfn>という種類のオブジェクトについて解説します。</p>
+<p>CSSStyleSheetは、CSSそのもので最も大きなまとまりで、</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>というHTMLがあったとき、<code class="language-html">&lt;style&gt;〜&lt;/style&gt;</code>の間の</p>
+<pre class="language-css"><code>
+body {
+  background-color: aqua;
+}
+div {
+  background-color: white;
+}
+p {
+  background-color: yellow;
+}
+</code></pre>
+<p>これ全体を表すオブジェクトです。<code class="language-html">&lt;style&gt;〜&lt;/style&gt;</code>が2つ以上あった場合も、それぞれのstyle要素についてCSSStyleSheetがあります。また、link要素を使って外部のCSSを読み込んだ場合も、そのlink要素についてCSSStyleSheetがつくられます。</p>
+
+<h4>CSSStyleSheetの取得</h4>
+<p>では、このCSSStyleSheetはどのように取得すればいいのでしょうか。ここでは方法を2つ紹介します。</p>
+<p>1つ目の方法は、documentが持つ<strong>styleSheets</strong>というプロパティを使います。前述の通りCSSStyleSheetはstyle要素やlink要素によって作られますから、それはdocumentに（HTML要素を通じて）結びついていると考えられます。このstyleSheetsプロパティは、そのdocumentに結びついたCSSStyleSheetの一覧です。使い方はNodeListなどと同様です。すなわち、<dfn>length</dfn>はその数を表し、また<dfn>item</dfn>メソッドや<code>[0]</code>のようなインデックスアクセスにより個々のCSSStyleSheetを取得できます。例えば、最初のCSSStyleSheetを取得するには、<code>document.<mark>styleSheets</mark>.item(0)</code>または<code>document.<mark>styleSheets</mark>[0]</code>とします。</p>
+
+<p>もう1つの方法は、style要素やlink要素から対応するCSSStyleSheetを得る方法です。こちらのほうが、どのCSSStyleSheetを得たいのか明確になるのでいいかもしれません。それには、style要素またはlink要素の<dfn>sheet</dfn>プロパティを使います。次の例ではconsole.logでCSSStyleSheetが表示されます。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css" id="mysheet"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+    &lt;script&gt;
+      var style = document.getElementById('mysheet');
+      console.log(style.<mark>sheet</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+
+<h4>CSSStyleSheetのプロパティ</h4>
+<p>さて、このCSSStyleSheetは、いろいろプロパティなどを持っていますので、適当に紹介します。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+    var sheet = document.styleSheets.item(0);
+
+    alert(sheet.disabled);
+    sheet.disabled = true;
+    console.log(sheet.ownerNode);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>上の例では、まず<dfn>disabled</dfn>というプロパティを表示しています。これは、そのスタイルシートを<strong>無効化するかどうか</strong>の設定で、<strong>真偽値</strong>です。最初は当然無効化されていないからfalseです。</p>
+<p>alertで表示しても、falseが表示されます。その後、それをtrueに変更しています。trueということは無効化するということです。最初にアラートが出たときはまだスタイルシートが有効だから背景色がついていたのが、設定したあとはスタイルシートが無効になり背景色がつかなくなります。ちなみに今回console.logではなくわざわざalertを使っているのは、変化前と後を比べられるようにするためです。</p>
+<p>次の行で出ているのは、<dfn>ownerNode</dfn>というプロパティです。その名の通り、ノードが入っています。どんなノードかというと、そのCSSStyleSheetのもととなるノードで、今回の場合、このCSSStyleSheetはstyle要素によって作られたから、style要素のノードが入っています。言うなれば先に紹介した<dfn>sheet</dfn>の逆向きができるプロパティです。</p>
+<p>残りはあとで紹介します。</p>
+
+<h3>CSSRule</h3>
+<p>さて、CSSStyleSheetは、</p>
+<pre class="language-css"><code>
+body {
+    background-color: aqua;
+}
+div {
+    background-color: white;
+}
+p {
+    background-color: yellow;
+}
+</code></pre>
+<p>これ全体を表すものでした。これは、さらに細かく分けることができます。具体的には、</p>
+<pre class="language-css"><code>
+body {
+    background-color: aqua;
+}
+</code></pre>
+<pre class="language-css"><code>
+div {
+    background-color: white;
+}
+</code></pre>
+<pre class="language-css"><code>
+p {
+    background-color: yellow;
+}
+</code></pre>
+<p>の3つに分かれます。これらは、<code class="language-css"><var>セレクタ</var> { 〜 }</code>の組が3つととらえることができますね。ちなみに、セレクタとは、そのスタイルが適用される範囲を指定する部分です。今回の場合、「body」「div」「p」の部分です。</p>
+
+<p>このひとつひとつを表すのは<dfn>CSSRule</dfn>というオブジェクトです。CSSの用語でこのような構文単位をルールというので、CSSRuleという名前はそこから来ています。これらは、全体を司るCSSStyleSheetの下にあると考えることができます。これは、ノードの親と子の関係に似ていて、次のように表せます。</p>
+<div class="tree">
+CSSStyleSheet
+<ul>
+  <li>CSSRule
+  <li>CSSRule
+  <li>CSSRule
+</ul>
+</div>
+
+<p>これらはCSSStyleSheet側から取得することができます。</p>
+<p>CSSStyleSheetは<dfn>cssRules</dfn>というプロパティを持ち、それが、そのスタイルシートが持つCSSRuleのリストです。これまた、lengthプロパティとitemメソッドを持っています。</p>
+<p>つまり、例えば<code>sheet.<mark>cssRules</mark>[0]</code>のようにしてCSSRuleを取得します。ただし、<code>sheet</code>はCSSStyleSheetとします。さて、上のサンプルの場合、最初（0番目）のcssRuleは</p>
+<pre class="language-css"><code>
+body {
+  background-color: aqua;
+}
+</code></pre>
+<p>の部分のCSSRuleだから、それが返ってくることになります。</p>
+<p>さて、それではこのCSSRuleから情報を得る方法ですが、いくつは方法はあります。ひとつは、<dfn>cssText</dfn>プロパティを見る方法です。</p>
+<p>このcssTextには、そのCSSRuleが表す部分の文字列がそのまま入っています。実際にやってみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var cssrule = document.styleSheets.item(0).cssRules.item(0);
+
+      console.log(cssrule.<mark>cssText</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>のようにしたら、以下のような文字列が表示されるはずです。</p>
+<pre class="language-css"><code>
+body { background-color: aqua; }
+</code></pre>
+<p>ただし、前回解説したのと同じで、書いてあるソースがそのままそっくり表示されているというわけではないかもしれません。しかし意味は同じはずです。</p>
+
+<p>しかし、このように文字列で取得すると、人間から見ると分かりやすいですが、プログラムからは扱いづらいです。そこで、今度はもっとプログラムで扱いやすい方法を紹介します。</p>
+<p>なお、cssTextは読み取り専用です。これに新しい文字列を入れることでCSSRuleを書き換えることはできません。</p>
+
+<h3>CSSStyleRule</h3>
+<p>実は、CSSRuleには、さらに何種類も種類があります。今まで扱ってきた</p>
+<pre class="language-css"><code><var>セレクタ</var> {
+    スタイル
+}</code></pre>
+<p>という書式でスタイルを記述するものは、<dfn>CSSStyleRule</dfn>というオブジェクトで表されます。他にどんな種類があるかは後述します。</p>
+<p>上のサンプルでは3つCSSRuleがありましたが、いずれもCSSStyleRuleです。それ以外の種類は出てきていません。</p>
+<p>このCSSStyleRuleしか持たないプロパティが2つあります。</p>
+<p>ひとつは<dfn>selectorText</dfn>です。これには、セレクタの部分が文字列で入っています。</p>
+<pre class="language-css"><code>
+body {
+    background-color: aqua;
+}
+</code></pre>
+<p>の場合、セレクタは<code>"body"</code>ですね。このプロパティは<strong>変更可能</strong>です。</p>
+<p>もうひとつのプロパティは<dfn>style</dfn>です。このプロパティは<strong>CSSStyleDeclaration</strong>です。このCSSStyleDeclarationは前回も出てきたもので、これを通してひとつひとつのCSSのプロパティを扱うことができるのでした。</p>
+<p>このstyleが表すスタイルは、当然このCSSStyleRuleのスタイル指定です。これも変更可能なので、試しに変更してみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var cssrule = document.styleSheets[0].cssRules[0];
+
+      cssrule.<mark>style</mark>.backgroundColor = "blue";
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>JavaScriptからbackground-colorを<code>"blue"</code>に変更したので、背景色が青になっています。</p>
+<p>また、実はCSSStyleDeclarationを操作するためのメソッドがいくつかあり、まだ紹介していなかったのでここで紹介しておきます。最初に紹介するのは<dfn>setProperty</dfn>です。これは名前の通り、1つのプロパティの値をセットするものです。第一引数がプロパティ名で、第二引数が値です。つまり、端的にいえば、上のサンプルの</p>
+<pre><code>cssrule.style.backgroundColor = "blue";</code></pre>
+<p>は次の関数呼び出しと同じ意味です。</p>
+<pre><code>cssrule.style.<mark>setProperty</mark>("background-color","blue");</code></pre>
+<p>この書き方では、プロパティ名を文字列で指定するためハイフンマイナスの入ったプロパティ名もそのまま指定することができます。</p>
+<p>また今回は省略しましたが、実は第三引数を指定することが可能です。これは文字列で、ようするに<code>"important"</code>を指定することができます。この指定をすると、</p>
+<pre class="language-css"><code>background-color: blue <mark>!important</mark>;</code></pre>
+<p>と指定したのと同じ意味になります。</p>
+
+<p>逆に、セットされているプロパティの値を知るためのメソッド<dfn>getPropertyValue</dfn>もあります。これは引数が一つだけで、プロパティ名です。つまり上の例のあとだと、<code>cssrule.style.<mark>getPropertyValue</mark>("background-color")</code>は<code>"blue"</code>あるいは<code>"#0000ff</code>などの値が返ってきます。返り値は常に文字列で、もしそのプロパティがセットされていなかったら<code>""</code>が返ってきます。</p>
+<p>また、値ではなく<code>important</code>に相当する部分を取得するメソッド<dfn>getPropertyPriority</dfn>もあります。これも引数はプロパティ名です。もしなければこれまた<code>""</code>が返ってきます。</p>
+<p>次に、プロパティを削除するメソッド<dfn>removeProperty</dfn>を紹介します。これも引数がプロパティ名で、例えば</p>
+<pre><code>cssrule.style.<mark>removeProperty</mark>("background-color");</code></pre>
+<p>とした場合、<code class="language-css">background-color: blue;</code>という一文が無かったことになります。</p>
+<p>最後に、そのCSSStyleDeclarationにセットされているプロパティを全て調べたりするために、<dfn>length</dfn>プロパティと<dfn>item</dfn>メソッドがあります。使い方はいつもどおりです。itemメソッドには0から(length-1)までの数値を引数として渡すことができ、その番号に対応した<strong>プロパティ名</strong>が返ります。上のだと<code>cssrule.style.<mark>length</mark></code>は1で、<code>cssrule.style.<mark>item</mark>(0)</code>（または<code>cssrule.style[0]</code>は<code>"background-color"</code>が返ります。</p>
+
+
+<h3>その他のCSSRule</h3>
+<p>それでは、CSSStyleRule以外のCSSRuleについて解説します。</p>
+<p>どういう場合にそれらが発生するのかというと、</p>
+<pre class="language-css"><code><var>セレクタ</var> {
+    スタイル
+}</code></pre>
+<p>という形以外の記述があった場合にそれらが発生します。これ以外の書き方なんて見かけた事ないという人もいつかもしれませんが、この機会に知っておきましょう。</p>
+
+<h4>CSSCharsetRule</h4>
+<pre class="language-css"><code>@charset "UTF-8";</code></pre>
+<p>のような記述がスタイルシートの先頭にあることがあります。見ての通り、そのスタイルシートの文字コードを書いておきます。HTML中にstyle要素を使って書く場合は、HTML文書の文字コードと同じである必要があります。</p>
+<p>この文に対してひとつのCSSRuleが作られます。このとき作られるのは、<dfn>CSSCharsetRule</dfn>というものです。</p>
+<p>このCSSCharsetRuleが持つプロパティには、<dfn>encoding</dfn>があります。これは簡単で、指定された文字コードが文字列で入っています。この場合は"UTF-8"ですね。</p>
+
+<h4>CSSCharsetRule</h4>
+<p><dfn>CSSFontFaceRule</dfn>は、次のような指定があるとき登場します。</p>
+<pre class="language-css"><code>
+@font-face {
+  font-family: "testtesttest";
+  src: url("http://example.com/test.ttf");
+}
+</code></pre>
+<p>詳しい説明は省きますが、見て分かる通り、普通にスタイルを記述するのと同じ書式で設定をしているので、CSSStyleRuleと同じようにstyleプロパティを持ちます。</p>
+
+<h4>CSSImportRule</h4>
+<p><dfn>CSSImportRule</dfn>は、次のような指定があるとき登場します。</p>
+<pre class="language-css"><code>@import "style.css";</code></pre>
+<p>これは、スタイルシートの中から、別のスタイルシートを読み込むという指定です。HTMLから外部のcssを読み込むにはlink要素を使いますが、このようにCSS中からも読み込むことができます。</p>
+<p>読み込み先のURLは、<dfn>href</dfn>というプロパティに入っています。これは書き換えできませんので、書き換えて読み込み先のファイルを変えるというような使い方はできません。</p>
+<p>また、読み込んだスタイルシートをDOMで操作する方法もちゃんとあります。スタイルシートのファイルをまるまる1個読み込むのだから、読み込んだスタイルシートのファイルは上で解説した<strong>CSSStyleSheet</strong>で表されるはずです。</p>
+<p>それは、<dfn>styleSheet</dfn>というプロパティで取得できます。これがあると、上ででてきた木構造も複雑になります。</p>
+<div class="tree">
+CSSStyleSheet
+<ul>
+  <li>CSSStyleRule
+  <li><mark>CSSImportRule</mark>
+    <ul>
+      <li>CSSStyleSheet
+        <ul>
+          <li>CSSStyleRule
+        </ul>
+    </ul>
+</ul>
+<p>という感じになりますね。</p>
+
+<h4>CSSMediaRule</h4>
+<p><dfn>CSSMediaRule</dfn>は、次のような指定があるとき登場します。</p>
+<pre class="language-css"><code>
+@media screen {
+  スタイル
+}
+</code></pre>
+<p>これはメディアによって適用されるスタイルを変えるための指定です。メディアとは、どういう手段でそのページを表示するかということです。</p>
+<p>「当然パソコン（ブラウザ）で表示するに決まってる」と思うかもしれませんが、CSSではさまざまなメディアに対応ができるようになっています。</p>
+<p>例えば上にもある「screen」なら普通にパソコンなどのブラウザで、他に「print」なら印刷時のときのスタイル、「aural」なら音声読み上げブラウザ用、「tty」なら携帯端末などの限られた表示領域を持つもの用…などと決められています。</p>
+<p>つまり、パソコンで表示したときと印刷しようとしたときでは見た目が違うなんてことが起こりうるわけです。</p>
+<p>また、最近は<code class="language-css">@media (max-width: 600px){ … }</code>のような指定で、PCとスマートフォンでCSSを切り替えるようなことも行われています。</p>
+<p>さて、@mediaの中には複数のルールを書くことができます。よって、CSSStyleSheetと同様に<strong>cssRules</strong>プロパティを持っています。これは前述のCSSImportRuleと違い、CSSStyleSheetを介さないので注意してください。</p>
+<p>また、<code>screen</code>の部分を得るために、<strong>media</strong>というプロパティを持っています。このプロパティは<dfn>MediaList</dfn>というもので、名前のとおり対象となるメディアのリストです。</p>
+<p>いつもどおり、lengthとitemを持つリストです。itemは、メディアひとつを文字列で返します。また、mediaTextというプロパティは、メディアを全てコンマで区切ってまとめた文字列です。</p>
+
+<h4>CSSPageRule</h4>
+<p><dfn>CSSPageRule</dfn>は、次のような場合に登場します。</p>
+<pre class="language-css"><code>
+@page {
+  スタイル
+}
+</code></pre>
+<p>これは、</p>
+<pre class="language-css"><code>
+@page {
+  margin: 3px;
+}
+</code></pre>
+<p>のように中にスタイルを記述できるので、それを取得するためにstyleプロパティを持ちます。これはCSSStyleDeclarationだから、CSSStyleRuleのそれと同様に扱えます。</p>
+<p>また、</p>
+<pre class="language-css"><code>@page<mark>:first</mark> {
+}
+</code></pre>
+<p>のような記述をすることができます。セレクタ部分を取得するために、selectorTextというプロパティも持っています。これは文字列で、今回の場合<code>"@page:first"</code>のように入っています。</p>
+
+
+<p>とりあえず、これでCSSRuleの種類をすべて解説しました。CSSStyleSheetなどのcssRulesには、いろいろな種類のCSSRulesが一直線に並んで入っていることになります。CSSStyleSheet以外は書かないよという人はいいですが、どんな種類か分からないCSSRuleがあるとき、それの種類を知る必要があることもあります。</p>
+<p>その方法はちゃんとあります。どんなCSSRuleも、<dfn>type</dfn>というプロパティを持っていて、この値によってどの種類のCSSRuleであるか判別できます。この値は数値です。</p>
+<p>1から順番に、CSSStyleRule、CSSCharsetRule、CSSImportRule、CSSMediaRule、CSSFontFaceRule、CSSPageRuleとなっています。</p>
+<p>typeの値とこれらの数値を比較すればいいわけです。例えば、typeが1ならそれはCSSStyleRuleであることがわかります。</p>
+<p>しかし、数値を比較すると分かりにくいので、<strong>定数</strong>プロパティというものが用意されています。これらはCSSRuleのプロパティとしてあらかじめ用意されていて、決まった値が入っています。</p>
+<p>具体的に、1から順にSTYLE_RULE,CHARSET_RULE,IMPORT_RULE,MEDIA_RULE,FONT_FACE_RULE,PAGE_RULEという名前の定数があります。上と対応していますね。これらは、CSSRuleのプロパティとして参照することができます。つまり、変数aaaがあるCSSRuleであるとき、<code>aaa.<mark>STYLE_RULE</mark></code>には1が入っています。他の定数も同様です。これを用いて、<code>aaa.type == aaa.<mark>STYLE_RULE</mark></code>とすることでaaaがCSSSTyleRuleであるかどうか調べることができます。見た目にも、それがCSSStyleRuleであることを確かめているのが分かりやすいと思います。これが<code>aaa.type == 1</code>であると、やっていることは同じですが、上と比べて分かりにくいですね。</p>
+
+<p>今回は構造を知って参照するだけでしたが、次回はCSSRule自体の追加や削除などの操作を解説します。</p>
+

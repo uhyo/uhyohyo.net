@@ -1,0 +1,148 @@
+<p>前回は、CSSがどのような構造をしているのか説明しました。今回は、その構造をいじることについて解説します。</p>
+
+<h3>CSSRuleの追加と削除</h3>
+<p>まず、CSSRuleを子に持つCSSStyleSheetやCSSMediaRuleに、CSSRuleそのものを追加したり、あるいは削除したりする方法を解説します。</p>
+<p>CSSStyleSheet（やCSSMediaRule）は、<dfn>insertRule</dfn>と<dfn>deleteRule</dfn>という2つのメソッドを持っています。その名の通り、insertRuleは新しいCSSRuleを追加、deleteRuleは今あるCSSRuleを除去するメソッドです。</p>
+
+<h4>insertRule</h4>
+<p>まずinsertRuleの使い方から見ていきます。insertRuleは2つの引数を持ち、ひとつめの引数は<strong>追加するルール</strong>、ふたつめの引数は<strong>追加する位置</strong>です。これは何番目かを数値で指定するもので、ルールがその位置に追加されます。最初は0番目だから、たとえば0を指定すると一番先頭に追加されるということです。</p>
+<p>ひとつめの引数のルールはどのような形で指定するかですが、appendChildなどのときはノードのオブジェクトを作成してそれを引数にしました。今回同じようにCSSRuleを何らかの方法で作って渡すのかというと、実はそうではありません。ここには、追加したいルールをそのまま<strong>文字列</strong>で指定します。具体的なサンプルを見てみると、</p>
+<pre class="language-html"><code>&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var stylesheet = document.styleSheets.item(0);
+
+      stylesheet.<strong>insertRule</strong>(<mark>"body { background-color:#00ff00; }"</mark>, stylesheet.cssRules.length);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>という感じです。insertRuleの第一引数には、<code class="language-css">body { background-color:#00ff00; }</code>という、CSSのルールが文字列としてそのまま渡されています。これを渡すと、JavaScript側が解釈してCSSRuleをつくって追加してくれます。今回の場合、CSSStyleRuleが作られたことになりますね。</p>
+<p>全体的に確認しておくと、変数stylesheetには、最初の行でCSSStyleSheetが代入されています。また、insertRuleの第二引数は<code>stylesheet.cssRules.length</code>が渡されています。cssRulesはそのCSSStyleSheetが持つCSSRuleの一覧で、lengthはその個数ということになります。だから、例えばlengthが3のとき、CSSRuleは0番目から2番目まであるということです。同様にlengthが5なら4番目まで、10なら9番目まであることになります。つまり、(length-1)番目までCSSRuleがあることになります。したがって、length番目に追加すると、それが一番最後に追加されます。この書き方は、一番最後に追加するための書き方だったのです。</p>
+
+<p>さて、実行してみると、新しいCSSRuleが追加されて、新しいのに従って背景が緑に変わりましたね。今回学んだ方法で、ページ全体に自由なスタイルを適用することができます。</p>
+<p>また、すでにbodyの背景色を指定する</p>
+<pre class="language-css"><code>
+body {
+  background-color: aqua;
+}
+</code></pre>
+<p>というのがありますが（これは0番目にあたりますね）、これとの兼ね合いも多少解説します。CSSでは、このように重複する指定があった場合、後ろにあるほうが優先されます。（ただし、セレクタによって優先度が変わるためそれとの兼ね合いもあります。今回の場合はセレクタはどちらも<code>body</code>で同じ順位です。）今回の場合、もともとあったのは0番、JavaScriptで追加したのは3番になるから、追加したほうが優先されます。</p>
+
+<h4>deleteRule</h4>
+<p>deleteRuleは、CSSRuleを1つ削除するメソッドです。引数は1つで、insertRuleと同じく数値です。その番号のCSSRuleがなくなります。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+          background-color: aqua;
+      }
+      div {
+          background-color: white;
+      }
+      p {
+          background-color: yellow;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var stylesheet = document.styleSheets.item(0);
+
+      stylesheet.<strong>deleteRule</strong>(0);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このコードでは、0番目、つまり最初の</p>
+<pre class="language-css"><code>body {
+  background-color: aqua;
+}</code></pre>
+<p>を削除していることになります。だから、bodyの背景色の指定がなくなって、背景はデフォルトの白（大抵の場合）になります。</p>
+
+<h3>CSSStyleSheetの追加と削除</h3>
+<p>上では、もともとあるCSSStyleSheetに新しいルールなどを追加するものでした。しかし、JavaScriptで新しいスタイルなどを作りたい場合、その文書にもともとCSSStyleSheetが（style要素やlink要素が）存在していない場合がありえます。そこで、CSSStyleSheetそのものを新しく作る必要がでてきます。</p>
+<p>実は、DOMではCSSStyleSheetを直接作って追加する方法は提供されていません。そこで、どうするかというと、<strong>style要素を新しく作ってDOMに追加します</strong>。style要素やlink要素とCSSStyleSheetは一対一で対応しているので、こうすることで間接的に新しいCSSStyleSheetをつくったことになります。</p>
+<p>前回見たように、style要素の<dfn>sheet</dfn>というプロパティが対応するCSSStyleSheetを表しています。できたばかりのCSSStyleSheetは空っぽなので、insertRuleで追加していくことになります。</p>
+<p>つまり、例えばもともとstyle要素がない状態からp要素の背景を黄色くしたい場合は次のようにします。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;なんとかなんとか&lt;/p&gt;
+    &lt;p&gt;なんとかかんとか&lt;/p&gt;
+    &lt;p&gt;かんとかかんとか&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var newStyle = document.createElement('style');
+      newStyle.type = "text/css";
+
+      document.getElementsByTagName('head')[0].appendChild(newStyle);
+      newStyle.<mark>sheet</mark>.insertRule("p { background-color:yellow; }",0);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>できたstyle要素のノードのプロパティtypeに設定しているのは、style要素のtype属性に相当するものです。<code class="language-html">&lt;style <mark>type="text/css"</mark>&gt;</code>の部分ですね。昔はこのtype属性は必須でしたが、HTML5では必須でなくなりましたので、この行はなくても構いません。</p>
+<p>その次は、<code>document.getElementsByTagName('head')[0]</code>にappendChildでstyle要素を追加しています。これは、0番目のhead要素ということです。head要素は文書中に1個しかありませんね。これで、正しくstyle要素が追加されました。</p>
+<p>ちなみに、文書中のhead要素を取得するには<code>document.head</code>とする方法もあります。ただし、これは比較的新しい方法なので、非対応ブラウザを心配するなら今回のような方法を使いましょう。</p>
+
+<p>style要素を追加できたら、insertRuleでいよいよ具体的なルールを追加します。今回insertRuleの第二引数が0ですが、もともと空っぽなので0番目しか追加する場所がありませんね。</p>
+
+<h4>CSSStyleSheetの削除</h4>
+<p>CSSStyleSheetを削除するときも、同様に対応する要素を削除します。</p>
+<p>つまり、こんな感じです。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      body {
+        background-color: aqua;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+      &lt;script type="text/javascript"&gt;
+        var stylesheet = document.styleSheets[0];
+
+        var ele = stylesheet.<mark>ownerNode</mark>;
+        ele.parentNode.removeChild(ele);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>変数stylesheetはひとつあるstyle要素のCSSStyleSheetです。</p>
+<p>変数eleに代入しているのはstylesheetに対応するstyle要素ですね。</p>
+<p>その次の行でremoveChildでそのstyle要素を除去しています。removeChildは<a href="2_4.html">二章第四回</a>で出てきました。引数で指定した子ノードを除去するというものです。</p>
+<p>つまり、つまり、eleを子ノードとして持つノード、つまりeleの親ノードに対してremoveChildを実行する必要があります。eleの親ノードは、つまりele.parentNodeです。</p>
+<p>このサンプルを実行してみると、スタイルシートがなくなったことがわかります。</p>
+
+<p>以上でCSSの構造に関する話はおしまいです。特に今回は大した内容が無いように思えますが、CSSの構造をいじることができればCSSに関する大抵のことはできます。機会があればぜひ試してみてください。</p>

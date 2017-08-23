@@ -1,0 +1,103 @@
+<p>五章では、DOMの話に戻ってCSSの操作について詳しく解説していきます。CSSについては<a href="2_11.html">二章十一回</a>で少し触れましたが、これはまだまだ序の口です。五章ではもっと詳しい中身についてやっていきます。</p>
+
+<p>今回は、まずその初めとして、計算済みスタイルというものを取得することについて解説します。</p>
+<p>まずは次のサンプルを見てみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      p { background-color: yellow; }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このサンプルで、p要素の背景は黄色です。それは当然、スタイルシートでp要素のbackground-colorを黄色に設定しているからです。</p>
+<p>ここで、pタグにはstyle属性はなく、特に何も書かれていません。しかしp要素には背景が黄色だというスタイルがちゃんと適用されています。このように、ある要素に実際に適用されるスタイルが、計算済みスタイルです。</p>
+<p><a href="2_11.html">二章十一回</a>で解説した方法はstyle属性に書かれたスタイルを取得したり書き換えたりする方法ですから、今回のような場合に計算済みスタイルは以前の方法では取得できません。</p>
+
+<p>計算済みスタイルは、次のように取得します。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      p { background-color: yellow; }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var <mark>p</mark> = document.getElementsByTagName('p').item(0);
+
+      var style = document.<dfn>defaultView</dfn>.<dfn>getComputedStyle</dfn>(<mark>p</mark>, null);
+      console.log(style.backgroundColor);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このサンプルでは、<code>document.defaultView</code>が持つメソッド<code>getComputedStyle</code>を呼び出していることが分かります。第1引数に計算済みスタイルを取得したい要素を渡せばいいことが分かります。第2引数はnullとなっていますが、これの意味はあとで解説します。</p>
+<p>まず<code>document.defaultView</code>は、見ての通り、documentが持つdefaultViewプロパティです。これは、現在のドキュメントに対応する<strong>Windowオブジェクト</strong>というものを取得します。</p>
+<p>Windowオブジェクトについては深入りしませんが、Documentに対して対応するWindowというのが存在します。イメージとしては、表示などに関するものはDocumentではなくWindowの領分です。今回は、Windowオブジェクトが持つメソッドgetComputedStyleを利用します。</p>
+
+<p>getComputedStyleは、計算済みスタイルを表すオブジェクトを返します。このオブジェクトは<dfn>CSSStyleDeclaration</dfn>というオブジェクトで、この種類のオブジェクトは、具体的にひとつひとつのプロパティを参照したりするのに使うものです。実は、<a href="2_11.html">第二章第十一回</a>で紹介した、HTMLElementが持つstyleプロパティもこのCSSStyleDeclarationの一種です。</p>
+<p>すなわち、HTMLElementのstyleプロパティと同じように扱うことができます。だから、このサンプルでは、そのCSSStyleDeclarationが持つbackgroundColorプロパティを表示しています。</p>
+<p>ちなみに、スタイル指定は「yellow」となっていますが、スタイル指定で表示されるのは"yellow"ではないと思います。ブラウザによって差異はありますが、"#ffff00"とか"rgb(255,255,0)"とか表示されるのではないでしょうか。このように、ソースに書いた値は、ブラウザによって解釈されてブラウザにとって扱い易い形になってブラウザに記憶されています。それを参照したとき、ブラウザは改めて文字列を作っているため、このようにもとの形と違うようになるのです。</p>
+
+<p>ただ、注意する必要があるのが、getComputedStyleによって取得したスタイルは、HTMLElementのstyleとは違い、<strong>書き換えできません</strong>。あくまで見るだけです。</p>
+
+<h3>擬似要素</h3>
+<p>では、getComputedStyleの第2引数について説明します。実は、第2引数は<strong>擬似要素</strong>を指定します。擬似要素はCSSの用語で、例えば<code>::first-letter</code>のようなものです。これはセレクタにおいて使われるもので、HTML要素によらずにある部分を指定するためのものです。例えば、この<code>::first-letter</code>は次のように使います。</p>
+<pre class="language-css"><code>
+p<mark>::first-letter</mark>{
+    font-size: 2em;
+}
+</code></pre>
+<p><code>::first-letter</code>は「最初の文字」を意味します。上の例では、p要素中の最初の文字だけ文字サイズが違うということになります。</p>
+<p>ということは、p要素の中でも最初の文字とそれ以外とで計算済みスタイルが異なるということです。となると、ある擬似要素に該当する部分の計算済みスタイルを取得するということがやりたくなります。これを実現するのがgetComputedStyleの第二引数です。取得したい擬似要素を文字列で指定します。前に見たように、擬似要素を指定しない場合はnullです。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style type="text/css"&gt;
+      p { background-color: yellow; }
+      p<mark>:first-letter</mark>{
+        font-size:2em;
+        background-color: aqua;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;testtest&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var p = document.getElementsByTagName('p').item(0);
+
+      var style = document.defaultView.getComputedStyle(p, <mark>"::first-letter"</mark>);
+      console.log(style.backgroundColor);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>ちなみに、似た形でも、<code>:hover</code>や<code>:visited</code>などは<dfn>擬似クラス</dfn>と呼ばれ、擬似要素ではないのでこの方法は使えません。擬似クラスはコロンが1つ、擬似要素はコロンが2つという違いがありますので気をつけましょう。ただし、歴史的経緯により、擬似要素でもコロン1つで書かれることがあります（<code>:first-letter</code>など）。
+<p>次回から、CSSの構造などについて詳しく説明していきます。</p>
+
+<h3>window</h3>
+<p>現在の文書のDocumentオブジェクトを表すものとして<code>document</code>という変数がもともと存在していることは昔解説した通りです。</p>
+<p>実は、もうひとつDOMにもともと存在している変数として<code>window</code>があります。名前から想像がつくと思いますが、documentに対応するWindowオブジェクトが入っているのがwindow変数です。つまり、上で<code>document.defaultView</code>と書いていたのは<code>window</code>と書いても構いません。</p>
+<p>さらに、windowは実は<strong>グローバルオブジェクト</strong>です。グローバルオブジェクトというのは特殊なオブジェクトで、グローバル変数は実はグローバルオブジェクトのプロパティであるということです。そのため、次のようなことが起こります。</p>
+<pre><code>
+var str = "foo";
+console.log(<mark>window</mark>.str); // "foo"
+</code></pre>
+<p>逆に考えると、windowのプロパティはグローバル変数です。なので、実は<code>window.getComputedStyle</code>は単に<code>getComputedStyle</code>のようにグローバル変数として扱っても利用できます。結局のところ、<code>document.defaultView.getComputedStyle</code>は単に<code>getComputedStyle</code>と書くことができます。ただ、windowをグローバル変数として扱うのは分かりにくいしバグの元なので、なるべくやらないようにしましょう。</p>
+
