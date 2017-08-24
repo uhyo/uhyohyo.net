@@ -1,0 +1,249 @@
+<p>XMLの、HTMLにはない特徴として、<dfn>名前空間</dfn>というものがあります。今回、それについて解説します。</p>
+
+<p>名前空間があるXMLの具体例を見てみます。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;<mark>aaa</mark>:abc <mark>xmlns:aaa="http://example.com/aaa"</mark>&gt;
+  &lt;<mark>aaa</mark>:abcd a="aaaaaaaa" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="bbbbbbbb" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="cccccccc" /&gt;
+&lt;/<mark>aaa</mark>:abc&gt;
+</code></pre>
+<p>この文書では、タグ名の全てに最初に「<kbd>aaa:</kbd>」がついています。この部分が名前空間を表すものです。</p>
+<p>このとき、タグabcやabcdはaaaに属しているという意味になります。abc要素に謎の「xmlns:aaa」という属性がありますが、これについては後で説明します。</p>
+
+<p>また、このように複数の名前空間を使うことも可能です。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;root <mark>xmlns:aaa="http://example.com/aaa" xmlns:bbb="http://example.com/bbb"</mark>&gt;
+  &lt;<mark>aaa</mark>:abcd a="aaaaaaaa" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="bbbbbbbb" /&gt;
+  &lt;<mark>aaa</mark>:abcd a="cccccccc" /&gt;
+  &lt;<mark>bbb</mark>:abcd&gt;aaaaaaaa&lt;/<mark>bbb</mark>:abcd&gt;
+  &lt;<mark>bbb</mark>:abcd&gt;bbbbbbbb&lt;/<mark>bbb</mark>:abcd&gt;
+  &lt;<mark>bbb</mark>:abcd&gt;cccccccc&lt;/<mark>bbb</mark>:abcd&gt;
+&lt;/root&gt;
+</code></pre>
+<p>aaaに属しているのもbbbに属しているのもabcdタグですね。今回は、ルート要素であるrootタグはこれらの名前空間に属していません。</p>
+<p>実は、同じabcdでも、aaaに属するそれとbbbに属するそれは<strong>異なる要素</strong>として扱われます。</p>
+<p>逆に、</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;root xmlns:aaa="http://example.com/aaa"&gt;
+  &lt;<mark>aaa</mark>:abc /&gt;
+  &lt;<mark>aaa</mark>:def /&gt;
+  &lt;<mark>aaa</mark>:ghi /&gt;
+&lt;/root&gt;
+</code></pre>
+
+<h3>名前空間の実体</h3>
+<p>実はここまで、「aaaに属する」という言い方はしても「aaaが名前空間である」とは言っていません。実は、上の例では名前空間は<code>xmlns:aaa</code>属性で定義されています。上の例では、<code>"http://example.com/aaa"</code>が名前空間です。aaa自体は<dfn>名前空間接頭辞</dfn>といい、aaaという名前空間接頭辞が表す名前空間が<code>http://example.com/aaa</code>です。この関係が<code>xmlns:aaa</code>属性によって定義されています。正確に述べると、名前空間を定義するには次のような属性を書きます。</p>
+<pre class="language-xml"><code>xmlns:<var>名前空間接頭辞</var> ="<var>URI</var>"</code></pre>
+<p>これはどの要素にも書くことができます。これにより名前空間とそれに対応する名前空間接頭辞が定義されます。ここで定義された名前空間接頭辞は、その要素自身およびその中の要素で使うことができます。使うというのは、<code class="language-xml">&lt;aaa:abc /&gt;</code>のようにタグ名の前につけて使うということです。</p>
+<p>このURIこそが名前空間の本体といえます。例えば「<kbd>aaa:abcd</kbd>」というタグは、名前空間接頭辞のaaaが表す名前空間http://example.com/aaaに属する要素abcdということです。</p>
+<p>ちなみに、名前空間がURLの場合など、そのURLが表すインターネット上のページなどが存在しなくても構いません。実際に存在するサイトのURLでなくてもよいということです。</p>
+<p>それならなぜURIを使うかというと、重複する可能性が低いからです。一般的にWebサイトは誰かの所有物となるので、関係ない人が他人のWebサイトのURLを使うことは考えにくいですね。</p>
+
+<h3>名前空間の意味</h3>
+<p>上記の重複しにくいというのは、名前空間に意味を持たせるということに関連しています。</p>
+<p>一般に、XMLを用いてデータフォーマットを作る場合、そこで使われる要素が属するための名前空間を定義するのがよいでしょう。例えば、あなたがユーザーリストの書き方を考えだして使ったとします。前回の</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;users&gt;
+  &lt;ユーザー&gt;
+    &lt;名前&gt;Aさん&lt;/名前&gt;
+    &lt;年齢&gt;23&lt;/年齢&gt;
+  &lt;/ユーザー&gt;
+  &lt;ユーザー&gt;
+    &lt;名前&gt;Bさん&lt;/名前&gt;
+    &lt;年齢&gt;100&lt;/年齢&gt;
+  &lt;/ユーザー&gt;
+&lt;/users&gt;
+</code></pre>
+<p>を使ってみましょう。</p>
+<p>ここで、これに出てきている要素名（users、ユーザー、名前、年齢）やその使い方（usersの子はユーザーで、ユーザーの子は名前と年齢…）はこの「ユーザーリスト」のための要素です。</p>
+<p>ここで、このユーザーリストをひとつの名前空間に属するようにすると、こうなります。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;<mark class="ins">users:</mark>users <mark class="ins">xmlns:users="http://example.com/users"</mark>&gt;
+  &lt;<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;<mark class="ins">users:</mark>名前&gt;Aさん&lt;/<mark class="ins">users:</mark>名前&gt;
+    &lt;<mark class="ins">users:</mark>年齢&gt;23&lt;/<mark class="ins">users:</mark>年齢&gt;
+  &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+  &lt;<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;<mark class="ins">users:</mark>名前&gt;Bさん&lt;/<mark class="ins">users:</mark>名前&gt;
+    &lt;<mark class="ins">users:</mark>年齢&gt;100&lt;/<mark class="ins">users:</mark>年齢&gt;
+  &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+&lt;/<mark class="ins">users:</mark>users&gt;
+</code></pre>
+<p>ここで、この名前空間「http://example.com/users」とこれらの要素が結びついたことになります。つまり、ここで「users」とか「ユーザー」とかいっている要素は、実は名前空間「http://example.com/users」に属する要素を使っているということになります。</p>
+
+<p>このように結びつけることが何の役に立つのかというと、例えば他のXML文書（やXHTML文書）でこのデータフォーマットを使いたいときに役に立ちます。</p>
+<p>例えば、次のようなXML文書を考えます。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;users&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Cさん&lt;/名前&gt;
+        &lt;年齢&gt;-5&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+    &lt;/users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+</code></pre>
+<p>ccc要素の下で、さっきの「ユーザーリスト」の要素が使われているのがわかります。</p>
+<p>ところが、この文書全体は何らかの別のフォーマットに従っているはずです。しかし「ユーザーリスト」の部分はそれとは独立した別のフォーマットを利用しているので、これらは区別したくなります。ここで出てくるのが名前空間です。</p>
+<p>ユーザーリストの部分を文書とは別の名前空間に属するようにすれば、その部分が独立したフォーマットに従っていることを明示できます。すなわち、</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;<mark class="ins">users:</mark>users <mark class="ins">xmlns:users="http://example.com/users"</mark>&gt;
+      &lt;<mark class="ins">users:</mark>ユーザー&gt;
+        &lt;<mark class="ins">users:</mark>名前&gt;Cさん&lt;/<mark class="ins">users:</mark>名前&gt;
+        &lt;<mark class="ins">users:</mark>年齢&gt;-5&lt;/<mark class="ins">users:</mark>年齢&gt;
+      &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;/<mark class="ins">users:</mark>users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+</code></pre>
+<p>こうすることで、users以下の「ユーザーリスト」の語彙は、名前空間「http://example.com/users」に属するようになりました。</p>
+<p>自分でデータフォーマットを作った場合、このように名前空間を定めておくことで、どのXML文書で使われてもどのデータフォーマットに由来するのかわかるようになります。</p>
+<p>とはいえ、実際に自分で名前空間を作ることは少ないでしょう。実際には、XHTMLやSVGなど既存のフォーマットにはちゃんと名前空間が定義されていますから、それをちゃんと扱えるようになることが名前空間を学ぶ大きな意義です。</p>
+
+<h3>デフォルト名前空間</h3>
+<p>実は、<strong>デフォルト名前空間</strong>というものがあります。それはつまり、名前空間接頭辞の無いタグがどの名前空間に属するかということです。</p>
+<p>実は、それはあらかじめ決めることができます。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;aaa <mark>xmlns="http://example.com/"</mark>&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+&lt;/aaa&gt;
+</code></pre>
+<p>このサンプルで、aaa要素はxmlnsという属性を持っています。<code>xmlns:<var>名前空間接頭辞</var></code>という形の、接頭辞の部分が省略された形だといえますね。</p>
+<p>この形で、接頭辞のないタグが属する名前空間を指定することができます。これがデフォルト名前空間です。ちなみに、</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+&lt;/aaa&gt;
+</code></pre>
+<p>のようにxmlnsも無い場合は、「名前空間が無い」という扱いになります。</p>
+
+<p>デフォルト名前空間を用いることで、名前空間接頭辞を何回も書くのを避けることができます。例えば上の</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;<mark class="ins">users:</mark>users <mark class="ins">xmlns:users="http://example.com/users"</mark>&gt;
+      &lt;<mark class="ins">users:</mark>ユーザー&gt;
+        &lt;<mark class="ins">users:</mark>名前&gt;Cさん&lt;/<mark class="ins">users:</mark>名前&gt;
+        &lt;<mark class="ins">users:</mark>年齢&gt;-5&lt;/<mark class="ins">users:</mark>年齢&gt;
+      &lt;/<mark class="ins">users:</mark>ユーザー&gt;
+    &lt;/<mark class="ins">users:</mark>users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+</code></pre>
+<p>というXML文書は、users要素以下全てのタグにusersという接頭辞をつけなければならず見にくいので、このようにできます。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;aaa&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;bbb&gt;あああ&lt;/bbb&gt;
+  &lt;ccc&gt;
+    &lt;users <mark>xmlns="http://example.com/users"</mark>&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Cさん&lt;/名前&gt;
+        &lt;年齢&gt;-5&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+    &lt;/users&gt;
+  &lt;/ccc&gt;
+&lt;/aaa&gt;
+</code></pre>
+<p>users接頭辞がなくなりました。上記のように、接頭辞がない場合はデフォルト名前空間に属しますが、xmlnsでデフォルト名前空間をhttp://example.com/usersにしたから、結局users要素以下は変更前と同じhttp://example.com/usersに属することになります。</p>
+<p>上のほうで解説したとおり、xmlnsの適用範囲はその要素以下なので、usersの外側には影響はありません。このように、全部のタグに名前空間接頭辞をつけるのは見づらいし億劫なので、このようにデフォルト名前空間を設定して省略することがよく行われます。</p>
+
+<h3>XHTMLと名前空間</h3>
+<p>ここで、XHTMLの話題に戻ります。前述のように、XHTMLは決まった名前空間に属することになっています。その名前空間は、<strong>http://www.w3.org/1999/xhtml</strong>です。</p>
+<p>だから、XHTMLは、例えば名前空間接頭辞をxhtmlとしたとき、</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;xhtml:html <mark>xmlns:xhtml="http://www.w3.org/1999/xhtml"</mark>&gt;
+  &lt;xhtml:head&gt;
+    &lt;xhtml:meta charset="UTF-8" /&gt;
+    &lt;xhtml:title&gt;タイトル&lt;/xhtml:title&gt;
+  &lt;/xhtml:head&gt;
+  &lt;xhtml:body&gt;
+    &lt;xhtml:p&gt;サンプル&lt;/xhtml:p&gt;
+  &lt;/xhtml:body&gt;
+&lt;/xhtml:html&gt;
+</code></pre>
+<p>という感じにします。ただ、一目見て分かるようにとても見にくいです。そこで、大抵の場合、デフォルト名前空間を用いて次のようにします。</p>
+<pre class="language-xml"><code>&lt;?xml version="1.0" ?&gt;
+&lt;html <mark>xmlns="http://www.w3.org/1999/xhtml"</mark>&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;タイトル&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;サンプル&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>これならとてもすっきりして、HTMLとそこまで変わらなくなりました。</p>
+
+<p>多くのXHTML文書には呪文のようにこのxmlns属性が書いてあります。それは、デフォルト名前空間を定めることで各要素がちゃんとXHTMLの名前空間に属するようにするためだったのです。</p>
+<p>ちなみに、XHTML文書では、XHTMLの名前空間に属する要素だけが意味のあるHTML要素として解釈されます。例えば、次の例を試してみましょう。</p>
+<pre class="language-xml"><code>&lt;?xml version="1.0" ?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" xmlns:myns="http://example.com/"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;タイトル&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;サンプル&lt;/p&gt;
+    &lt;p&gt;これは&lt;strong <mark>xmlns="http://example.com/"</mark>&gt;重要&lt;/strong&gt;です。&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>なお、この例では<em>ファイルの拡張子を.xhtmlとする必要があります</em>。そうしないと、XHTMLではなくただのHTMLとして解釈されてしまいます。</p>
+<p>さて、拡張子.xhtmlでこの例を保存してブラウザで開くと、strong要素は一般に太字で描画されるにも関わらず、この例では太字にならないはずです。</p>
+<p>この理由は、strong要素にxmlns属性があるためデフォルト名前空間が変わり、結果としてstrong要素はXHTMLの名前空間に属していないからです。その結果、このstrong要素はHTMLのstrong要素であるとは解釈されず、太字にならないのです。</p>
+
+<p>また、実は、XHTMLはXMLなので、<strong>他の名前空間に属していればXHTML以外の要素を使用してもよい</strong>です。</p>
+<p>だから、次のようなことが可能です。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;ユーザー一覧&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;ユーザーの一覧です。&lt;/p&gt;
+    <mark>&lt;users xmlns="http://example.com/users"&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Dさん&lt;/名前&gt;
+        &lt;年齢&gt;35&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+      &lt;ユーザー&gt;
+        &lt;名前&gt;Eさん&lt;/名前&gt;
+        &lt;年齢&gt;0.6&lt;/年齢&gt;
+      &lt;/ユーザー&gt;
+    &lt;/users&gt;</mark>
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>強調部分は、さっきの「ユーザーリスト」です。明らかにXHTMLの語彙ではありませんね。しかし、users以下でデフォルト名前空間がユーザーリストのそれになっていることにより、この部分はXHTMLの語彙として使われているわけではないから、これでもXHTMLとして問題ありません。</p>
+<p>ただ、XHTML以外の自分が勝手に作った要素をブラウザは当然知りませんから、そこにそういうタグがあってそういう構造をしていることは認識できても、それがどういう意味なのかは分かってくれません。だから、気を利かせてリストっぽく描画してくれたりはしません。描画をいい感じにするにはやはりCSSを使います。実はCSSでも名前空間を扱うことができますので、気になる人は調べてみましょう。</p>
+

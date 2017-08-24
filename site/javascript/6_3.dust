@@ -1,0 +1,208 @@
+<p>今回は、DOMでXMLを扱うときの方法について解説します。とはいっても基本はHTMLと同じなので、XMLに特有の部分を解説することになります。</p>
+<p>今回は、簡単に使えるXML文書として、前回に引き続きXHTML文書を使います。XHTML文書がサンプルに出てきた場合、拡張子は<b>.xhtml</b>で保存してください。そうしないとXHTML文書として扱われません。</p>
+<p>XHTMLではないXML文書を扱うには他のファイルから読み込む必要があり、それは大変なのでまた今度扱うことにします。</p>
+
+<h3>ノードと名前空間</h3>
+<p>前回述べたように、XMLではノードが名前空間に属しています。</p>
+
+<h4>名前空間の情報を得る</h4>
+<p>次の場合を見てみましょう。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;<mark class="ins">xhtml:</mark>html xmlns<mark class="ins">:xhtml</mark>="http://www.w3.org/1999/xhtml"&gt;
+  &lt;<mark class="ins">xhtml:</mark>head&gt;
+    &lt;<mark class="ins">xhtml:</mark>meta charset="UTF-8" /&gt;
+    &lt;<mark class="ins">xhtml:</mark>title&gt;test&lt;/<mark class="ins">xhtml:</mark>title&gt;
+  &lt;/<mark class="ins">xhtml:</mark>head&gt;
+  &lt;<mark class="ins">xhtml:</mark>body&gt;
+    &lt;<mark class="ins">xhtml:</mark>p&gt;test&lt;/<mark class="ins">xhtml:</mark>p&gt;
+
+    &lt;<mark class="ins">xhtml:</mark>script type="text/javascript"&gt;
+      &lt;![CDATA[
+        console.log(document.documentElement.tagName);
+      ]]&gt;&lt;/<mark class="ins">xhtml:</mark>script&gt;
+  &lt;/<mark class="ins">xhtml:</mark>body&gt;
+&lt;/<mark class="ins">xhtml:</mark>html&gt;
+</code></pre>
+<p>デフォルト名前空間を使用せずに、名前空間接頭辞にxhtmlを使って書いた形です。上の文書では<code>document.documentElement.tagName</code>を表示しています。これはhtml要素のノードのtagNameを表示することになります。</p>
+<p>このとき、html要素のtagNameは<code>"xhtml:html"</code>となっています。つまり、tagNameには<strong>名前空間接頭辞も含んだタグ名が入っている</strong>ということです。</p>
+<p>ちなみにこのように名前空間接頭辞も含んだタグ名は「qualified name」の略で「QName」とよばれます。</p>
+<p>ただ、同じ名前空間でも名前空間接頭辞は人によって違う可能性があり、名前空間接頭辞の情報はあまり役に立ちません。名そこで、前空間接頭辞とそれ以外とを別々に取得する方法もあります。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;<mark class="ins">xhtml:</mark>html xmlns<mark class="ins">:xhtml</mark>="http://www.w3.org/1999/xhtml"&gt;
+  &lt;<mark class="ins">xhtml:</mark>head&gt;
+    &lt;<mark class="ins">xhtml:</mark>meta charset="UTF-8" /&gt;
+    &lt;<mark class="ins">xhtml:</mark>title&gt;test&lt;/<mark class="ins">xhtml:</mark>title&gt;
+  &lt;/<mark class="ins">xhtml:</mark>head&gt;
+  &lt;<mark class="ins">xhtml:</mark>body&gt;
+    &lt;<mark class="ins">xhtml:</mark>p&gt;test&lt;/<mark class="ins">xhtml:</mark>p&gt;
+
+    &lt;<mark class="ins">xhtml:</mark>script type="text/javascript"&gt;
+      &lt;![CDATA[
+        console.log(document.documentElement.<dfn>prefix</dfn>);    // "xhtml"
+        console.log(document.documentElement.<dfn>localName</dfn>); // "html"
+      ]]&gt;&lt;/<mark class="ins">xhtml:</mark>script&gt;
+  &lt;/<mark class="ins">xhtml:</mark>body&gt;
+&lt;/<mark class="ins">xhtml:</mark>html&gt;
+</code></pre>
+<p>prefixとlocalNameという2つのプロパティが出てきました。<dfn>prefix</dfn>が名前空間接頭辞、<dfn>localName</dfn>がローカル名（接頭辞を含まないタグ名）です。</p>
+
+<p>また、名前空間の実体は接頭辞ではなくURIです。例えばXHTMLの場合はhttp://www.w3.org/1999/xhtmlでした。情報としては名前空間接頭辞よりもこちらのほうが有用です。名前空間自体を取得するには<dfn>namespaceURI</dfn>プロパティを使います。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;<mark class="ins">xhtml:</mark>html xmlns<mark class="ins">:xhtml</mark>="http://www.w3.org/1999/xhtml"&gt;
+  &lt;<mark class="ins">xhtml:</mark>head&gt;
+    &lt;<mark class="ins">xhtml:</mark>meta charset="UTF-8" /&gt;
+    &lt;<mark class="ins">xhtml:</mark>title&gt;test&lt;/<mark class="ins">xhtml:</mark>title&gt;
+  &lt;/<mark class="ins">xhtml:</mark>head&gt;
+  &lt;<mark class="ins">xhtml:</mark>body&gt;
+    &lt;<mark class="ins">xhtml:</mark>p&gt;test&lt;/<mark class="ins">xhtml:</mark>p&gt;
+
+    &lt;<mark class="ins">xhtml:</mark>script type="text/javascript"&gt;
+      &lt;![CDATA[
+        console.log(document.documentElement.<dfn>namespaceURI</dfn>); // "http://www.w3.org/1999/xhtml"
+      ]]&gt;&lt;/<mark class="ins">xhtml:</mark>script&gt;
+  &lt;/<mark class="ins">xhtml:</mark>body&gt;
+&lt;/<mark class="ins">xhtml:</mark>html&gt;
+</code></pre>
+
+<h4>名前空間を持ったノードを作る</h4>
+<p>さて、上のnamespaceURIは書き換えられません。だから、あるノードを作るとき、そのノードが属する名前空間は<strong>作るときに決める</strong>ことが必要になります。まあ、tagNameなども書き換えられないので当然ですね。</p>
+<p>名前空間を指定してノードを作るには次のようにします。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml"&gt;
+  &lt;xhtml:head&gt;
+    &lt;xhtml:meta charset="UTF-8" /&gt;
+    &lt;xhtml:title&gt;test&lt;/xhtml:title&gt;
+  &lt;/xhtml:head&gt;
+  &lt;xhtml:body&gt;
+    &lt;xhtml:p&gt;test&lt;/xhtml:p&gt;
+
+    &lt;xhtml:script type="text/javascript"&gt;&lt;![CDATA[
+      var newp = document.<dfn>createElementNS</dfn>(<mark>"http://www.w3.org/1999/xhtml"</mark>, <mark>"xhtml:p"</mark>);
+
+      newp.appendChild(document.createTextNode("newp"));
+
+      document.body.appendChild(newp);
+
+      console.log(newp.namespaceURI);
+    ]]&gt;&lt;/xhtml:script&gt;
+  &lt;/xhtml:body&gt;
+&lt;/xhtml:html&gt;
+</code></pre>
+<p>ここで、名前空間を指定して要素のノードを作っているのは<dfn>createElementNS</dfn>というメソッドです。<a href="2_5.html#anchor-create-element">createElement</a>の名前空間あり版です。</p>
+
+<p>引数も2つに増えていて、1つめが名前空間のURI、2つめが接頭辞つきのタグ名（QName）です。</p>
+<p>これで名前空間に属するノードができます。最後にconsole.logでnamespaceURIを表示していますが、ちゃんと"http://www.w3.org/1999/xhtml"が表示されます。</p>
+<p>ちなみに、createElementNSの次にテキストノードを作って追加していますが、テキストノードは特に名前空間に属したりはしないので、特に変わりません。</p>
+
+<p>また、今回はQNameとして接頭辞つきの名前を指定しましたが、JavaScriptから新しく要素を作るときには接頭辞はあまり関係ありません。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml"&gt;
+  &lt;xhtml:head&gt;
+    &lt;xhtml:meta charset="UTF-8" /&gt;
+    &lt;xhtml:title&gt;test&lt;/xhtml:title&gt;
+  &lt;/xhtml:head&gt;
+  &lt;xhtml:body&gt;
+    &lt;xhtml:p&gt;test&lt;/xhtml:p&gt;
+
+    &lt;xhtml:script type="text/javascript"&gt;&lt;![CDATA[
+      var newp = document.<dfn>createElementNS</dfn>("http://www.w3.org/1999/xhtml", "<mark>aaaaaaa</mark>:p");
+
+      newp.appendChild(document.createTextNode("newp"));
+
+      document.body.appendChild(newp);
+
+      console.log(newp.namespaceURI);
+    ]]&gt;&lt;/xhtml:script&gt;
+  &lt;/xhtml:body&gt;
+&lt;/xhtml:html&gt;
+</code></pre>
+<p>のようにしても正しくXHTMLの名前空間に属します。</p>
+<p>だから、事実上接頭辞は省略できます。第二引数はただ単に"p"としても一応問題ないわけです。</p>
+<p>また、名前空間を含む文書で普通のcreateElementを使用した場合、名前空間に属しません。ただし、XHTML文書の場合は親切にも自動で<code>"http://www.w3.org/1999/xhtml"</code>に設定してくれます。なので、XHTML文書中でHTML要素のノードを作る場合はcreateElementを使ってもOKです。</p>
+
+<h4>getElementsByTagNameNS</h4>
+<p>getElementsByTagNameの名前空間対応版もあります。それが<dfn>getElementsByTagNameNS</dfn>です。これが威力を発揮するのは、例えばXHTML文書に他の名前空間の要素を埋め込んだ場合です。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" <mark>xmlns:abc="http://example.com/abc"</mark>&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;&lt;a href="http://google.com/"&gt;Go<mark>&lt;abc:a&gt;</mark>ogl<mark>&lt;/abc:a&gt;</mark>e&lt;/a&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;a href="http://google.com/"&gt;<mark>&lt;abc:a&gt;</mark>Goo<mark>&lt;/abc:a&gt;</mark>gle&lt;/a&gt;&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>この例では2つの名前空間があり、両方の名前空間に属するaという要素が登場しています。この中からリンクのa（XHTMLのa）だけを抜き出したい場合に威力を発揮します。</p>
+<p>例えば、次のようにします。</p>
+<pre><code>document.<strong>getElementsByTagNameNS</strong>(<mark>"http://www.w3.org/1999/xhtml"</mark>, <mark>"a"</mark>)</code></pre>
+<p>第一引数が名前空間で、第二引数がタグ名です。これで、指定したタグのち、その名前空間に属するものだけを取得できます。</p>
+<p>注意すべき点は、ここでのタグ名は<strong>ローカル名</strong>（接頭辞がつかない名前）を指定するという点です。</p>
+<p>一方、普通のgetElementsByTagNameの場合、指定するのはQNameです。名前空間は関係なく指定されたQNameを持つ要素が列挙されます。</p>
+<p>QNameは接頭辞によって変わりうるので、名前空間を意識する場合はgetElementsByTagNameNSを使いましょう。</p>
+
+<p>ちなみに、getElementsByTagNameNSの第一引数に<strong>"*"</strong>を指定すると、全ての名前空間から探すことができます。</p>
+
+<h3>属性の名前空間</h3>
+<p>前回解説しませんでしたが、実は属性も名前空間を持ちます。</p>
+<p>つまり、例えば</p>
+<pre class="language-xml"><code>&lt;abc:a <mark>abc:</mark>aaa="aaaaaa" /&gt;</code></pre>
+<p>という感じですね。ここでは属性にabcという名前空間接頭辞が付いて<code>abc:aaa</code>属性になっています。</p>
+<p>実は、要素に対する名前空間と属性に対する名前空間では少し違う部分があります。タグ名に接頭辞がつかない場合はデフォルト名前空間に属することになっていましたが、属性の場合はそのような<strong>名前空間に属しません</strong>。</p>
+<p>それに対し、属性に接頭辞をつけた場合、その属性は<strong>グローバル属性</strong>というものになります。この属性は、「要素から独立している」のだそうです。一応要素とくっついていますが、要素に属しているというわけではないらしいです。例えば、</p>
+<pre class="language-xml"><code>&lt;xhtml:a href="http://google.com/" <mark>abc:aaa="aaaa"</mark>&gt;</code></pre>
+<p>のような場合に、このa要素はxhtmlの名前空間に属する要素です。hrefは名前空間に属していないから、このa要素に属していることになりますが、対してabc:aaa属性は、abcで表される別の名前空間に属する属性ということになります。</p>
+<p>このときこのaaaはグローバル属性です。XHTMLで書かれた文書に何か独自の情報を追加したいとき、このように別の名前空間の属性を要素の属性としてくっつけておくことができます。</p>
+<p>もともと属する名前空間が違うから、このa要素はaaaなんて属性は知りません。だから、aaaがa要素に属しているというわけではないそうです。そういう意味で、このaaaは独立しているといえます。</p>
+
+<p>これらの属性は、JavaScriptでの扱い方が違います。グローバル属性でない場合（要素に属した属性の場合）、今まで同様getAttributeとsetAttribute（<a href="2_10.html">二章第十回</a>）で操作できます。</p>
+<p>対して、グローバル属性は、名前空間に属しているから扱い方が違います。</p>
+<pre class="language-xml"><code>&lt;a aaa:<mark>abc</mark>="..." bbb:<mark>abc</mark>="..." /&gt;</code></pre>
+<p>のような場合に区別する必要があるからですね。</p>
+<p>ここで使うのが、<dfn>getAttributeNS</dfn>と<dfn>setAttributeNS</dfn>です。</p>
+
+<p>まず、getAttributeNSは引数が2つになりました。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" <mark>xmlns:abc="http://example.com/abc"</mark>&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body <mark>abc:aaa="ababababab"</mark>&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;&lt;![CDATA[
+      console.log(document.body.<strong>getAttributeNS</strong>(<mark>"http://example.com/abc"</mark>, <mark>"aaa"</mark>) );
+    ]]&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>第一引数は名前空間のURIで、第二引数が属性のローカル名（接頭辞がつかない名前）です。</p>
+
+<p><dfn>setAttributeNS</dfn>も引数が1つ増えます。</p>
+<pre class="language-xml"><code>
+&lt;?xml version="1.0" ?&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" <mark>xmlns:abc="http://example.com/abc"</mark>&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body <mark>abc:aaa="ababababab"</mark>&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;&lt;![CDATA[
+      document.body.<strong>setAttributeNS</strong>(<mark>"http://example.com/abc"</mark>, <mark>"abc:aaa"</mark>, "cccccc");
+    ]]&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>第一引数が名前空間、第二引数が属性名、第三引数が変更後の値ということになります。</p>
+<p>ここで注意するのが、getAttributeNSではローカル名だった第二引数が、setAttributeNSではQName（接頭辞も含む名前）になっていることです。とはいっても、createElementNSの場合と同じように接頭辞はあまり意味がありません。</p>
+
+<p>以上でXHTML・XMLに関する解説は終了です。ここで解説しなかったことに関しては、だいたいはHTMLのノウハウが通用します（というより、本来DOMとはそもそもXMLを操作するためのものであって、それをHTMLにも適用しているのだという見方もできます）。</p>
+

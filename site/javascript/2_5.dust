@@ -3,7 +3,7 @@
 <h3>ノードを作る</h3>
 <p>まず、ノードを追加するには、追加するノードを新しく作る必要があります。その方法を解説します。</p>
 
-<h4>createElement</h4>
+<h4 id="anchor-create-element">createElement</h4>
 <p><dfn>createElement</dfn>というメソッドがあります。これは、要素名を指定することで、新しいHTMLElementを作って返すメソッドです。これは<strong>document</strong>が持つメソッドです。つまり、次のように呼び出します。</p>
 <pre><code>document.<strong>createElement</strong>('p')</code></pre>
 <p>では、次のサンプルを見てください。</p>
