@@ -1,0 +1,154 @@
+<p>この第七章では、章立てするほど大規模ではないが役立つさまざまな機能について解説します。</p>
+<p>まず第一回では、「複数のドキュメントを扱う」ということを解説していきます。</p>
+<p>次の例を見てください。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      <mark>&lt;iframe src="test.html"&gt;&lt;/iframe&gt;</mark>
+    &lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>これは、iframe要素、すなわち<strong>インラインフレーム</strong>を使用した文書です。インラインフレームとは、そこに別の文書を表示するしくみです。この文書では、その文書の中に、test.htmlという別のページを表示しているのがわかります。</p>
+<p>このページ全体もひとつの文書ですが、表示されるtest.htmlもまたひとつの文書です。そこで、JavaScriptではそれを扱う方法もあります。</p>
+<p>なお、今回のようにJavaScriptから他のページをいじる場合は<strong>同一生成元ポリシー</strong>（SOP）の制限を受けるため、注意する必要があります。これは、簡単に言うと<strong>他のウェブサイトの内容を読むことができない</strong>ということです。ウェブサイトが同じかどうかというのは<strong>オリジン</strong>（生成元）が同じかどうかで判断されます。例えばこのサイトのオリジンは<code>http://uhyohyo.net</code>です。オリジンというのは、プロトコル（<code>http:</code>）とホスト<code>uhyohyo.net</code>、さらにポート番号をあわせた概念です。オリジンが同じでないと読めないということは、例えばこのサイト上のページのJavaScriptは他のオリジン（例えば<code>https://google.co.jp</code>）上のページは読めません。
+</p>
+<p>また、最近はセキュリティ上の制限は厳しいため、ローカルのファイル上で実行されるJavaScriptは他のファイルを読み込むことができないようになっています。したがって、今回紹介するサンプルもローカルのファイルに書いて実行しただけだと動作しません。これに対処するには、ブラウザの設定でローカルファイルに対するSOPを無効にする方法と、仕方ないのでウェブサーバー上に置いてアクセスする方法があります。自分のPC上でウェブサーバーを動かすのもいいですね。詳しい方法は調べてみてください。</p>
+
+<h3>documentの取得</h3>
+<p>JavaScriptで文書を操作するのは、<strong>document</strong>を使うのでした。iframeで読み込んだ文書も一つの文書だから、その文書に対応する<strong>documentがあります</strong>。それを取得する方法を説明します。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="test.html" <mark class="ins">id="iframe"</mark>&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+    var iframe = document.getElementById('iframe');
+
+    window.addEventListener('load', function(){
+      var doc = iframe.<dfn>contentDocument</dfn>;
+      console.log(doc);
+    });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このサンプルでは以前紹介した<a href="3_2.html">addEventListener</a>を使用しています。loadというイベントは<a href="3_1.html">三章第一回</a>で紹介しました。ページの読み込みが完了したときに発生するイベントです。以前はbody要素で発生するイベントとして紹介しましたが、実はこのようにwindowでも発生します。loadイベントをJavaScriptから登録するときはwindowに登録するのがいいでしょう。</p>
+<p>今回loadイベントを待つ理由は、iframe要素がtest.htmlを読み込むのを待つためです。</p>
+<p>このサンプルは、loadイベントが発生したらiframe要素のHTMLElement（HTMLIFrameElement）のプロパティ<dfn>contentDocument</dfn>をdocに代入して表示しています。このcontentDocumentがiframe要素で読み込まれた文書のdocumentです。</p>
+<p>もっと具体的な操作をしてみましょう。そのために、読み込むtest.htmlは、</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;aaaaaaa&lt;/p&gt;
+    &lt;p&gt;bbbbbbb&lt;/p&gt;
+    &lt;p&gt;ccccccc&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ということにしておきます。では、次のサンプルを実行してみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="test.html" id="iframe"&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      window.addEventListener('load', function(){
+        var iframe = document.getElementById('iframe');
+
+        var doc = iframe.contentDocument;
+
+        console.log(doc.getElementsByTagName('p')[0]);
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p><code>doc.getElementsByTagName</code>を呼び出すことで、読み込まれたほうの文書(test.html)からpが探されます。その0番目、つまり最初だから、<code class="language-html">&lt;p&gt;aaaaaaa&lt;/p&gt;</code>と表示されます。</p>
+
+<p>以前、documentはwindowと対になっていると説明しました。iframe要素にはcontentDocumentに対応するWindowを取得するための<dfn>contentWindow</dfn>プロパティもあります。
+
+<h3>documentとノードの関係</h3>
+<p>さて、基本的に、ノードはdocumentに<strong>属しています</strong>。例えば、ある文書のノードは、全てその文書のdocumentに属しています。また、上のiframeの例だと、iframeがある側のページのノードはdocumentに、iframeで読み込まれる側のページのノードはiframe.contentDocumentに属しているということになります。</p>
+<p>ノード側から、そのノードがどのdocumentに属しているかを知ることができます。それには、ノードが持つ<dfn>ownerDocument</dfn>プロパティを用います。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      console.log(document.body.<mark>ownerDocument</mark> == <mark>document</mark>); // true
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>しかし、ノードがどのdocumentに属しているかということを気にする場面は少ないかもしれません。次の例を見てください。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;
+      &lt;iframe src="test.html" id="iframe"&gt;&lt;/iframe&gt;
+    &lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      window.addEventListener('load', function(){
+        var iframe = document.getElementById('iframe');
+        var doc = iframe.contentDocument;
+
+        var p = doc.getElementsByTagName('p')[0];
+        console.log(p.ownerDocument == document);
+        document.body.appendChild(p);
+        console.log(p.ownerDocument == document);
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このサンプルは、iframeで読みこまれた文書の中から<code class="language-html">&lt;p&gt;aaaaaaa&lt;/p&gt;</code>を取り出し、それをdocument（読み込んだ側の文書）に追加しています。</p>
+<p>結果として、iframeの中からは<code class="language-html">&lt;p&gt;aaaaaaa&lt;/p&gt;</code>が消え、外に出現したはずです。iframeの中から消えた理由は、ノードは1箇所にしか存在できないからです。既に木構造中に存在するノードが新しい場所にappendChildされた場合はこのように古い場所から移動してきます。</p>
+<p>興味深いのは2回のconsole.logの結果で、1回目はfalseで2回目はtrueとなっているはずです。つまり、appendChildで<code>document</code>下の木構造に追加されたことによって、このp要素が属するDocumentが変更されたということです。</p>
+<div class="sidenote">
+  <p>この挙動は、実は昔のDOM (DOM Level 3)とは異なっています。昔は異なるDocumentに属するノードをappendChildすることはできませんでした。代わりに、他の文書に属するノードはまずdocumentの<b>importNode</b>メソッドによって自分のdocumentに属するコピーを作成し、それをappendChildする必要がありました。</p>
+  <p>importNodeは次のように使います。</p>
+  <pre><code>
+    window.addEventListener('load', function(){
+      var iframe = document.getElementById('iframe');
+      var doc = iframe.contentDocument;
+      var p = doc.getElementsByTagName('p')[0];
+      var p2 = document.<mark>importNode</mark>(p, true);
+      console.log(p2.ownerDocument === document); // true
+      document.body.appendChild(p2);
+    });
+  </code></pre>
+  <p>第1引数はコピーしたいノードです。第2引数は真偽値で、これは<a href="2_7.html#anchor-clone-node">cloneNode</a>の引数と同じです。つまり、子ノードたちもコピーするかどうかを表します。</p>
+</div>

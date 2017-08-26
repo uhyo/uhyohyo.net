@@ -127,6 +127,8 @@ if(<mark>10</mark>){
 <p>この場合、「真」が表示されるので、10という数値は真であることが分かります。他にもいろいろ試してみましょう。</p>
 <p>実は、ifに渡すと偽になる値は限られています。<strong>0</strong>と<strong>NaN</strong>（これについて詳しくは<a href="11_6.html">第十一章第六回</a>で説明します）、<strong>空文字列</strong>（つまり<code>""</code>）、<strong>false</strong>、<strong>null</strong>、<strong>undefined</strong>。</p>
 <p>これ以外の値は、全て真です。また、オブジェクトも全て真です。</p>
+<p><small>（真と偽については<a href="7_2.html#anchor-sidenote-singi">七章第二回</a>にもさらに進んだ説明があります。）</small></p>
+
 <p>これを活用したのが、次の例です。</p>
 <pre><code>
 // 変数nodeは何かのノード

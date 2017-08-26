@@ -90,7 +90,7 @@ users.<mark>getElementsByTagName</mark>('ユーザー');		//usersが持つユー
 <pre class="language-html"><code>&lt;img src="aaa.gif" alt="aaa" <mark>/</mark>&gt;</code></pre>
 <p>開始タグと終了タグがひとつになり、もともとのHTMLの書き方に近くなりました。これはどんなタグでも同じです。XHTMLは廃れましたが、これの影響を受けてHTMLなのに<code class="language-html">&lt;br /&gt;</code>のように書かれているサイトがたまに見られます。HTMLではこのような記法をする必要はありませんが、一応許容されています。</p>
 
-<p>ついでに、style要素やscript要素を書くときにも注意が必要です。style要素やscript要素の中身を次のようにしないといけません。</p>
+<p id="anchor-cdata-section">ついでに、style要素やscript要素を書くときにも注意が必要です。style要素やscript要素の中身を次のようにしないといけません。</p>
 <pre class="language-xml"><code>
 &lt;script type="text/javascript"&gt;<mark>&lt;![CDATA[</mark>
   var aaa = 123;

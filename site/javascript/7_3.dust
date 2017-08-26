@@ -1,0 +1,193 @@
+<p>今回は、たまに役立つものを紹介します。ある条件を満たすノード全てに対して処理を実行する方法です。</p>
+<p>同じ感じのことは、今までに多少やってきました。例えば、getElementsByTagName（<a href="2_6.html">二章第六回</a>）は、あるタグ名を持つ要素の一覧を得るためのものです。そうして得たNodeListをfor文などで1つずつ処理すれば、「ある要素名を持つ」という条件を満たすノードをまとめて処理したということになります。</p>
+<p>しかし、今回紹介する方法では、要素名だけでなく、もっと複雑な条件を指定できます。</p>
+<p>今回紹介するのは、<strong>TreeWalker</strong>です。</p>
+<p>直訳すると「木を歩くもの」という意味です。木とは木構造のことで、分かりにくいと思いますが、木構造の上を移動しながら次々処理をしていくというイメージです。</p>
+<p>とりあえずやってみましょう。</p>
+
+<h3>TreeWalkerのオブジェクトを作る</h3>
+<p>TreeWalkerを使うには、まず<strong>TreeWalkerのオブジェクトを作る</strong>必要があります。それには、documentの<dfn>createTreeWalker</dfn>というメソッドを使います。</p>
+<p>これには引数が3つ必要で、1つめの引数は<strong>頂点ノード</strong>、2つめと3つめは<strong>条件</strong>です。</p>
+<p>頂点ノードとは、そのノード以下（そのノードとその子孫）を探索するというものです。例えば、body要素を指定すると、そこが頂点ですから、その親のhtml要素や兄弟のhead要素は探索されません。文書全体を探索するには、ルート要素であるhtml要素か、あるいはその上であるdocument自体を指定するといいです。ちなみに、ルート要素は、<a href="3_5.html#anchor-document-element">document.documentElement</a>で取得できます。</p>
+<p>2つめと3つめは条件です。TreeWalkerを作るときに、 どのノードに対して処理するかという条件を決めてしまうわけですね。できたオブジェクトは、その条件専用のTreeWalkerになります。そして、なぜ引数を2つも条件に使うかですが、次のような意味があります。</p>
+<p>まず2つめの引数では、<strong>おおまかな条件</strong>を指定します。この大まかな条件は、ノードの種類による絞り込みを行います。ノードの種類は、たとえば「要素ノード(HTMLElement)」とか、「テキストノード」とかです。</p>
+<p>これは<strong>数値</strong>で指定しますが、前回と同じように<strong>定数</strong>があります。使えそうなのをいくつか紹介します。</p>
+<dl>
+  <dt>SHOW_ELEMENT</dt>
+  <dd>要素ノードのみ。</dd>
+  <dt>SHOW_TEXT</dt>
+  <dd>テキストノードのみ。</dt>
+  <dt>SHOW_CDATA_SECTION</dt>
+  <dd><a href="6_1.html#anchor-cdata-section">CDATAセクション</a>のみ。</dt>
+  <dt>SHOW_COMMENT</dt>
+  <dd>コメントノードのみ。</dd>
+  <dt>SHOW_ALL</dt>
+  <dd>全種類。</dd>
+</dl>
+<p>これらの定数を引数として渡すわけです。実は、<strong>NodeFilter</strong>という名のついたオブジェクトがあり、今回の定数はNodeFilterのプロパティとして参照できます。</p>
+<p>さらに、これらの定数は、前回出てきた定数と同様に<strong>1つのビットのみが立った数値</strong>で、2つ以上のビットが立った値を渡した場合、その<strong>両方</strong>が対象となります。1つのビットのみが立った数2つからその両方のビットが立った値を得るには、<strong>ビットごとの論理和</strong>を使うのでした。だから、例えば「要素ノード」と「テキストノード」の二種類を対象にしたいときは、<code>NodeFilter.<mark>SHOW_ELEMENT</mark> <mark>|</mark> NodeFilter.<mark>SHOW_TEXT</mark></code>のようにします。なお、SHOW_ALLというのは全てのビットが最初から立った値です。</p>
+
+<p>さて、3つめの引数では、さらに詳しい条件を指定できます。3つめの引数に指定するのは<strong>関数</strong>です。この関数は<strong>フィルター</strong>と呼ばれ、引数としてノードが渡されます。そのノードが条件を満たすかどうかを判定し、返り値で判定結果をTreeWalkerに教えます。だから、例えば次のような関数を渡します。</p>
+<pre><code>
+function (node){
+    if(node.className == "aaa"){
+        return <mark>NodeFilter.FILTER_ACCEPT</mark>;
+    }else{
+        return <mark>NodeFilter.FILTER_SKIP</mark>;
+    }
+}
+</code></pre>
+<p>返り値として、よくわからないものを返しています。実は、これも<strong>定数</strong>で、上と同じようにNodeFilterのプロパティです。次の3種類があります。</p>
+<dl>
+  <dt>FILTER_ACCEPT</dt>
+  <dd>そのノードは条件を満たす。</dd>
+  <dt>FILTER_REJECT</dt>
+  <dd>そのノードは条件を満たさず、その子孫も全て条件を満たさない。</dd>
+  <dt>FILTER_SKIP</dt>
+  <dd>そのノードは条件を満たさない。</dd>
+</dl>
+<p>の3種類があります。今回の場合そのノードのクラス名が"aaa"であれば<small>（ただしこの方法は"aaa bbb"のように複数のクラスに属する可能性があるから不完全です。<a href="12_1.html">十二章第一回</a>で紹介する<a href="12_1.html">classList</a>を使いましょう）</small>、FILTER_ACCEPTを返すから条件を満たしているということになります。</p>
+<p>そうでない場合（else）、FILTER_SKIPを返していて、条件を満たさないということになります。</p>
+<p>今回使われていないFILTER_REJECTですが、これも条件を満たさないことを意味します。FILTER_SKIPとの違いは、FILTER_REJECTの場合、その子孫も一緒に問答無用で条件を満たさないことになります。例えば、</p>
+<div class="tree">
+A
+<ul>
+  <li>B
+    <ul>
+      <li>C
+      <li>D
+    </ul>
+  <li>E
+</ul>
+</div>
+<p>という木構造の場合、BでFILTER_REJECTが返されたら、C,Dが条件を満たしていたとしても、B以下は全て条件を満たさないということにされます。EはBの子孫でないから、影響は受けません。</p>
+<p>FILTER_SKIPの場合は、子孫に影響を与えません。上のサンプルの場合、BがFILTER_SKIPだとしても、C,Dもちゃんと判定されて、もし条件を満たしていたら満たしているということになります。</p>
+
+<p>さて、今までのを踏まえて、createTreeWalkerを使ってみましょう。条件は、「クラス名が"abc"である要素」ということにしてみます。</p>
+<pre><code>
+var tw = document.<dfn>createTreeWalker</dfn>(
+  document,
+  NodeFilter.SHOW_ELEMENT,
+  function(node){
+      if(node.className == "abc"){
+          return NodeFilter.FILTER_ACCEPT;
+      }else{
+          return NodeFilter.FILTER_SKIP;
+      }
+  });
+</code></pre>
+<p>何行もありますが、これはただcreateTreeWalkerを呼んでいるだけです。見やすいように、引数1つごとに改行をしています。1つめの引数が<code>document</code>、2つめが<code>NodeFilter.SHOW_ELEMENT</code>で、3つめが</p>
+<pre><code>function(node){
+    if(node.className == "abc"){
+        return NodeFilter.FILTER_ACCEPT;
+    }else{
+        return NodeFilter.FILTER_SKIP;
+    }
+}</code></pre>
+<p>です。</p>
+
+<h3>TreeWalkerを使う</h3>
+<p>さて、こうしてできたTreeWalkerオブジェクトを使ってみましょう。</p>
+
+<h4>TreeWalkerの「位置」</h4>
+<p>TreeWalkerには、<strong>位置</strong>というものがあります。TreeWalkerは木構造の上をノードからノードへと動きまわるものです。つまり、TreeWalkerが今どこのノードにいるかという情報が発生します。これが位置です。</p>
+<p>TreeWalkerが動くノードは、それに設定された条件を満たすノードのみです。木構造の上を順番に動いていってひとつずつ処理することで、条件を満たすノード全て処理するという目的を果たすのです。</p>
+<p>そして、TreeWalkerを動かすのには、TreeWalkerのメソッドを使います。</p>
+
+<h4>previousNode,nextNode</h4>
+<p><dfn>previousNode</dfn>、<dfn>nextNode</dfn>は、TreeWalkerを動かす基本的なメソッドのひとつです。それぞれ、「前のノード」「次のノード」という意味です。ここで前とか次とかと言っているのは、前回紹介した文書順で前とか次ということです例えば、。</p>
+<div class="tree">
+A
+<ul>
+  <li><mark>B</mark>
+    <ul>
+      <li>C
+        <ul>
+          <li><mark>D</mark>
+        </ul>
+      <li><mark>E</mark>
+        <ul>
+          <li>F
+        </ul>
+    </ul>
+  <li><mark>G</mark>
+    <ul>
+      <li><mark>H</mark>
+      <li>I
+        <ul>
+          <li><mark>J</mark>
+        </ul>
+    </ul>
+</ul>
+</div>
+<p>という木構造があり、B,D,E,G,H,Jが条件を満たしている場合を考えます。</p>
+<p>このとき、Bの次はD、その次がE,G,H,Jとなります。逆も同じです。直感的で分かりやすいですね。</p>
+
+<p>TreeWalkerオブジェクトが持つpreviousNode,nextNodeメソッドは返り値があり、<strong>移動後の位置にあるノード</strong>を返します。例えば、Bの位置にTreeWalkerがあった場合、nextNodeを呼び出すとDに移動し、返り値としてDのノードが返されるというわけです。</p>
+<p>また、移動先がない場合はこれらのメソッドは<strong>nullを返します</strong>。上の例では、Jの位置でnextNodeを使ったりBの位置でpreviousNodeを使ったりした場合が該当します。その場合、移動先がないから、TreeWalkerの位置は変わりません。</p>
+<p>そして、TreeWalkerが作られた直後は、つまり最初の状態では、TreeWalkerの位置は<strong>どこのノードにもありません</strong>。まだどこにもないという状態ですね。この最初の状態でnextNodeを呼び出すと、最初のノード、つまり上の例の場合Bに移動するということになっています。</p>
+
+<p>これらの性質を利用すれば、nextNodeだけで条件を満たすノードを全て処理することができます。そのためには次のようにします。</p>
+<pre><code>
+//（twは作ったばかりのTreeWalkerオブジェクトとする）
+var node;
+while( <mark>node = tw.nextNode()</mark> ){
+    node;	//そのノードに対する何らかの処理
+}
+</code></pre>
+<p>whileの条件が代入文になっていますね。代入演算子は代入されたその値を返すということは<a href="kiso2.html">基礎編第二回</a>で解説しました。つまり、whileで何回も処理される処理の開始時に変数nodeにnextNodeで移動先のノードを代入し、同時にその値をwhileの条件にしているということです。</p>
+<p>順を追ってみていきます。また上のサンプルを使うことにしましょう。</p>
+<p>まず、while文に入ると条件式で<code>tw.nextNode()</code>が実行されます。上で解説したとおり、最初のノードであるBが返されます。よって、<code>node</code>にBのノードが代入されると同時にBがwhile文の条件となります。オブジェクトなら真なので、whileの条件は真となり実行されます。その処理では、変数nodeにBが入っているから、まずBに対して処理ができました。</p>
+<p>次のループではnextNodeはDを返し、TreeWalkerもDの位置に移動します。同様に<code>node</code>にはDが入り、Dが処理されます。</p>
+<p>以下同様に、E,G,H,Jと処理していきます。</p>
+<p>Jの処理が終わったとき、<code>tw.nextNode()</code>は<strong>nullを返します</strong>。Jの次のノードは無いからですね。よって変数<code>node</code>にもnullが代入されます。そして、nullは<strong>偽</strong>として扱われるので、while文は無事終了します。</p>
+<p>このようにして、nextNodeだけで条件を満たす全てのノードを処理することができました。正直、nextNodeさえあれば十分という感じもしますが、TreeWalkerには他のメソッドもありますから、一応紹介しておきます。</p>
+
+<h4>firstChild,lastChild,parentNode</h4>
+<p>この3つはいずれもメソッドです。firstChildは「最初の子」、lastChildは「最後の子」、parentNodeは「親ノード」という意味です。これらは、現在位置から見てそれぞれ対応するノードの位置に移動してそのノードを返すというメソッドです。</p>
+<p>ただし、firstChild,lastChildは、正確には「条件を満たす子孫の中で最初/最後のもの」に移動します。そのようなものがなければnullが返ります。</p>
+<p>例えば、上の例で、Aの位置で<code>firstChild()</code>を実行するとBに移動します。また、Bの位置で<code>firstChild()</code>を実行するとDに移動します。ただし、それはCの位置でフィルター関数が<code>FILTER_SKIP</code>を返した場合です。もし<code>FILTER_REJECT</code>を返した場合には、その子孫は無視されるので移動先はDではなくEとなります。</p>
+<p><code>lastChild()</code>も同様で、Bの位置から<code>lastChild()</code>とするとEに移動します。またGから<code>lastChild()</code>とするとJに移動します。</p>
+
+<p>一方、parentNodeは条件を満たす親ノードに移動します。しかし、親ノードはもともと一つしかないですね。もし親ノードが条件を満たさないノードの場合は、そのさらに親を探して移動するということになっています。親の親がだめなら親の親の親…のように探します。最終的に頂点ノードまで探しても無かったら、nullとなり移動しません。</p>
+<p>例えば、Dの位置から見たparentNodeは、直接の親のCが条件を満たさないからその上のBが見られ、Bが条件を満たすからBに移動するということになります。</p>
+
+<h4>previousSibling,nextSibling</h4>
+<p>previousSiblingは「前の兄弟ノード」、nextSiblingは「次の兄弟ノード」にそれぞれ移動します。previousSiblingは直前の兄弟が条件を満たさなければもうひとつ前、それも満たさなければさらに前…のようにして探します。なければいつものようにnullです。nextSiblingも同様です。</p>
+
+<p>これらの5つのメソッドは木構造上のノードを処理する順番を細かく制御したい場合に有用です。なお、firstChild,lastChild,parentNode,previousSibling,nextSiblingはノードが持つプロパティと同じ名前ですが、こちらはあくまでTreeWalkerが持つメソッドなので、区別しましょう。</p>
+
+<h3>実際のサンプル</h3>
+<p>では、TreeWalkerを実際に使ってみましょう。今回は、「p要素またはdiv要素の背景色を黄色にする」ということをやってみます。本当は<a href="5_1.html">第五章</a>で解説した方法でやるのがいいですが、サンプルだし気にしません。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;p1&lt;/p&gt;
+      &lt;div&gt;div1&lt;/p&gt;
+    &lt;p&gt;p2&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var tw = document.createTreeWalker(document,
+      NodeFilter.SHOW_ELEMENT,
+      function(node){
+          if(node.tagName=="P" || node.tagName=="DIV"){
+              return NodeFilter.FILTER_ACCEPT;
+          }else{
+              return NodeFilter.FILTER_SKIP;
+          }
+      },
+      false);
+
+      var node;
+      while(node = tw.nextNode()){
+          node.style.backgroundColor="yellow";
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+

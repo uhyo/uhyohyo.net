@@ -105,7 +105,7 @@
 </code></pre>
 <p>このサンプルでは、イベントリスナ自体はbody要素に登録されていますが、イベントオブジェクトのtargetプロパティを調べて、そのtagNameが"P"であるとき、つまりtargetプロパティがp要素であるときのみログを表示しています。</p>
 
-<h3>ルートノード</h3>
+<h3 id="anchor-document-element">ルートノード</h3>
 <p>さて、このように、親要素にひとつだけイベントを登録して、そこからtargetなどを利用して処理する方法は、とてもよく使われます。そこで、今回のようにbody要素にイベントを登録してもいいのですが、これにはひとつ欠点があります。それは、head要素中に記述されたスクリプトで<code>document.body</code>を参照できないという点です。<small>（HTMLは上から読みこまれるので、head要素の中身が読まれている時点ではまだbody要素は読みこまれておらず、したがって<code>document.body</code>は存在しないことになります。）</small></p>
 <p>そこで、body要素よりさらに上のhtml要素に登録するというのはひとつの手です。当然、HTML文書では一番上の要素はhtml要素です。ちなみに、このように一番上の要素を<dfn>ルート要素</dfn>といい、documentが持つ<dfn>documentElement</dfn>プロパティで取得できます。例えば次のようにするとhtml要素が表示されるでしょう。</p>
 <pre><code>console.log(document.<mark>documentElement</mark>);</code></pre>

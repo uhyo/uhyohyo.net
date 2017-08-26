@@ -1,0 +1,209 @@
+<p>今回解説するのは、<dfn>DocumentFragment</dfn>というものです。これは、題名の通り、複数のノードをまとめて扱うのに必要なものです。</p>
+<p>実はこれは<strong>ノードの一種</strong>です。つまり、「テキストノード」とか「要素ノード」とかと同じように、「DocumentFragment」という種類のノードがあるのです。</p>
+<p>ノードの一種だから、appendChildなどで子ノードを追加したり、あるいはcloneNodeでDocumentFragment自身をコピーしたりもできます。</p>
+<p>このDocumentFragmentはどういった意味を持つノードなのかということですが、典型的な説明としては「小型のdocumentのようなものである」とされます。</p>
+<p>つまり、DocumentFragmentは、ひとつの独立した木構造の頂点のノードであるといえます。</p>
+<p>しかし、例えばp要素を作ってその子としてテキストノードを作って追加した場合、</p>
+<div class="tree">
+p
+<ul>
+  <li>#text
+</ul>
+<p>という独立した木構造が生まれるのはご存知の通りです。p要素が例えばbodyにappendChildされて初めてこの木構造は文書の一部となり、それまでは文書の木構造とは独立した木構造として存在することになります。なので、独立した木構造を作りたいだけならばDocumentFragmentは必ずしも必要ではないように思えます。しかし、このように要素を頂点とした木構造では表現できない場合があります。例えば、</p>
+<div class="tree">
+A
+<ul>
+  <li>B
+  <li>C
+  <li>D
+  <li>E
+</ul>
+</div>
+<p>という木構造からB, C, Dを抜き出したいとします。このとき、もとの木構造は</p>
+<div class="tree">
+A
+<ul>
+  <li>E
+</ul>
+</div>
+<p>となり、抜き出した部分は
+<div class="tree">
+<ul>
+  <li>B
+  <li>C
+  <li>D
+</ul>
+</div>
+<p>となります。この抜き出した部分が問題で、この3つは兄弟でなければいけませんが、しかし親がいません。木構造の場合、親がないと兄弟として成り立たないのです。</p>
+<p>こういう場合に、仮の親としてこのB,C,Dの木構造の頂点に位置するべきものがDocumentFragmentなのです。つまり、</p>
+<div class="tree">
+<mark>DocumentFragment</mark>
+<ul>
+  <li>B
+  <li>C
+  <li>D
+</ul>
+</div>
+<p>という木構造ならばよいということです。このように、DocumentFragmentの主な役目は親がいないが兄弟関係にある複数のノードたちに対してその仮の親となることです。（兄弟関係にある）ノードたちをまとめておくための入れ物という見方もできるでしょう。</p>
+<p>では、まず新しいDocumentFragmentを作るサンプルを見ましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var df = document.<mark>createDocumentFragment</mark>();
+
+      var p1 = document.createElement("p");
+      p1.appendChild(document.createTextNode('p1'));
+      var div1 = document.createElement("div");
+      div1.appendChild(document.createTextNode('div1'));
+      var div2 = document.createElement("div");
+      div2.appendChild(document.createTextNode('div2'));
+
+      df.appendChild(p1);
+      df.appendChild(div1);
+      df.appendChild(div2);
+
+      console.log(df);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ここで新登場した<dfn>createDocumentFragment</dfn>はdocumentのメソッドで、このようにすることで新しいDocumentFragmentが作れます。返り値が新しくできたDocumentFragmentです。当然ながら、新しく作られたDocumentFragmentは中身が空です。子はいません。</p>
+<p>そして、できたDocumentFragmentにp1,div1,div2の3つの子ノードを追加しています。console.logでDocumentFragmentを表示すると、それが</p>
+<div class="tree">
+DocumentFragment
+<ul>
+  <li>p (p1)
+  <li>div (div1)
+  <li>div (div2)
+</ul>
+</div<
+<p>という木構造を持っていることが分かるはずです。</p>
+
+<h4>DocumentFragmentの使い方</h4>
+<p>さて、このDocumentFragmentがどんなものかは分かったと思います。実は、DocumentFragmentには特別な特徴があります。それは、DocumentFragmentを<a href="2_5.html#anchor-append-child">appendChild</a>などで他のノードの子ノードとして追加しようとしたときに現れます。</p>
+<p>上で作ったDocumentFragmentをbody要素に追加してみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;test&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      var df = document.<mark>createDocumentFragment</mark>();
+
+      var p1 = document.createElement("p");
+      p1.appendChild(document.createTextNode('p1'));
+      var div1 = document.createElement("div");
+      div1.appendChild(document.createTextNode('div1'));
+      var div2 = document.createElement("div");
+      div2.appendChild(document.createTextNode('div2'));
+
+      df.appendChild(p1);
+      df.appendChild(div1);
+      df.appendChild(div2);
+
+      <mark class="ins">document.body.appendChild(<mark>df</mark>);</mark>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>単純に考えると、ページは次のようになる気がします。</p>
+<div class="tree">
+body
+<ul>
+  <li>p (test)
+  <li>script
+  <li><mark>DocumentFragment</mark>
+    <ul>
+      <li>p (p1)
+      <li>div (div1)
+      <li>div (div2)
+    </ul>
+</ul>
+</div>
+<p>ところが、<strong>実際は違う</strong>のです。実はDocumentFragmentを追加した場合、<strong>DocumentFragment自体は追加されず</strong>、<strong>DocumentFragmentの子ノードが直接追加される</strong>のです。つまり、実際の木構造はこうなります。</p>
+<div class="tree">
+body
+<ul>
+  <li>p (test)
+  <li>script
+  <li>p (p1)
+  <li>div (div1)
+  <li>div (div2)
+</ul>
+</div>
+<p>この動作は、DocumentFragmentがあくまでノードを入れる入れ物であると考えれば納得がいきます。</p>
+
+<p>DocumentFragmentを使うことの利点は、例えば画面に影響する木構造へのappendChild（など）を少なくできるという点があります。画面に影響する木構造とは、実際に画面に表示されているものの木構造、つまりdocumentを頂点とする木構造です。これにノードが追加されたりすると、その結果を画面に反映させなければいけません。これはブラウザにとっては大変な作業です。特に多くのノードを追加したい場合、appendChildをするたびに画面を書き直す必要があり、大変です（ブラウザによっては賢く画面を書きなおすのをサボるものもあります）。そこで、DocumentFragmentに先にまとめて追加しておき（DocumentFragmentはdocumentとは独立した木構造だから追加しても画面を書き直す必要がありません）、最後にDocumentFragmentを追加すればいいのです。そうすれは、画面の木構造はDocumentFragmentを追加したときの1回だけ変化し、描き直しも1回しか起こりません。</p>
+
+<p>また、同じノードの組をたくさん追加したいときなども役立ちます。例えば、</p>
+<pre class="language-html"><code>
+&lt;li&gt;1&lt;/li&gt;
+&lt;li&gt;2&lt;/li&gt;
+&lt;li&gt;3&lt;/li&gt;
+&lt;li&gt;4&lt;/li&gt;
+&lt;li&gt;5&lt;/li&gt;
+</code></pre>
+<p>を全てのul要素に追加したいとします。そうすると、DocumentFragmentを使わずに実現する場合、li要素が5個だからul要素1つにつき5回のappendChildが必要になり、ul要素が5個あれば25回ものappendChildをすることになってしまいます。DocumentFragmentがあれば、次のようにできます。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;あ&lt;/li&gt;
+      &lt;li&gt;い&lt;/li&gt;
+      &lt;li&gt;う&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;イ&lt;/li&gt;
+      &lt;li&gt;ロ&lt;/li&gt;
+      &lt;li&gt;ハ&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;A&lt;/li&gt;
+      &lt;li&gt;B&lt;/li&gt;
+      &lt;li&gt;C&lt;/li&gt;
+    &lt;/ul&gt;
+
+
+    &lt;script type="text/javascript"&gt;
+      var df = document.createDocumentFragment();	//新しいDocumentFragmentを作る
+
+      //5個のli要素を作ってdfに追加
+      for(var i=1;i&lt;=5;i++){
+        var li = document.createElement('li');		//li要素を作って
+        li.appendChild(document.createTextNode(i));	//テキストノードも作って
+        df.appendChild(li);				//dfに追加
+      }
+
+      //全てのul要素に対して処理
+      var uls = document.getElementsByTagName('ul');
+      for(i=0;i&lt;uls.length;i++){
+        var ul = uls.item(i);		//処理するul要素
+        ul.appendChild( df.cloneNode(true) );	//原本のDocumentFragmentは使いまわせないから、同じものを作って追加
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>こうすれば、画面に影響するappendChild（画面上のul要素に対するappendChild）は各ul要素につき1回となります。</p>
+
+<p>以上がDocumentFragmentの紹介です。使いどころがたまにあるノードの種類です。また、HTML5ではtemplate要素の中身がDocumentFragmentにより表されています（これについてはまた今度の機会に紹介します）。</p>

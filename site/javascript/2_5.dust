@@ -58,7 +58,7 @@ html
 <p>body要素にid属性をつけて、getElementByIdで取得することもできますが、body要素の場合はもっとよい方法があります。それは、<strong>documentオブジェクトのbodyプロパティ</strong>です。つまり、
 <code>document.body</code>ですね。実はbody要素はこのように取得することができます。今回はこれを使いましょう。</p>
 
-<h4>appendChild</h4>
+<h4 id="anchor-append-child">appendChild</h4>
 <p>ノードに子ノードを追加するには、<dfn>appendChild</dfn>というメソッドを使います。</p>
 <p>このメソッドに引数を渡すと、そのノードの子ノードの一番最後に引数のノードが追加されます。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;
