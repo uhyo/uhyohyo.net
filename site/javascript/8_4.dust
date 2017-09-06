@@ -1,0 +1,253 @@
+<h3>考え方</h3>
+<p>今回は、前回の最後に作ったサンプルを完成させる回です。前回の最後は結局次のような状態でした。
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      document.addEventListener('mouseup',function(ev){
+        var selection = getSelection();
+        if(selection.rangeCount &gt; 0){
+          var range = selection.getRangeAt(0);
+          //新しいspan要素を作る
+          var newspan = document.createElement('span');
+          //background-colorを設定
+          newspan.style.backgroundColor="#ffff00";
+
+          var df = range.extractContents();
+          newspan.appendChild(df);
+          range.insertNode(newspan);
+        }
+      },false);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>という物を作ったのでした。しかし、問題もあるということは前回解説しました。</p>
+<p>そこで、今回それをどう改良するかということをまず解説します。</p>
+<p>なお、今回Rangeの新しい機能は登場しません。それ以外の新要素は2つ登場します。ページの最後にまとまっていますので、今回のサンプルに興味がない方はそこだけ参照してください。</p>
+
+<p>さて、今回どうやって背景色を変えるかというと、<strong>Rangeに含まれる要素ひとつひとつにスタイルを指定して回る</strong>という方針でいきます。</p>
+<p>つまり、</p>
+<pre class="language-html"><code>
+&lt;p&gt;......<mark>...&lt;/p&gt;
+&lt;p&gt;.....&lt;/p&gt;
+&lt;p&gt;...</mark>.....&lt;/p&gt;
+</code></pre>
+<p>というように選択していた場合、適宜spanを補いつつ、</p>
+<pre class="language-html"><code>
+&lt;p&gt;......<mark class="ins">&lt;span style="background-color:yellow"&gt;</mark>...<mark class="ins">&lt;/span&gt;</mark>&lt;/p&gt;
+&lt;p <mark class="ins">style="background-color:yellow"</mark>&gt;.....&lt;/p&gt;
+&lt;p&gt;<mark class="ins">&lt;span style="background-color:yellow"&gt;</mark>...<mark>&lt;/span&gt;</mark>.....&lt;/p&gt;
+</code></pre>
+<p>というようにします。このように、真ん中のp要素に関しては全て範囲内なので、そのp要素に直接スタイルを指定してしまいます。</p>
+<p>Rangeの開始点や終了点がテキストの途中にある場合はテキストに直接スタイルを適用できませんので、span要素を補います。</p>
+<p>今回は、一番上（body要素）から順に、どこを着色すべきか調べていくことにしましょう。方針としては、あるノードを調べたとき、そのノードが完全にRangeに含まれていればそのノードを着色する。そのノードにRangeの範囲の一部が入っていれば中を詳しく調べる。完全にRangeの範囲外ならそのノードはやめて次を調べる。このような方針をとりましょう。</p>
+<p>この方針は再帰関数を使えば簡単に実現できます。上で「あるノードを調べる」という表現がありましたが、これに対応する関数を作ります。</p>
+<pre><code>
+document.addEventListener('mouseup',function(ev){
+  // 現在の選択範囲を調べる
+  var selection = getSelection();
+  if(selection.rangeCount &gt; 0){
+    var range = selection.getRangeAt(0);
+    checkNode(document.body, range)
+  }
+}
+// メインの関数
+// nodeは現在調べているノード、rangeは着色したい範囲のRange
+function checkNode(node, range){
+}
+</code></pre>
+<p>上で述べた処理の実現のためには、nodeがrangeの中に含まれているかどうか調べる必要があります。このために使えるのが<a href="8_2.html#anchor-compare-boundary-points">compareBoundaryPoints</a>です。nodeの範囲とちょうど一致する範囲を表すRangeを作ることでnodeとrangeの位置関係を知ることができます。</p>
+<pre class="line-numbers"><code>
+// メインの関数
+// nodeは現在調べているノード、rangeは着色したい範囲のRange
+function checkNode(node, range){
+  // 新しいRangeを作る
+  var nodeRange = new Range();
+  // nodeRangeの範囲をnodeを囲むように設定
+  nodeRange.selectNode(node);
+
+  if(range.compareBoundaryPoints(Range.START_TO_START, nodeRange) &lt;= 0 &amp;&amp;
+     range.compareBoundaryPoints(Range.END_TO_END, nodeRange) &gt;= 0){
+    // nodeRangeはrangeに囲まれている
+    // → このノード全体を着色して終わり
+    node.style.backgroundColor = "#ffff00";
+  }else if(range.compareBoundaryPoints(Range.START_TO_END, nodeRange) &lt;=0 ||
+            range.compareBoundaryPoints(Range.END_TO_START, nodeRange) &gt;=0){
+    // nodeRangeとrangeは重なっていない
+    // →このノードをこれ以上調べる必要はない
+    return;
+  }else{
+    // このノードは一部rangeに含まれている
+    for(var i=0; i&lt;node.childNodes.length; i++){
+      // 子ノードをひとつずつ調べる
+      checkNode(node.childNodes[i], range);
+    }
+  }
+}
+</code></pre>
+<p>これはなかなか簡潔でわかりやすいプログラムですが、これではまだひとつ考慮できていない場合があります。それは、テキストノードを着色したい場合です。上の関数では<code>node.style.backgroundColor = "#ffff00";</code>としていましたが、これは明らかにnodeがHTML要素の場合を想定しており、nodeがテキストノードの場合はこれだと無理です。</p>
+<p>テキストノードを着色したい場合は、span要素でそのテキストノードで囲むことで対処するのがよいでしょう。つまり、関数を次のように改良します。</p>
+<pre class="line-numbers" data-line="13-20"><code>
+// メインの関数
+// nodeは現在調べているノード、rangeは着色したい範囲のRange
+function checkNode(node, range){
+  // 新しいRangeを作る
+  var nodeRange = new Range();
+  // nodeRangeの範囲をnodeを囲むように設定
+  nodeRange.selectNode(node);
+
+  if(range.compareBoundaryPoints(Range.START_TO_START, nodeRange) &lt;= 0 &amp;&amp;
+     range.compareBoundaryPoints(Range.END_TO_END, nodeRange) &gt;= 0){
+    // nodeRangeはrangeに囲まれている
+    // → このノード全体を着色して終わり
+    if(node.nodeType == Node.TEXT_NODE){
+      // テキストノードの場合はspanで囲む
+      var span = document.createElement('span');
+      // まずspanをテキストノードの直前に設置
+      node.parentNode.insertBefore(span, node);
+      // テキストノードをspanの中に移す
+      span.appendChild(node);
+      span.style.backgroundColor = "#ffff00";
+    }else{
+      // テキストノードでない場合は普通に着色
+      node.style.backgroundColor = "#ffff00";
+    }
+  }else if(range.compareBoundaryPoints(Range.START_TO_END, nodeRange) &lt;=0 ||
+            range.compareBoundaryPoints(Range.END_TO_START, nodeRange) &gt;=0){
+    // nodeRangeとrangeは重なっていない
+    // →このノードをこれ以上調べる必要はない
+    return;
+  }else{
+    // このノードは一部rangeに含まれている
+    for(var i=0; i&lt;node.childNodes.length; i++){
+      // 子ノードをひとつずつ調べる
+      checkNode(node.childNodes[i], range);
+    }
+  }
+}
+</code></pre>
+<p>これにはまだ問題があることに気づいたでしょうか。それは、テキストノードの一部のみ着色したい場合です。対処法は、テキストノードを<em>分割</em>することで、着色されるべきノードと着色されないべきノードを分けることです。</p>
+<p>これは上記の関数に組み込むより事前に処理をしてしまったほうが楽なので、別の関数にしましょう。</p>
+<pre><code>
+// 前処理
+function sanitize(range){
+  // 開始点がテキストノードの中だったら
+  if(range.startContainer.nodeType == Node.TEXT_NODE){
+    // テキストノードをRangeの開始点の位置で2つに分ける
+    var latter = range.startContainer.<mark>splitText</mark>(range.startOffset);
+    // Rangeの開始点をテキストノードの外側にする
+    range.setStartBefore(latter);
+  }
+  // 終了点にも同様の処理
+  if(range.endContainer.nodeType == Node.TEXT_NODE){
+    var latter = range.endContainer.splitText(range.endOffset);
+    range.setEndBefore(latter);
+  }
+}
+</code></pre>
+<p>以上を組み合わせれば完成です。試してみましょう。</p>
+
+
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+    &lt;p&gt;あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん&lt;/p&gt;
+
+    &lt;script type="text/javascript"&gt;
+      document.addEventListener('mouseup',function(ev){
+        var selection = getSelection();
+        if(selection.rangeCount &gt; 0){
+          var range = selection.getRangeAt(0);
+
+          sanitize(range);
+          checkNode(document.body, range);
+          // 変化が分かるように選択範囲は消す
+          selection.removeAllRanges();
+        }
+      },false);
+
+      // 前処理
+      function sanitize(range){
+        // 開始点がテキストノードの中だったら
+        if(range.startContainer.nodeType == Node.TEXT_NODE){
+          // テキストノードをRangeの開始点の位置で2つに分ける
+          var latter = range.startContainer.splitText(range.startOffset);
+          // Rangeの開始点をテキストノードの外側にする
+          range.setStartBefore(latter);
+        }
+        // 終了点にも同様の処理
+        if(range.endContainer.nodeType == Node.TEXT_NODE){
+          var latter = range.endContainer.splitText(range.endOffset);
+          range.setEndBefore(latter);
+        }
+      }
+
+      // メインの関数
+      // nodeは現在調べているノード、rangeは着色したい範囲のRange
+      function checkNode(node, range){
+        // 新しいRangeを作る
+        var nodeRange = new Range();
+        // nodeRangeの範囲をnodeを囲むように設定
+        nodeRange.selectNode(node);
+
+        if(range.compareBoundaryPoints(Range.START_TO_START, nodeRange) &lt;= 0 &amp;&amp;
+           range.compareBoundaryPoints(Range.END_TO_END, nodeRange) &gt;= 0){
+          // nodeRangeはrangeに囲まれている
+          // → このノード全体を着色して終わり
+          if(node.nodeType == Node.TEXT_NODE){
+            // テキストノードの場合はspanで囲む
+            var span = document.createElement('span');
+            // まずspanをテキストノードの直前に設置
+            node.parentNode.insertBefore(span, node);
+            // テキストノードをspanの中に移す
+            span.appendChild(node);
+            span.style.backgroundColor = "#ffff00";
+          }else{
+            // テキストノードでない場合は普通に着色
+            node.style.backgroundColor = "#ffff00";
+          }
+        }else if(range.compareBoundaryPoints(Range.START_TO_END, nodeRange) &lt;=0 ||
+                  range.compareBoundaryPoints(Range.END_TO_START, nodeRange) &gt;=0){
+          // nodeRangeとrangeは重なっていない
+          // →このノードをこれ以上調べる必要はない
+          return;
+        }else{
+          // このノードは一部rangeに含まれている
+          for(var i=0; i&lt;node.childNodes.length; i++){
+            // 子ノードをひとつずつ調べる
+            checkNode(node.childNodes[i], range);
+          }
+        }
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>これで完成です。ところで、今回新しく登場したものが2つあります。最後にこれについて紹介して終わります。</p>
+
+<h3>nodeType</h3>
+<p><dfn>nodeType</dfn>はノードが持つプロパティで、そのノードの種類を示す数値が入っています。上のサンプルではノードがテキストノードかどうか判定するために使われましたね。</p>
+<p>お察しの通り、各数値には対応する定数があります。これらはNodeオブジェクトのもつ定数となっていて、TEXT_NODE（テキストノード）の他にもELEMENT_NODE(要素）などがあります。</p>
+
+<h3>splitText</h3>
+<p>もう1つ、sanitize関数の中で<dfn>splitText</dfn>というメソッドが使われています。これはText（テキストノード）が持つメソッドで、テキストノードをある位置で2つに分割するメソッドです。その位置は数値で示します。見て分かるとおり、この位置は一番最初を0，次を1，……とするもので、Rangeのオフセットと同じ考え方です。</p>
+<p>splitTextにより新しいテキストノードが<em>1つ</em>作られます。すなわち、もともとのテキストノードから分割点より後ろの文字列が除去され、直後に追加された新しいテキストノードに移されます。splitTextの返り値は、後ろに作られた新しいテキストノードです。</p>
+
