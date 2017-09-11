@@ -77,7 +77,7 @@ html
 <h3>属性の操作</h3>
 <p>さて、ある要素の属性を取得したり操作したいとき、その多くは上のように要素のプロパティを使って操作します。しかし、どんな属性でも使える汎用的な機能があります。それが、ノートが持つ<dfn>getAttribute</dfn>と<dfn>setAttribute</dfn>メソッドです。</p>
 
-<h4>getAttribute</h4>
+<h4 id="anchor-getattribute">getAttribute</h4>
 <p>getAttributeは、ある属性を取得するときに使います。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;
 &lt;html&gt;

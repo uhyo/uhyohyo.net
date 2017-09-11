@@ -1,6 +1,6 @@
 <p>前回、木構造の操作の基本を解説しました。他にもさまざまなメソッドがあるので、解説します。</p>
 
-<h3>getElementsByTagName</h3>
+<h3 id="anchor-getelementsbytagname">getElementsByTagName</h3>
 <p><dfn>getElementsByTagName</dfn>というメソッドがあります。これはdocumentやノードが持つメソッドです。これは引数に<strong>要素名</strong>を渡すと、その要素の一覧の<strong>NodeList</strong>を返します。NodeListについては、<a href="2_3.html">二章第三回</a>を参照して下さい。NodeListの重要な特徴は、木構造の変化が反映されるという点です。つまり、getElementsByTagNameを呼び出してから木構造に追加された要素もNodeListに入るし、逆に木構造から除かれた要素はNodeListからも除かれます。</p>
 <p>documentが持つgetElementsByTagNameを呼び出した場合、文書全てのノード（つまり、文書の木構造に属するノード）から探します。ノードが持つgetElementsByTagNameの場合、そのノードの子孫から探します。</p>
 <p>サンプルを見てみましょう。</p>

@@ -1,0 +1,67 @@
+<p>十章では、またDOMの話題に戻って<b>XPath</b>を解説します。</p>
+
+<h3>XPathとは</h3>
+<p><dfn>XPath</dfn>とは、木構造中の<strong>ノード</strong>を指し示す<strong>表現</strong>のことです。ノードは1つでもいいし複数でも構いません。</p>
+<p>具体的な例として、例えば「body要素中の最初のp要素」とか、「3番目のa要素」とかそういった指定が可能です。そういわれるとCSSのセレクタを思い浮かべるかもしれません。しかし、XPathはCSSセレクタよりも数段強力な表現力をもちます。</p>
+<p>JavaScriptのDOMにおいては、このあるノードを表す表現を<strong>条件</strong>として使うことで、対応するノードを絞り込んで処理することができます。</p>
+<p>これは、例えば「要素名」という条件に限れば<a href="2_6.dust#anchor-getelementsbytagname">getElementsByTagName</a>でできていました。また、<a href="2_2.html#anchor-getelementbyid">getElementById</a>も条件によりノードを絞り込んでいるといえるでしょう。</p>
+<p>似たようなことは以前<a href="7_3.html">TreeWalker</a>でもやりました。TreeWalkerでは、関数でノードを判定することで条件としていたのです。XPathを利用したノードの絞り込みは、その別方向からのアプローチということもできます。</p>
+
+<h3>XPathの書き方</h3>
+<p>さて、それではXPathの書き方を解説していきます。XPathには、<strong>独自の文法</strong>があります。</p>
+<p>まず基本的な概念として、XPathには「現在のノード」という概念があります。XPathの構文により「現在のノード」が移動していきます。</p>
+<p>具体例として、<code>/html/body/p</code>というのを例としてみましょう。このXPathは<code>/html</code>, <code>/body</code>, <code>/p</code>の3つから成っています。このように、スラッシュ（<code>/</code>）に続けて<b>要素名</b>を書く構文は、<strong>子ノード</strong>への移動を意味します</p>
+<p>実は、一番最初は現在のノードは<strong><a href="3_5.html#anchor-document-element">ルートノード</a></strong>、すなわちdocumentということになっています。知っての通り、documentはDOMにおける木構造の頂点であり、その下にhtml要素が存在しています。つまり、最初の<code>/html</code>でdocumentからその子ノードたるhtml要素に移動し、さらにその子のbody要素、その子のp要素に進みます。</p>
+<p>したがって、<code>/html/body/p</code>は<strong>bodyの子要素であるp要素</strong>を表すXPathだったということです。</p>
+<p>ちなみに、body要素の子に複数のp要素がある場合どれが当てはまるかというと、<strong>全部</strong>です。このように、現在のノードが複数となることもあります。</p>
+<p>例えば、<code>/html/body/p/strong</code>のようにすると、さっきのp要素の中からさらにstrongを探すことになりますが、そのときp要素が複数あった場合、それぞれのp要素の中からstrongが全て探されます。</p>
+<p>なお、XPath用語でノードの集まりを<dfn>ノードセット</dfn>といいます。</p>
+
+<h3>軸</h3>
+<p>さて、XPathの構文として<code>/<var>要素名</var></code>というものを紹介しました。この書き方はXPathの構文のほんの一部です。実はこの形は省略形であり、一般には次のような形をしています。</p>
+<pre><code><mark>軸</mark> :: <mark>ノードテスト</mark></code></pre>
+<p>これを<dfn>ロケーションステップ</dfn>といいます。つまり、例えば上の書き方において<code>/body</code>の部分は<b>軸</b>と<code>::</code>が省略されて、ノードテストの部分が<code>body</code>となっている形でした。XPathはこのように、ノードテストを<code>/</code>で区切って並べて書くことができます。</p>
+<p><b>軸</b>というのは、ノードを探す<b>範囲</b>を示すものです。今までは、「body要素の<em>子</em>の中のp要素」とか「p要素の<em>子</em>の中のem要素」のように、ノードを探す範囲はその要素の子の中からでした。実は、これは「子」という範囲を表す軸が省略されていたからなのです。</p>
+<p>その軸とは、<dfn>child軸</dfn>です。だから、先の例を省略せずに書くと
+<pre><code>/<mark>child</mark>::html/<mark>child</mark>::body/<mark>child</mark>::p</code></pre>
+<p>のようになります。このように、軸を省略した場合、child軸とみなされます。</p>
+<p>注意すべき点は、このchild軸は、<strong>直接の子</strong>しか範囲にとらないということです。例えば、</p>
+<div class="tree">
+body
+<ul>
+  <li>p
+  <li>div
+    <ul>
+      <li>p
+    </ul>
+  <li>p
+</ul>
+</div>
+<p>という木構造で<code>/html/body/p</code>というXPath文の場合、bodyの直接の子であるp要素は当てはまる一方、div要素の子となっているp要素は当てはまらないのです。</p>
+<p>さて、それでは他の軸も紹介していきます。まず紹介するのが、<dfn>descendant軸</dfn>です。これは<strong>子孫ノード</strong>を意味する軸で、直接の子ではなく、自分の下全てから探します。つまり、先の例だと、div要素の子のp要素も含めて3つ全てのp要素が当てはまることになります。これは、<code>/html/body/<mark>descendant</mark>::p</code>というように書くわけですね。</p>
+<p>さらに、<dfn>ancestor軸</dfn>という軸があります。これは、descendant軸とは逆に上方向を探す軸です。つまり、自分の親、そのまた親、・・・というようにルートノード（document）まで探します。また、<dfn>parent軸</dfn>というのもあります。これは、直接の親だけです。すなわち、この軸の範囲にあたるのは常に1個（ルートノードの場合は親がないので0個）となります。</p>
+<p>上下の関係だけでなく、横方向の軸もあります。ひとつは<dfn>preceding-sibling軸</dfn>です。これは、兄弟ノードのうち自分より前のノードが範囲となります。逆に、<dfn>following-sibling軸</dfn>という軸は、自分より後のノードを探します。</p>
+<p>他には、<dfn>self軸</dfn>（自分自身のみ）という変わった軸もあります。他にも使いやすい軸として、<dfn>descendant-or-self軸</dfn>（子孫と自分自身）や<dfn>ancestor-or-self</dfn>（自分より上と自分自身）があります。ここで紹介した以外にもいくつかあります。</p>
+
+<h3>ノードテストの記法</h3>
+<p>さて、こんどはノードテストに着目します。今まで、ノードテストには要素名を書いてきました。実は、ここには他にも書けるものがあります。</p>
+<p>まずは<strong><code>*</code></strong>です。これは、<strong>どんな名前でもよい</strong>というノードテストです。<a href="2_6.html#anchor-getelementsbytagname">getElementsByTagName</a>と似た感じがしますね。例えば<code>/html/body/<mark>*</mark></code>というXPath文は、body要素の子である<strong>要素ノード</strong>全てが当てはまります。言い換えると、このXPath文の結果は、body要素の子要素を全て含むノードセットだということです。</p>
+<p>ここで、全てのノードではなく全ての要素ノードである点には注意してください。つまり、<code>*</code>は全ての<em>要素ノード</em>を意味するノードテストであり、テキストノードなどその他のノードは含みません。</p>
+<p>もちろん、要素ノード以外のものを取得できるノードテストもあります。</p>
+<p>そのひとつが<dfn>text()</dfn>です。これは、テキストノード全てを意味するノードテストです。使用例は次の通りです。</p>
+<pre><code>/html/body/child::<mark>text()</mark></code></pre>
+<p>とすると、body要素の子であるテキストノードを全て含んだ<strong>ノードセット</strong>が得られます。</p>
+<p>今度は<code>/html/body/descendant::<mark>text()</mark></code>と書けば、body要素内の全てのテキストノードのノードセットとなり、Webページのテキストが全て集まるでしょう。</p>
+<p>このように<code>()</code>がついているノードテストは、何か関数のようですね。実際これは関数のようなもので、後々紹介しますが引数がある関数とかも出てきます。</p>
+<p>他のノードテストとしては<dfn>comment()</dfn>（コメントノード）や、<dfn>node()</dfn>（全ての種類のノード）などがあります。</p>
+<p>ここまでノードの種類と要素名くらいしかノードテストで判定していませんが、より詳細な判定方法については後で紹介します。</p>
+
+<h3>ロケーションステップの省略</h3>
+<p>次に、ロケーションステップ全体に関する省略記法を紹介します。ロケーションステップとは、/と/で挟まれた間全体で、<code>軸::ノードテスト</code>の記法を持つものでした。実は、よく使うロケーションステップを省略して書ける記法が用意されています。ひとつは、<code>.</code>です。これは、<code>self::node()</code> の省略形で、self軸のノード全てという意味ですが、self軸は<strong>自分自身</strong>で、当然ひとつのノードにつきひとつしかありません。つまり、これは結局自分自身を表しているということになり、ノードセットは変わりません。だから、<code>/html/body/<mark>.</mark>/<mark>.</mark>/p</code>のように、間に挟んだりしても関係ありません。</p>
+<p>次は<code>..</code>です。これは<code>parent::node()</code>の省略形です。parent軸は<strong>直接の親</strong>なので、self軸同様、ノードセット中のノード1つに対して最大ひとつしかありません。例えば、<code>/html/body/<mark>..</mark></code>とすると、bodyの親はhtml要素なので、これはhtml要素を表すということになります。</p>
+<p>最後にもうひとつ紹介します。それは、<code>//</code>のように<em>ロケーションステップに何も書かない</em>という記法です。このとき、このロケーションステップは<code>descendant-or-self::node()</code>の省略形になります。descendant-or-self軸は、自分自身とその子孫を範囲としていて、その範囲のノード全てです。例えば、<code>/html/body//</code>とすると、body要素を含めてそれ以下の要素全部のノードセットが結果ということになります。これの利用例は、例えばこうです。</p>
+<pre><code>/html/body//<em>self::</em>p</code></pre>
+<p>これは「body要素中のp要素全て」という意味です。なぜなら、<code>/html/body//</code>までの部分でbody要素の中にある全てのノードが列挙されており、その中（self軸）からp要素のノードを集めるからです。もっとも、これは<code>/html/body/descendant-or-self:p</code>と同じ意味なのでわざわざ<code>//</code>を使う必要がないのですが。</p>
+
+<p>次回以降、XPathのさらに高機能な部分やDOMでの利用法などを解説していきます。</p>
+

@@ -1,0 +1,80 @@
+<h3>属性を取得する</h3>
+<p>今回は、XPathにおける新しい軸が出てきます。</p>
+<p>今まで、軸はどちらの方向にあるノードを探索するかという意味を持つものを紹介してきました。今回紹介する<dfn>attribute軸</dfn>は、あるノードの<b>属性</b>を調べることができます。最初のサンプルは次のXPath文です。</p>
+<pre><code>/html/<mark>attribute::</mark>lang</code></pre>
+<p>これは、html要素のlang属性を取得していることになります。</p>
+<p>さて、ここで、今までXPath文の結果は<strong>ノードセット</strong>でした。では、「属性を取得する」というのは何が結果になるのでしょうか。前に紹介した<a href="2_10.html#anchor-getattribute">getAttribute</a>の例からいくと、属性というのは文字列で取得できそうです。</p>
+<p>しかし、実は今回の場合、<dfn>属性ノード</dfn>が取得されます。</p>
+<p>ということで、実験してみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+    &lt;script type="text/javascript"&gt;
+      var result = document.evaluate('/html/attribute::lang', document, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null);
+
+      var kekka = result.singleNodeValue;
+      console.log(kekka);
+      console.log(kekka.nodeType === Node.ATTRIBUTE_NODE); // true
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>コンソールに表示された結果はブラウザで見るといったい何なのか分かりにくいかもしれませんが、これは<code>nodeType</code>プロパティを持ち、しかも<code>Node.ATTRIBUTE_NODE</code>という定数で示される種類のノードであることが分かります。これが属性ノードです。なお、属性ノードの正式名称は<dfn>Attr</dfn>といいます。</p>
+
+<h4>Attrノード</h4>
+<p>さて、このAttrから値をどう取得するのかというと、<dfn>value</dfn>というプロパティがあり、それに文字列で属性の値が入っています。つまり、<code>kekka.value</code>とするとlang属性の値である<code>"en"</code>が取得できます。</p>
+<p>他にもできることはありますが、今回はこのAttrは本題ではないので詳しく解説しません。</p>
+
+<h3>XPathの型</h3>
+<p>実際のところ、Attrノードが使われることは多くありません。属性ノードなどというものが登場したことでXPathは結果としてノードセットしか返せないのかと思った人がいるかもしれませんが、もしいたとしたらそれは誤解です。XPathは文字列や数値・真偽値も扱うことができます。XPathの型は真偽値型、数値型、文字列型、そしてノードセット型の4つです。</p>
+<p>具体的には、次のXPath文により、XPath上で属性ノードから属性の値を文字列で取り出すことができます。</p>
+<pre><code><mark>string(</mark> /html/attribute::lang <mark>)</mark></code></pre>
+<p>ここで、<code>/html/attribute::lang</code>を<code>string()</code>で囲んでいます。これは関数のようですが、実際<strong>関数</strong>です。XPathには関数があったのです。</p>
+<p>また、今までXPathの文法はロケーションステップを<code>/</code>で区切って並べるだけのものだと思っていましたが、実はそれはノードセットを取得するための<b>式</b>でしかなく、その結果を関数の引数にしたり、あるいは後述しますが別の式の一部に使ったりできます。</p>
+<p>今回登場したstring関数は、引数を文字列に変換して返します。実は属性ノードは文字列に変換すると属性の値に変換されます。属性の値の取得を文字列の変換によって行っているのです。</p>
+<p>となると、<code><mark>string(</mark> /html/attribute::lang <mark>)</mark></code>の最終的な結果は<em>文字列型</em>であるということになります。</p>
+<p>では、XPathの結果の取得はどうすればよいのでしょう。実は前回紹介した結果タイプは全てノードセット用のもので、他の型の値は取得できません。そこで、新しい結果タイプを紹介します。</p>
+<dl>
+  <dt>NUMBER_TYPE</dt>
+  <dd>数値である結果を取得します。プロパティ<dfn>numberValue</dfn>で取り出せます。</dd>
+  <dt>STRING_TYPE</dt>
+  <dd>文字列である結果を取得します。プロパティ<dfn>stringValue</dfn>で取り出せます。</dd>
+  <dt>BOOLEAN_TYPE</dt>
+  <dd>真偽値である結果を取得します。プロパティ<dfn>booleanValue</dfn>で取り出せます。</dd>
+  <dt>ANY_TYPE</dt>
+  <dd>
+  結果の型に応じて自動的に結果タイプを選びます。数値、文字列、真偽値の場合はNUMBER_TYPE,STRING_TYPE,BOOLEAN_TYPEになり、ノードセットの場合はUNORDERED_NODE_ITERATOR_TYPEとなります。
+  </dd>
+</dl>
+<p>これは単純ですね。では、属性を文字列値で取得してみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+    &lt;script type="text/javascript"&gt;
+      var result = document.evaluate('<mark>string(</mark>/html/attribute::lang<mark>)</mark>', document, null, XPathResult.<mark>STRING_TYPE</mark>, null);
+
+      var kekka = result.<mark>stringValue</mark>;
+      console.log(kekka);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>result.stringValueに直接文字列値で<code>"en"</code>が入っていることが分かります。</p>
+
+<h3>attribute軸の省略</h3>
+<p>ここでひとつ新しい省略記法を紹介しておきます。といっても単純なもので、attribute軸を<strong>@</strong>で省略できるというものです。すなわち、
+<code>/html/attribute::lang</code>
+を
+<code>/html/<mark>@</mark>lang</code>
+と書けます。これは楽ですね。</p>
+

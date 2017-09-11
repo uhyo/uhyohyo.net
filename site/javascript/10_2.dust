@@ -1,0 +1,205 @@
+<h3>DOMでXPathを使う</h3>
+<p>いよいよ今回、DOMでXPathを使う方法を紹介します。</p>
+<p>ここで出てくるのが、documentが持つ<dfn>evaluate</dfn>というメソッドです。</p>
+<p>これは、5個の引数を渡してXPathを処理してもらい、結果を<dfn>XPathResult</dfn>というオブジェクトで返すものです。</p>
+<p>具体的なサンプルを見てみましょう。</p>
+<pre><code>
+var result = document.<strong>evaluate</strong>('/html', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+</code></pre>
+<p>ここでは、<code>/html</code>という単純なXPath文を文字列として第一引数に渡しています。evaluateはこのXPath文を処理して結果を返します。</p>
+<p>それでは引数の解説ですが、第一引数は既に述べたようにXPath文を文字列で渡します。</p>
+<p>つぎに、第二引数にはdocumentが渡されています。これは、<strong>ルートノード</strong>です。すなわち、（このノードも含めて）このノードより下で探索するということです。documentということは、木構造全部ということですね。基本はdocumentで事足りるでしょう。</p>
+<p>次は第三引数で、これは今nullとなっていますが、ここには<strong>名前空間解決器</strong>（後述）を渡します。不要な場合はnullです。。</p>
+<p>第四引数は<strong>結果のタイプ</strong>です。今回は<code>XPathResult.<mark>FIRST_ORDERED_NODE_TYPE</mark></code>です。これは明らかに定数ですね。当然他にもあるのですが、各定数の解説は後述とします。今回指定した定数は、結果のノードセットのうち最初の1つを取得するというものです。</p>
+
+<p>次に第五引数はnullとなっていますが、これは<strong>再利用するオブジェクト</strong>です。この引数に以前のevaluateで結果として返ってきたXPathResultオブジェクトを渡すと、そのオブジェクトに結果が書き込まれます。すなわち、結果のオブジェクトを再利用できるのです。どういうことかというと、通常document.evaluateで結果を得るときは新しいXPathResultが作られて結果として返されます。つまり、1回実行するごとに新しいXPathResultオブジェクトがどんどんできるのです。これは無駄だということで、この第五引数に使い終わったXPathResultオブジェクトを渡すと、新しいXPathResultを作らずに渡されたオブジェクトを書き換えてそれを返してくれます。繰り返しXPathを利用する場合はこれを活用するのがよいかもしれません。</p>
+
+<p>では肝心の、結果のXPathResultからノードを得る方法を解説します。これは<strong>結果タイプ</strong>によって変わってきます。詳しくは後述しますが、今回の場合（第四引数に<code>XPathResult.FIRST_ORDERED_NODE_TYPE</code>を指定した場合）は<code>result.<mark>singleNodeValue</mark></code>で該当するノードが取得できます。試してみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;test&lt;/p&gt;
+    &lt;script type="text/javascript"&gt;
+      var result = document.<mark>evaluate</mark>('/html', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+
+      console.log(<mark>result.singleNodeValue</mark>);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>実行するとhtml要素がログに表示されます。つまり、このXPath文の結果としてhtml要素が取得できたということです。</p>
+
+<h3>結果タイプ</h3>
+<p>それでは、結果タイプの解説をします。結果タイプによって、XPathResultオブジェクトから結果のノードを取得する方法が変わります。</p>
+<p>結果タイプは定数で、<strong>XPathResult</strong>のプロパティとして利用できます。</p>
+<p>結果タイプにはいくつかの種類がありますが、それぞれについて<strong>ORDERED</strong>と<strong>UNORDERED</strong>のバージョンがあります。ORDEREDは、ノードが<strong>文書順</strong>（最初から順番に並んでいる）になっています。対してUNORDEREDの場合、並び順は適当です。ORDEREDの場合かならず文書順に探さないといけませんが、UNORDEREDの場合ブラウザが探しやすい順番で探せるので、UNORDEREDのほうが少し速い可能性があります。</p>
+<dl>
+  <dt>ANY_<mark>UNORDERED</mark>_NODE_TYPE, FIRST_<mark>ORDERED</mark>_NODE_TYPE</dt>
+  <dd>
+    <p>この2つの結果タイプは、ノードを<strong>1つだけ</strong>取得します。というのも、前回解説したようにXPath文の結果はノードセットであり、そこには複数のノードが含まれているかもしれません（1つかもしれませんが。その中の1つだけに興味がある場合（もしくは、最初から結果のノードが1つだけと分かっている場合）は、この結果タイプを使うのがよいでしょう。</p>
+    <p>UNORDEREDの場合は結果の順番が不定なので、ノードセットがノードを複数含んでいる場合その中のどれが出てくるか分かりません。ORDEREDの場合、文書順で探して最初なので、必ず最初に見つかったノードが結果となります。</p>
+    <p>そして、結果の取得方法は、結果の<strong>singleNodeValue</strong>プロパティにノードが入っています。</p>
+  </dd>
+
+  <dt><mark>UNORDERED</mark>_NODE_SNAPSHOT_TYPE, <mark>ORDERED</mark>_NODE_SNAPSHOT_TYPE</dt>
+  <dd>
+    <p>この2つは、ノードセットに含まれるノードを全て取得できます。</p>
+    <p>この結果タイプを用いる場合、XPathResultオブジェクトの<dfn>snapshotLength</dfn>に結果のノードの個数が入っています。そして、結果のノードには0から番号がついていて、<dfn>snapshotItem</dfn>というメソッドに数値を渡すことでその番号のノードが返ってきます。</p>
+    <p>すなわち、複数のノードを処理するには例えば次のようにします。</p>
+    <pre><code>
+      //resultは結果のXPathResultオブジェクト
+      for(var i=0; i&lt;result.<mark>snapshotLength</mark>; i++){
+        var node = result.<mark>snapshotItem</mark>(i);
+        //得られたnodeに対して処理をする
+        console.log(node);
+      }
+    </code></pre>
+    <p>なお、名前のSNAPSHOTというのは、<strong>evaluateメソッドを実行した時点でノードの探索を全て終える</strong>ということを意味しています。</p>
+  </dd>
+  <dt><mark>UNORDERED</mark>_NODE_ITERATOR_TYPE, <mark>ORDERED</mark>_NODE_ITERATOR_TYPE</dt>
+  <dd>
+    <p>これらも複数のノードを全て扱える方法ですが、直前の2つとは異なりevaluateを実行した時点では全探索の処理が行われません。その代わりに、<strong>次のノードが必要になるたびにその都度探索する</strong>という方法をとります。</p>
+    <p>具体的には、XPathResultオブジェクトの<dfn>iterateNext</dfn>メソッド（引数なし）を呼び出すことでその都度次のノードを探索して返してくれます。もう無い場合はnullになります。すなわち、全てのノードを処理するには次のようにします。</p>
+    <pre><code>
+      //resultは結果のXPathResultオブジェクト
+      var node;
+      while(node = result.<mark>iterateNext()</mark>){
+        //得られたnodeに対して処理をする
+        console.log(node);
+      }
+    </code></pre>
+  </dd>
+</dl>
+<p>実はまだいくらか結果タイプがありますが、それはあとで説明します。</p>
+
+<p>さて、SNAPSHOT系とITERATOR系の違いについて改めて説明します。前者は最初にノードの探索を全て終えると述べました。つまり、巨大な木構造に対してSNAPSHOT系でXPath文を探索すると完了まで時間がかかる可能性があります。一方、後者（ITERATOR系）ではevaluate自体は一瞬で終了します。なぜなら、実際に結果のノードを要求される（<code>iterateNext()</code>が呼ばれる）までは探索をさぼるからです。その代わり後者は一回の<code>iterateNext()</code>ごとに探索を行うため<code>snapshotItem()</code>を用いたノードの取得よりは時間がかかります。つまり、この2つの違いは探索時間をいつかけるかが主です。
+
+<p>ただ、実際的な問題としてもう1つSNAPSHOT系とITERATOR系には違いがあります。それは、evaluateメソッドが呼ばれてXPathResultが生成されたあとに木構造が変更された場合の挙動の違いです。</p>SNAPSHOT系は、XPathResultが返された時点でもう探索が終了して結果が確定しているので、その後文書に変更があった場合も影響を受けず、XPathResultの結果を利用できます。</p>
+<p>一方ITERATOR系は、XPathResultが返されたあとに探索が進みます。なので、探索の合間（つまり、<code>iterateNext()</code>が呼ばれる合間）に木構造が変更されてしまうと探索結果が狂ってしまう恐れがあります。したがって、ITERATOR系を指定した場合のXPathResultは木構造が変更されたら即座に無効となります（探索を続けることはできなくなり、iterateNextでノードを取得しようとするとエラーになります）。</p>
+<p>SNAPSHOT系とITERATOR系の2つは状況に応じて使い分けるのがよいでしょう。</p>
+
+<h3>サンプル</h3>
+<p>XPathの話は込み入っているので、具体的なサンプルを用意してみました。単純なものですが、いろいろ自分で工夫するなどしてみましょう。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p id="test"&gt;test&lt;/p&gt;
+    &lt;p id="test2"&gt;test2&lt;/p&gt;
+    &lt;p id="test3"&gt;test3&lt;/p&gt;
+    &lt;script type="text/javascript"&gt;
+      var result = document.evaluate('/descendant::p', document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+      var node;
+      while(node=result.iterateNext()){
+        console.log(node);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ここで用いられているXPath文は全てのp要素を取得するというものです。そして、タイプはORERED_NODE_ITERATORなので、このようにwhile文で処理しています。今回は、得られたノードをとりあえずconsole.log表示しています。3つのp要素が全て表示されるのが分かるはずです。さらに、ORDEREDな結果タイプを用いたのでtest，test2，test3の順番で表示されるはずです。UNORDEREDにすると順番が変わるかもしれないし変わらないかもしれません。</p>
+
+<h3>名前空間解決器について</h3>
+<p>今回の最後に、さっき説明を先送りにした<b>名前空間解決器</b>について説明します。</p>
+<p>実はXPathはXML（やXHTML）でも使用できます。その際、<a href="6_2.html">名前空間</a>を考慮する必要が出てきます。その時に必要となるのが名前空間解決器です。HTMLのように名前空間の無い文書ではこれはnullとして構いません。以下に書いてある名前空間解決器の説明は名前空間がある文書を扱う場合にのみ必要で、少しマニアックです。興味がない方は読み飛ばして構いません。</p>
+
+<p>さて、前に紹介した通り、タグには
+<code class="language-html">&lt;<mark>xhtml:</mark>html&gt;</code>
+のように名前空間接頭辞がついていることがありました。ところが、この接頭辞が名前空間の実体というわけではなく、実体は<strong>URI</strong>（http://www.w3.org/1999/xhtmlなど）なのでした。</p>
+<p>XPathにおいても、例えば<code>/<mark>xhtml:</mark>html/descendant-or-self::<mark>xhtml:</mark>p</code>のように要素名のノードテストに対して名前空間接頭辞を付けることができます。そうなると、例えば<code>xhtml</code>という名前空間接頭辞がどの名前空間を指すかをなんとかして判断する必要があることになります。XHTMLでは、これは<code>xmlns:xhtml</code>という属性により設定することができました。</p>
+<p>残念なことにXPathにはこの<code>xmlns:xhtml</code>属性を読んで名前空間接頭辞を名前空間（URI）に関連付ける機能がありません。恐らくそんなことのために無駄な探索をしたくないのだと思います。また、後述のカスタム名前空間解決器を使いたいという需要に応える形にもなっています。</p>
+<p>そこで、接頭辞を名前空間に対応付ける仕組みをXPathの処理器（<code>document.evaluate</code>）に提供してあげる必要があります。これが<strong>名前空間解決器</strong>なのです。</p>
+
+<p>それでは、この名前空間解決器が必要なときはどうやって作ればよいのでしょうか。実は、簡単な文書の場合は名前空間解決器を自動的に作ってくれるメソッドがあります。それは、document.<dfn>createNSResolver</dfn>です。このメソッドは引数としてノードを1つとります。すると、そのノードが知っている名前空間に対応した名前空間解決器が返り値として出てきます。</p>
+<p>例えば、このようなXHTML文書を考えます（XHTML文書なので、保存してブラウザで表示するときは拡張子を<code>.xhtml</code>としなければなりません）。</p>
+<pre class="language-xml"><code>
+  &lt;?xml version="1.0" ?&gt;
+  &lt;xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml"&gt;
+    &lt;xhtml:head&gt;
+      &lt;xhtml:meta charset="UTF-8" /&gt;
+      &lt;xhtml:title&gt;test&lt;/xhtml:title&gt;
+    &lt;/xhtml:head&gt;
+    &lt;xhtml:body&gt;
+      &lt;xhtml:p&gt;test&lt;/xhtml:p&gt;
+      &lt;xhtml:script&gt;
+        var resolver = document.<mark>createNSResolver</mark>(document.documentElement);
+        console.log(resolver.lookupNamespaceURI("xhtml")); // "http://www.w3.org/1999/xhtml"
+      &lt;/xhtml:script&gt;
+    &lt;/xhtml:body&gt;
+  &lt;/xhtml:html&gt;
+</code></pre>
+<p>この文書中のscript要素では、<code>document.createNSResolver</code>を<code>document.documentElement</code>を引数として呼び出しています。これはルート要素であるhtml要素を指していますね。こうすると結果の名前空間解決器はhtml要素が知っている名前空間の情報を持っています。html要素には<code>xmlns:xhtml</code>属性があり、xhtmlという名前の名前空間が定義されています。そのため、html要素はxhtmlという名前空間接頭辞を知っていることになります。</p>
+<p>したがって、createNSResolverによって作られた名前空間解決器はxhtmlという名前空間接頭辞を知っています。このことは次の行で名前空間解決器の<b>lookupNamespaceURI</b>メソッドを呼ぶことで確かめられています。このメソッドは、名前空間接頭辞を引数に渡すと対応する名前空間を返すメソッドです。知らない場合はnullとなります。</p>
+<p>createNSResolverの弱点は、引数に渡したノードが知っている名前空間接頭辞しか解決できない点です。例えば、次のように変更したサンプルを見てください。</p>
+<pre class="language-xml"><code>
+  &lt;?xml version="1.0" ?&gt;
+  &lt;<mark>foo</mark>:html xmlns:<mark>foo</mark>="http://www.w3.org/1999/xhtml"&gt;
+    &lt;foo:head&gt;
+      &lt;foo:meta charset="UTF-8" /&gt;
+      &lt;foo:title&gt;test&lt;/foo:title&gt;
+    &lt;/foo:head&gt;
+    &lt;xhtml:body xmlns:xhtml="http://www.w3.org/1999/xhtml"&gt;
+      &lt;xhtml:p&gt;test&lt;/xhtml:p&gt;
+      &lt;xhtml:script&gt;
+        var resolver = document.<mark>createNSResolver</mark>(document.documentElement);
+        console.log(resolver.lookupNamespaceURI("xhtml")); // null
+        console.log(resolver.lookupNamespaceURI("foo"));   // "http://www.w3.org/1999/xhtml"
+      &lt;/xhtml:script&gt;
+    &lt;/xhtml:body&gt;
+  &lt;/foo:html&gt;
+</code></pre>
+<p>これは、body要素の中と外で使う名前空間接頭辞を返るというなかなかふざけたサンプルです。こうすると、html要素はfooという名前空間は知っているものの、それより下のbody要素で定義されたxhtmlという名前空間は知らないという状態になります。よって、html要素から作られた名前空間解決器はxhtmlという接頭辞を解決することができません。</p>
+<p>この問題を解決したい場合は十分に深い位置のノードを指定する必要があります。今回の場合、<code>document.doculemtElement</code>の代わりに<code>document.body</code>をcreateNSResolverに渡せばうまくいきますが、そのような解決法はナンセンスです。</p>
+<p>つまり、ルート要素で全ての名前空間接頭辞が定義されるような単純な文書ならば<code>document.createNSResolver</code>を使うことができるものの、そうでない場合は有効ではありません。<code>document.createNSResolver</code>を使う場合は<code>document.evaluate</code>の呼び出しはたとえば次のようにすればよいでしょう。</p>
+<pre><code>
+var result = document.<strong>evaluate</strong>('/html', document, <mark>document.createNSResolver(document.documentElement)</mark>, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+</code></pre>
+
+<h4>カスタム名前空間解決器</h4>
+<p>さて、複雑な場合でも思い通りに名前空間を解決するには、<b>カスタム名前空間解決器</b>を作る必要があります。つまり、<code>document.createNSResolvr</code>任せにせずに自分で名前空間解決器を作るということです。</p>
+<p>とはいえ、これはそんなに難しくありません。カスタム名前空間解決器は<em>関数</em>です。引数として名前空間接頭辞を受け取り、それに対応する名前空間を返す関数を作ればそれがカスタム名前空間解決器になります。</p>
+<p>例えば上のサンプルに対応する名前空間解決器は次のように作れます。なお、知らない名前空間の場合はnullを返します。</p>
+<pre><code>
+function(prefix){
+  if(prefix === "xhtml" || prefix === "foo"){
+    return "http://www.w3.org/1999/xhtml";
+  }else{
+    return null;
+  }
+}
+</code></pre>
+<p>この関数を使うと、上の文書でも正しくXPathでノードを検索できるでしょう。</p>
+<pre class="language-xml"><code>
+  &lt;?xml version="1.0" ?&gt;
+  &lt;<mark>foo</mark>:html xmlns:<mark>foo</mark>="http://www.w3.org/1999/xhtml"&gt;
+    &lt;foo:head&gt;
+      &lt;foo:meta charset="UTF-8" /&gt;
+      &lt;foo:title&gt;test&lt;/foo:title&gt;
+    &lt;/foo:head&gt;
+    &lt;xhtml:body xmlns:xhtml="http://www.w3.org/1999/xhtml"&gt;
+      &lt;xhtml:p&gt;test&lt;/xhtml:p&gt;
+      &lt;xhtml:script&gt;
+        var resolver = function(prefix){
+          if(prefix === "xhtml" || prefix === "foo"){
+            return "http://www.w3.org/1999/xhtml";
+          }else{
+            return null;
+          }
+        };
+        var result = document.evaluate('/xhtml:html/foo:body/foo:p', document, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        console.log(result);
+      &lt;/xhtml:script&gt;
+    &lt;/xhtml:body&gt;
+  &lt;/foo:html&gt;
+</code></pre>
+<p>お気づきの通り、名前空間接頭辞は名前空間を示すための道具にすぎませんから、文書中の接頭辞（<code><mark>xhtml</mark>:body</code>）とXPath中の接頭辞（<code><mark>foo</mark>:body</code>）が違っていても、同じ名前空間なら問題なくマッチします。</p>
+
+<p>なお、XPathではデフォルト名前空間の扱いには注意が必要です。XPathでは、<code>/html/body/p</code>のように名前空間接頭辞がない要素名をノードテストとして与えた場合、<em>名前空間がないノードにしかマッチしません</em>。つまり、名前空間を持つ要素にマッチさせたい場合は、ノードテストに名前空間接頭辞を書いてあげる必要があります。特に、XML文書が全てデフォルト名前空間を用いて書かれているときは自分のオリジナルの名前空間接頭辞、そしてそれに対応した名前空間解決器を用意する必要があります。</p>
