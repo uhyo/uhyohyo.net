@@ -1,0 +1,100 @@
+<p>今回は、<dfn>prototype</dfn>というものを解説します。まず前回のサンプルを振り返ります。</p>
+<pre class="line-numbers"><code>
+var jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};
+
+function Yuusha(n){
+  this.name = n;
+  this.jikoshokai = jikoshokai;
+}
+
+var yuusha1 = new Yuusha("勇者1");
+var yuusha2 = new Yuusha("勇者2");
+var yuusha3 = new Yuusha("勇者3");
+
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+</code></pre>
+<p>前回これはまだ完璧ではないと述べました。今回の内容はそれと関連しています。</p>
+<p>前回の内容で、勇者オブジェクトの初期化についてはいい感じにコンストラクタにまとめることができました。オブジェクト指向のもうひとつの特徴として紹介した<em>共通の機能（メソッド）</em>をまとめる方法を今回紹介します。それが<b>prototype</b>です。</p>
+<p>現状は何かよくわからないところにjikoshokai関数が定義されていて、一見して勇者オブジェクトの関係が分からないので微妙です。まず結論から述べると、よい書き方は次のような書き方です。</p>
+<pre class="line-numbers" data-line="5-7"><code>
+function Yuusha(n){
+  this.name = n;
+}
+
+Yuusha.<strong>prototype</strong>.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};
+
+var yuusha1 = new Yuusha("勇者1");
+var yuusha2 = new Yuusha("勇者2");
+var yuusha3 = new Yuusha("勇者3");
+
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+</code></pre>
+<p>実は、コンストラクタ（というより<strong>関数</strong>）は<b>prototype</b>というプロパティを持っています。これはオブジェクトで、<strong>コンストラクタのprototypeが持つプロパティやメソッドは、インスタンスのプロパティやメソッドとして参照することができます</strong>。
+<p>つまり、上の例ではYuushaのprototypeにjikoshokaiメソッドがあることにより、Yuushaのインスタンスであるyuusha1などのメソッドとしてjikoshokaiを使うことができたのです。</p>
+<p>これの動作の仕組みは以下のようになっています。あるオブジェクトのプロパティやメソッドを使おうとしてもないとき、<strong>次にコンストラクタのprototypeを探す</strong>のです。それでもなければ、本当にないということで、以前述べたようにundefinedになります。</p>
+<p>例えば、<code>yuusha1,jikoshokai</code>の場合を見てみます。今回の場合、yuusha1のjikoshokaiというメソッドを探しますが、ありません。そこで、yuusha1のコンストラクタがYuushaなので、Yuusha.prototype.jikoshokaiを探します。そこであったので、無事自己紹介できたというわけです。</p>
+
+<p>これを利用して、ちょっと遊んでみます。</p>
+<pre class="line-numbers"><code>
+function Yuusha(n){
+  this.name = n;
+}
+Yuusha.prototype.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。"<mark class="ins"> + "HPは" + this.hp + "です。"</mark>);
+};
+<mark class="ins">Yuusha.<mark>prototype</mark>.hp = 100;</mark>
+
+var yuusha1 = new Yuusha("勇者1");
+
+//自己紹介してもらう
+yuusha1.jikoshokai();
+</code></pre>
+<p>hpプロパティをprototypeで設定しました。これは、勇者（インスタンス）を何人作ってもhpは100ということですね。</p>
+
+<p>次に、これはどうでしょう。</p>
+<pre class="line-numbers" data-line="8-12"><code>
+function Yuusha(n){
+  this.name = n;
+}
+Yuusha.prototype.jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。" + "HPは" + this.hp + "です。");
+};
+Yuusha.prototype.hp = 100;
+//攻撃する
+Yuusha.prototype.attack = function(){
+  <mark>this.hp -= 20;</mark>
+  console.log("攻撃しました。 HPが" + this.hp + "に減りました。");
+};
+
+var yuusha1 = new Yuusha("勇者1");
+var yuusha2 = new Yuusha("勇者2");
+
+//攻撃してもらう
+yuusha1.attack();
+yuusha1.attack();
+
+yuusha2.jikoshokai();
+</code></pre>
+<p>新しいattackというメソッドを作りました。攻撃して、HPが20減るというメソッドです。普通なら敵のHPが減りますが、敵を作るのが面倒なので、疲れて自分のHPが減るということにしましょう。</p>
+<p>ここで、<code>this.hp -= 20;</code>という一文があります。見ての通り、this.hpを20減らすという意味です。しかし、yuusha1はhpというプロパティを持たないので代わりにYuusha.prototype.hpを見ていたのでした。そこで<code>this.hp -= 20;</code>とするとどうなるのでしょう。Yuusha.prototype.hpが減るのでしょうか。</p>
+<p>実は、これは<code>this.hp = this.hp - 20;</code>と同じ意味なので、 <code>this.hp</code>に<code>this.hp-20</code>が代入されるということになります。ここで、右辺の値を計算するには<code>this.hp</code>の値を知る必要があるので<code>Yuusha.prototype.hp</code>（ここでは100）をみてきます。したがって、右辺は80ということになります。それを<code>this.hp</code>に今度は代入するわけですが、ここでthisやyuusha1です。代入においてはprototypeに頼る必要はありません。よって<code>yuusha1.hp</code>に80が入り、<code>Yuusha.prototype.hp</code>は100のままです。その証拠に、attackのあとでも勇者2のhpは100のままですね。</p>
+
+<p>ただし、このように変動して各インスタンスに固有な値は、初期値をprototypeに入れておくのではなくコンストラクタで初期化しておくのがよいでしょう。すなわち、次のようにします。</p>
+<pre><code>
+function Yuusha(n){
+  this.name = n;
+  <mark class="ins">this.hp = 100;</mark>
+}
+</code></pre>
+<p>prototypeには、主にメソッドなど、どのインスタンスでも変わらないようなものを入れておきましょう。</p>
+<p>今回はここまでですが、次回もprototypeが活躍します。</p>
+
+

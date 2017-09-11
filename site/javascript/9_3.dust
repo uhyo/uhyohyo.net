@@ -1,0 +1,177 @@
+<p>今回は<dfn>継承</dfn>というものについて解説します。継承とはざっくり言うと、あるオブジェクトの特徴をもったままで、さらに拡張したオブジェクトをつくるというものです。</p>
+<p>ただ、先に少し、今回必要な予備知識について解説します。</p>
+<h3>apply, call</h3>
+<p><dfn>apply</dfn>および<dfn>call</dfn>とは、<strong>関数が持つメソッド</strong>です。どちらも<strong>関数を呼び出す</strong>ことができます。</p>
+<p>まずapplyから見ましょう。関数を呼び出すだけなら普通に<code><var>関数</var>()</code>でいいような気がしますが、applyには2つの特徴があります。1つは<strong>関数内でのthisの値を指定できる</strong>こと、もう1つは<strong>引数列を配列で渡すことができる</strong>ことです。</p>
+<p>では、applyのサンプルを見ましょう。</p>
+<pre><code>
+function test(x, y){
+  console.log("thisは", this, "です！！！");
+  console.log(x, y);
+}
+
+test.<mark>apply</mark>({hoge: 3}, ["foo", "bar"]);
+</code></pre>
+<p>実行してみると、applyメソッドによりtestが呼び出され、その際確かにthisは<code>{hoge: 3}</code>になり、引数x, yはそれぞれ<code>"foo"</code>と<code>"bar"</code>になっていることが分かります。</p>
+<p>このthisの値を指定できる機能が今回紹介する継承で役に立ちます。また、引数列を配列で指定できるのは、配列の長さによって指定する引数の個数を変えることができるというメリットがあります。今回渡した配列は<code>["foo", "bar"]</code>という長さ2の配列なので、引数2つでtestが呼び出されました。<small>（ただし、後者のメリットについてはES2015のspread operatorにお株を奪われてしまいました。これについてはまた今度紹介します。）</small></p>
+<p>callは、thisの値を指定できるという点は同じですが、こちらは配列ではなく引数を1つずつ指定します。つまり、上のサンプルのapplyと同様のことをするには、<code>test.<mark>call</mark>({hoge: 3}, "foo", "bar");</code>とします。</p>
+
+<p>ちなみに、applyはcallは関数が持つメソッドであると言いましたが、関数というのは前にも述べたように関数オブジェクトであり、実はそれは<strong>Functionのインスタンス</strong>です。つまり、applyやcallは<code>Function.prototype</code>のメソッドとして存在しています。</p>
+
+<h3>arguments</h3>
+<p>もう1つ紹介したいのが<dfn>arguments</dfn>です。これは関数の中で使える特殊な変数で、関数呼び出し時に渡された引数が一覧で入っている<em>配列っぽいオブジェクト</em>です。配列っぽいというのはDOMで出てきたNodeListなどと同様に、lengthプロパティに長さが入っていて<code>arguments[0]</code>のように要素にアクセスできるけど配列ではないということです。なお、このような配列っぽいオブジェクトは結局配列と何が違うのかというと、配列には存在するさまざまなメソッドが存在しないという点で違います。なお、お察しとは思いますが配列はArrayのインスタンスなので、配列に存在するメソッドというのは<code>Array.prototype</code>に用意されているメソッドを指します。</p>
+
+<p>argumentsを使うことで、引数の長さによって動作を変えるようなメソッドを作ることができます。例えば、次の関数は与えられた引数を何個でも全て足して結果を返すという関数です。</p>
+<pre><code>
+function sum(){
+  var result = 0;
+  for(var i = 0; i &lt; <mark>arguments</mark>.length; i++){
+    result += <mark>arguments</mark>[i];
+  }
+  return result;
+}
+
+console.log(sum(1,2,3,4,5)); // 15
+</code></pre>
+<p>なお、この例では<code>function sum()</code>となっているのでsumは引数を取らないように見えます。しかし、それは引数が渡されてもそれが入る変数がないということであり、引数を取ること自体はできます。そして、引数が入る変数が無くてもargumentsにはちゃんと入っています。</p>
+
+<h3>継承とは</h3>
+<p>では、本題に入りましょう。今回もRPGの例で考えてます。「敵」というオブジェクトを作ることにしましょう。</p>
+<pre><code>
+function Teki(n){
+  this.name = n;
+}
+//現れる
+Teki.prototype.appear = function(){
+  console.log(this.name + "があらわれた！");
+};
+
+var zako1 = new Teki("ザコ敵");	//敵をつくる
+zako1.appear();	//現れる
+</code></pre>
+<p>これは、前回同様のコードです。</p>
+<p>さて、ひとくちに「敵」といっても、「スライム」とか「魔法使い」とか「ドラゴン」とかいろいろな種類の敵がいます。種類が違うということは、コンストラクタが違うということですね。</p>
+<p>では、「敵」と「魔法使い」や「ドラゴン」の関係はどうでしょう。明らかに、「魔法使い」や「ドラゴン」は「敵」の一種です。このことは次のように影響してきます。「魔法使い」や「ドラゴン」はそれぞれ攻撃方法は違うでしょうが、例えばHPがあるという点では共通しています。つまり、HPは「敵」の特徴で、それは「魔法使い」や「ドラゴン」にも当然あります。そして、攻撃方法は「魔法使い」や「ドラゴン」独特の特徴なのです。</p>
+<p>ここで、「魔法使い」や「ドラゴン」は、　それであると同時に「敵」でもあるのです。言い方を変えると、「魔法使い」や「ドラゴン」は「敵」にさらに追加の特徴を加えてできるものなのです。このことを指して、これらは「敵」を<strong>継承している</strong>といいます。</p>
+
+<h3>継承のやり方</h3>
+<p>さて、継承の概念をJavaScriptで表現するにはどうやればいいのでしょうか。まず最初にサンプルを見てみましょう。「敵」を作り、さらにそれを継承する「ドラゴン」を作ります。</p>
+<pre class="line-numbers" data-line="11,13"><code>
+//敵を作る
+function Teki(){
+  this.hp = 100;
+}
+Teki.prototype.die = function(){
+  console.log("やった！　敵を倒した！");
+};
+
+//ドラゴンを作る
+function Dragon(){
+  Teki.<strong>apply</strong>(this,<strong>arguments</strong>);
+}
+Dragon.<strong>prototype</strong> = new Teki;
+
+//攻撃してHPを教えてもらう
+Dragon.prototype.attack = function(){
+  console.log("ドラゴンの攻撃！ ドラゴンのHPは"+this.hp+"だ！");
+};
+
+var boss = new Dragon();	//インスタンスをつくる
+boss.attack();	//攻撃してもらう
+boss.die();     //死んでもらう
+</code></pre>
+<p><small>※注： 今回紹介している継承の方法にはまだ多少の問題があります。そのあたりの話は、<a href="11_7.html">十一章第七回</a>を参照してください。</small></p>
+<p>8行目と10行目が継承と関係のある部分です。とりあえずこのサンプルの動作を確認してみましょう。</p>
+
+<p>変数bossに「ドラゴン」のインスタンスを作成して代入しています。そして、そのattackメソッドとdieメソッドを順にを呼び出しています。attackメソッドでは、自らのプロパティhpを表示しています（なぜ攻撃するとHPが分かるのかは気にしないことにしましょう）。dieメソッドを呼び出すと敵を倒したメッセージが出ます。</p>
+<p>ここで、bossはDragonのインスタンスのはずなのに、Tekiのメソッドであるdieを呼び出すことができています。これは、DragonがTekiを継承している証拠です。また、attackメソッドの中で参照しているhpプロパティはTekiのコンストラクタで初期化されています。これは、<code>new Dragon()</code>としてDragonのインスタンスを作るさなかでTekiのコンストラクタも呼ばれていることを示唆しています。</p>
+
+<p>さて、それでは継承の仕組みを説明していきます。まず、順番が逆になりますが、<code>Dragon.prototype = new Teki;</code>の部分を説明します。</p>
+<p>なお、<code>new Teki</code>という書き方ですが、これはnewの場合は関数呼び出しの<code>()</code>を省略できることを利用しています。意味は<code>new Teki()</code>とするのと変わりません。</p>
+<p>ここではなぜかTekiのインスタンスが作られており、さらにそれを<code>Dragon.prototype</code>に代入しています。</p>
+<p>コンストラクタにはprototypeプロパティが存在すると述べましたが、このようにprototypeに代入することによってprototypeを好きなオブジェクトに差し替えることができます。そして今回はそれにさらにattackメソッドを追加しています。</p>
+<p>こうすると何が起こるでしょうか。prototypeは、インスタンスがプロパティなどを持っていないときにそこから探すというものでした。そして、今回はその探す先がTekiのインスタンスです。つまり、Tekiのインスタンスが持っているプロパティ・メソッドはDragonのインスタンスも持っているという状況が実現しました。</p>
+<p>特に、Tekiのインスタンスが持っていないプロパティを探した場合は何が起こるでしょうか。そう、<em>Tekiのprototypeから探します</em>。これにより、<code>boss.die</code>を探したときに最終的に<code>Teki.prototype.die</code>し、dieメソッドを使うことができたのです。</p>
+<p>このように、prototypeをだんだんさかのぼって探していくことは、<dfn>プロトタイプチェーン</dfn>と呼ばれます。</p>
+
+<h4>プロトタイプチェーンの終端</h4>
+<p>やや余談ですが、ここで<strong>オブジェクト</strong>について振り返ります。</p>
+<p>オブジェクトを作るとき、<code>new <mark>Object</mark>()</code>
+という書き方をすることができました。今思えば、これは<strong>Objectのインスタンスを作っている</strong>ということだったのです。つまり、<strong>オブジェクトは、Objectのインスタンスである</strong>ということです。</p>
+<p>では、TekiとかDragonとか、<code>new <mark>Object</mark>()</code>ではない（Objectのインスタンスではない）ものはどうなのでしょう。
+実は、これらは<strong>Objectを継承している</strong>のです。つまり、継承先のオブジェクトのインスタンスは同時に継承元のインスタンスとしての役割も果たすから、<strong>すべてのオブジェクトはObjectのインスタンスである</strong>ということができます<small>（注：ES5以降はこれにあてはまらない特殊なオブジェクトを作ることができますが、ここでは触れません。）</small></p>
+<p>さて、すべてのオブジェクトがObjectを継承しているとはどういうことでしょう。もう一度振り返ると、インスタンスのプロパティが無いときはコンストラクタのprototypeを探すのでした。例えば、Dragonのインスタンスの場合は、Dragon.prototypeを探します。</p>
+<p>そして、それが<strong>Tekiのインスタンス</strong>だったから、Dragon.protoypeそれ自体に存在しないプロパティの場合は次にTeki.prototypeを探すことになるので、DragonのインスタンスはTekiのインスタンスとしての役割も果たしているということになっているのでした。</p>
+<p>では、特に何も継承していないものはどうでしょう。実は、初期状態でprototypeは<strong>普通のオブジェクト</strong>です。普通のオブジェクトとは、つまり<strong>Objectのインスタンス</strong>です。</p>
+<p>だから、すべてのオブジェクトはObjectを継承しているということができるのです。</p>
+<p>ちなみに、Object.prototypeにもメソッドなどはあります。つまり、Object.prototypeにあるメソッドはすべてのオブジェクトが持っているということです。これについては<a href="11_4.html">第十一章第四回</a>で多少説明しています。</p>
+
+<p>さて、これでやっと<code>Dragon.prototype = new Teki;</code>の説明が終わりました。次は<code>Teki.apply(this, arguments);</code>の部分です。</p>
+<p>Tekiは、thisで与えられたオブジェクトをTekiのインスタンスとして初期化するための処理を行うメソッドでしたね。今回の場合、Dragonのコンストラクタの中でTekiを呼び出しています。Dragonの中ではthisは初期化中のDragonのインスタンスになるオブジェクトです。このthisをTekiの中のthisとしてTekiを実行することで、thisに対してTekiの処理が行われます。今回の例ではここで<code>this.hp</code>が設定されたので、<code>boss</code>はhpプロパティを持っていたのです。より抽象的に言えば、Dragonのインスタンスの初期化処理の中でTekiのインスタンスとしての初期化処理も行ったということです。DragonはTekiの一種という直感からいえば、DragonのインスタンスをTekiのインスタンスとしても扱うのはとても妥当ですね。</p>
+<p>第二引数のargumentsですが、これは配列っぽいオブジェクトだと述べました。そして、applyの第2引数は配列で渡すと述べましたね。しかしapplyは寛容なので、配列っぽいオブジェクトでもセーフです。今回の場合、argumentsはDragonに渡された引数全てであり、それをTekiを呼び出す際の引数としてそのまま全て渡していることになります。</p>
+<p>これは、継承元のコンストラクタが引数を取るときそれを継承先でも使えるようにする常套手段ですが、常にこうすべきとは限りません。今回の場合そもそもTekiに引数は必要ありませんから<code>Teki.call(this);</code>とか<code>Teki.apply(this, []);</code>などでも良いでしょう（ちなみに<code>Teki.apply(this);</code>という書き方もOKです）。場合に合わせて工夫してください。</p>
+
+<p>まとめると、<code>	Teki.apply(this, arguments);</code>の行は、Dragonコンストラクタの中で、Tekiのコンストラクタにも処理をしてもらうというものでした。Dragonのインスタンスは同時にTekiのインスタンスでもあるので、この処理はやるべきでしょう。</p>
+
+<h4 id="anchor-instanceof">instanceof</h4>
+<p>ここでひとつ余談です。<strong>instanceof</strong>という演算子を紹介しておきます。</p>
+<p>これは、<code><var>オブジェクト</var> instanceof <var>コンストラクタ</var></code>の形で、オブジェクトがあるコンストラクタのインスタンスかどうか真偽値で返してくれる演算子です。</p>
+<p>例えば、<code><var>変数</var> instanceof Array</code>とすると変数が配列かどうか判定できます（ただし配列の場合は、<a href="1_3.html">一章第三回</a>で紹介したArray.isArrayのほうがよいでしょう）。これは、配列はArrayのインスタンスだからです。</p>
+<p>さっきのTekiとDragonも使って試してみましょう。</p>
+<pre><code>//敵を作る
+function Teki(){
+}
+
+//ドラゴンを作る
+function Dragon(){
+  Teki.apply(this,arguments);
+}
+Dragon.prototype = new Teki;
+
+var boss = new Dragon();	//インスタンスをつくる
+
+console.log(boss <mark>instanceof</mark> Dragon);	//インスタンスがDragonのインスタンスかどうか
+console.log(boss <mark>instanceof</mark> Teki);	//インスタンスがTekiのインスタンスかどうか
+</code></pre>
+<p>結果はどちらもtrueです。確かに、DragonのインスタンスがTekiのインスタンスとしても扱われていますね。</p>
+
+<h3>サンプル</h3>
+<p>最後に、復習的なサンプルです。</p>
+<pre><code>//敵を作る
+function Teki(n){
+  this.name = n;
+}
+//現れる
+Teki.prototype.appear = function(){
+  console.log(this.name+"が あらわれた！");
+};
+//攻撃
+Teki.prototype.attack = function(){
+  console.log(this.name+"のこうげき！ダメージをうけた！");
+};
+
+//ドラゴンを作る
+function Dragon(){
+  Teki.apply(this,arguments);
+}
+Dragon.prototype = new Teki;
+//ドラゴンの攻撃は強い
+Dragon.prototype.attack = function(){
+  console.log(this.name+"のこうげき！大ダメージをうけた！");
+}
+
+var zako = new Teki("ザコ");	//インスタンスをつくる
+var boss = new Dragon("ボス");
+
+zako.appear();	//ザコ現れる
+boss.appear();	//ボス現れる
+zako.attack();	//ザコの攻撃
+boss.attack();	//ボスの攻撃
+</code></pre>
+<p>ザコとボスを作っています。コンストラクタにはどちらも引数で名前を指定しています。その引数を処理してプロパティnameに代入するのはTekiの仕事ですが、Dragonのインスタンスを作った場合でも、applyしていることでちゃんとTekiの仕事も行われています。</p>
+<p>その後、appearです。appearは、Tekiにしかありません。しかし、DragonもTekiのインスタンスなので、どちらもTekiのappearを使っています。</p>
+<p>次のattackでは、TekiにもDragonにもあり、中身が違います。ザコのほうはTekiのインスタンスなのでTekiの、ボスはDragonなのでDragonのを使っています。</p>
+<p>このように、継承を利用することの利点は、まず「敵」という大元に、appearとかattackとか基本的な機能を作っておけば、すべての種類の敵（継承先）でそれが使えるということです。また、このように同名のメソッドを継承先に新たに作れば、そのメソッドを書き換えたかのように動作します。いずれの場合にも、attackというメソッドを呼び出せば、「攻撃」の処理をうまくやってくれるわけです。プログラムを組む側は、attackをするのが「敵」なのか、はたまた「ドラゴン」なのか「魔法使い」なのか（プログラム中に出てきませんでしたが）は気にする必要がありません。これはオブジェクト指向のひとつの便利な側面です。</p>
+
+<p>※継承についてのより詳しい説明が<a href="11_7.html">十一章第七回</a>にあります。実際にプログラムで継承を利用する際は、こちらも読んでおくことをおすすめします。</p>
+

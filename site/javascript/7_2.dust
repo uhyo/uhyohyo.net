@@ -203,7 +203,7 @@ if(res &amp; node.DOCUMENT_POSITION_PRECEDING <mark>&amp;&amp;</mark> <mark>!</m
 <p>また、同じようにただの論理和<kbd>||</kbd>もあります。これは、条件のどちらか片方が真から真というものです。</p>
 
 <div class="sidenote" id="anchor-sidenote-singi">
-  <p>ここでは論理積・論理和・否定演算子について「真」とか「偽」とかいう言葉を使って説明しましたが、それはあまり正確ではありませんね。真か偽かというのは、より正確にいえば、真な値というのは<strong>真偽値に変換するとtrueになる値</strong>のことであり、偽な値というのは<strong>真偽値に変換するとfalseになる値</strong>ということです。<a href="2_14.html">二章第十四回</a>ではif文の条件について真や偽という概念を用いて説明しましたが、実はif文の条件部分に真偽値以外の値が渡されると真偽値に変換されるのです。</p>
+  <p>ここでは論理積・論理和・否定演算子について「真」とか「偽」とかいう言葉を使って説明しましたが、それはあまり正確ではありませんね。真か偽かというのは、より正確にいえば、真な値というのは<strong>真偽値に変換するとtrueになる値</strong>のことであり、偽な値というのは<strong>真偽値に変換するとfalseになる値</strong>ということです。<a href="2_14.html">二章第十四回</a>ではif文の条件について真や偽という概念を用いて説明しましたが、実はif文の条件部分に真偽値以外の値が渡されると真偽値に変換されるのです。真偽値への変換については<a href="9_7.html#anchor-type-conversion-boolean">九章第七回</a>で解説します。</p>
   <p>ちなみに、JavaScriptである値を真偽値に変換するには、<code>Boolean(値)</code>というようにBoolean関数に渡せばよいです。返り値は当然真偽値です。<code>Boolean(1)</code>が<code>true</code>になる一方<code>Boolean(0)</code>は<code>false</code>になるなどのことを確かめてみましょう。</p>
   <p>まず否定演算子<code>!</code>の挙動から説明します。これは簡単で、<code>!</code>の返り値は真偽値です。<code>!</code>は与えられた値を真偽値に変換し、それがtrueならfalseを返し、falseならtrueを返します。</p>
   <p>一方、論理積<code>&amp;&amp;</code>と論理和<code>||</code>はより複雑です。実は、<code>A &amp;&amp; B</code>の返り値はAかBかのどちらかです。具体的には、<code>A</code>を真偽値に変換してtrueなら<code>B</code>を返し、falseなら<code>A</code>を返します（<code>A</code>を真偽値に変換した結果を返すわけではないので注意してください）。たとえば、<code>3 &amp;&amp; "foo"</code>は<code>"foo"</code>となります。実はこの動作によって「AとBが両方真なら真な値を返し、そうでなければ偽な値を返す」という性質が成り立ちます。考えてみましょう。</p>

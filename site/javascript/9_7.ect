@@ -104,7 +104,7 @@ console.log("aaa!"==aaa);
           </code></pre>
         <p>というケースではvalueOfではなくtoStringが呼び出されているように見えますが、これはvalueOf（Object.prototype.valueOfが呼ばれる）を呼び出した結果がオブジェクトだったので無効になり、次にtoStringが呼ばれて比較されたことによります。</p>
 
-        <h4>厳密等価演算子</h4>
+        <h4 id="anchor-strict-equal">厳密等価演算子</h4>
         <p>ここで、<dfn>厳密等価演算子</dfn>というものを紹介します。これは、<code>===</code>という、イコールを3つ並べたもので、等価演算子(<code>==</code>)と同じように使えます。</p>
         <p>では、どこが違うかというと、<strong>型が違うものどうしは全てfalse</strong>という点です。等価演算子では、型変換をして調整してくれていましたが、厳密等価演算子では全てfalseにされます。等価演算子ではtrueだったnullとundefinedの比較も、falseになります。</p>
         <p>たとえば普通の等価演算子だと、<code>0==false</code>のようなものがtrueになるなど、直感的ではないかもしれない場合があります。厳密等価演算子では型変換を行わないのでこれもfalseになります。</p>

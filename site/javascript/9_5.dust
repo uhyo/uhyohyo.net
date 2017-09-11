@@ -1,0 +1,177 @@
+<h3>クロージャとは</h3>
+<p>今回は<dfn>クロージャ</dfn>について解説します。これはオブジェクト指向とはちょっと趣向が異なる方向の話ですが、とりあえず記にしないことにしましょう。</p>
+<p>クロージャとは、ある関数が作られたとき、そのときの<strong>環境</strong>が関数の中で保持されるということです。</p>
+<p>環境とは、そこの処理でどの変数が使えるかということです。JavaScriptでは<b>スコープ</b>という用語で表されることもあります。例えば、</p>
+<pre><code>
+var a=3;
+console.log(a);
+</code></pre>
+<p>という何の変哲もないコードですが、<code>console.log(a);</code>が実行されたときの環境では、変数aが使用できます。また、変数a以外にも<strong>全てのグローバル変数</strong>が使用できます。例えば何気なく使っている<code>console</code>はグローバル変数ですね。</p>
+<p>また、</p>
+<pre><code>
+function aaa(){
+  var b = 3;
+  console.log(a+b);
+}
+var a = 5;
+aaa();
+</code></pre>
+<p>というコードでは、関数aaa内で変数a,bが使われています。ここで変数aはグローバル変数で、変数bはローカル変数です。</p>
+<p>つまり、関数内の環境は、グローバル変数とその関数のローカル変数を使うことができるというわけです。関数外では、ローカル変数は参照できないというわけです。</p>
+<p>このようにある変数が使える有効範囲を<b>スコープ</b>といいます。例えばプログラムは全て<b>グローバルスコープ</b>に入っており、これはグローバル変数が使える範囲です。また、関数aaaの中のプログラムは<em>関数aaaのスコープ</em>に入っており、このスコープにはローカル変数bが属しています。結局、関数aaaの中のプログラムはグローバルスコープと関数aaaのスコープという2つのスコープに属していることになります。</p>
+<p>なお、この例のように、グローバルスコープ以外のスコープは関数により作られます。<small>（ES2015ではブロックスコープが導入されましたが、それはまた今度解説します。）</small></p>
+<p>そして、環境というのは今どこのスコープに入っているのかということに対応しています。</p>
+
+<p>さて、最初の説明で、「関数が作られたとき」とあります。なので関数を作ってみましょう。</p>
+<pre><code>
+function aaa(){
+  var a = 3;
+  var bbb = function(){
+    console.log(a);
+  }
+  bbb();
+}
+aaa();
+</code></pre>
+<p>関数aaa内で、ローカル変数aと関数bbbが作られています。varを付けて代入されているので、bbb自体もたローカル変数であることに注意してください。</p>
+<p>関数bbbの中の環境はどうなっているでしょうか。実は、関数bbbは関数aaaの中にあるので、関数aaaのスコープにある変数（この場合は変数a）が使えます。上の例では関数bbbの中で変数aが使われています。これはとても直感的で自然な動作ですね。</p>
+<p>なお、関数bbbも自分のスコープを持っており、ここに属するのは関数bbbの中でvarで宣言された変数です。このスコープに属する変数が使えるのはスコープ内、つまり関数bbbの中だけであり、その外では使えません。</p>
+
+<p>さて、これだけだと別に普通だし、何の意味があるのか分かりません。本題は、次のサンプルにあります。</p>
+<pre><code>
+function aaa(){
+  var a = 5;
+
+  var bbb = function(){
+    console.log(a);
+  };
+  <mark>return bbb;</mark>
+}
+var func = aaa();
+func();
+</code></pre>
+<p>関数aaaは、ローカル変数aとbbbを作ったあと、bbbを返しています。ここで、関数の中で</p>
+<p>さて、返ってきたbbbは、グローバル変数funcに代入されます。そして最後にそれを呼び出しています。このbbbは、aを表示するだけです。</p>
+<p>ここでのポイントは、funcは関数aaaの外で実行されたのに、aの内容が正しく表示されるという点です。これは、funcは関数aaaの中で作られた関数であるため、その環境（ローカル変数aが使える）を保持しているからです。</p>
+<p>このように、関数の中身が実行されるときの環境は、常にその関数が作られたときの環境＋その関数自身のスコープになります。</p>
+<p>ここで注目すべき点は、funcは関数の処理が終了してしまってもう干渉することができなくなったローカル変数aに干渉する手段を与えているということです。</p>
+<p>今はconsole.logで表示するだけですが、次のようにするとどうでしょう。</p>
+<pre><code>
+function aaa(){
+  var a = 5;
+  var bbb = function(){
+    <mark class="ins">a++;</mark>
+      console.log(a);
+  }
+  <mark>return bbb;</mark>
+}
+var func = aaa();
+func();
+</code></pre>
+<p><code>a++;</code>が追加され、funcを呼び出すことでaを増やすことができるようになりました。</p>
+<p>ここで、関数aaaの外ではfuncはaに干渉する唯一の手段であり、aを同時に2以上増やす手段がなく、またaを1増やすにはログをそのつど表示しなければなりません。aは、決して5より小さくなりません。例えばaを100にするには、ログを95回出さなければいけないということになります。</p>
+
+<p>このように、クロージャは、ローカル変数に対する限定的なアクセスを提供する手段になります。また、関数がどのような環境で実行されるかというのはJavaScriptの動作を理解する上で重要ですからぜひ身につけておきましょう。</p>
+
+<h3>クロージャの活用</h3>
+<p>クロージャの活用法として以前から利用されてきたものは、<strong>this</strong>と関連した使い方があります。</p>
+<p>DOMとの絡みが出てきますが、次のサンプルを見てみましょう。</p>
+<pre class="line-numbers"><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.textContent="このdiv要素は"+name+"です";
+  document.body.appendChild(this.div);
+}
+
+var div1 = new MyDiv("div1");
+</code></pre>
+<p>新しいMyDivのインスタンスを作って、変数div1に代入しています。</p>
+<p>インスタンスを作った時点で、コンストラクタMyDivが実行されます。ここでやっていることは、新しいdiv要素を作ってプロパティdivに代入し、テキストノードのメッセージも加えてbody要素に追加されます。</p>
+<p>また、名前を引数で渡し、プロパティnameに代入しています。</p>
+<p>その結果、これを実行すると、body要素に「このdiv要素はdiv1です」という中身のdiv要素が出現します。これだけでは何の意味もないですが、きっとこの後このdivを使って凄いことをするのでしょう。</p>
+
+<p>そういった時に欠かせないのが<a href="3_2.html">イベント</a>です。そこで、「クリックされたら自身の名前（<code>this.name</code>）を表示するというのをやってみましょう。</p>
+
+<p>そこで、単純に考えると次のようになるでしょう。</p>
+<pre class="line-numbers" data-line="7-9"><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.textContent="このdiv要素は"+name+"です";
+  document.body.appendChild(this.div);
+
+  this.div.<mark>addEventListener</mark>('click',function(e){
+    console.log(<mark>this.name</mark>);
+  },false);
+}
+
+var div1 = new MyDiv("div1");
+  </code></pre>
+<p>さっき書いたことをそのままコードで表現するとこうなりますね。クリックされるとthis.nameが表示されます。</p>
+<p>しかし、これはうまくいきません。実際にクリックすると表示された値は<strong>undefined</strong>です。これは、thisのプロパティとしてnameなどというものは無かった、つまりthisは、MyDivのインスタンスを表していないということです。</p>
+<p>この理由は、<b>this</b>の値は関数呼び出し時に決まるからです。今thisがMyDivのインスタンスなのは、MyDivがコンストラクタとして呼ばれたからでした。しかし、今回のイベントハンドラは</p>
+<pre><code>
+function(e){
+  console.log(<mark>this.name</mark>);
+}
+</code></pre>
+<p>という関数であり、この関数がイベント発生時に呼ばれた時点でthisには別の値が入りもはやMyDivのインスタンスではなくなってしまうのです。</p>
+<p>ちなみに、この場合thisには多分div要素が入っています。</p>
+
+<p>それではどうするかというと、ここで<strong>クロージャ</strong>の登場です。具体的には次のようにします。</p>
+<pre class="line-numbers" data-line="7,10"><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.textContent="このdiv要素は"+name+"です";
+  document.body.appendChild(this.div);
+
+  var t = this;
+
+  this.div.addEventListener('click',function(){
+    console.log(<mark>t</mark>.name);
+  },false);
+}
+
+var div1 = new MyDiv("div1");
+</code></pre>
+<p>これがやっていることは簡単です。thisが勝手に変わってしまうのなら、別の変数に入れて取っておけばいいのです。しかしこの動作の裏にはクロージャ機構の活躍があります。イベントハンドラが実行されるのは関数が実行されるより後のことであるにも関わらずその中で変数tを利用することができているのは、先に説明したようにこのイベントハンドラが作られたときの環境を保持しているからです。</p>
+<p>また、少しややこしいですが、こんな書き方をする人も昔はいました。</p>
+<pre class="line-numbers" data-line="7-11"><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.textContent="このdiv要素は"+name+"です";
+  document.body.appendChild(this.div);
+
+  this.div.addEventListener('click',(function(<mark>t</mark>){
+    return function(e){
+      console.log(<mark>t</mark>.name);
+    };
+  })(<mark>this</mark>),false);
+}
+
+var div1 = new MyDiv("div1");
+</code></pre>
+<p>何か複雑になりましたね。しかし、試してみると確かにクリックすると"div1"が表示されます。</p>
+<p>やっていることは分かりにくいですが、要はMyDivのローカル変数にtが入るのを嫌って、無名関数によるスコープを一段噛ませています。
+
+<p>そう、以前は使われていました。今はあまり使われていないのです。</p>
+<p>では今はどうかというと、呼ばれる時のthis値を指定するメソッド<a href="11_2.html">bind</a>があります。これを紹介するのはまた今度ですが、使用例だけ紹介しておきます。</p>
+<pre><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.appendChild(document.createTextNode("このdiv要素は"+name+"です"));
+  document.body.appendChild(this.div);
+
+  this.div.addEventListener('click',(function(e){
+    console.log(<mark>this</mark>.name);
+  }).<mark>bind</mark>(<mark>this</mark>),false);
+}
+
+var div1 = new MyDiv("div1");
+</code></pre>
+<p>bindを使うメリットは、thisがthisのままとなり余計な変数が必要ないという点です。</p>
+

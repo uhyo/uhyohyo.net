@@ -1,0 +1,160 @@
+<p>九章では、DOMから少し離れて<strong>オブジェクト指向</strong>について解説します。</p>
+
+<h3>オブジェクト指向とは</h3>
+<p>オブジェクトそのものについては、<a href="1_1.html">一章</a>で少し解説しました。では、オブジェクト指向とは何なのでしょう。</p>
+<p>オブジェクト指向とは何かというのは諸説ありますが、大まかにいうと、プログラムをいい感じに<strong>部品</strong>に細分化し、部品の組み合わせでプログラムをつくるというものです。このそれぞれの部品がオブジェクトというわけです。この章では、このような考え方のもとオブジェクト指向を実践するための言語機能を紹介します。</p>
+<div class="sidenote">
+  <p>注意として、この章に書いてあることは少し古くさいです。これは、JavaScriptのオブジェクト指向的機能が進化を続けているため、この章で紹介するのは最新の方法ではないからです。</p>
+  <p>とはいえ、基礎的な考え方は同じなので、ぜひこの章で身につけてください。</p>
+</div>
+
+<p>例えば、RPGを作りたい場合を考えてみましょう。RPGにはいろいろなものが登場します。それら1つ1つが部品となるでしょう 。例えば、「勇者」がいます。「敵」もいます。「アイテム」とか「武器」というのもありますね。RPGはこれらの組み合わせで動いているということができます。</p>
+
+<p>なので、これらをオブジェクトとして作り、それを使ってプログラムを作ればよいのです。ちょっとやってみましょう。</p>
+<pre><code>
+var yuusha = new Object();
+yuusha.name = "勇者";	//勇者の名前
+yuusha.power = 10;	//勇者の攻撃力
+
+var teki = new Object();
+teki.name = "ザコ敵";	//敵の名前
+teki.hp = 100;		//敵のHP
+
+//攻撃する
+console.log(yuusha.name + "は　"+ teki.name + "に" + yuusha.power + "ダメージをあたえた！");
+</code></pre>
+<p>実行すると「勇者は　ザコ敵に10ダメージをあたえた！」と出ます。</p>
+<p>この例では「勇者」と「ザコ敵」の情報がそれぞれオブジェクトに入ってます。オブジェクトの作り方は、まず<code>new Object()</code>として空のオブジェクトを作り、そこにプロパティをくっつけるというやり方です。</p>
+
+<p>また、オブジェクトは、「情報」だけでなく「機能」をもつこともできます。すなわち、プロパティだけでなく<strong>メソッド</strong>も持てるということです。</p>
+<pre><code>
+var yuusha = new Object();
+yuusha.name = "勇者";	//勇者の名前
+
+//自己紹介してもらう
+yuusha.jikoshokai = function(){
+  console.log("私の名前は" + <strong>this</strong>.name + "です。");
+};
+
+yuusha.jikoshokai();
+</code></pre>
+<p>「私の名前は勇者です。」と出ます。</p>
+<p>さて、今回は、勇者オブジェクトにjikoshokaiというメソッドをもたせました。勇者に自己紹介をしてもらうメソッドです。今回、<strong>this</strong>という謎のものが出ています。まずはこれを解説します。コードと結果を比べると、 this.name が "勇者"、すなわちyuusha.nameを表しています。ということは、thisはyuushaです。</p>
+<p>実は、何かというと、あるオブジェクトのメソッドが呼び出されたときに、thisはそのオブジェクト自体を表します。つまり、<code>yuusha.jikoshokai()</code>として呼び出した場合、その中ではthisは<code>yuusha</code>になったのです。</p>
+<p>この機能はオブジェクト指向プログラミングをする上で重要です。メソッドはオブジェクトが持つ機能なので、メソッド内で自分が何のオブジェクトなのか知らないというのはおかしいですね。</p>
+
+<p>さて、ここまで少し解説してきたのはまだまだこれは本当のオブジェクト指向ではありません。例えば、「勇者」が5人いた場合を考えます。勇者も1人で1つの部品ですから、勇者が5人いる場合オブジェクトは5つになります。今回自己紹介もしてもらいましょう。</p>
+<pre><code>
+var yuusha1 = new Object();
+yuusha1.name = "勇者1";
+yuusha1.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha2 = new Object();
+yuusha2.name = "勇者2";
+yuusha2.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha3 = new Object();
+yuusha3.name = "勇者3";
+yuusha3.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha4 = new Object();
+yuusha4.name = "勇者4";
+yuusha4.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+var yuusha5 = new Object();
+yuusha5.name = "勇者5";
+yuusha5.jikoshokai = function(){
+console.log("私の名前は" + this.name + "です。");
+};
+
+//みんなに自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+yuusha4.jikoshokai();
+yuusha5.jikoshokai();
+</code></pre>
+<p>ちゃんとそれぞれオブジェクトを作って、nameプロパティとjikoshokaiプロパティを作っています。</p>
+<p>しかし、何だか格好悪い気がしませんか。ここで、あることに気づくかもしれません。<strong>jikoshokaiは5人とも全く同じメソッドである</strong>ということです。thisのおかげでjikoshokaiの中にyuusha1〜yuusha5の変数が出てきてませんから、全部共通になっています。そこで、こうしようと思うかもしれません。</p>
+<pre><code>
+//先に自己紹介関数を作っておく
+var jikoshokai = function(){
+  console.log("私の名前は" + this.name + "です。");
+};
+
+var yuusha1 = new Object();
+yuusha1.name = "勇者1";
+yuusha1.jikoshokai = jikoshokai;
+var yuusha2 = new Object();
+yuusha2.name = "勇者2";
+yuusha2.jikoshokai = jikoshokai;
+var yuusha3 = new Object();
+yuusha3.name = "勇者3";
+yuusha3.jikoshokai = jikoshokai;
+var yuusha4 = new Object();
+yuusha4.name = "勇者4";
+yuusha4.jikoshokai = jikoshokai;
+var yuusha5 = new Object();
+yuusha5.name = "勇者5";
+yuusha5.jikoshokai = jikoshokai;
+
+//みんなに自己紹介してもらう
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+yuusha4.jikoshokai();
+yuusha5.jikoshokai();
+</code></pre>
+<p>これは、みんな同じ関数なんだから、関数は最初に1個作っておいて、勇者1〜5にはそれぞれ代入するだけで済ませようということです。<code>yuusha1.jikoshokai=jikoshokai;</code>というようにjikoshokaiが2つ出てきていてややこしいですが、前者は勇者のオブジェクトのプロパティ名、後者は変数名で別物です。</p>
+<p>注意としては、もはや<code>yuusha1.jikoshokai</code>や<code>yuusha2.jikoshokai</code>などはもはや同じ関数オブジェクトであるにも関わらず、呼び出すとthisの値は依然としてそれぞれの呼び出しで異なっているということです。これは、thisの値は関数オブジェクトに保存されているものではなく、あくまで<em>呼び出し時の状況</em>によって決まるということです。つまり、繰り返しになりますが、thisの値は例えば<code>yuusha1.jikoshokai();</code>の場合はyuusha1になるというように、呼び出し時に決定されます。</p>
+
+<p>さて、サンプルは前に比べて少しすっきりしたような気がしますが、実はまだオブジェクト指向的な感じがしません。いままでのやり方では、yuusha1〜yuusha5という<strong>別々のオブジェクト</strong>を、同じプロパティ名を持つように気をつけて作っているだけです。</p>
+<p>yuusha1〜yuusha5は同じ「勇者」なのですから、本質的に<strong>同じ種類のオブジェクト</strong>であるということができます。同じ種類のオブジェクトは統一して扱えるような方法が欲しいですね。それがオブジェクト指向において重要な部分の1つです。</p>
+
+<p>具体的にどうすればいいかというと、同じ種類のオブジェクトに対して<em>共通の初期化方法</em>と<em>共通の機能（メソッド）</em>とを定めます。初期化というのはオブジェクトを作ることです。例えばyuusha1の初期化に該当する部分は</p>
+<pre><code>
+var yuusha1 = new Object();
+yuusha1.name = "勇者1";
+yuusha1.jikoshokai = jikoshokai;
+</code></pre>
+<p>です。このパターンはyuusha2やyuusha3などと共通であり、違うのは名前だけです。なので、これが勇者オブジェクトの共通の初期化方法であるということです。</p>
+<div class="sidenote">
+  <p>このような言語機能は他のオブジェクト指向言語では<b>クラス</b>として知られているものですが、以下で紹介するJavaScriptのオブジェクト指向的機能はクラスとは趣が違います。</p>
+  <p>実は、オブジェクト指向は2種類に分類されることがあります。1つはクラス指向、もう1つはプロトタイプ指向です。JavaScriptは後者に属するため、クラス指向の言語とは少し違った方法でオブジェクト指向を実現しています。</p>
+  <p>ただし、JavaScriptにもクラスの構文がES2015で導入されました。これについては後々紹介します。しかしJavaScriptに特有の事情は健在ですので、ぜひこの章でJavaScript的オブジェクト指向に慣れ親しむことを推奨します。</p>
+</div>
+
+<p>さて、まず共通の初期化方法について見ます。これは、<strong>コンストラクタ</strong>を作ることによって実現します。コンストラクタとは、ある種の<strong>関数</strong>です。例えば、勇者のコンストラクタを作りたければ関数を作ります。</p>
+<pre><code>
+function Yuusha(){
+}
+</code></pre>
+<p>コンストラクタを使ってオブジェクトを初期化するのに使うのが<strong>new演算子</strong>です。これは今までも<code>new Object()</code>とかの形で出てきましたが、あまり詳しく説明していませんでした。</p>
+<p>実はこれ、演算子の一種ということになっています。といっても特殊な形をもつ演算子です。<code>new Object()</code>の例を見て分かるように、
+<code><strong>new</strong> <mark>コンストラクタ</mark>(引数)</code>
+という形で使います。</p>
+<p>new演算子が使われると、コンストラクタが呼び出されます。そこでオブジェクトの初期化をすればいいのです。具体的には次のようにします。</p>
+<pre><code>
+function <mark>Yuusha</mark>(n){
+  this.name = n;
+  this.jikoshokai = jikoshokai;
+}
+
+var yuusha1 = new <mark>Yuusha</mark>("勇者1");
+var yuusha2 = new <mark>Yuusha</mark>("勇者2");
+var yuusha3 = new <mark>Yuusha</mark>("勇者3");
+
+yuusha1.jikoshokai();
+yuusha2.jikoshokai();
+yuusha3.jikoshokai();
+</code></pre>
+<p>実は、コンストラクタがnew演算子で呼び出された場合、新しいオブジェクトが作成され、それが関数内でのthisになります。そして、そのオブジェクトがnew演算子の返り値となります。したがって、コンストラクタはthisとして与えられた新しいオブジェクトを初期化すればいいことになります。それをやっているのが上のプログラムです。</p>
+<p>ちなみに、newによって作られたオブジェクトのことをコンストラクタから見て<dfn>インスタンス</dfn>と呼びます。つまり、上のサンプルではyuusha1，yuusha2，yuusha3は全てYuushaのインスタンスです。</p>
+
+<p>このサンプルは最初に比べてだいぶすっきりしたプログラムになりました。特に、勇者オブジェクトの初期化処理はコンストラクタにまとまっていていいですね。</p>
+<p>しかし、まだ完璧というわけではありません。そのあたりを次回解説します。</p>
+
