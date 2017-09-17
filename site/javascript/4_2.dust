@@ -48,7 +48,7 @@
 <h3>JavaScriptで正規表現</h3>
 <p>さて、正規表現にはまだまだバリエーションがありますが、ここで一度休憩して、実際にJavaScriptで正規表現を扱ってみたいと思います。</p>
 
-<h4>正規表現オブジェクト</h4>
+<h4 id="anchor-regexp-object">正規表現オブジェクト</h4>
 <p>JavaScriptでは、正規表現（検索条件）はオブジェクトの形で表現します。それが正規表現オブジェクト(RegExpオブジェクト)です。</p>
 <p>正規表現を作るには次のように書きます。</p>
 <pre><code>new RegExp(<mark>"ab+c"</mark>)</code></pre>

@@ -1,0 +1,167 @@
+<p>今回は<strong>プリミティブ</strong>の話です。この言葉は<a href="1_2.html">第一章第二回</a>で初登場し、<a href="9_7.html">九章第七回</a>でも軽く解説しています。今回はES5の視点も絡めつつさらに細かく解説します。</p>
+<p>プリミティブには数値、文字列、真偽値、undefined,nullの5種類がありました。すなわちプリミティブは<strong>オブジェクト以外のもの</strong>です。</p>
+
+<h3 id="anchor-typeof">typeof演算子</h3>
+<p>ここで、<dfn>typeof演算子</dfn>を紹介します。これは単項演算子であり、渡された値の<strong>種類</strong>を得られるものです。
+<code><mark>typeof</mark> 値</code>
+とします。返り値は文字列で、これは渡された値の<em>種類</em>です。返り値には次の種類があります。</p>
+<dl>
+  <dt>"string"</dt>
+  <dd>プリミティブで、文字列。</dd>
+  <dt>"number"</dt>
+  <dd>プリミティブで、数値。</dd>
+  <dt>"boolean"</dt>
+  <dd>プリミティブで、真偽値。</dd>
+  <dt>"undefined"</dt>
+  <dd>undefined。</dd>
+  <dt>"object"</dt>
+  <dd>関数以外のオブジェクト及びnull。</dd>
+  <dt>"function"</dt>
+  <dd>関数。</dd>
+</dl>
+<p>このように、与えられた値がオブジェクトかどうか、そしてプリミティブならどの型のプリミティブかを判定することができます。ただし、注意点が2つあります。</p>
+<p>1つは、オブジェクトの場合も返り値が2種類あるという点です。関数の場合とそれ以外のオブジェクトの場合ですね。そしてもう1つが問題です。プリミティブのうち<b>null</b>が特殊な扱いを受けています。というのも<strong><code>typeof null</code>は<code>"object"</code>を返す</strong>のです。<code>typeof</code>は大嘘つきですね。オブジェクトではないものに対しても<code>"object"</code>を返します。こんなおかしなことになっている理由は歴史的経緯なので仕方ありません。罠にはまらないように気をつけましょう。</p>
+<p>例えば、ある変数aの中身がオブジェクトかどうか判定するには、次のようなコードを書く必要があります。（関数ではないということにしましょう。）</p>
+<pre><code>
+if(typeof a=="object" <mark>&amp;&amp; a!=null</mark>){
+}
+</code></pre>
+<div class="side-note">
+  <p>ちなみに、この<code>typeof</code>の動作はさすがにおかしいということで、新しいバージョンのJavaScriptでは<code>typeof null</code>は<code>"null"</code>にしようという動きが一時期ありました。しかしこれは断念されました。</p>
+</div>
+
+<h3>プリミティブとプロパティ</h3>
+<p>ここからは<b>文字列のメソッド</b>を紹介していきたいのですが、その前に1つ<a href="9_7.html">九章第七回</a>の復習をしましょう。</p>
+<p><strong>プリミティブはオブジェクトではない</strong>ですから、<strong>プロパティは無い</strong>のでした。逆に言うと、プロパティを持つのがオブジェクトなのです。</p>
+<p>それにもかかわらずプリミティブのプロパティを参照することができ、その場合はプリミティブに対応したオブジェクトのインスタンスが一時的に作られていたのでした。</p>
+<p>文字列の場合は<dfn>Stringオブジェクト</dfn>、数値の場合は<dfn>Numberオブジェクト</dfn>、真偽値の場合は<dfn>Booleanオブジェクト</dfn>が生成されます。</p>
+<p>nullとundefinedには対応するオブジェクトがないので変換できず、nullやundefinedのプロパティを参照しようとするとエラーになります。</p>
+<p>なので、以下で文字列のメソッドとして紹介するものは<code>String.prototype</code>に存在するメソッドです。</p>
+
+<h3>文字列のメソッド</h3>
+<p>文字列のメソッドについては<a href="4_1.html">四章第一回</a>でも少し紹介したので、忘れている方はあわせて参照してください。もちろん今回はES5で追加されたメソッドも紹介していきますが、ES5より前からあるメソッドについてもまだ紹介していないものがあったので紹介しています。</p>
+
+<h4>charCodeAt</h4>
+<p>これは<a href="4_1.html#anchor-charat">charAt</a>と少し似ています。charAtは引数(1つ)で指定された位置の文字1つを返しますが、charCodeAtはそのかわりにその文字の<strong>コードポイント</strong>を返します。例えば文字aはUnicodeコードポイントU+0061（十進数で97）を持つので、<code>"abc".<mark>charCodeAt</mark>(0)</code>は97となります。</p>
+
+<h4>concat</h4>
+<p>その文字列に、引数で渡された文字列（複数可）を全てつなげた文字列を返します。配列とは異なり文字列は<code>+</code>で繋げられるので使う機会はやや少ないかもしれません。</p>
+<pre><code>
+"aaa".<mark>concat</mark>("bbb","ccc","ddd")	// "aaabbbcccddd"
+</code></pre>
+
+<h4>lastIndexOf</h4>
+<p><a href="4_1.html#anchor-indexof">indexOf</a>と同じく文字列を検索するメソッドですが、lastIndexOfは<em>後ろから検索します</em>。</p>
+<p>というのも、実はindexOfはマッチする文字列が複数ある場合一番最初の位置を返します。</p>
+<pre><code>
+"0<mark><strong>123</strong></mark>4567890<mark>123</mark>456789".indexOf("123")	// 1
+</code></pre>
+<p>それに対し、lastIndexOfは、<strong>一番最後</strong>のものを返します。ただし、返される位置はindexOfと同じく、前から数えた位置なので注意してください。</p>
+<pre><code>
+"0<mark>123</mark>4567890<mark><strong>123</strong></mark>456789".lastIndexOf("123")	// 11
+</code></pre>
+<p>ちなみに、indexOfやlastIndexOfは<strong>第2引数</strong>を渡すことができて、それは<strong>検索開始位置</strong>です。</p>
+<p>indexOfの場合、その位置より前に条件にあうものがあっても無視されます。</p>
+<pre><code>
+"0<mark>123</mark>40<mark><strong>123</strong></mark>40<mark>123</mark>4".indexOf("abc",2)	<mark class="ins">// 6</mark>
+</code></pre>
+<p>この場合、2番目（0から数えるので最初の"2"の位置）以降から探すので、最初の"123"は無視されて、次の123がヒットして返されます。</p>
+<p>lastIndexOfの場合、前から数えた位置を渡してあげるとその位置より後ろは無視されます。</p>
+
+<h4 id="anchor-localecompare">localeCompare</h4>
+<p>localeとは「地域」、Compareとは「比較」のことです。このメソッドは2つの文字列を比較するメソッドです。返り値は数値です。具体的には、</p>
+<pre><code><mark>a</mark>.localeCompare(<mark>b</mark>)</code></pre>
+<p>のように文字列aとbを比較したとき、aのほうがbより先なら負の値、aとbが同じなら0、aのほうがbより後なら正の値を返します。</p>
+<p>このような返り値はどこかで見ましたね。そう、<a href="11_1.html#anchor-sort">sort</a>に渡すコールバック関数ですね。ということは、このメソッドは文字列をいい感じに並べたい時に使うことができそうです。</p>
+<p>なお、正とか負とかいっても、実際にどんな値になるかは具体的には分かりません。ですから、興味があるのは正か負か0かだけで、具体的な値は特に意味が無いものとして考えるのがよいでしょう。</p>
+
+<p>ではどのような基準で文字列が比較されるのかというと、それは<em>辞書順</em>です。</p>
+<pre><code>
+console.log("<mark>x</mark>".localeCompare("<mark>y</mark>"));	// 負
+console.log("<mark>Z</mark>".localeCompare("<mark>A</mark>"));	// 正
+</code></pre>
+<p>この順序は必ずしもコードポイント順と同じにはなりません。例えば、スペイン語で使われるアルファベット“ñ”は、コードポイントU+00F1を持ち、普通のaからzのアルファベット（U+0061〜U+007A）よりずっと後ろにあります。ところが、localeCompareで比べると多くのブラウザではñはnとoの間にあるのではないかと思います。</p>
+<pre><code>
+console.log("n".localeCompare("<mark>ñ</mark>"));	// 負
+console.log("<mark>ñ</mark>".localeCompare("<mark>o</mark>"));	// 負
+</code></pre>
+<p>これは、スペイン語等の辞書においてÑがNとOの間に来ることと合致しています。</p>
+
+<p>そして、メソッド名のlocaleとは、ここでは<em>多言語対応</em>のことです。というのも、文字列の適切な並べ方は言語によって異なります。このメソッドは、指定した言語になるべく適したような並び順を提供してくれます。ブラウザができる範囲でですが。注意すべきなのは、このメソッドの結果はブラウザによって異なる可能性が多いにあるということです。本記事のサンプルコードでは正や負という結果が示されていますがこれはChrome 60の結果です。</p>
+<p>そこで、localeCompareの第2引数に<b>言語</b>を指定することができます。言語は文字列で指定します。例えば日本語は<code>"jp"</code>で、英語は<code>"en"</code>です。言語を表す文字列は<b>IETF言語タグ</b>で指定することになっていますので、さらなる詳細に興味がある方は調べてみてください。言語を指定することで、なるべくその言語に適した並び順となります。</p>
+<p>例えば、<a href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare">MDN</a>で紹介されていた例を引用します。</p>
+<pre><code>
+console.log('ä'.localeCompare('z', 'de')); // 負
+console.log('ä'.localeCompare('z', 'sv')); // 正
+</code></pre>
+<p>同じ<code>'ä'</code>と<code>'z'</code>を比較しているのに、第2引数の言語タグにより結果が変わりました。上の言語タグ<code>'de'</code>はドイツ語で、下の言語タグ<code>'sv'</code>はスウェーデン語を意味します。実は、ドイツ語の辞書順ではäは普通のaと同じく扱われるのに対してスウェーデン語ではäはzの後に来ることになっています。そのためこのような違いが生じています。</p>
+<p>また、localeStringは第3引数でさらに細かいオプションが指定可能です。しかし使う機会はほとんど無いでしょうから、詳しくはここでは解説しません。興味がある方は調べてみてください。</p>
+
+<h4>search</h4>
+<p>次に紹介する<dfn>search</dfn>は、以前紹介した<a href="4_3.html">match・replace</a>の仲間で、<b>正規表現</b>をマッチさせるメソッドです。</p>
+<p>matchの場合はマッチに関する情報を配列で返して、replaceの場合は置き換え後の文字列を返しました。searchはもっと単純で、indexOfの正規表現版のようなものです。つまり、引数として渡された正規表現で文字列を検索し、マッチしたらその位置を返し、マッチしなかったら-1を返します。</p>
+<p>ただし、indexOfのように途中から検索する機能はないので注意しましょう。</p>
+<pre><code>
+//数字の位置を返す例
+"abc123def".<mark>search</mark>(/\d/)	// 3
+</code></pre>
+
+<h4>split</h4>
+<p>splitは「分ける」という意味です。文字列を、第1引数に渡された文字で区切って、文字列の<strong>配列</strong>にして返します。例えばこういうことです。</p>
+<pre><code>
+"aaa<mark>,</mark>bb<mark>,</mark>c<mark>,</mark>dddd<mark>,</mark>ee".<strong>split</strong>("<mark>,</mark>")	// ["aaa","bb","c","dddd","ee"]
+</code></pre>
+<p>このように文字列を配列で分けたい場合はわりとよくあるので、重宝します。また、区切り文字は複数文字でも構いませんし、<strong>正規表現</strong>も利用可能です。</p>
+<pre><code>
+//正規表現：数字で区切る例
+"fff<mark>1</mark>ghi<mark>2</mark>jjjkkk<mark>0</mark>lmn".split(<mark>/\d/</mark>)	// ["fff","ghi","jjjkkk","lmn"]
+</code></pre>
+<p>さらに、splitに正規表現を渡した場合、正規表現の中にグループ化の括弧があればその中の部分が配列に組み入れられます。例えば、さっきの例で数字を()で囲んでみると:</p>
+<pre><code>
+"fff<mark>1</mark>ghi<mark>2</mark>jjjkkk<mark>0</mark>lmn".split(/<mark>(\d)</mark>/)	// ["fff","1","ghi","2","jjjkkk","0","lmn"]
+</code></pre>
+<p>今回の場合全体を括弧でくくったので、区切り文字も配列の中に現れました。</p>
+
+<p>さらにsplitには<strong>第2引数</strong>があり、これがある場合<strong>配列の要素数の上限</strong>を表します。つまり、分けた後に配列の要素数がこの数を超過してしまった場合、多い分は捨てられてから返されます。</p>
+<pre><code>
+"aaa<mark>,</mark>bb<mark>,</mark>c<mark>,</mark>dddd<mark>,</mark>ee".split("<mark>,</mark>",<strong>3</strong>)	// ["aaa","bb","c"]
+</code></pre>
+<p>この例では、ddddとeeが捨てられたことが分かります。</p>
+
+<h4>toLowerCase, toUpperCase</h4>
+<p>これらの関数は引数はありません。LowerCaseとは小文字、UpperCaseとは大文字のことであす。toLowerCaseは、文字列のうち大文字があれば小文字に変換したものを返します。toUpperCaseは逆に、小文字を大文字に変換したものを返します。その他の文字はそのままです。</p>
+<pre><code>
+"Hello, everyone.".<mark>toUpperCase</mark>()	// "HELLO, EVERYONE."
+"ABCDE".<mark>toLowerCase</mark>()	// "abcde"
+</code></pre>
+<p>注意してほしいのは、英語のアルファベット以外にも大文字小文字は存在します。そういうものも変換できることになっています。</p>
+<pre><code>
+"Ω".toLowerCase()	// "ω"
+"φ".toUpperCase()	// "Φ"
+"&#xe1;".toUpperCase()	// "&#xc1;"
+</code></pre>
+
+<h4>toLocaleLowerCase, toLocaleUpperCase</h4>
+<p>上で紹介した関数にLocaleがつきました。先ほどのlocaleCompareと同様に多言語に対応した関数です。ただし、こちらは引数で言語を指定できるわけではありません。ブラウザの言語設定に応じて適切な大文字・小文字変換が行われます。</p>
+<p>というのも、大文字小文字の概念が一般とは食い違う言語がたまにあるのです。</p>
+<p>その代表例がトルコ語です。トルコ語においては、i（小文字のアイ）を大文字にすると、Iではなく&#x130;（Iに上の点がある形）です。逆に、iは&#x130;の小文字ということになります。</p>
+<p>そして、普通のIに対する小文字として、&#x131;（上の点がない）があります。</p>
+<p>ところが、一般にはIの小文字はiですから、toUpperCaseなどを使うと下のような結果になります。</p>
+<pre><code>"&#x130;".toLowerCase()	// "i" (これは正しい）
+"i".toUpperCase()	// "I" （トルコ語としては正しくない）
+
+"&#x131;".toUpperCase()	// "I" （これは正しい）
+"I".toUpperCase()	// "i" （トルコ語としては正しくない）
+</code></pre>
+<p>普通の人はこうでないと困りますが、トルコ人はこれだと困るわけです。</p>
+<p>toLocaleLowerCaseやtoLocaleUpperCaseならば、言語設定がトルコ語の場合のみ<code>"I".toLocaleLowerCase()</code>が<code>"&#x131;"</code>などとなります。</p>
+<p>このメソッドは（というかそもそも普通のtoLowerCaseなども）あまり使いどころが無いかもしれませんが、もし機会があれば思い出してください。</p>
+
+<h4>trim</h4>
+<p>今回最後に紹介する<dfn>trim</dfn>は、文字列の前後にある空白や改行を消した文字列を返すメソッドです。引数はありません。</p>
+<pre><code>
+"     aaa bbb ccc    ".<mark>trim</mark>()	// "aaa bbb ccc"
+</code></pre>
+
+<p>以上で文字列のメソッドの紹介が全て終了しました。次回は数値と真偽値の話です。</p>
+

@@ -1,0 +1,31 @@
+<p>今回の記事は短いです。今回は<dfn>bind</dfn>というメソッドを1つだけ紹介します。bindは<a href="9_5.html">九章第五回</a>でちらっと出てきたもので、ある関数が呼ばれたときのthisの値を固定するためのメソッドです。</p>
+<p>次の単純な例を見てみましょう。</p>
+<pre><code>
+function showThis(){
+  console.log(this);
+}
+
+var <mark>foo</mark> = showThis.<strong>bind</strong>("菅直人");
+
+<mark>foo</mark>();
+</code></pre>
+<p><code>"菅直人"</code>と表示されるはずです。つまり、showThis内で<code>this</code>が<code>"菅直人"</code>になっていたのです。</p>
+<p>この例から分かるように、<strong>bindの戻り値は新しい関数です</strong>。その関数は元の関数と同じ動作をしますが、thisの値はbindに渡された値に固定されています。以前に述べた通り、thisの値はどのように関数が呼ばれたかによって変わります。bindによって作られた関数は、どのように呼ばれてもthisの値が固定されています。</p>
+<p>bindの戻り値は、もとの関数（この場合showThis）と同じ関数なのですが、その中でのthisの値が指定したもので固定されています。</p>
+<p>thisが全く無関係なおかしな値になっても嬉しいことはあまりありませんが、コールバック関数の中でも外側のthisの値を使いたい場合など、thisの値を保存したい場合には役に立ちます。</p>
+
+<h3>bindによる引数の固定</h3></p>
+<p>実は、bindにはもう1つ機能があります。bindはthisだけでなく引数も固定できます。次のサンプルを見てください。
+<pre><code>
+function sum(x,y,z){
+  return x+y+z;
+}
+
+var <mark>foo</mark> = sum.<strong>bind</strong>(null,10);
+
+console.log(<mark>foo</mark>(20,30));
+</code></pre>
+<p>関数sumは3つの引数を足して返す関数です。まず、今回のbindの第1引数はnullです。bindにnullを渡した場合はthisは固定されず、通常通りとなります。今回のポイントは第2引数で、これはsumの第1引数、すなわち<code>x</code>を固定します。</p>
+<p>これにより、<code>sum.bind</code>が返した関数fooはsumと同じ働きをするものの引数<code>x</code>が10に固定されたものになります。つまり、fooの第1引数はsumの引数<code>y</code>に、第2引数は<code>z</code>に入ります。その結果、<code>foo(20,30)</code>が60となりました。</p>
+<p>bindには第3引数以降も渡すことができ、その場合はもとの関数の第2引数以降が順に固定されていきます。</p>
+

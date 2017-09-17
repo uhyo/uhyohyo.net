@@ -1,0 +1,58 @@
+<p>今回紹介するのは<dfn>console</dfn>です<small>（実はES5の範疇ではないような気がしますが気にしないでください）</small>。これはデバッグ時に大いに役立つものです。</p>
+<p>consoleと言われたら、<a href="2_1.html">二章第一回</a>に紹介して以来ずっと使ってきた<code>console.log</code>を思い浮かべますね。</p>
+<p>実は<code>console.log</code>の他にも似たような便利メソッドがあるので、今回はそれを紹介します。</p>
+<p><code>console.log</code>というのも、実はconsoleという変数に入ったオブジェクトが持つlogというメソッドであることはお察しのとおりです。</p>
+
+<h3>console.debug, console.info, console.warn, console.error</h3>
+<p>やはりconsoleで一番使うのはconsole.logで、それ以外のメソッドは使用頻度が結構劣ります。デバッグ用の用途が最も多いですから、console.logだけで事足りる場合が多いのです。しかし、ある以上は紹介しておきましょう。まず紹介するのは3つのメソッドです。</p>
+<p>info,warn,errorとありますが、これらは「コンソールに表示する」という基本機能は同じで、引数もconsole.logと同じです（すなわち、表示したいものを何個でも渡すことができます）。これらのメソッドで表示したものは、コンソール上での文字列やアイコンが異なります。logはただ表示するだけでしたが、debugは<strong>「デバッグ用情報」っぽく</strong>、infoは<strong>「情報」っぽく</strong>、<strong>warnは「警告」っぽく</strong>、<strong>errorは「エラー」っぽく</strong>表示します。</p>
+<p>また、これらはログレベル（重要度）が異なります。debugが最も低く、errorが最も高いですね。Chromeなどのコンソールでは、どのレベルまで表示するかを操作できます。デバッグ用にログを大量に表示する場合、異なるレベルのログを使い分けることで整理できるかもしれません。</p>
+
+<h3>console.dir,console.dirxml</h3>
+<p><a href="./img11_3.png"><img class="sidess" src="./img11_3.png" width="485" height="309" alt="Google Chrome 60でのconsole.logとconsole.dirの比較"></a></p>
+<p>これらも表示用のメソッドで、引数はconsole.logなどと同じです。</p>
+<p>console.dirは、「オブジェクトの場合はそのプロパティ一覧を表示する」ということになっています。これは通常のオブジェクトをコンソールに表示する場合はあまり違いがありませんが、DOMのノードなど特殊なオブジェクトを表示する場合に違いが現れます。</p>
+<p>右の図は、Google Chrome 60で<code>document.documentElement</code>を<code>console.log</code>および<code>console.dir</code>で表示した場合を比較したものです。Chromeでノードを表示した場合、普通（<code>console.log</code>の場合）は図の上半分のように木構造を分かりやすく表示してくれるインターフェースが表示されます。このインターフェースはこのオブジェクトがどんなプロパティを持っているかなどの情報を表示してくれません。一方<code>console.dir</code>の場合はオブジェクトのプロパティ一覧を見ることができるインターフェースが表示されます（これは普通のオブジェクトを<code>console.log</code>で表示した場合と同じ動作です）。</p>
+<p>覚えておくとたまに役に立つかもしれません。</p>
+<p><code>console.dirxml</code>はXMLオブジェクトを表示しているのに特化しているらしいですが、よくわかりません。</p>
+
+<h3 style="clear: both">console.assert</h3>
+<p><code>console.assert</code>は今までのようにただ表示するだけではありません。まず、引数がちょっと違います。第一引数に<strong>条件</strong>、第二引数以降が今まで同様に表示するものとなります。</p>
+<p>これは、いわゆる<strong>テスト</strong>に便利なものです。第一引数は条件を表す真偽値であり、trueなら条件クリア、falseならダメという意味です。<code>console.assert</code>は、条件がtrueなら何も起こりません（コンソールにも何も表示されません）。falseなら、第二引数以降の内容を表示しつつ<strong>エラーを発生させて停止します</strong>（<a href="9_8.html">九章第八回</a>で紹介したthrowと同じ感じです）。</p>
+<p>たまに活躍する場面があるかもしれません。</p>
+<p>これはデバッグ時に、成り立っているべき条件がちゃんと成り立っているか確認する用途で使用できます。条件が成り立たない場合はエラーが発生し、バグに気づくことができます。</p>
+
+<h3>console.trace</h3>
+<p>これは引数なしで、コンソールに現時点でのコールスタックを表示します。詳しいデバッグができるかもしれません。</p>
+
+<h3>console.group, console.groupCollapsed, console.groupEnd</h3>
+<p>console.groupは、コンソールに表示されるログを<strong>グループ化</strong>します。console.group自体にも引数を指定することで、通常どおりログに表示させることができます。</p>
+<p>console.groupが呼び出された後に続くログは、そのconsole.groupのログを親としてまとめられ（グループ化）、まとめて折りたたんだりできるようになります。</p>
+<p>このグループ化は、console.groupEnd（引数なし）が呼び出されるまで続きます。例えば、こんな感じのを実行してみると、複数のログをまとめてたたんだりできるのが確認できます。</p>
+<pre><code>
+console.<mark>group</mark>("group start");
+console.log(1);
+console.log(2);
+console.log(3);
+console.<mark>groupEnd</mark>();
+</code></pre>
+<p>実際にやってみると、なんとなく動作が分かると思います。</p>
+<p>ちなみに、groupCollapsedというのはgroupと同じですが、最初からそのグループが閉じてまとまった状態で表示されます。</p>
+<p>これらをうまく使うと、大量のデバッグログをうまくまとめられるかもしれません（しかし自分は使ったことはありません）。</p>
+
+<h3>console.profile, console.profileEnd</h3>
+<p>これはまた面白いメソッドですが、コンソールに表示するという他のメソッドとはちょっと違います。</p>
+<p>おおまかに言うと、profileが呼ばれてからprofileEndが呼ばれるまでの、実行時間などのデータを取得できます。</p>
+<p>例えば処理にやけに時間がかかるときなど、その部分全体をconsole.profile()〜console.profileEnd()で囲むと、その処理内での関数ごとの実行時間などがくわしく把握できるので、デバッグに役立つかもしれません。</p>
+<p>ちなみにprofileには引数を指定することができ、あとで結果を表示するときにそのタイトルとなります。複数profile〜profileEndがあるときに区別できます。</p>
+
+<h3>console.time, console.timeEnd</h3>
+<p>もう一つ時間が関係するのが、console.time〜console.timeEndです。</p>
+<p>これは要するにタイマーで、timeが呼ばれてからtimeEndが呼ばれるまでの時間を測定します。</p>
+<p>注意すべきことは、timeは引数に<strong>タイマーの名前</strong>を指定して呼び出し、timeEndも同じ引数で呼び出すということです。</p>
+<p>たとえば時間がかかる処理の前後にtimeとtimeEndを置いて時間を測定したりなどできます。測定結果は、timeEndのときにコンソールに出力されます。</p>
+
+<h3>console.count</h3>
+<p>次はcountです。これはカウンタで、console.countが呼ばれるたびに数字を1増やして出力します。ある処理の回数を数えるのに使えるかもしれません。</p>
+<p>これもtime同様に第一引数にカウンタの名前を指定できます。異なる名前で呼び出されたカウンタは異なる系列となり、また1からになります。再度もとと同じ名前で呼び出すと、もとのやつのカウントが継続されます。</p>
+

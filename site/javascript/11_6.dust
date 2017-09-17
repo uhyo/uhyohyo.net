@@ -1,0 +1,376 @@
+<p>前回に続いてプリミティブの話です。前回は文字列について主に解説しました。</p>
+<p>今回はまず数値の話です。</p>
+
+<h3>数値の種類</h3>
+<p>数値といっても、数にはいろいろな種類があります。プログラミング言語によっては、数値は整数しか扱えないint型や、小数も扱えるfloat型やdouble型などと区別されている場合もあります。また言語によっては虚数をサポートしているものもあるそうです。</p>
+<p>一方、JavaScriptにおける数値は整数も小数も別け隔てなく数値として扱います。次の例を見てください。</p>
+<pre><code>
+var a = <mark>2</mark>;
+a /= 3;
+console.log(a);	// 0.6666666666666666
+</code></pre>
+<p>整数同士の計算の結果が小数になりました。整数と小数を区別する言語では整数同士の計算はかならず整数になることもあり、それとは対称的です。</p>
+<p>ただし、JavaScriptにおける数値には、普段我々が数と呼ぶものとは別にいくつか特別な値があります。1つは<dfn>Infinity</dfn>です。これはつまり「無限大」です。</p>
+<p>数学では、一般には「0で割ってはいけない」ということになっています。しかし、JavaScriptにおいては0で割ってもエラーになりません。その代わりに、0で割った結果は<strong>Infinity</strong>になります。</p>
+<pre><code>
+console.log(3/0);	// <mark>Infinity</mark>
+</code></pre>
+<p>つまり、JavaScriptにおいては0で割ると無限大になるものとして、無限大を数値の一種として扱っているということになります。</p>
+<p>また、無限大にも正の無限大と負の無限大があります。負の値を0で割った場合には-Infinityとなります。</p>
+<pre><code>
+console.log(-5/0);	// -Infinity
+</code></pre>
+<p>Infinityは、数ではないとはいえ数値の一種として扱われます。<a href="11_5.html#anchor-typeof">typeof</a>で調べると確かに数値であることが分かります。</p>
+<pre><code>
+console.log(typeof (1/0));	// "number"
+</code></pre>
+<p>なお、Infinityはundefinedと同様に変数として存在しているので、<code>Infinity</code>と書けばInfinityを得ることができます。</p>
+<pre><code>
+console.log(Infinity);
+</code></pre>
+<p>また、<code>Number.POSITIVE_INFINITY</code>としてもInfinityを得ることができます。負の無限大（<code>-Infinity</code>）が入った<code>Number.NEGATIVE_INFINITY</code>もあります。</p>
+
+<h4>Infinityの扱い</h4>
+<p>Infinityも数値ですから、四則演算その他の演算ができます。無限大に数値を足したり引いたりしても無限大のままです。</p>
+<pre><code>
+Infinity+100	// Infinity
+Infinity-50	// Infinity
+</code></pre>
+<p>また、掛け算割り算も基本的に結果はInfinityのままですが、正の無限大に負の数をかけると負の無限大になります。逆も同様です。</p>
+<pre><code>
+Infinity*0.5	// Infinity
+Infinity/(-2)	// -Infinity
+</code></pre>
+
+<p>ただし、無限大を含む計算というのは常にはうまくいきません。例えば、<code>Infinity+Infinity</code>は<code>Infinity</code>となりますが、<code>Infinity-Infinity</code>はどうなるでしょうか。細かい数学的事情は省きますが、無限大の場合両辺が同じだから結果は0というわけにはいきません。数学的には、このような計算は結果が決まらない（定義できない）と解釈されます。</p>
+<p>このように結果が決まらない場合、その値は<a href="9_7.html#anchor-nan">NaN</a>になります。</p>
+<pre><code>
+console.log(Infinity-Infinity);	// <strong>NaN</strong>
+</code></pre>
+
+<h4>NaN</h4>
+<p>NaNは以前も少し説明しましたね。NaNはNot a Numberという名前なのに数値扱いというとても不思議な値でした。もちろん、typeofで確かめると<code>"number"</code>になります。</p>
+<pre><code>
+console.log(typeof Number.NaN); // "number"
+</code></pre>
+<p>数値計算において、計算できないようなものは全部結果がNaNになります。<code>Infinity-Infinity</code>の他にも<code>Infinity/Infinity</code>などもNaNになります。</p>
+<p>また、先ほど何かを0で割るとInfinityと述べましたが、0で0を割った形はNaNになります。</p>
+<p>NaNを含む計算の結果が全てNaNとなるのは、<a href="9_7.html">九章第七回</a>で解説したとおりです。</p>
+<p>さらに、NaNが出てくるのは計算時だけではありません。文字列から数値への変換時に、変換できない文字列はNaNになります。</p>
+
+<h4>parseInt・parseFloat</h4>
+<p>数値への変換、<strong>parseInt</strong>もNaNを返す可能性があります。parseIntは<a href="kiso4.html">基礎第四回</a>に何気なく出てきた組み込み関数で、文字列を数値に変換するというものでした。</p>
+<pre><code>
+parseInt("<mark>123</mark>")	// 123
+</code></pre>
+<p>しかし、文字列を全て数値に変換できるわけではないのは明らかです。そういう場合NaNが返ります。</p>
+<pre><code>
+parseInt("foooooo")	// NaN
+parseInt("")	// <mark>NaN</mark>
+</code></pre>
+<p>ところで、<a href="9_7.html">九章第七回</a>ではプリミティブの変換について解説したのを覚えているでしょうか。それによれば、変換したい値をNumber関数に渡せば数値に変換できるはずです。</p>
+<pre><code>
+Number("123")  // 123
+</code></pre>
+<p>では、この方法とparseIntとでは何が違うのでしょうか。実は、主に3つの違いがあります。ひとつは、<em>parseIntは数値の後に文字列が続く場合はそれは無視して数値を返してくれる</em>という点です。</p>
+<pre><code>
+parseInt("123px")	// 123
+</code></pre>
+<p>一方のNumberは、余計なものがついている文字列は全てNaNです。</p>
+<pre><code>
+Number("123px")	// NaN
+</code></pre>
+<p>2つ目は、parseIntのIntというのはInteger（整数）のことですから、文字列を整数として解釈するという点です。</p>
+<pre><code>
+Number("100.5")  // 100.5
+parseInt("100.5")  // 100
+</code></pre>
+<p><code>parseInt("100.5")</code>が100となる理由は、上述の機能により<code>.5</code>の部分が無視されるからです。</p>
+<p>3つ目は、parseIntには<b>基数</b>を指定する機能がついているという点です。実はparseIntは第2引数を渡すことができ、それは基数です。基数というのは、その文字列を何進法として解釈するかということです。もちろんデフォルトは10進法です。</p>
+<p>例えば、10000は2進法では32を表しますから、</p>
+<pre><code>
+parseInt("10000")	// 10000
+parseInt("10000", <mark>2</mark>)	// 32
+</code></pre>
+<p>となります。</p>
+<p>基数は、2から36まで可能です。10より大きい基数としては16進法が有名ですね。</p>
+<pre><code>
+parseInt("ff",16)	// 255
+</code></pre>
+<p>16進法では、a〜fを10〜15番目の数字として扱います。同様に、gを16,hを17,...としてあてはめていくとzが35になりますから、36進法まで可能なわけです。</p>
+<pre><code>
+parseInt("z",36)	// 35
+</code></pre>
+<p>ついでに、もうひとつparseIntに類似の関数として<dfn>parseFloat</dfn>を紹介しておきます。これはparseIntとは異なり、小数でも正しく解釈してくれます。実は数値リテラル（後述）は全て解釈してくれます。</p>
+<pre><code>
+<mark>parseFloat</mark>("100.5")	// 100.5
+</code></pre>
+<p>ただし、parseFloatは小数も解釈できるようになった代わりに、10進数しか対応しません。そのため第二引数はありません。このため、Numberによる変換との違いは後ろに続く文字列が無視されるという点のみです。</p>
+
+<h3>数値の比較</h3>
+<p>つまるところ、JavaScriptの数値は普通の数（整数・小数）と、±Infinity及びNaNからなります。</p>
+<p>上で数値の計算について紹介しましたが、数値の比較（<code>==</code>とか不等号とか）はどうでしょうか。</p>
+<p>Infinityについては直感通りの結果です。何と比較しても大きいです。</p>
+<pre><code>
+100&lt;Intinify	// true
+</code></pre>
+<p><code>-Infinity</code>が何よりも小さいのも同様です。</p>
+<p>ただし、<strong>NaN</strong>については注意が必要です。前に述べたようにNaNが入ると<strong>全てfalse</strong>になります。</p>
+<pre><code>
+NaN&lt;3	// false
+NaN===3	// false
+NaN&gt;3	// false
+</code></pre>
+
+<h4>isFinite</h4>
+<p>さてやはり、普通の数値と、InfinityやNaNは一線を画したところがあります。そこで、これらを区別する便利な方法を解説します。</p>
+<p>まずは関数<dfn>isFinite</dfn>です。Finiteとは、Infinite(無限の)と逆で、有限ということです。この関数は数値の引数を一つとって、InfinityやNaNならfalseを返し、普通の数値ならtrueを返します。これで判別が可能です。</p>
+<p>数値以外を渡したときは数値に変換してから判定します。</p>
+
+<h4>isNaN</h4>
+<p>もう一つ紹介するのが<dfn>isNaN</dfn>です。読んで字の如しという感じですが、引数に渡された数値が<strong>NaN</strong>ならばtrue、そうでなければ（Infinityなども含めて）falseになります。isFiniteとは逆の関係なので注意しましょう。</p>
+<pre><code>
+<mark>isNaN</mark>(3)	// false
+<mark>isNaN</mark>(Infinity)	// false
+<mark>isNaN</mark>(NaN)	// true
+</code></pre>
+
+<h3>数値リテラル</h3>
+<p>次は<dfn>リテラル</dfn>の話です。リテラルとは、JavaScriptのスクリプト上で何らかの値として解釈される文字列のことです。</p>
+<p>例えば、JavaScriptで文字列を表すには<code>"foobar"</code>や<code>'12345'</code>のように""（ダブルクォーテーション）か''（シングルクォーテーション）で囲います。つまり、文字列を表現するにはこのように書かないといけません。</p>
+<p>ですから、この""や''で囲まれたものを<strong>文字列リテラル</strong>といいます。他に、簡単なのが<strong>真偽値リテラル</strong>です。真偽値を表すには<code>true</code>や<code>false</code>と書きます。この2つが真偽値リテラルです。</p>
+<p>他には<code>null</code>もリテラルです。一方、実はundefinedはリテラルではなく変数ということになっています。スクリプト上にundefinedと書いた時はそれはundefinedのリテラルではなく、undefinedという値が入った変数が予め用意されているだけなのです。しかし、writable属性（<a href="11_4.html">十一章第四回</a>参照）がfalseになっているので書き換えられません。</p>
+<p>またリテラルはプリミティブばかりに用意してあるわけではなく、<strong>オブジェクトリテラル</strong>や<strong>配列リテラル</strong>もあります。これらは既にお馴染みだと思います。</p>
+<pre><code>
+{
+  foo:"bar",
+  baz:3,
+}
+[0, 1, 2, 3]
+</code></pre>
+<p>のようなものがそれぞれオブジェクトリテラルや配列リテラルです。他に<a href="4_2.html#anchor-regexp-object">正規表現リテラル</a>というのもありますね。</p>
+<p>そして最後に残ったのが問題の<strong>数値リテラル</strong>です。実は数値リテラルというのはいろいろ種類が豊富なのです。それを紹介します。</p>
+<p>最も一般的に使うのは、ただ数字を並べただけの次のようなリテラルだと思います。</p>
+<pre><code>
+0
+123
+15000
+</code></pre>
+<p>また、小数点を使ったものも数値リテラルの一種です。</p>
+<pre><code>
+0.5
+3.00
+3.14
+</code></pre>
+<p>ただし注意してほしいのは、次のようなのは数値リテラルではありません。</p>
+<pre><code>
+-3
+-0.5
+</code></pre>
+<p>というのも、マイナスがついたのはひとまとまりの数値リテラルではなく、単項演算子の<code>-</code>（マイナス）の後に数値リテラルがくっついた値であるということです。その証拠に、</p>
+<pre><code>console.log(- 100);</code></pre>
+<p>のようにマイナスを離しても動作します。単項演算子<code>-</code>は、簡単にいうと数値の符号を逆にして返す演算子です。ですから、上のコードの場合、まず正の数100があって、-によって処理されて負の数-100が返されて<code>console.log</code>に渡されているのです。</p>
+<p>また、この単項演算子-は、演算子ですから数値リテラル以外にも付けられます。</p>
+<pre><code>
+var num=10;
+console.log(<mark>-</mark>num);	// -10
+</code></pre>
+<p>注意してほしいのは、これはJavaScriptの数値は負の数を扱えないということではなく、負の数を直接表すリテラルが無いということです。</p>
+
+<p>では、ここから見慣れない形の数値リテラルを紹介していきます。</p>
+<p>実は、小数点だけ書いてその先を省略する形の数値リテラルも許されています。</p>
+<pre><code>
+3.	// 3.0と同じ（つまり3と同じ）
+0.	// 0と同じ
+</code></pre>
+<p>ただ、<code>3.</code>と書くくらいなら<code>3</code>と書けばいいはずなので、JavaScriptで<code>3.</code>のように書く意味はないでしょう。<small>（この記法は整数と小数が区別される言語において小数を少ない文字数で書くためのもので、他の言語との統一性のためにJavaScriptでも使えるようになっているものです。）</small></p>
+
+<p>さらに、数値リテラルには<strong>指数部</strong>をつけることができます。指数部は、<code>e</code>のあとに整数を付けます。例えば、<code>1<mark>e4</mark></code>という形です。<code>1e4</code>というのは、「1×10<sup>4</sup>」を意味します。つまり指数というのは10の指数です。</p>
+<p>ですから、1e4というのは、1を10<sup>4</sup>倍した数、つまり10000になります。他の例も見てみましょう。</p>
+<pre><code>
+1<mark>e4</mark>	// 10000
+2.5<mark>e3</mark>	// 2500
+5.<mark>E2</mark>	// 500
+</code></pre>
+<p>最後の例のように、eは大文字でも構いません。</p>
+<p>また、指数（eのあとの数字）は-（マイナス）を付けて負の数にしても構いません。例えば、</p>
+<pre><code>
+3<mark>e-2</mark>	// 0.03
+1.3<mark>e-6</mark>	// 0.0000013
+</code></pre>
+<p>途中でマイナスが入っているので計算式のように見えますが、あくまでこれでひとつの数値リテラルです。数値リテラルですから、もちろん次のようにプログラム中で自由に使えます。</p>
+<pre><code>
+console.log(<mark>1e5</mark>-<mark>3.14e+2</mark>);	// 99686
+</code></pre>
+<p>また、eのあとに-がついていいなら+もついていいだろうということで、上で出たような3.14e+2のような形も許されます。意味は、+を省略した場合と変わりません。</p>
+
+<p>さらに、<strong>16進数</strong>のリテラルがあります。数値リテラルを<strong>0x</strong>または<strong>0X</strong>で始めて、その後16進数の数字（0〜9,a〜fまたはA〜F）を並べることができます。この記法は整数のみであり、eを使って指数を示す記法は使えません。</p>
+<pre><code>
+0xff	// 255
+0xDEADBEEF	// 3735928559
+</code></pre>
+<p>プログラム中では16進数を使うこともわりとあるので、その場合に重宝します。</p>
+
+<h3>数値のメソッド</h3>
+<p>それではいよいよ、数値のメソッドについて見ていきます。</p>
+<p>文字列の場合は、一時的にStringオブジェクトが作られてそのメソッドが呼ばれるのでした。同様に、数値の場合には<dfn>Number</dfn>オブジェクトが作られます。ですから、今から紹介するメソッドは全てNumber.prototypeにあるメソッドです。</p>
+
+<h4>toString</h4>
+<p>toStringというのは<a href="9_7.html">九章第七回</a>で出てきましたね。その名の通り、数値を文字列に変換するメソッドです。</p>
+<pre><code>
+var num=10;
+console.log(num.<mark>toString</mark>());	// "10"
+</code></pre>
+<p>以前でてきたtoStringは引数をもたないメソッドでしたが、数値のtoStringは特別で、引数に<strong>基数</strong>を渡すとその進法で変換してくれます。parseIntと同じく、基数は2から36までです。</p>
+<pre><code>
+var num=10;
+console.log(num.<mark>toString</mark>(<mark>2</mark>));	// "1010"(2進法で10)
+</code></pre>
+<p>省略した場合はもちろん10進数です。</p>
+
+<h4>toLocaleString</h4>
+<p>またLocaleがついた関数がでました。これは、ユーザーの言語設定に合わせた表記法で数値が文字列に変換されます。</p>
+<p>ただ、日本人（や英語圏の人々）は数字は普通に123とかそういう数字（アラビア数字）で書くのが普通ですから、toStringと同じような結果しか出ないでしょう。場合によっては、見る人に合った結果が出るかもしれません。</p>
+<p>この関数は人間が見やすい形で数値を表示してくれます。例えば、多くのブラウザでは桁区切りの記号が入ります。</p>
+<pre><code>
+var a=30000;
+console.log(a.<mark>toLocaleString</mark>()); // "30,000"
+</code></pre>
+<p>toLocaleStringは<a href="11_5.html#anchor-localecompare">localeCompare</a>と同様に第2引数に言語タグ・第3引数にその他のオプションを取ります。これについてはここでは詳しく解説しません。</p>
+
+<h4>toFixed</h4>
+<p>どうしても、数値のメソッドは文字列に加工することくらいしかやることがないので、そういうメソッドが多くなります。<dfn>toFixed</dfn>もそのようなメソッドの一つです。</p>
+<p>toFixedは、小数点以下の桁数を引数に指定して文字列にしてくれます。小数点以下の桁数が足りない場合は0で埋めます。また、あふれる分は<strong>四捨五入</strong>して丸められます。</p>
+<pre><code>
+1.234.<mark>toFixed</mark>(3)	// 1.234
+5.1.<mark>toFixed</mark>(5)	// 5.10000
+123456.789.<mark>toFixed</mark>(2)	// 123456.79
+</code></pre>
+<p>小数点より上の位はそのまま表示されます。負の数に対しても正しく動作します。</p>
+<p>また、桁数は0桁（整数に丸める）から20桁まで処理可能なことが保証されています。それ以上の桁数を処理できるかどうかはブラウザ依存で、エラーが発生する場合もあります。</p>
+
+<h4>toExponential</h4>
+<p>Exponentialというのは指数ということです。これは、数値をさっき数値リテラルで紹介したeを使った表記に直してくれます。引数はtoFixedと同じく、小数点以下の桁数です。</p>
+<p>考え方は有効数字に近いもので、かならず小数点の前（1の位）に数字が一つくるようになります。</p>
+<pre><code>
+12345.6.<mark>toExponential</mark>(6)	// 1.234560e+4
+</code></pre>
+<p>これは、12345.6という数字は、有効数字7桁（1の位も含めて）でいうと1.234560×10<sup>4</sup>であることを示した表記ですね。</p>
+<p>また、桁数が足りない場合はtoFixedと同様<strong>四捨五入</strong>してくれます。</p>
+<pre><code>
+0.000045678.<mark>toExponential</mark>(3)	//4.568e-5
+</code></pre>
+
+<h4>toPrecision</h4>
+<p>最後に、さらに似たようなのをもう一つ紹介します。Precisionとは有効数字のことです。</p>
+<p>これはtoExponentialとよく似たメソッドです。toExponentialでは小数点以下の桁数を引数として指定しましたが、toPrecisionでは小数点より前（1の位）の桁数も含めて考えます。これはより一般的な有効数字の概念に近いですね。</p>
+<p>また、指数表示（e）を使わなくてもいけそうな範囲ではeを使わずに表示してくれるという違いもあります。toExponentialとの比較で結果を見てみましょう。</p>
+<pre><code>
+3.0.toExponential(2)	// "3.00e+0"
+3.0.<mark>toPrecision</mark>(3)	// "3.00"
+
+0.05.toExponential(2)	// "5.00e-2"
+0.05.<mark>toPrecision</mark>(3)	// "0.0500"
+
+3e3.toExponential(1)	// "3.0e+3"
+3e3.<mark>toPrecision</mark>(2)	// "3.0e+3"
+3e3.<mark>toPrecision</mark>(4)	// "3000"
+3e3.<mark>toPrecision</mark>(5)	// "3000.0"
+
+0.0000001.toExponential(3)	// "1.000e-7"
+0.0000001.<mark>toPrecision</mark>(4)	// "1.000e-7"
+
+0.000001.toExponential(3)	// "1.000e-6"
+0.000001.<mark>toPrecision</mark>(4)	// "0.00000100"
+</code></pre>
+<p>eを使った表示に切り替わる条件の一つは3番目の例からうかがい知ることができます。</p>
+<p>条件は、その有効数字で少なくとも1の位まで全部表示できるなら数字を直接表示して、桁数が足りなくて1の位まで表示できない場合はeを使った表記になります。</p>
+<p>また凄く小さい数については4番目に例を示しましたが、eのあとの指数が-7以下になりそうならeを使い、-6以上でおさまりそうなら直接表示します。</p>
+<p>ある程度現れそうな数字の範囲が分かっていれば、eが出てこないので違和感ない表示もできるなど、わりと使い勝手のいいメソッドです。</p>
+
+<p>以上で数値のもつメソッドの紹介は終わりです。</p>
+
+<h4>数値リテラルとプロパティ表記</h4>
+<p>上の解説では小数を多く使っていました。ピリオドが2つ並んで多少気持ち悪いかもしれませんが、1つ目のピリオドは小数点（数値リテラルの一部）で、2つ目のピリオドはリテラルとメソッド名をつなぐピリオドです。</p>
+<pre><code>
+<mark>3.0</mark>.toExponential(2)
+<em>^^^</em>
+ここが数値リテラル
+</code></pre>
+<p>では、整数ではだめなのでしょうか。</p>
+<pre><code>
+<mark>3</mark>.toExponential(2)
+<em>^</em>
+</code></pre>
+<p>実はこれはエラーになります。なぜかというと、さっき上のほうで<code>0.</code>とか<code>3.</code>とかの「小数点以下を省略する記法」を紹介しました。こちらの文法が優先されているからです。すなわち、次のように解釈されているということです。</p>
+<pre><code>
+<mark>3.</mark>toExponential(2)
+<em>^^</em>
+ここがリテラル
+</code></pre>
+<p>するとこれは、<code><mark>3</mark>toExponential</code>というのと同じ意味になり、これは文法的にはおかしいですね。ですからエラーになるのです。</p>
+<p>解決策の一つは、()で囲んで分離することです。</p>
+<pre><code>(<mark>3</mark>).toExponential(2)	// "3.00e+0"
+</code></pre>
+<p>もう一つの解決策は、次のような形です。</p>
+<pre><code>
+3..toExponential(2)
+</code></pre>
+<p>ピリオドが2つ並んでますます気持ち悪い形になりました。これの構造は次のようになっています。</p>
+<pre><code>
+<mark>3.</mark>.toExponential(2)
+<em>^^</em>
+</code></pre>
+<p>つまり、数値リテラルはピリオドを1つしか含みませんから、2つ目のピリオドはプロパティ参照の<code>.</code>として正しく解釈されるのです。</p>
+<p>もちろん他にも、</p>
+<pre><code>
+<mark>3.0</mark>.toExponential(2)
+<mark>3e0</mark>.toExponential(2)
+</code></pre>
+<p>などの形でもできますが、ピリオドを2つ並べる形が面白いのか、案外使われているようです。</p>
+<p>ちなみに3e0のほうはまだピリオドが登場していませんが、文法上eのあとには整数しかこないので、この形でも<code>.</code>が数値リテラルの一部と解釈されることはありません。</p>
+
+<h3>Numberのプロパティ</h3>
+<p>Numberはコンストラクタであり、それ自体は関数です。しかし、Numberはそれ自身がいくつかのプロパティを持っています。</p>
+
+<h4>Number.MAX_VALUE, Number.MIN_VALUE</h4>
+<p>それぞれ「最大値」、「最小値」という意味です。本来実数はどこまでも大きくなることができるので最大値などは無いのですが、コンピュータですから記憶できる量に上限があり、したがってJavaScriptの数値型で扱うことができる数にも限りがあります。もっとも、普段はこれが支障になることはないでしょう。なお、JavaScriptで扱える数値の範囲はIEEE 754倍精度浮動小数点数の範囲と同じです。</p>
+<pre><code>
+<mark>Number.MAX_VALUE</mark>	// 1.7976931348623157e+308
+</code></pre>
+<p>見てわかるようにMAX_VALUEはとても大きな数です。また、MIN_VALUEは負の数ではなく、正の数として扱える中で最も小さい数になります。つまり、なるべく0に近い数です。</p>
+<pre><code>
+<mark>Number.MIN_VALUE</mark>	// 5e-324
+</code></pre>
+<p>MIN_VALUEはMAX_VALUEに加えて有効数字が少ない気がしますが、これは非正規化数であるためです。</p>
+<p>これはJavaScriptではなく浮動小数点数の一般論ですが、このように極端に大きいまたは小さい数を扱うときは演算が不安定になります。例えば、</p>
+<pre><code>
+var a= Number.MAX_VALUE;
+var b=a-1;
+console.log(a===b);	// true
+</code></pre>
+<p>bのほうがaより1小さいはずなのに、<code>a===b</code>と言われてしまいます。こうなる理由は、10<sup>308</sup>という極めて大きい数の世界ではたった1など小さすぎて記憶されないからです。</p>
+<p>影響を与えるほど十分大きな数を足してみると、次のようなことが起こります。</p>
+<pre><code>
+console.log(Number.MAX_VALUE + 1.0e300);	// Infinity
+</code></pre>
+<p>限界を超えて大きくなった数はInfinityに変わります。ですから、</p>
+<pre><code>
+console.log(Number.MAX_VALUE + 1.0e300 <mark class="ins">-1.0e300</mark>);	// Infinity
+</code></pre>
+<p>このように同じ数を足して引いても結果が変わるというようなことも起こります。また、最初から大きすぎる数を表現しようとした場合もInfinityになります。</p>
+<pre><code>
+console.log(1e400);	// Infinity
+</code></pre>
+<p>しかし、実際の使用の範囲ではこのような問題はめったに発生しないでしょう。</p>
+<p>ちなみに、MIN_VALUEについても同じようなことが起こります。MIN_VALUEはJavaScriptで表現できる数の中で0より大きい中で最も小さい数なので、その間の数は出現しません。</p>
+<pre><code>
+Number.MIN_VALUE-2.47032822e-324	// 5e-324
+Number.MIN_VALUE-2.47032823e-324	// 0
+</code></pre>
+
+<h3>真偽値</h3>
+<p>さて、数値についても終了したので最後に残った真偽値のプリミティブの話に移りたいところですが、真偽値については特筆事項はありません。Boolean.prototypeには特にメソッドはありません。</p>
+
+<p>これでプリミティブの扱い方に関する話は終了です。</p>
+

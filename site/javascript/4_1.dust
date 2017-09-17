@@ -25,7 +25,7 @@ console.log(str.<dfn>length</dfn>);
 </div>
 
 
-<h3>文字列の検索</h3>
+<h3 id="anchor-indexof">文字列の検索</h3>
 <p>ここでいう検索とは、文字列に、ある文字列が含まれているかどうかを調べるということです。次のサンプルを見てみましょう。</p>
 <pre><code>
 var str = "abcde";
@@ -99,7 +99,7 @@ console.log( aaa.slice(<mark>-3</mark>,5) );
 
 <p>ちなみに、sliceやsubstringの2つめの引数は<strong>省略できます</strong>。省略した場合、終了位置は文字列の一番最後になり、文字列の一番最後まで抜き出されます。これもよく使われます。</p>
 
-<h4>charAt</h4>
+<h4 id="anchor-charat">charAt</h4>
 <p>1文字だけ抜き出す場合、もっと簡単なものがあります。それは<dfn>charAt</dfn>です。</p>
 <pre><code>
 var str = "abcde";
