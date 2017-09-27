@@ -1,0 +1,22 @@
+<p>今回はちょっと息抜きで、簡単ですが便利な<dfn>dataset</dfn>を紹介します。</p>
+<p>HTML5には<strong>独自データ属性</strong>というものがあり、簡単にいうと、要素に好きな属性をつけられるというものです。</p>
+<p>ただ、完全に自由に属性に名前をつけていては大変なので、data-という接頭辞をつけた属性を勝手に自分で作っていいことになっています。つまり、具体的には例えばこうです。</p>
+<pre class="language-html"><code>
+&lt;div <mark>data-test="foo"</mark>&gt;
+</code></pre>
+<p>この例ではdiv要素に<code>data-test</code>という独自データ属性がつけられています。</p>
+<p>もちろん自分で勝手に作ったので、HTML的にはこの属性には何の意味もありません。じゃあ何に使うのかというと、そう、<strong>JavaScript側から利用できる</strong>のです。JavaScriptから読む用にHTML要素に付加的な情報をつけるのが独自データ属性の主な役割となります。</p>
+<p>それではこれを読み込むほうはこんな感じでしょうか。ひとつの方法は<a href="2_10.html#anchor-getattribute">getAttribute</a>を使うことです。</p>
+<pre><code>
+//elementを上のdiv要素とすると
+element.getAttribute('data-foo');
+</code></pre>
+<p>これでも読めることは読めるのですが、わざわざ独自データ属性として用意されているからには、実はもっと便利な方法があるのです。それがこれです。</p>
+<pre><code>
+element.<mark>dataset</mark>.foo;
+</code></pre>
+<p>HTML要素が持つ<dfn>dataset</dfn>というプロパティが出現しました。これは<dfn>DOMStringMap</dfn>のインスタンスですが、このオブジェクトは特にメソッド等を持ちません。</p>
+<p>このdatasetが持つプロパティが独自データ属性に対応しています。つまり、<code>dataset.foo</code>というプロパティが<code>data-foo</code>属性に対応していて（要するにdata-を取った部分がプロパティ名になっています）、参照して属性の値を取得したり、代入して属性を書き換えたりできます。</p>
+<p>なお、属性名にハイフンが含まれていた場合キャメルケースに変換されます。つまり、例えば<code>data-foo-bar</code>という属性は<code>dataset.fooBar</code>というプロパティに対応します。
+<p>このdatasetを用いることで、HTML側からJavaScript側へ情報を楽に渡すことができるのです。</p>
+

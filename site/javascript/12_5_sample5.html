@@ -17,17 +17,13 @@ function change(ev){
 	var file=files[0];	//最初のファイルを取得
 	if(!file)return;	//ファイルがなかったらやめる
 
+  // URL.createObjectURLはBlobを引数に取るので今回はFileReaderは不要
+  var objurl = URL.createObjectURL(file);
+  console.log(objurl);
 
-	//FileReaderを作る
-	var reader=new FileReader();
-	reader.onload=function(e){
-		var buffer=reader.result;	//DataURLが入っている
-		
-		var img=document.createElement("img");	//新しい画像を作る
-		img.src=buffer;	//URLなのでsrc属性に入れる
-		document.body.appendChild(img);	//その画像を表示する
-	};
-	reader.readAsDataURL(file);	//Fileオブジェクト（つまりBlob）を渡す
+  var img = document.createElement("img");	//新しい画像を作る
+  img.src = objurl;	//URLなのでsrc属性に入れる
+  document.body.appendChild(img);	//その画像を表示する
 }
 
 </script>

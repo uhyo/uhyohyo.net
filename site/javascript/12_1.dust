@@ -1,0 +1,58 @@
+<p>この章のテーマは<strong>HTML5</strong>です。HTML5は新世代のHTMLで、2010年代に入ってから普及が始まりました。この講座を最初に書いた当時はHTML5は最先端の技術でしたが、何回かの改稿を経た今（2017年9月）となってはごく当たり前の技術となっています。</p>
+<p>この章ではHTML5に関連する内容を解説します。というのも、HTML5の策定に伴ってHTML用のDOMにも新しくて便利な仕様が加えられました。</p>
+<p>HTML5がよく分からないという人は、昔書いた<a href="http://uhyohyo.sakura.tv/html/">HTML5講座</a>も合わせて読むといいでしょう。</p>
+<p>また、この章では、HTML5とは直接の関係が無いもののHTML5の時代に出現してきたような新しいAPIについても解説していきます。</p>
+
+<p>さて、今回まず紹介するのは<dfn>classList</dfn>です。これは非常に便利です。名前から想像がつくかもしれませんが、これはHTML要素の<strong>class属性</strong>を扱うものです。</p>
+<p>かなり前になりますが、以前<a href="2_6.html#anchor-classname">className</a>プロパティを紹介しました。これはclass属性を文字列で参照・設定できるプロパティでした。例えば、</p>
+<pre class="language-html"><code>
+&lt;div <mark>class="aaa"</mark>&gt;&lt;/div&gt;
+</code></pre>
+<p>というdiv要素ならばそのclassNameプロパティは<code>"aaa"</code>です。</p>
+<p>ここに新しいクラスbbbを追加したいならば、<code>className += " bbb"</code>としてやることでclassNameは<code>"aaa bbb"</code>となります。</p>
+<p>ところが、ここからクラスaaaを除去したい場合はどうでしょう。これには多少面倒な処理が必要になります。一例としては、<a href="4_3.html">正規表現</a>を用いる方法があるでしょう。</p>
+
+<p>このように、以前はclass属性をいじるためには文字列をなんとかして操作する必要がありました。しかし、HTML5ではその必要はありません。今回紹介する<b>classList</b>を用いると、クラスの追加・除去といった処理をより分かりやすく簡単に行うことができます。classListはいくつかのメソッドを持ち、それらによってclass属性をいじることができます。</p>
+<div class="sidenote">
+  <p>ちなみに、classListは仕様上は<strong>DOMTokenList</strong>というオブジェクトのインスタンスであり、これは「トークン（文字列）のリスト」を表すオブジェクトということになっています。</p>
+  <p>class属性は複数のクラスがスペースで区切られて並べられているものですので、DOMTokenListで表すことができます。</p>
+  <p>今から紹介するclassListのメソッドは正確にはDOMTokenListのメソッドですから、同じようにDOMTokenListで表されている他の属性も同様の方法で操作することができます。</p>
+</div>
+
+<h3>contains</h3>
+<p>ということで、まず紹介するのは<dfn>contains</dfn>メソッドです。これは、指定したクラスがclass要素に含まれるかどうかを判定します。判定するということですから、結果は真偽値（trueかfalse）になりますね。</p>
+<p>例えば、ある要素がクラス<code>"long"</code>に属しているかどうかは次のように書きます。</p>
+<pre><code>
+element.classList.<strong>contains</strong>("<mark>long</mark>")
+</code></pre>
+
+<h3>add・remove</h3>
+<p>そして、このclassListを通して要素が属するクラスを変更することもできます。これらは、classListにクラスを追加、あるいは削除するという形で表されます。</p>
+<p>追加には<dfn>add</dfn>・<dfn>remove</dfn>を使います。</p>
+<p>例えば、ある要素にクラス<code>"foo"</code>を追加したい場合は次のようにします。</p>
+<pre><code>
+element.classList.<strong>add</strong>("<mark>foo</mark>");
+</code></pre>
+<p>逆に、ある要素からクラス<code>"foo"</code>を削除したい場合にはこうです。</p>
+<pre><code>
+element.classList.<strong>remove</strong>("<mark>foo</mark>");
+</code></pre>
+<p>これらのメソッドは、追加したいクラスが既にある・あるいは削除したいのに既に無いという場合もうまく処理してます。</p>
+
+<h3>toggle</h3>
+<p>さらに便利かもしれないのが、<dfn>toggle</dfn>です。これは、指定したクラスの有る無しを切り替えるというものです。つまり、既にそのクラスがある場合は無くし、まだ無い場合はクラスを追加します。これにより、例えば「クリックすると表示・非表示を切り替え」なんてものを作りたい場合に、今表示しているかどうかを何かのクラスで表すとすれば、toggleだけでそれを実現することができます。</p>
+<p>例えば</p>
+<pre><code>
+element.classList.<strong>toggle</strong>("<mark>foo</mark>");
+</code></pre>
+<p>こうすることで、クラスfooが無い場合は追加、ある場合はそれを取り除きます。</p>
+
+<h3>item</h3>
+<p>これは使う機会があまり多くないかもしれませんが、リストの各要素には配列のように通し番号がふってあって、<dfn>item</dfn>メソッドで、各番号のトークン（クラス名）を得ることができます。また、そのための<dfn>length</dfn>プロパティもあります。</p>
+
+<p>以上、classListを紹介しました。使いどころを見つければ非常に便利ですので、活用しましょう。</p>
+
+<h3>getElementsByClassName</h3>
+<p>おまけとして<dfn>getElementsByClassName</dfn>を紹介しておきます。これは、「あるクラスに属する要素を列挙する」というメソッドです。使い方は<a href="2_6.html#anchor-getelementsbytagname">getElementsByTagName</a>と同じですが、要素名の代わりにクラス名を引数として渡します。返り値は、getElementsByTagNameと同じくNodeListです。</p>
+<p>これもHTML5で仕様に組み入れられました。</p>
+

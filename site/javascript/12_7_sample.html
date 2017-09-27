@@ -13,10 +13,8 @@ div.d{
 </style>
 </head>
 <body>
-<p>下の画像は画像なのでドラッグできます。</p>
-<p><img src="img1.gif"><img src="img2.gif"><img src="img3.gif"></p>
-
-<div class="d" id="dropzone">ここにドロップ</div>
+<p>ここにファイルをドロップしてください。ファイル名が表示されます。</p>
+<div class="d" id="dropzone">ここ</div>
 
 <script>
 //idが"dropzone"のdivにイベントを設定する
@@ -31,14 +29,16 @@ dropzone.addEventListener('dragover',function(e){
   e.preventDefault();
 },false);
 dropzone.addEventListener('drop',function(ev){
-	var data = ev.dataTransfer.getData("text/uri-list");
-  if (data){
-    data.split(/\r\n+/).forEach(function(url){
-      var img=document.createElement("img");
-      img.src=url;
-      dropzone.appendChild(img);
-    });
+  //ファイルが複数かもしれないので、forループで調べる
+  for(var i=0;i<ev.dataTransfer.files.length;i++){
+    var file=ev.dataTransfer.files[i];
+
+    //新しいp要素を作って表示
+    var p=document.createElement("p");
+    p.textContent= file.name;
+    ev.target.appendChild(p);
   }
+  ev.preventDefault();
 },false);
 </script>
 </body>

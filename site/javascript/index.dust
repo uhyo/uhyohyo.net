@@ -137,9 +137,9 @@
 <section>
   <h2>第二篇 新しいJavaScript</h2>
   <p>JavaScriptの中でも割と新しい部類の技術について紹介します。</p>
-  <p>具体的にはECMAScript5やHTML5の関連技術、最近標準化されたようなものなどを紹介します。</p>
+  <p>具体的にはES5以降のJavaSciptやHTML5の関連技術、また最近標準化されたAPIなどを紹介します。</p>
 
-  <h3>第十一章　ECMAScript5</h3>
+  <h3>第十一章　ES5</h3>
   <ol>
     <li><a href="11_1.html">配列</a></li>
     <li><a href="11_2.html">bind</a></li>

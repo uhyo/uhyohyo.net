@@ -3,11 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>妥当性テスト</title>
+<style>
+  input:invalid {
+    background-color: #ffeeee;
+  }
+</style>
 </head>
 <body>
-<form action="12_2_sample3.html">
+<form action="12_2_sample3.html" oninput="inp(this)">
 <p>パスワード（必須・英数字とアンダーバーのみ）：<input type="text" size="20" name="password1" required placeholder="パスワード" pattern="\w+"></p>
-<p>再度入力：<input type="text" size="20" name="password2" required placeholder="再度入力" onforminput="inp(this.form)"></p>
+<p>再度入力：<input type="text" size="20" name="password2" required placeholder="再度入力"></p>
 <p><input type="submit" value="送信"></p>
 </form>
 
@@ -19,7 +24,7 @@ function inp(form){
 
 	if(password1.checkValidity()){
 		//パスワードが正しくされている
-		if(password2.value==password1.value){
+		if(password2.value === password1.value){
 			//同じだ
 			password2.setCustomValidity("");	//妥当
 		}else{

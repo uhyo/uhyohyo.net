@@ -106,7 +106,7 @@ console.log('ä'.localeCompare('z', 'sv')); // 正
 "abc123def".<mark>search</mark>(/\d/)	// 3
 </code></pre>
 
-<h4>split</h4>
+<h4 id="anchor-split">split</h4>
 <p>splitは「分ける」という意味です。文字列を、第1引数に渡された文字で区切って、文字列の<strong>配列</strong>にして返します。例えばこういうことです。</p>
 <pre><code>
 "aaa<mark>,</mark>bb<mark>,</mark>c<mark>,</mark>dddd<mark>,</mark>ee".<strong>split</strong>("<mark>,</mark>")	// ["aaa","bb","c","dddd","ee"]

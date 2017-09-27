@@ -153,7 +153,7 @@
 <h3>イベントオブジェクトのメソッド</h3>
 <p>イベントオブジェクトは、プロパティの他にメソッドも持っています。その中でもよく使うものを紹介します。</p>
 
-<h4>preventDefault</h4>
+<h4 id="anchor-preventdefault">preventDefault</h4>
 <p><dfn>preventDefault</dfn>というメソッドを紹介します。これは、<strong>デフォルトアクションを中止する</strong>というものです。デフォルトアクションとは、イベントが発生したときに起こるもともとの動作ということです。よく分からないと思うので、次のサンプルを見てみましょう。</p>
 <pre class="language-html"><code>
 &lt;!doctype html&gt;

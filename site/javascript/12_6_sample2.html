@@ -27,7 +27,7 @@ div.d{
   dropzone.addEventListener('dragenter',function(e){
     e.preventDefault();
   },false);
-  //dragoverイベントでドラッグオペレーションを設定
+  //dragoverイベントでドラッグオペレーションを設定してキャンセル
   dropzone.addEventListener('dragover',function(e){
     e.dataTransfer.dropEffect="copy";
     e.preventDefault();

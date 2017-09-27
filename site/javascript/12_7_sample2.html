@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DnD APIのサンプル</title>
+<style>
+div.d{
+	padding:10px;
+	margin:20px;
+	width:100px;
+	border:4px dotted black;
+}
+</style>
+</head>
+<body>
+<p>下のdiv要素はドラッグできます。</p>
+<div class="d" draggable="true">div要素1</div>
+<div class="d" draggable="true">div要素2</div>
+<div class="d" draggable="true">div要素3</div>
+
+<p>ここにドラッグできます。</p>
+<div class="d" id="dropzone">ここ</div>
+
+<script>
+//draggableなdiv要素がドラッグ開始されたとき
+document.addEventListener("dragstart",function(ev){
+  ev.dataTransfer.items.add(ev.target.textContent, "text/plain");
+},false);
+
+//idが"dropzone"のdivにイベントを設定する
+var dropzone=document.getElementById('dropzone');
+dropzone.addEventListener('dragenter',function(e){
+  // dataTransfer.itemsの中身を見てみる
+  if (e.dataTransfer.items.length > 0){
+    e.target.textContent = e.dataTransfer.items[0].type;
+  }
+  e.preventDefault();
+},false);
+dropzone.addEventListener('dragleave',function(e){
+  // ついでにドラッグ先から外れたら中身を戻す
+  e.target.textContent='ここ';
+},false);
+
+//dragoverイベントでドラッグオペレーションを設定
+dropzone.addEventListener('dragover',function(e){
+  e.dataTransfer.dropEffect="copy";
+  e.preventDefault();
+},false);
+dropzone.addEventListener('drop',function(ev){
+  for(var i=0; i<ev.dataTransfer.items.length; i++){
+    var data = ev.dataTransfer.items[i];
+    if (data.kind === "string" && data.type === "text/plain"){
+      data.getAsString(function(text){
+        ev.target.textContent = text;
+      });
+    }
+  }
+
+  ev.preventDefault();
+},false);
+</script>
+</body>
+</html>

@@ -9,8 +9,11 @@
     
     <p><a href="./game_inputplayer.html">キー入力再生サンプル</a> （<a href="./game_inputrecorder.html">キー入力データ作成はこちら</a>）</p>
 
-    <h3>ヤチャモダッシュ用</h3>
+    <h3>拡張機能</h3>
+    <p>拡張機能は<a href="https://github.com/uhyo/mc_extensions">GitHubにまとめてあります</a>。</p>
     <p><a href="./game_accel.html">加速床</a></p>
+    <p><a href="./game_t_continue.html">Tキーの動作変更</a></p>
+    <h3>ヤチャモダッシュ用</h3>
     <p><a href="./game_bounce.html">反発係数1の壁</a></p>
   </section>
 {/content}

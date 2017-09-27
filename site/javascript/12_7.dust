@@ -1,0 +1,80 @@
+<p>今回は、前回に引き続き<strong>Drag and Drop API</strong> (DnD API)を扱います。前回はもっぱらページ内で要素をドラッグ&amp;ドロップする場合を扱いましたが、実はページの外から何かがドラッグされてくるという場合もあります。DnD APIはそのような場合にも対応できます。</p>
+
+<h3>ファイルのドラッグ&ドロップ</h3>
+<p><a href="12_5.html">File API</a>の回でファイルを読み込むためにinput要素を使用しましたね。実は、ファイルをJavaScriptから読み込む方法はもう1つあります。それが、<strong>ブラウザ内へファイルをドラッグ&amp;ドロップしてもらう</strong>ことです。</p>
+<p>実は、ページの外からファイルがドラッグ&amp;ドロップされてきた場合も、ドロップ先の要素ではdragenter、dragoverその他のイベントが発生します。</p>
+<p>ファイルがどこからかドラッグされてきた場合、やはり<strong>dataTransfer</strong>に情報が入っています。実は、dataTransferは<dfn>files</dfn>というプロパティを持っており、これは<a href="12_5.html">FIleListオブジェクト</a>です。当然、入っているのはドラッグされているファイルの情報ですので、これを用いてファイルを取得することができます。</p>
+<pre><code>
+function drop(ev){
+  //ファイルが複数かもしれないのでforループで調べる
+  for(var i=0;i&lt;ev.dataTransfer.files.length;i++){
+    var file=ev.dataTransfer.files[i];
+
+    //新しいp要素を作って表示
+    var p=document.createElement("p");
+    p.textContent= file.name;
+    ev.target.appendChild(p);
+  }
+}
+</code></pre>
+<p>今までの説明を総合するとこんな感じになります。<a href="12_7_sample.html">サンプル</a>で実際に確かめましょう。</p>
+
+<p>ちなみに、紹介しそびれたdataTransferのメソッドで、<dfn>clearData</dfn>というものがあります。これはフォーマット文字列を引数にとって呼び出すことで、そのフォーマットのデータをdataTransferから削除できます。</p>
+
+<h3>DataTransferを扱う新しい方法</h3>
+<p>実は、今まで紹介してきたDnD APIのうち、dataTransferを扱うメソッド（setData, getData, clearData）は実はちょっと古い方法で、最新の仕様では新しい方法が用意されています（ただし、古い方法も使用可能であると定められており、実際に多く利用されているので古い方を使ってもすぐに問題になるわけではありません）。</p>
+<p>この記事を最初に書いたとき（2014年7月）は新しい方法をサポートするブラウザが全然ありませんでしたので古い方法を先に紹介しましたが、TODO</p>
+
+<p>新しい方法では、DataTranfer内のデータはdataTransferが持つ<dfn>items</dfn>プロパティに集約されます。これにはDataTransferItemListオブジェクトが入っており、このオブジェクトを通してデータをやりとりします。</p>
+<p>データをdataTransferに格納するには、このDataTransfetItemListオブジェクトの<dfn>add</dfn>メソッドを使います。setDataメソッドとは逆で、第一引数にデータ文字列、第二引数にフォーマット文字列となっています。</p>
+<p>この新しい方法の特徴は、addメソッドの第1引数に別の方法で生成したFileオブジェクトを渡すことでdataTransferにファイルを追加することができる点です。古い方法では、ブラウザウィンドウの外からファイルをドラッグしてきた場合しかDnD APIでファイルを扱う機会はありませんでしたが、新しい方法ではこのようなパターンもあるのです。</p>
+<p>そして、入っているデータを得る方法ですが、実はこのDataTransferItemListオブジェクトは例によって<dfn>length</dfn>プロパティを持ちます。これだけでピンとくるかもしれません。<code>dataTransfer.items<mark>[0]</mark></code>のように、添字で入っているデータを取得できます。</p>
+<p>そのため、ループして目的のフォーマットのものを探す必要があります。getDataメソッドを使った場合は一発で取得できたのでちょっと面倒ですね。</p>
+<p>しかも、<code>dataTranser.items[0]</code>のように取得したデータは生のデータではありません。ここで得られるのはDataTransferItemオブジェクトというもので、このオブジェクトからさらにデータを引き出すのが少し面倒です。</p>
+<p>DataTransferItemオブジェクトは<dfn>kind</dfn>プロパティと<dfn>type</dfn>プロパティを持ち、kindプロパティは<code>"string"</code>か<code>"file"</code>のどちらかです。つまり、このデータがテキストなのかファイルなのかを示しています。typeプロパティはフォーマット文字列です。</p>
+<p>そして、文字列の場合は<dfn>getAsString</dfn>メソッドで、ファイルの場合は<dfn>getAsFile</dfn>で生のデータを取得します。getAsFileの場合は引数なしで、返り値でFileオブジェクトが得られるのですが、getAsStringメソッドの場合はさらに面倒です。このメソッドには引数で<b>コールバック関数</b>を渡す必要があり、その関数にデータが渡されます。</p>
+<p>この方法は面倒ですが、dataTranferに入っているデータを列挙したい場合などはこの方法を使う必要があります。特に、この方法によって中にどのようなデータ（データのフォーマットや種類）が入っているかを知ることができます。前回dragstartイベントとdropイベント以外ではdataTransfer内のデータを見ることができないと解説しましたが、実は実際のデータを見ることはできないもののデータの種類などの情報は見ることができます。これにより、例えばdragenterイベントで、データの種類によって受け入れるかどうかを決めるというような挙動が可能になります。</p>
+<p>なお、他にもDataTransfetItemListはremoveメソッド（除去するデータを番号で指定）やclearメソッド（引数なしで全て削除）を持ちます。</p>
+<p>また、<code>dataTransfer.items.add</code>と<code>dataTransfer.setData</code>にはひとつ違いがあります。既に存在するタイプのデータを追加しようとしたとき、前者はエラーとなるのに対し後者は上書きします。</p>
+
+<p>これらを踏まえて<a href="12_6_sample3.html">前回のサンプル3</a>を書き換えたのが<a href="12_7_sample2.html">サンプル2</a>です。特にデータの取得がごちゃごちゃしていますね。さっき述べたことを踏まえて、dragenter時点でデータの種類を表示するようにしてみました。div要素の他に外からファイルをドラッグしてきたりしても面白いでしょう。</p>
+
+<h3>その他のメソッドなど</h3>
+<p>さて、前回と今回の説明でやりたいことはだいたいできるでしょう。ここでは補足説明を加えます。以下の説明は古い方法も新しい方法も共通です。</p>
+<p>実は、DataTransferには、<dfn>setDragImage</dfn>というメソッドがあり、ドラッグ中に表示する画像を設定できます。例えばdragstartでこれを呼び出すと、ドラッグ中のマウス等の画像表示を変更できるでしょう。使い方は以下の通りです。</p>
+<pre><code>
+dataTransfer.<mark>setDragImage</mark>( <mark>element</mark>, x,y);
+</code></pre>
+<p>elementというのは、画像として使用する要素です。一般的には<strong>img要素</strong>ですが、他にも任意の要素を指定可能です。x,yは数値で指定します。これは画像のつかむ場所を示す座標です。</p>
+
+<p>最後に、DataTransferの<code>effectAllowed</code>プロパティを紹介します。これは、ドラッグオペレーション（copy・link・move）のうちどれが可能かを示すものです。</p>
+<p>ドラッグオペレーションはdragoverイベント時に<code>dataTransfer.dropEffect</code>プロパティを指定することで設定できますが、このとき設定できる値はeffectAllowedにより制限されます。</p>
+<p>effectAllowedはdragstartイベント時しか書き込むことができません。これにより、ドラッグされている側がどのようなドラッグオペレーションが許されるのか制御する狙いです。</p>
+<p>一方dropEffectというのは、ドロップ先（受け入れ先）が指定するドラッグオペレーションを示します。もしこれらが咬み合わない場合（effectAllowedで許されていないドラッグオペレーションがdropEffectで指定された場合）は<code>"none"</code>扱いとなりドロップできません。</p>
+<p>effectAllowedには以下の値を設定することができます。</p>
+<dl>
+  <dt>none</dt>
+  <dd>ドラッグできません。ドラッグオペレーションは必ずnoneになります。</dd>
+  <dt>copy</dt>
+  <dd>copyのみ許されます。</dd>
+  <dt>copyLink</dt>
+  <dd>copyとlinkが許されます。</dd>
+  <dt>all</dt>
+  <dd>3種類全てが許されます。</dd>
+  <dt>link</dt>
+  <dd>linkのみ許されます。</dd>
+  <dt>linkMove</dt>
+  <dd>linkとmoveが許されます。</dd>
+  <dt>move</dt>
+  <dd>moveのみ許されます。</dd>
+  <dt>uninitialized</dt>
+  <dd>デフォルト値です。3種類全てが許されます。</dd>
+</dl>
+<p>そして、effectAllowedにはもう1つ意味があります。上のリストをよく見てみると、allとuninitializedが同じに見えます。実は、dragenterイベント及びdragoverイベントにおいては、あらかじめ<code>dataTransfer.dropEffect</code>プロパティが自動的にセットされています。これはeffectAllowedに基づいて決められます。</p>
+<p>例えば、effectAllowedが<code>"copy"</code>の場合はdropEffectは自動的に<code>"copy"</code>にセットされています。そのため、effectAllowedを適切に設定してやればdragoverでわざわざdropEffectを手動で設定する必要がありません。ただし、dragoverをキャンセルするのは行う必要があります。</p>
+<p>また、複数のところから異なるeffectAllowedを持つものがドラッグされてくるがこちら側では1種類または2種類のドラッグオペレーションしか受け付けないという場合には、手動で設定したりdropEffectの値を見たりしてやる必要があるでしょう。</p>
+<p>ちなみに、effectAllowedが<code>"copyMove"</code>のように複数の値が許されている場合は、ブラウザがいい感じに決めてくれます。例えばWindowsでは、普通にドラッグすると移動(move)だけどCtrlキーを押しながら移動するとコピー(copy)になります。気が利くブラウザならばそういった情報を与えてくれるでしょう。しかし、あまり期待するべきではありません。</p>
+<p>結局uninitializedとallは何が違うかというと、微妙な違いではありますが、uninitializedの場合は何をドラッグしているかによってさらに気を利かせてくれます。</p>
+<p>全2回と長かったですが、以上でDrag and Drop APIの説明を終わります。もしドラッグ&amp;ドロップという動作が必要になったら必ず関わってくるAPIなのでぜひ自分のものにしておきましょう、</p>
+
+

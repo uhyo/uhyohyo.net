@@ -4,14 +4,28 @@
 <meta charset="UTF-8">
 <title>タブのテスト</title>
 <style>
-section[role="tabpanel"]{
-	border:3px solid black;
-	padding:5px;
-	margin:5px;
-}
-[aria-expanded="false"]{
-	display:none;
-}
+  ul#tablist {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+  }
+  ul#tablist li {
+    list-style: none;
+    flex: auto 1 0;
+    border: 1px dashed black;
+    margin: 0.8em;
+    padding: 0.5em;
+    cursor: pointer;
+  }
+  section[role="tabpanel"]{
+    border:3px solid black;
+    padding:5px;
+    margin:5px;
+  }
+  [aria-expanded="false"]{
+    display:none;
+  }
 </style>
 </head>
 <body>

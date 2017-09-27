@@ -1,0 +1,105 @@
+<p>次に紹介するのが<strong>HTML5 History API</strong>です。Historyとは<strong>履歴</strong>のことです。履歴関係のことは、historyという名前のオブジェクトから利用可能です。</p>
+
+<h3>古典的な履歴操作</h3>
+<p>実はこのhistory自体は昔からあって、いくつかメソッドを持っていました。</p>
+<pre><code>
+<strong>history</strong>.<mark>back</mark>();
+</code></pre>
+<p>例えばhistory.backメソッドは、いわゆるブラウザの「戻る」ボタンと同じ動きです。</p>
+<p>実際にやってみましょう。<input type="button" value="戻る" onclick="history.back()"></p>
+<p>このボタンは次のようにできています。</p>
+<pre class="language-html"><code>
+&lt;input type="button" value="戻る" onclick="<mark>history.back()</mark>"&gt;
+</code></pre>
+<p>このボタンを押すと、ブラウザの「戻る」ボタンを押したときと同じように前のページに戻ります。</p>
+<p>逆に「進む」は<code>history.forward()</code>です。他に、「3個すすむ」とか「2個戻る」とかを汎用的に表現する<code>history.go</code>があります。これは引数を取って、使いかたはこうです。</p>
+<pre><code>
+history.go(<mark>3</mark>);	//3個すすむ
+history.go(<mark>-2</mark>);	//-2個戻る
+</code></pre>
+<p>このように、正の数値は進む、負の数値は戻るを表す数値を引数としてとります。</p>
+
+<p>以上が、昔からある古典的な履歴操作です。次に、HTML5で加わった機能を説明します。</p>
+
+<h3>履歴の追加</h3>
+<p>HTML5での画期的な新機能は何かというと、<strong>履歴の追加</strong>です。<strong>勝手に自分で履歴を追加できる</strong>のです。</p>
+<p>例えば、<input type="button" value="このボタン" onclick="history.pushState(null,'テスト','/javascript/testtest')">を押してみましょう。</p>
+<p>押すと、実際にはページを移動していないのに、上のURLが「http://uhyohyo.net/javascript/testtest」というように変わったと思います。もちろん、実際にそんなURLを開いても何もありません。</p>
+<p>さらに、そこからブラウザで「戻る」をやってみましょう。またもページが変わらずに、URLが元に戻ったと思います。これが意味するのは、このボタンによって、実際にページが変わったわけではないけれども「http://uhyohyo.net/javascript/testtest」というURLに行ったという履歴が追加されたということです。「進む」を押してみるとまたURLが変わるはずです。</p>
+<p>それでは、その方法を紹介します。使うのは、<dfn>history.pushState</dfn>メソッドです。上のボタンは押すと次のようにhistory.pushStateを呼び出します。</p>
+<pre><code>history.<strong>pushState</strong>(null, 'テスト', '/javascript/testtest');</code></pre>
+<p>今回用いたコードはこれです。3つの引数があることがわかりますね。history.pushStateは、呼び出されると新しい<b>履歴</b>を追加してその履歴に遷移します。</p>
+<p>順番が前後しますが、第3引数が新しい履歴のURLだということが分かると思います。また、第2引数は履歴の<strong>タイトル</strong>です。ただ、タイトルは現状のブラウザでは意味がないようです。第3引数については省略可能であり、その場合は現在のURLと同じになります。</p>
+<p>残る第1引数は<strong>state</strong>であり、これは<strong>その履歴と関連付けられた情報</strong>です。好きなオブジェクトを履歴と関連付けることができます。stateの使い方については後述します。ただ、今回は履歴と関連付けたい情報は特に無いのでnullにしてあります。</p>
+
+<p>ちなみに、「履歴を追加」ではなく「現在の履歴を上書き」してしまう、<dfn>history.replaceState</dfn>もあります。使い方はpushStateと同じです。</p>
+
+<h3>履歴の活用</h3>
+<p>さて、これで新しい履歴を追加する方法が分かりました。ちなみに、追加した履歴を消す方法はありません。</p>
+<p>ところで、実際にページが移動するわけでもない履歴を追加して何の役に立つのでしょうか。</p>
+<p>これは、近年発達してきている<b>シングルページアプリケーション</b>（<b>SPA</b>）を作るときに役立ちます。SPAとは、ひとつのページ内で完結しているウェブアプリケーションのことです。つまり、リンクやボタンをクリックして他の画面に移動したように見えても、実はJavaScriptが画面を書き換えただけでページは移動していないというものです。</p>
+<p>このようなユーザーインターフェースにおいて、ユーザーがブラウザの「戻る」ボタンで前の画面に戻ろうとするのは自然な行動です。しかし、この場合「戻る」の動作として適切なのは実際に前のページに戻ることではなく、再びJavaScriptによって画面が書き換えられて前の画面に戻るという動作です。History APIの真髄はこの動作を実現することにあります。そのためには、これまで紹介した履歴の追加に加えて、いまから紹介する<strong>履歴移動の検知</strong>を用いることになります。</p>
+<p>具体的には、<dfn>popstate</dfn>というイベントを用いることで履歴移動を検知することができます。これは履歴を移動したら発生するイベントです。ただし、別のページへ行ってしまう場合は発生しません。pushStateなどによって追加された履歴の間で（すなわち、同じページの中で）履歴を移動する場合に発生してくれるイベントです。</p>
+<p>popstateイベントは<strong>window</strong>で発生するイベントなので、このように検知します。</p>
+<pre><code>
+<mark>window</mark>.addEventListener('popstate', function(ev){
+}, false);
+</code></pre>
+<p>しかし、「履歴を移動した」だけでは情報が足りません。そこで役に立つのがさっきの<strong>state</strong>です。移動後の履歴に関連付けられたstateオブジェクトがイベントオブジェクトの<strong>stateプロパティ</strong>に入っています。つまり今回の場合は<code>ev.state</code>ですね。これを用いれば、移動後の履歴がどういう状態なのかを判別できるわけです。</p>
+<p>さて、それではこれらを活用して具体的に何ができるかを見ていきたいと思いますが、前回に続きサンプルを提示したいと思います。</p>
+<p>今回作ってみるのは、いわゆる<b>タブ</b>っぽいUIを持ったページです。タブを選択すると表示内容が切り替わります。まずはHistory APIを使っていない土台の<a href="12_3_sample.html">サンプル</a>を見てください。上に3つリストがあって、クリックするとタブA,タブB,タブCが切り替わります。ちなみに随所で<a href="http://uhyohyo.sakura.tv/html/6_10.html">WAI-ARIA</a>を使っていますが、今回の解説と本質的にはそんなに関わりませんので、気にしないでください。</p>
+<p>このサンプルでは、何度かタブを切り替えたあとにブラウザの「戻る」ボタンを押すと当然もとのページに戻ります。しかし、前に選択していたタブに切り替わるほうが直感には合っているのではないでしょうか。</p>
+<p>History APIを使えばこれを実現することができます。1回タブを開くごとに新しい履歴を追加すればいいのです。</p>
+<p>これをやってみたのが次の<a href="12_3_sample2.html">サンプル2</a>です。少し長いですがソースを見てみるとよいでしょう。</p>
+<p>タブを切り替えると<code>history.pushState</code>で履歴を追加します。その際、どのタブを開いたかはstateに入れることにしています。</p>
+<p>popstateが発生した場合はstateを見て、それによりどのタブが開いている履歴に戻ったのか判断します。</p>
+<p>最後に<dfn>history.state</dfn>を紹介します。これは「現在の履歴」に関連付けられたstateが入っています。</p>
+
+<h3>location</h3>
+<p>次に紹介したいのは<strong>ハッシュ</strong>です。ハッシュとは、</p>
+<pre><code>
+http://uhyohyo.net/index.html<mark>#abc</mark>
+</code></pre>
+<p>というような、URLにおける「#」以降の部分です。これは一般的にページ名には含まれず、あるページ内での位置を表すなどするのでした。</p>
+<p>JavaScriptでは、このハッシュを用いた操作をすることができます。それには、<dfn>location</dfn>というオブジェクトを使います。</p>
+<p>locationもわりと昔からあり、<b>URL</b>を扱うためのものです。例えば、
+<code>location.<mark>href</mark></code>
+で現在のURLを取得できます。さらに、この<code>location.href</code>に代入すると、そのページへ移動することができます。</p>
+
+<p>locationには、URLの各部分をいじることができるプロパティがあります（後述）。ハッシュの部分だけを変更するには、<code>location.hash</code>を使います。例えば先程の例だと、<code>location.hash</code>には<code>"#abc"</code>と入っています。これに代入して変更すると、やはり<strong>URLが変わります</strong>。</p>
+<p>URLの部分の中でもハッシュというのは特殊な性質があります。これは一般にページ内での位置を表すものです。なので、<em>ハッシュが変更されてもページは変わらない</em>という性質があります。しかし、ハッシュはURLに含まれますからURLは変わります。この、ページが変わらないのにURLが変わるという挙動はpushStateと似ていますね。実際のところ、<em>ハッシュを変更すると新しい履歴が追加されます</em>。ということは、「戻る」ボタンが押されると同じページの中でハッシュだけが違うURLに移動することになります。同じページ内での履歴移動ということはpopstateイベントも発生します。</p>
+<p>さっきのタブの例を、pushStateではなくlocation.hashを用いるように変更したのが<a href="12_3_sample3.html">サンプル3</a>です。</p>
+<p>変更点は、pushStateの部分がlocation.hashへの代入になった点と、popStateイベントの発生時に<code>ev.state</code>ではなく<code>location.hash</code>を調べている点です。</p>
+<p>ここで注目すべきことは、<strong>popStateが呼び出された時点でlocationのURL情報は履歴移動後のものになっている</strong>ということです。</p>
+
+<h3>hashchangeイベント</h3>
+<p>ところで、popstateと似たイベントとして、履歴移動のうち<strong>ハッシュだけが変わった場合</strong>に発生する<strong>hashchangeイベント</strong>があります。つまり、pushStateの第三引数によってURLも変わってしまった場合の履歴移動などでは発生しないイベントということです。</p>
+<p>hashchangeイベントのイベントオブジェクトには<dfn>oldURL</dfn>と<dfn>newURL</dfn>という2つのプロパティがあり、移動元・移動後のURLを両方得ることができます。ただし、先程述べたとおり、ハッシュ以外は変わっていません。</p>
+<p>ということで、最後に、popstateの代わりにこのhashchangeイベントを利用した<a href="12_3_sample4.html">サンプル4</a>を提示します。今回は、このoldURL・newURLは特に使う必要もないので使っていません。popstateのときと同様にlocation.hashを参照しています。</p>
+<p>特筆すべきは、さっきのサンプル3ではlocation.hashに代入するときにopenTab関数を呼び出していたのに、サンプル4ではそれが消えているということです。</p>
+<p>これはなぜかというと、hashchangeイベントが発生するのは「ハッシュが変わった場合」ですので、履歴移動により変わった場合はもちろんのこと、実は「JavaScript側によって変えられた場合」にも呼ばれるのです。ですから、location.hashに代入してハッシュが変わったので、その時点でhashchangeイベントが呼ばれているのです。</p>
+<p>このようにhashchangeイベントを適切に使うと、今回の場合はopenTabを呼び出す箇所が一回だけに減るなど、すっきりしたコードが書けます。</p>
+<p>また、ハッシュを用いて履歴を管理することには、場合によってはもうひとつ大きな利点があります。それは、<strong>ページの状態とURLが対応する</strong>という点です。例えば上記の<a href="12_3_sample4">サンプル4</a>では、「タブB」を開いた状態のURLは<code>http://uhyohyo.net/javascript/12_3_sample4.html#tab_B</code>となり、「タブC」を開いている場合は<code>http://uhyohyo.net/javascript/12_3_sample4.html#tab_C</code>となります。つまり、URLに「今どのタブを開いているか」という情報が入っています。このことは、<em>URLからページの状態を復元可能</em>であることを意味します。例えばユーザーが「タブB」を開いた状態のURLを保存しておいて、あとでそのURLにアクセスするとタブBが開いている、というようなことが可能です。</p>
+<p>しかし、実は上のサンプル4はそうなっていません。このことを簡単に確かめる方法は、タブBやタブCを開いた状態でページの更新（再読み込み）を行うことです。現状のサンプル4では、この場合も初期状態と同様タブAが開いてしまいます。</p>
+<p>これを直すのは簡単です。初期状態（ページを開いた状態）でハッシュが読みどのタブを開くか決定してあげればいいのです。練習問題としてやってみましょう。</p>
+
+<h3>locationのまとめ</h3>
+<p>最後に、今回ちらりと紹介したlocationオブジェクトについて以下にまとめます。</p>
+<pre><code>
+//プロパティ（すべて代入して変更可能です）
+location.<mark>href</mark>;		//例: "<mark>http://uhyohyo.net/javascript/12_3.html?key=value#abc</mark>"
+location.<mark>protocol</mark>;	//例: "<mark>http:</mark>"
+location.<mark>host</mark>;		//例: "<mark>uhyohyo.net</mark>"
+location.<mark>hostname</mark>;		//例: "<mark>uhyohyo.net</mark>"
+location.<mark>port</mark>;		//例: ""
+location.<mark>pathname</mark>;	//例: "<mark>/javascript/12_3.html</mark>"
+location.<mark>search</mark>;	//例: "<mark>?key=value</mark>"
+location.<mark>hash</mark>;		//例: "<mark>#abc</mark>"
+</code></pre>
+<p>protocolは、「<code>:</code>」まで入っていることに注意してください。また、portは、通信に使用するポートです。HTTP通信は普通80で、この場合URLからポートは省略されます。ポートが省略されていないURL（例：<code>"http://example.com:8080/"</code>）の場合には、文字列で"8080"などと入ります。</p>
+<p>hostとhostnameの違いは、ポート部分を含むかどうかです。hostnameは含めませんが、hostは含めます。</p>
+
+<p>また、locationは<dfn>location.assign</dfn>というメソッドがあります。これは引数をひとつとってそのURLへ移動するメソッドで、location.hrefに直接代入するのとあまり変わりません。</p>
+<p>また、<dfn>location.replace</dfn>というメソッドがあって、これはassignと同様の使い方ですが<strong>現在のページの履歴情報を上書きする</strong>もので、これを使ってページを移動すると「戻る」を押しても移動前が履歴に残っておらず、さらにその一つ前に飛ぶことになります。</p>
+<p>また、<dfn>location.reload</dfn>は引数なしのメソッドで、現在のページを「更新」します。</p>
+
