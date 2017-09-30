@@ -26,7 +26,7 @@
 <p>このソースコードでいうと引数<code>ev</code>です。これを通して、さまざまな情報を得ることができます。</p>
 <p>ちなみに、HTML要素に対して属性（例えば<code>onclick</code>）として記述されたイベントハンドラの場合は関数になっていませんが、この場合は「event」という変数にイベントオブジェクトが代入されています。</p>
 
-<h3>targetとcurrentTarget</h3>
+<h3 id="anchor-target">targetとcurrentTarget</h3>
 <p>まず、イベントオブジェクトが持つ<dfn>target</dfn>と<dfn>currentTarget</dfn>という2つのプロパティを紹介します。</p>
 <pre class="language-html"><code>
 &lt;!doctype html&gt;

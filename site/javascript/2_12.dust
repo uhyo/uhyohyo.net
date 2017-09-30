@@ -1,6 +1,6 @@
 <p>フォームについての説明は、<a href="kiso6.html">基礎第六回</a>にもありましたね。今回はよりDOM的な観点からフォームについて振り返ります。</p>
 
-<h3>HTMLFormElement</h3>
+<h3 id="anchor-htmlformelement">HTMLFormElement</h3>
 <p>form要素のHTMLElementは、<dfn>HTMLFormElement</dfn>と呼ばれます。</p>
 <p>このform要素ですが、今までと同様にgetElementByIdなどで取得することも可能ですが、実は専用のものもあります。</p>
 <p>それは、documentが持つ<dfn>forms</dfn>というプロパティで、これは<strong>HTMLCollection</strong>です。例えば、</p>

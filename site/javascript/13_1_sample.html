@@ -10,13 +10,14 @@
 <script>
 var xhr = new XMLHttpRequest();
 
+xhr.open("GET","/index.html");
+xhr.send();
+
 xhr.addEventListener("load",function(ev){
 	//結果を表示
 	document.getElementById('result').textContent = xhr.response;
 });
 
-xhr.open("GET","/index.html");
-xhr.send();
 
 </script>
 </body>
