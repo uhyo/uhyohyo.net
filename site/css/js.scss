@@ -71,8 +71,8 @@ img.sidess {
 code mark {
   color: inherit;
 }
-code em {
-  color: #ff6060;
+code em, code em span.token {
+  color: #ff6060 !important;
   font-weight: normal;
 }
 

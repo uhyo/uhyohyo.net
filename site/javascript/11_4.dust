@@ -108,7 +108,7 @@ for(var key in obj){
 <pre><code>console.log(obj.toString);</code></pre>
 <p>ではなぜ、prototypeまでさかのぼって列挙するはずのfor-in文でも、このtoStringなど（他にもいろいろありますが）は列挙されなかったのでしょうか。それが次の話題です。</p>
 
-<h3>プロパティの属性</h3>
+<h3 id="anchor-property-attribute">プロパティの属性</h3>
 <p>実は、すべてのプロパティには<strong>属性</strong>というものが付属しています。属性は、プロパティの性質を決めるものです。</p>
 <p>まず紹介するのが<dfn>enumerable属性</dfn>です。日本語にすると「列挙可能性」とかそういう感じです。この属性はtrueかfalseかで、<strong>enumerableがfalseの属性はfor-in文やObject.keysで列挙されない</strong>のです。</p>
 <p>我々が普通に作るプロパティは全てenumerableがtrueのプロパティになります。しかし、Object.prototypeが持つメソッドとか、JavaScriptの言語仕様としてすでに存在しているようなプロパティは、基本的に列挙の邪魔にならないようにenumerableがfalseになっています。さっき発生した謎の答えはこれです。</p>

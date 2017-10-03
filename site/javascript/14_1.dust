@@ -1,0 +1,108 @@
+<p>今回紹介する<dfn>Storage</dfn>はとても便利なものです。Storageとは何かというと、簡単にいうと<strong>ブラウザにデータを保存しておける</strong>ものです。そういうと昔からあるCookieを思い出す人も多いと思います。Cookieとの違いは、「データがサーバーへ送られるか送られないか」です。Cookieはブラウザに保存されており、サーバーへのリクエストの際はCookieが送られます。サーバー側はそれを参照して動作を変えることができます。</p>
+<p>一方、Storageはサーバー側からは参照できません。Storageを見ることができるのはJavaScriptからのみです。つまり、Cookieとは異なり完全にクライアント側で動作するJavaScriptプログラム向けに記憶機能が提供されているということです。基本的にはこちらのほうが便利なので、サーバーに送る必要がないデータを保存しておきたいときはStorageを使うのがよいでしょう。</p>
+
+<h3>2つのStorage</h3>
+<p>Storageには2種類あります。一つは<dfn>localStorage</dfn>であり、もうひとつは<dfn>sessionStorage</dfn>です。この2つでは、データの保存のされ方が違うため用途も違います。</p>
+<p>windowは<b>localStorage</b>と<b>sessionStorage</b>というプロパティを持っており、これを通じて利用可能です。</p>
+<p>この2種類のうちでは、<b>localStorage</b>のほうが使用される頻度が圧倒的に多いようです。localStorageは、<strong>同じオリジン</strong>の間で共有されるストレージです。これは前章でおなじみの同一オリジンポリシーを考えれば分かりますね。違うオリジンのデータを読めるべきではありません。ポイントは、localStorageは同じオリジンなら、違うページからでも同じ内容を共有できるということです。複数のページの連携にも使うことができるでしょう。</p>
+<p>これを利用して、サイトを利用したデータをずっと保存しておくことが可能です。ただしもちろん、ユーザーが消そうと思えばデータは消すことができます。</p>
+<p>次の<b>sessionStorage</b>は少し毛色が違います。これは<b>ブラウジングコンテキスト</b>1つに対して1つの領域が割り当てられます。つまり、異なるブラウジングコンテキストからは違うsessionStorageになり、保存内容が共有されないということです。ブラウジングコンテキストは前章でも出てきましたね。要するに<em>ブラウザのタブ1つ</em>ということです。異なるタブでは異なるsessionStorageになります。</p>
+<p>それでは、具体的な使い方を見て行きましょう。</p>
+
+<h3>Storageの操作</h3>
+<p>Storageの操作は、localStorageでもsessionStorageでも変わりません。基本は、Storageのプロパティに値を入れるとそれがそのまま保存されます。実は、保存できる値は<strong>文字列</strong>に限ります。オブジェクトとかを保存したい場合はJSONにしましょう。</p>
+<p>例えば、localStorageに<code>"foo"</code>という名前で<code>"bar"</code>という値を保存したい場合はこうです。</p>
+<pre><code>
+<mark>localStorage</mark>.<mark>foo</mark>="bar";
+</code></pre>
+<p>簡単ですね。ただし、<dfn>setItem</dfn>というメソッドを使うことも可能です。</p>
+<pre><code>
+localStorage.<mark>setItem</mark>("foo","bar");
+</code></pre>
+<p>このとき、データに付けられる名前は<b>キー</b>と呼ばれます。上の例の場合は<code>"foo"</code>がキーですね。</p>
+<p>Storageに保存されている値を得るにはプロパティを参照します。</p>
+<pre><code>
+console.log(localStorage.foo);
+</code></pre>
+<p>setItemと対になる、getItemというメソッドも使えます。</p>
+<pre><code>
+console.log(localStorage.<mark>getItem</mark>("foo"));
+</code></pre>
+<p>基本的な保存と取り出しは以上です。また、保存されたデータを消去するには<dfn>removeItem</dfn>メソッドです。</p>
+<pre><code>
+localStorage.<mark>removeItem</mark>("foo");
+</code></pre>
+<p>また、そのStorageのデータを全て消去する<dfn>clear</dfn>メソッド（引数無し）があります。</p>
+<p>さらに、そのStorageにデータが何個保存されているか示す<dfn>length</dfn>プロパティがあります。例えば上の例の場合、<code>"foo"</code>に<code>"bar"</code>という値が保存されているだけとするとlengthは1です。</p>
+<p>そして、lengthがあるということは、0から順番にデータを取得できそうですね。Storageの場合は<dfn>key</dfn>というメソッドを使います。これは番号を渡すとキーを返します。たとえば、こんな感じです。</p>
+<pre><code>
+var key=localStorage.<mark>key</mark>(0);	//0番目のキーを取得
+console.log("0番目のキーは"+key+"で　値は"+localStorage[key]+"です");
+</code></pre>
+<p>以上でStorageの操作は終了です。上の例はlocalStorageでしたが、sessionStorageも使い方は全く同じです。</p>
+
+<h3>Storageのイベント</h3>
+<p>Storageに関して、Storageが変更されたときにそれを知らせる<strong>イベント</strong>があります。それが<dfn>storage</dfn>イベントです。これは、popStateとかと同様、<strong>window</strong>において発生するイベントです。すなわちこうです。</p>
+<pre><code>
+<mark>window</mark>.addEventListener("<mark>storage</mark>",function(e){
+},false);</code></pre>
+<p>このstorageイベントにおけるイベントオブジェクトは<dfn>StorageEvent</dfn>のインスタンスであり、以下のプロパティを持っています。</p>
+<dl>
+  <dt>key</dt>
+  <dd>変更されたキーの名前。</dd>
+  <dt>oldValue</dt>
+  <dd>変更前の値。</dd>
+  <dt>newValue</dt>
+  <dd>変更後の値。</dd>
+  <dt>url</dt>
+  <dd>ストレージが変更されたページのURL。</dd>
+  <dt>storageArea</dt>
+  <dd>変更が起こったStorageオブジェクト（localStorageまたはsessionStorage）。</dd>
+</dl>
+<p>ちょっと注目したいのが<strong>url</strong>プロパティですね。実は、同じStorageを共有している（といってもsessionStorageを複数タブで共有することはないのでlocalStorageになりますが）複数のブラウジングコンテキスト（≒タブ）において、そのStorageが変更されると全てのタブでstorageイベントが発生します。つまり、他のタブでlocalStorageに行われた変更を即座に感知できるということです。</p>
+<p>しかも、<strong>localStorageを変更した張本人のタブではstorageイベントは発生しません</strong>。これは、いちいちstorageイベントを捕捉しなくても変更タイミングが明らかだからでしょうか。</p>
+<p>これはブラウジングコンテキスト間の非常に簡単な通信と見ることもできますね。ということで、使う機会があるかもしれませんので紹介します。</p>
+<p>Storageに対してどんな操作が行われたかによって、key,oldValue,newValueの値が変わります。基本的にはkeyは変更されたキー、oldValueは変更前の値、newValueは変更後の値です。</p>
+<p>たとえば単純に新しいキーに書き込んだ場合、またはすでにあるキーの値を書き換えた場合には、keyはそのキー、oldValueは変更前の値（何も入っていなかったならnull）、newValueは新しくセットした値になります。</p>
+<p>なお、getItemなどは見るだけなのでイベントは起こりません。</p>
+<p>次にremoveItemは、key,oldValueはsetItemと同じですが、newValueがnullになっています。</p>
+<p>clearメソッドの場合は、key,oldValue,newValueが全てnullになっています。</p>
+
+<h3>Storageのサンプル</h3>
+<p><a href="14_1_sample.html">サンプル</a>を用意しました。ページを開くたびにlocalStorageを読んで1を足して、ページの表示関数をカウントするやつです。当然ながら、localStorageは各利用者のブラウザに保存されるものであり、サーバーに保存されるカウンタではないので他人の訪問は記録されませんし見ることもできません。</p>
+<p>ページを開いて更新すると数が増えます。localStorageに保存された内容は、ページを更新しても残っているからです。また、ページを閉じてから開きなおしても前回のデータが残っていて、続きからカウントされます。</p>
+<p>ソースは以下のようになっています。</p>
+<pre><code>
+//ページ表示時にカウントを1ふやす
+var value=localStorage.sample14_1;
+if(!value){
+  //valueに何も入っていなかったら
+  value=1;
+}else{
+  value=parseInt(value)+1;
+}
+localStorage.sample14_1=value;
+disp(value);
+
+//他のページでlocalStorageが更新されたら反映する
+window.addEventListener("storage",function(e){
+  if(e.key=="sample14_1"){
+    //sample14_1が更新された
+    disp(e.newValue);
+  }
+},false);
+
+function disp(val){
+  document.getElementById('result').textContent="あなたは"+val+"回目の訪問です";
+}
+</code></pre>
+<p>sample14_1というキーにデータを保存していることが分かります。前半は変数valueにlocalStorageのデータを読み込み、1を足してそれをdisp関数で表示しています。その後それをlocalStorageに保存しています。ただし、始めてのときは何も入っていないので、valueを1としています。</p>
+<p>valueに1を足す際、Storage内のデータは文字列なのでparseIntで数値に変換している点に注意して下さい。</p>
+<p>このページを何度も開きなおすと数字が増えていきます。もちろんこれはlocalStorageにデータが保存されているからですね。</p>
+<p>サンプルの後半部分はstorageイベントを使っています。sample14_1が更新されたらその内容を表示しなおしています。</p>
+<p>storageイベントをこのサンプルで確認してみましょう。複数タブでこの<a href="14_1_sample.html">サンプル</a>を開き、更新するなどしてカウントを増やしてみて下さい。もう一つのほうにもstorageイベントによって変更が伝えられ、常に表示が一緒になっているはずです。</p>
+
+<p>また、sessionStorageの動作を用意するために、<a href="14_1_sample2.html">サンプル2</a>を用意しました。これは上のサンプルと同じことをsessionStorageで行なっています。ただし、さっき解説した通り異なるタブだと異なるsessionStorageになるので、storageイベントの部分は消しています。</p>
+<p>サンプル2を開いて「ページの更新」を行うと回数が増えます。これは、同じタブならばページを移動・更新してもsessionStorageは一緒だからです。</p>
+<p>一方、今度は複数のタブを開いても、表示は一致しません。また、各々のタブで更新を行うと別々にカウントが進みます。これは、タブが違うとsessionStorageが違うからです。このような違いを理解して使用しましょう。今のサンプルでわかるように、sessionStorageはその名の通り、現在の作業の内容を一時的に保存しておくようなそういう用途が合っているかもしれません。localStorageはサイト利用の情報としてずっと保存しておきたいような情報を入れるといいでしょう。</p>
+
