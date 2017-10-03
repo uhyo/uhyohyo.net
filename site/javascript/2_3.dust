@@ -1,5 +1,5 @@
 <p>今回から、いよいよWebページにも多少動きが出てきます。</p>
-<h3>innerHTML</h3>
+<h3 id="anchor-innerhtml">innerHTML</h3>
 <p>前回、ちらっと「innerHTML」というプロパティが出てきました。これはHTMLElementが持っているプロパティです。</p>
 <p>これは、要素の中身がHTMLで代入されているというものでした。</p>
 <p>それでは、今度はそこに新しい中身を代入したらどうなるでしょう。なんと、<strong>実際に書きかわります</strong>。</p>

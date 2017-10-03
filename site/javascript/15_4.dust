@@ -1,0 +1,105 @@
+<p><a href="15_3.html">前回</a>の続きです。前回はPerformanceEntryオブジェクトの扱い方を紹介しました。今回はその具体例です。</p>
+
+<p>Resource Timingという仕様では、Webページからimg要素やlink要素によって読み込まれたリソースについて、それにかかった時間などを知ることができます。これは、<a href="15_2.html">一五章第二回</a>で紹介したnavigation Timingと似ていますね。あちらはページ本体に読み込みにかかった時間であり、本体が読み込み完了してHTMLのパース・DOMの構築まで終わったら読み込み完了としていたので、外部リソースに読み込みにかかった時間までは測れませんでした。</p>
+
+<h3>PerformanceResourceTiming</h3>
+<p>Resource Timingでは、ページから読み込まれた外部リソース一つ一つについて<dfn>PerformanceResourceTiming</dfn>オブジェクトが作成され、<code>window.performance</code>に登録されます。このPerformanceResourceTimingというのは、前回紹介したPerformanceEntryを継承したオブジェクトです。この場合、前回紹介した4つのプロパティは次のような値が入っています。</p>
+<dl>
+  <dt>name</dt>
+  <dd>nameプロパティには、<b>リソースのURL</b>が入っています。</dd>
+  <dt>entryType</dt>
+  <dd>entryTypeプロパティは<code>"resource"</code>で固定です。これは、このPerformanceEntryがPerformanceResourceTimingであることを示す値になっています。</dd>
+  <dt>startTime</dt>
+  <dd>redirectStartが有効な場合はその値、そうでなければfetchStartの値です。（詳しくは後述）</dd>
+  <dt>duration</dt>
+  <dd>responseEndとstartTimeの差です。（これも後述）</dd>
+</dl>
+<p>リソースのURLと言っていることから分かるとおり、ひとつのリソースに対してひとつのPerformanceResourceTimingオブジェクトが作られます。</p>
+<p>このページもCSSなどを読み込んでいますので、試しにコンソールで次のコードを実行してみると、PerformanceResourceTimingオブジェクトがいくつも入った配列が得られるのがわかります。他のオブジェクトも多分ありますが。</p>
+<pre><code>
+console.log(performance.getEntriesByType("resource"));
+</code></pre>
+<p>PerformanceResourceTimingには、さらに以下のプロパティがあります。</p>
+<dl>
+  <dt>initiatorType</dt>
+  <dd>そのリソースが何によって読み込まれたか。HTML要素ならばその要素名（<code>"link"</code>とか）、CSSならば<code>"css"</code>、XMLHttpRequestならば<code>"xmlhttprequest"</code>になる。
+  <dt>redirectStart</dt>
+  <dd>リダイレクトがあった場合、一番最初のリソースにアクセスした瞬間の時間です。リダイレクトが無かった場合は0です。</dd>
+  <dt>redirectEnd</dt>
+  <dd>リダイレクトがあった場合、最後のリダイレクトページから受信を完了した瞬間の時間です。リダイレクトが無かった場合は0です。</dd>
+  <dt>fetchStart</dt>
+  <dd>リソースへのアクセスを開始した瞬間です。これは厳密には、URLの文字列解析を開始する瞬間と（多くの場合）一致します。</dd>
+  <dt>domainLookupStart</dt>
+  <dd>URLの解析が終わり、DNSサーバーに問い合わせを開始した瞬間です。</dd>
+  <dt>domainLookupEnd</dt>
+  <dd>DNSサーバーとの通信が終了した瞬間です。</dd>
+  <dt>connectStart</dt>
+  <dd>リソースのあるサーバーへの通信を開始した瞬間です。</dd>
+  <dt>connectEnd</dt>
+  <dd>サーバーへの通信を確立した瞬間です。</dd>
+  <dt>secureConnectionStart</dt>
+  <dd>HTTPS通信の場合、ハンドシェイクを開始した瞬間です（ブラウザによってはサポートしないこともあるようです）。HTTPS通信でない場合は0です。</dd>
+  <dt>requestStart</dt>
+  <dd>サーバーへリクエストを送信し始める瞬間です。</dd>
+  <dt>responseStart</dt>
+  <dd>サーバーからレスポンスの最初の1バイトを受信した瞬間です。</dd>
+  <dt>responseEnd</dt>
+  <dd>サーバーからレスポンスを最後まで受信した瞬間です。</dd>
+</dl>
+<p><a href="15_2.html">Navigation Timing</a>の話を思い出しますね。まあ、この情報を全て使いこなす必要はないでしょう。結局、そのリソースを取得するのにどれだけ時間がかかったかを調べるには上で紹介したdurationプロパティの値を見れば十分なわけです。より詳しい情報が必要になったときに他のプロパティを見ればよいでしょう。</p>
+
+<p>注意点がひとつあります。それは、時刻を表すプロパティがたくさん出てきましたが、今回これらはUNIX timeではないということです。これらは、performance.timing.navigationStartの時刻を0とするミリ秒単位の時間で表されます。なので、これらの値を利用して実際の時刻を求めることは一応可能であるものの、基本的には時刻の情報は2つの値の差をとって経過時間として使うことになります。</p>
+<p>また、initiatorTypeプロパティについて補足しておくと、例えばimg要素で画像を読み込む場合はこの値は<code>"img"</code>になるし、link要素でCSSファイルを読み込む場合は<code>"link"</code>です。また<code>"iframe"</code>などもありえます。CSSのbackground-imageなどで画像ファイルを読み込む場合は、CSSファイル経由で読み込まれているので<code>"css"</code>ですね。</p>
+<p>ただ、今回もやはり他の<b>オリジン</b>の情報には厳しくて、他のオリジンのリソースの場合にはfetchStartとresponseEndの値以外は軒並み0になってしまいます。この2つが有効なのでdurationを得ることはできますが、他の値は役に立ちません。ただし、リソースを読み込む際にサーバー側が<code>Timing-Allow-Origin</code>レスポンスヘッダを指定した場合は、他のオリジンであっても時間の情報を取得することができます。これは、<a href="13_1.html">十三章第一回</a>で紹介したAccess-Control-Allow-Originヘッダと似ていますね。</p>
+
+<h3>Performanceオブジェクトの拡張</h3>
+<p>実は、PerformanceオブジェクトはResource Timing関連のメソッド等を持っています。</p>
+<p>1つは<dfn>clearResourceTimings</dfn>（引数なし）です。これは、Performanceに登録されているPerformanceResourceTimingオブジェクトを消去してしまいます。</p>
+<p>もう一つは<dfn>setResourceTimingBufferSize</dfn>です。これは引数に数値を指定することで、「最大何件までPerformanceResourceTimingオブジェクトを保存するか」を設定できます。</p>
+<p>実は、デフォルトでは150件まで保存されることになっています。これは、やはり情報を保存するというのはメモリを食うので、何らかの形で制限する必要があるからでしょう。それだと困るという場合には、このメソッドでこちら側から数を増やしてやることができます。</p>
+<p>また、実はPerformanceオブジェクトではイベントが発生することがあります。Performanceオブジェクトで発生するイベントの一つが<dfn>resourcetimingbufferfull</dfn>イベントです。これは、PerformanceResourceTimingが保存できる最大件数に達した場合に発生します。もし件数が足りない場合は、このイベントが発生したらそれにあわせてsetResourceTimingBufferSizeメソッドで実行するのがよいでしょう。</p>
+<p>イベントなので当然addEventListenerでハンドラを登録します。</p>
+<pre><code>
+performance.addEventListener("<mark>resourcetimingbufferfull</mark>",function(e){
+  //最大件数に達した場合の処理
+});
+</code></pre>
+<p>いつものことですが、addEventListenerを使ってイベントを登録する方法のほかに、次のようにイベントハンドラを直接プロパティにセットする方法もあります。</p>
+<pre><code>
+performance.<mark>onresourcetimingbufferfull</mark>=function(e){
+};
+</code></pre>
+
+<p>以上でResource Timingに関して紹介すべきことは終了です。最後にサンプルを用意しました。このページから読み込まれたリソースを列挙するサンプルです。</p>
+<pre><code>
+window.addEventListener("<mark>load</mark>",function(e){
+  //ページ内に&lt;div id="resultarea"&gt;&lt;/div&gt;をあらかじめ用意しておく
+  var div=document.getElementById("resultarea");
+
+  var entries=performance.getEntriesByType("<mark>resource</mark>");
+  entries.forEach(function(obj){
+    //objはPerformanceResourceTimingオブジェクト
+    var p=document.createElement("p");
+    p.textContent=obj.name+"を"+obj.duration.toFixed(2)+"ミリ秒かけて読み込みました";
+    div.appendChild(p);
+  });
+},false);
+</code></pre>
+<p>最初の<b>loadイベント</b>というのは、ページの読み込みが完了したときに発生するイベントでしたね。今回はリソースの読み込みについての情報が欲しいのでこのイベントを用います。</p>
+<div id="resultarea" style="margin:1em;padding:1em;border:2px solid black"></div>
+<script>
+window.addEventListener("load",function(e){
+  var div=document.getElementById("resultarea");
+
+  var entries=performance.getEntriesByType("resource");
+  entries.forEach(function(obj){
+    //objはPerformanceResourceTimingオブジェクト
+    var p=document.createElement("p");
+    p.textContent=obj.name+"を"+obj.duration.toFixed(2)+"ミリ秒かけて読み込みました";
+    div.appendChild(p);
+  });
+},false);
+</script>
+<p>こんな感じでリソースに関する情報を取得することができます。</p>
+<p>次回も関連した話です。</p>
+

@@ -1,0 +1,26 @@
+<p>今回紹介する<dfn>Performance Timeline</dfn>は、<a href="15_2.html">前回</a>のNagivation Timingをある意味拡張したもので、またもや時間に関する話です。</p>
+<p>前回は、performanceのtimingプロパティにPerformanceTimingプロパティが入っており、それでページの表示に要した時間の情報が得られるというものでした。</p>
+
+<h3>PerformanceEntry</h3>
+<p>実は、時間計測の情報をPerformanceオブジェクト（<code>window.performance</code>）から取得する方法は他にもあります。Performanceオブジェクトには時間計測の情報が<dfn>PerformanceEntry</dfn>オブジェクトの形で保存されています。普通は複数の計測が行われるため、複数のオブジェクトが登録されています。</p>
+<p>全てのPerformanceEntryオブジェクトは以下のプロパティを持ちます。ものによってはさらに追加の情報を持ちます。</p>
+<dl>
+  <dt>name</dt>
+  <dd>そのPerformanceEntryオブジェクトに付けられた名前です。</dd>
+  <dt>entryType</dt>
+  <dd>PerformanceEntryオブジェクトの種類です。</dd>
+  <dt>startTime</dt>
+  <dd>そのPerformanceEntryオブジェクトで最初に記録された時間です。</dd>
+  <dt>duration</dt>
+  <dd>そのPerformanceEntryオブジェクトでの一連の時間計測が終了するまでの時間です。</dd>
+</dl>
+<p>ここで、「時間」というのは数値で表されています。前回同様にこの数値はミリ秒単位で表されていますが、今回は数値が小数になる可能性があります。その精度は最大で0.001ミリ秒ですが、実際の精度はブラウザやハードウェアに依存するでしょう。</p>
+
+<p>PerformanceEntryオブジェクトの例はとりあえず後回しにするとして、Performanceオブジェクトに登録されたPerformanceEntryオブジェクトを見る方法を紹介します。それには、Performanceオブジェクトの<dfn>getEntries</dfn>メソッドを使用します。このメソッドは引数なしで、返り値は登録されている<b>PerformanceEntry</b>全ての配列です。</p>
+<p>他に、引数に文字列を指定することでentryTypeによる絞り込みができる<dfn>getEntriesByType</dfn>メソッドと、同じくnameによる絞り込みができる<dfn>getEntriesByName</dfn>メソッドがあります。さらにgetEntriesByNameメソッドの場合、第2引数によりentryTypeによる絞り込みもできます。</p>
+
+<p>以上でPerformanceEntryオブジェクトの取得方法は分かりましたね。しかし、具体的にどんな種類のPerformanceEntryがあるのかを知らないと役に立ちそうにありません。というわけで、次回からはPerformanceEntryの種類を解説していきます。</p>
+
+<p>短いですが導入編ということで、今回はこれで終わりです。</p>
+
+
