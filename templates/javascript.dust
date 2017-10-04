@@ -23,6 +23,9 @@
   {/navlinks}
   <section class="language-javascript">
     <h2>{page_title}</h2>
+    <p class="last-modified-time">
+      {last_modified|s}
+    </p>
     {+js_content/}
   </section>
   {?navlinks}

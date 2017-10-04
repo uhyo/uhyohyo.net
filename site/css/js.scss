@@ -10,31 +10,11 @@ ul.recent {
   }
 }
 
-/*
-pre {
-  display:block;
-  white-space:pre;
-
-  max-width: 100%;
-  overflow-x: auto;
+p.last-modified-time {
+  font-size: 0.9em;
+  color: #777777;
 }
-code {
-  display: inline-block;
-  border: 1px solid #d3d3d3;
-  margin: 0 2px;
-  padding: 1px;
 
-  font-weight: normal;
-}
-pre code {
-  display: block;
-  padding: 6px;
-  border-radius: 3px;
-
-  background-color:#f6f6f6;
-
-}
-*/
 code {
   font-weight: normal;
 }

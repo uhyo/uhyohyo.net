@@ -78,6 +78,19 @@ module.exports = (context)=>{
 
         const navlinks = [back_link, prev_link, next_link].filter(s=>s).join(' ｜ ');
         data.navlinks = navlinks;
+
+        // ファイルの最終更新日
+        try {
+            const {
+               mtime,
+            } = fs.statSync(filename);
+            const datetime = mtime.toISOString();
+            //人間に読みやすい
+            const last_modified = `このページの最終更新日：<time datetime="${datetime}">${mtime.getFullYear()}年${mtime.getMonth()+1}月${mtime.getDate()}日</time>`;
+            data.last_modified = last_modified;
+        } catch(e){
+        }
+
         data.page_title = page_title;
         return {
             data,
