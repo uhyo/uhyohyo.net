@@ -122,7 +122,7 @@ p
 &lt;/html&gt;
 </code></pre>
 
-<h3>replaceChild</h3>
+<h3 id="anchor-replacechild">replaceChild</h3>
 <p>次に紹介する<dfn>replaceChild</dfn>は、<strong>ノード</strong>が持つプロパティで、そのノードが持つある子ノードを、別のノードに<strong>置き換えます</strong>。より正確には、もともとあった子ノードを除去し、その位置に新しいノードを挿入します。</p>
 <p>実際のサンプルを見てみましょう。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;

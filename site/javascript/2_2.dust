@@ -28,7 +28,7 @@
 <p>それは<dfn>document</dfn>です。日本語で「文書」という意味の単語ですね。DOMのほとんどがここから始まるという、重要なオブジェクトです。</p>
 <p>documentは数多くのメソッドやプロパティを持ち、それらを使ってHTML文書を操作するわけです。</p>
 
-<h3>getElementByIdメソッド</h3>
+<h3 id="anchor-getelementbyid">getElementByIdメソッド</h3>
 <p>1行目では、documentが持つ<dfn>getElementById</dfn>というメソッドが使われています。大文字小文字を区別するので、注意しましょう。</p>
 <p>このメソッドは、引数で与えられたidを持つ要素を返すメソッドです。要素が持つidとは、すなわち<strong>id属性</strong>のことです。上のサンプルでは、p要素が「aaaaa」というidを持っているのが分かります。id属性とは、それぞれ個別の要素を区別するためのものです。</p>
 <p>そして、getElementByIdに渡した引数も'aaaaa'だったから、同じid「aaaaa」を持つp要素が返されるというわけです。</p>

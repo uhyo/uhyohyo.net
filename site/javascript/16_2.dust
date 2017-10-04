@@ -123,7 +123,7 @@ while(true){
 
 <h3>iterableの活用例</h3>
 <p>iterableを自分で作る方法は少し後回しにして、iterableのfor-of文以外の活用法を紹介します。</p>
-<p><dfn>Array.from</dfn>というメソッドがあります。これは、配列ではないものから配列を作るメソッドです。<a href="11_7.html">Object.create</a>みたいに、コンストラクタに直接くっついているメソッドですね。</p>
+<p id="anchor-array-from"><dfn>Array.from</dfn>というメソッドがあります。これは、配列ではないものから配列を作るメソッドです。<a href="11_7.html">Object.create</a>みたいに、コンストラクタに直接くっついているメソッドですね。</p>
 <p>Array.fromは、iterableを渡されるとそれから配列を作ることができま。具体的には、イテレータを回して得た値が順番に入った配列になります。例えば、文字列もiterableであり、イテレータにより1文字ずつ返されるということを紹介したので、文字列をArray.fromで配列にしてみましょう。</p>
 <pre><code>
 console.log(<mark>Array.from</mark>("foobar"));

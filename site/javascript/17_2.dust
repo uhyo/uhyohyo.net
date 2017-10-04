@@ -1,0 +1,79 @@
+<p>実は、DOM4では基本的な機能に対して新しいメソッドがいろいろ追加されました。これらのメソッドはjQueryという有名なライブラリの影響を受けていると考えられます。</p>
+
+<h3>ノードの分類</h3>
+<p>メソッドを紹介する前に、DOM4で導入されたノードの分類について解説します。ノードというのは、たくさん種類がありました。要素を表すElement、木構造の頂点にあるDocument、テキストノードであるTextを最もよく使うでしょう。他に<a href="7_4.html">DocumentFragment</a>も使い所がありましたね。他にも、Attr、Comment、DocumentTypeなど普段あまり目にしないタイプのノードもあります。</p>
+<p>これらのノードを特徴により分類したものがあります。まず最初に紹介するのは<dfn>ParentNode</dfn>です。これは名前の通り、他のノードの親になりえるノードが該当します。具体的には、Document、DocumentFragment、Elementです。その他のノード、例えばTextは、テキストノードなので子を持つということがありませんので、ParentNodeではありません。</p>
+<p>逆に<dfn>ChildNode</dfn>というのもあります。これは、他のノードの子になりえるノードの分類です。具体的には、DocumentType、Element, Text, Comment, ProcessingInstructionです。後者3つはテキストデータを保持するもので、CharacterDataという分類がつくられています（CharacterData自体の概念はDOM4より前から存在しました）。</p>
+<p>ちなみに、ProcessingInstructionというのはXML文書で登場するもので、こういうやつです。</p>
+<pre class="language-xml"><code>
+&lt;?xml-stylesheet href="foo.xsl" type="text/xsl" ?&gt;
+</code></pre>
+<p>このように、<code>&lt;?</code>で始まり<code>?&gt;</code>で終わるのがProcessing Instruction（処理命令）で、それを示すノードがProcessingInstructionです。</p>
+<p>一見属性があるタグのように見えますが、中身の書式は自由です。これはxml-stylesheetという処理命令がたまたまこういう文法を持っていただけです。ただし、<code>&lt;?</code>の直後の文字列（今回の場合はxml-stylesheet）の部分はtargetと呼ばれ、他の部分（data）と区別されます。</p>
+<p>dataの部分は一切文法を持たないので、XMLやDOM的には中身はただの文字列にすぎません。そこで文字列を保持するノードであるCharacterDataの一種とされています。コメントについても中身はただの文字列なわけですね。ちなみに、CharacterDataは共通して、その保持する文字列を<strong>data</strong>プロパティにより取得できます。</p>
+
+<h3>メソッド・プロパティたち</h3>
+<p>さて、話を戻してメソッドを紹介することにします。上でParentNodeとChildNodeの定義を紹介したのは、これに対して定義されたメソッドが存在するからです。例えばParentNodeが持つメソッドというのは、Document、DocumentFragment、Elementに共通するメソッドということになります。</p>
+<p>ちなみに、従来は複数の種類のノードに存在すべきメソッドは全部Nodeに定義されていました。例えば<a href="2_5.html#anchor-append-child">appendChild</a>について考えます。これは実はNodeが持つメソッドです。だから、Elementに対してもDocumentFragmentに対しても共通に利用できました。しかし、Nodeが持つメソッドということは、子を持たないようなノード、例えばTextに対してもappendChildを呼び出すことができます。ところが、テキストノードに対して子を追加することはできないので、エラーになります。そこでDOM4では、メソッドをもつ範囲をParentNodeに制限することでこの問題を解消し、無意味なメソッドを無くそうとしています。</p>
+<p>とはいえ、互換性の問題から、appendChildといった旧来のメソッドをいきなり消すことができません。それでも新しいメソッドを作ることに意味はあります。最近はJavaScriptの開発環境が充実し、自動補完や（TypeScriptでは）型チェックなどもできるようになりました。その精度を向上させることができます。</p>
+
+<p>前置きが長くなりましたが、それでは最初はParentNodeが持つメソッドを紹介します。ParnetNodeの特徴は子を持てることだったので、子に関するメソッドやプロパティがあります。</p>
+<p>まずは<dfn>append</dfn>です。これは子ノードを追加するメソッドです。appendChildが進化したメソッドです。</p>
+<p>進化したポイントは、まず引数は1つだけではなく任意の数可能です。これにより、複数のノードを一度に追加することができます。一つ一つappendChildする手間が省けるのでとてもうれしいですね。</p>
+<p>もう1つは、テキストノードを挿入したいときは<a href="2_5.html#anchor-createtextnode">document.createTextNode</a>を使ってテキストノードを作るかわりに、引数に文字列を渡すと勝手にテキストノードに変換してくれる点です。</p>
+<p>前回のサンプルに登場した、p要素の中身を作る次の部分をappendを使って書き換えてみましょう。</p>
+<pre><code>
+p.textContent="ああ、";
+p.appendChild(time);
+p.appendChild(document.createTextNode("もいい天気だなあ。"));
+</code></pre>
+<p>これを書き換えると次のようになります。</p>
+<pre><code>
+p.<mark>append</mark>("ああ、",time,"もいい天気だなあ。");
+</code></pre>
+<p>記述が短くなり、しかも何をやっているか分かりやすくなりました。とても嬉しいですね。</p>
+
+<p>子ノードを追加するメソッドはもう1つあります。<strong>prepend</strong>です。appendでは親ノードの子の最後に全部追加しますが、prependは最初に追加します。例えば、</p>
+<div class="tree">
+A
+<ul>
+  <li>B
+  <li>C
+  <li>D
+</ul>
+<p>というときに<code>A.<mark>prepend</mark>(E,F);</code>を実行した場合次のようになります。</p>
+<div class="tree">
+A
+<ul>
+  <li><mark>E</mark>
+  <li><mark>F</mark>
+  <li>B
+  <li>C
+  <li>D
+</ul>
+<p>では、ここでいくつかParentNodeが持つプロパティを紹介します。</p>
+<p>まずは<dfn>children</dfn>です。これはchildNodes（Nodeに存在）のParentNode版で、HTMLCollectionを返します。childNodesと同じように使えます。</p>
+<p>……</p>
+<p>ここで、鋭い方ならあることに気づいたかもしれません。DOMというのは第六章でも紹介した通り、HTMLばかりでなくXML文書も扱うことができる仕様です。それなのにHTMLCollectionなどというものが登場している。これは<strong>歴史的経緯</strong>によるものです。まあ、あまり気にしないようにするのがよいでしょう。</p>
+<p>他に、<dfn>firstElementChild</dfn>と<dfn>lastElementChild</dfn>というプロパティがあります。これは、子ノードでElementであるもののうち最初/最後のものを返します。従来（Nodeのプロパティとして）存在したfirstChildとlastChildは、すべての子ノードのうち最初/最後のノードを返すことになります。例えば、</p>
+<pre class="language-html"><code>
+&lt;ul&gt;
+  &lt;li&gt;AAA&lt;/li&gt;
+  &lt;li&gt;BBB&lt;/li&gt;
+  &lt;li&gt;CCC&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+<p>のulに対してそのfirstChildはulタグとliタグの間にある改行のテキストノードとなりますが、firstElementChildは最初のli要素になります。正直テキストノードとかどうでもいいという場面も多いので、こちらが役に立つ場面が多いでしょう。</p>
+<p>他には、<dfn>childElementCount</dfn>というプロパティは、子ノードのうちElementであるものの数を返します。</p>
+<p>前回紹介した<strong>querySelectorAll</strong>も実はParentNodeのメソッドとして定義されています。他に、Allではない<strong>querySelector</strong>というメソッドもあり、こちらはセレクタにマッチする要素のうち最初のひとつのみを返します。すなわち、返り値はElementです（1つもなければnullになります）。</p>
+<p>他に、<strong>queryAll</strong>と<strong>query</strong>という似た名前のメソッドがあります。こちらはセレクタではなく相対セレクタ（<code>&gt; p</code>みたいな）にマッチする要素を返します。</p>
+<hr>
+<p>次に、ChildNodeが持つメソッドを紹介します。こちらの特徴は親がいるということなので、やはり親子関係に関わるメソッドが多いです。</p>
+<p>まず、最初のメソッドは<dfn>remove</dfn>です。これは引数なしのメソッドで、親ノードから自身を取り除きます。親がいない（まだ他のノードの子として追加されていない）場合は何も起きません。</p>
+<p>このメソッドの画期的なところは、親の存在を意識しなくていいところです。今までノードを木構造から除去するには、親ノードの<a href="2_4.html#anchor-removechild">removeChild</a>メソッドを呼ぶ必要がありました。こちらは子ノードのメソッドとなっている点が新しいですね。</p>
+<p>次に、<dfn>replaceWith</dfn>です。これは親の<a href="2_7.html#anchor-replacechild">replaceChild</a>を呼ぶのに相当するメソッドで、引数に渡されたノードで自身を置き換えます。先ほど紹介したappendやprependと同様に、複数のノードや文字列を引数に渡すことができます。</p>
+<p>他には、<dfn>before</dfn>と<dfn>after</dfn>メソッドがあります。これは、自分の前または後に、兄弟として引数のノードを追加するメソッドです。もちろん、引数はreplaceWith等と同様に複数指定可能です。これは特に便利ですね。今まではparentNodeの<a href="2_6.html#anchor-insertbefore">insertBefore</a>などを駆使する必要がありました。</p>
+<p>さらに、プロパティとして、<dfn>preivousElementSibling</dfn>と<dfn>nextElementSibling</dfn>があります。previousElementSiblingは、自身の兄弟ノードで、自身より前にあってElementであるもののうち最初のもの（一番自身に近いもの）を返します。nextElementSiblingは自身より後ろにあるElementで最初のものを返します。</p>
+<hr>
+<p>というわけで、今回はDOM4時代の基本的なメソッドをいくつか紹介しました。とても便利なメソッドたちですが、現在（2015年5月）まだブラウザの実装がぜんぜん追い付いていないことは書き終わってから気付きました。使う際は気をつけましょう。</p>
+

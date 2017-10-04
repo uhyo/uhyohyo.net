@@ -1,6 +1,6 @@
 <p>今回は、木構造からノードをまるまる除去してしまう方法を解説します。</p>
 
-<h3>removeChild</h3>
+<h3 id="anchor-removechild">removeChild</h3>
 <p>それには、<dfn>removeChild</dfn>というメソッドを使います。これは、<strong>ノード</strong>が持つメソッドです。</p>
 <p>まず使用例を見てみましょう。サンプルには、前回と同様のものを使います。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;

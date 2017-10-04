@@ -128,7 +128,7 @@ body
 <p>title属性は、その要素の補足情報を表すものです。</p>
 <p>ほかにもありますが、このくらいがメジャーなところです。</p>
 
-<h3>insertBefore</h3>
+<h3 id="anchor-insertbefore">insertBefore</h3>
 <p>次に、<dfn>insertBefore</dfn>というメソッドを紹介します。これは、前回のappendChildと似ています。違いは、appendChildは子ノードの最後にしか追加できませんでしたが、insertBeforeならどこにでも追加できるという点です。appendChildと同様に、<strong>ノード</strong>が持つメソッドです。</p>
 <p>追加する位置を指定するために、引数が追加するノードの他にもう1つあります。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;

@@ -20,25 +20,28 @@
     document.body.appendChild(p);
   }
 
-  //Mutation Observerの処理
   var mo = new MutationObserver(function(records){
-    records.forEach(function(record){
+    for (const record of records){
       //typeが"childList"だったら……（今回は他のは監視していないけど一応）
+      console.log(record.type);
       if(record.type==="childList"){
         //addedNodesを確認する
-        for(var i=0;i<record.addedNodes.length;i++){
-          if(record.addedNodes[i].querySelectorAll){
+        for(const node of Array.from(record.addedNodes)){
+          //テキストノード等の場合querySelectorAllがないので確認する
+          if(node.querySelectorAll){
             //ノードの中身からtime要素を探す
-            var times=record.addedNodes[i].querySelectorAll("time");
-            for(var j=0;j<times.length;j++){
-              addTitle(times[j]);
+            const times=node.querySelectorAll("time");
+            for(const time of Array.from(times)){
+              // time要素を見つけたらコンソールに表示
+              console.log('time要素を見つけました', time);
+              addTitle(time);
             }
           }
         }
       }
-    });
+    }
   });
-  mo.observe(document,{
+  mo.observe(document, {
     childList:true,
     subtree:true
   });

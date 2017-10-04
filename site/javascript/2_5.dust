@@ -108,7 +108,7 @@ html
 
 <p>つまり、追加するp要素に、さらにテキストノードの子ノードを持たせる必要があるわけです。次は、これを解説します。</p>
 
-<h3>テキストノードを作成する</h3>
+<h3 id="anchor-createtextnode">テキストノードを作成する</h3>
 <p>テキストノードを持たせるには、当然作る必要があります。テキストノードは、先に紹介したcreateElementでは作れません。別のメソッドを使います。</p>
 <p>それは、<dfn>createTextNode</dfn>です。これまた、<strong>documentが持つメソッド</strong>です。
   <pre><code>&lt;!doctype html&gt;

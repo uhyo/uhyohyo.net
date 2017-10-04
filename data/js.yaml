@@ -88,3 +88,5 @@ page:
   '16_3': 代入
   '16_4': シンボル
   '16_5': Promise
+  '17_1': MutationObserver
+  '17_2': DOM4的なメソッド

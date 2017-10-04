@@ -9,15 +9,15 @@
   <p>まずMutationObserverを登録し、そのあとdiv要素とp要素をbody要素に追加しています。要所でconsole.logによりログを出力しています。詳しくはソースを見てください。
 <script>
   //Mutation Observerを登録
-  var mo = new MutationObserver(function(records){
-    records.forEach(function(record){
+  const mo = new MutationObserver(function(records){
+    for (const record of records){
       if(record.type==="childList"){
-        for(var i=0;i<record.addedNodes.length;i++){
+        for(const node of Array.from(record.addedNodes)){
           //追加されたノードをconsole.logで表示Type
-          console.log(record.addedNodes[i].nodeName,"が追加されました。");
+          console.log(node.nodeName,"が追加されました。");
         }
       }
-    });
+    }
   });
   mo.observe(document.body,{
     childList:true
