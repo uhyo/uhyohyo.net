@@ -46,14 +46,27 @@ module.exports = (context)=>{
             back_link = '<a href="./index.html">戻る</a>';
             // 前を検出
             if (page > 1){
-                prev_link = `<a rel="prev" href="./${section}_${page-1}.html">${pageTitle(section, page-1)}</a>`;
+                const t = pageTitle(section, page-1);
+                prev_link = `<a rel="prev" href="./${section}_${page-1}.html" title="${t}　${data.js.page[section+'_'+(page-1)]}">${t}</a>`;
+            } else if (section > 1){
+                // 前章の最終を探す
+                let i = 1;
+                while (data.js.page[`${section-1}_${i}`]){
+                    i++;
+                }
+                i--;
+                if (i >= 1){
+                    const t = pageTitle(section-1, i);
+                    prev_link = `<a rel="prev" href="./${section-1}_${i}.html" title="${t}　${data.js.page[(section-1)+'_'+i]}">${t}</a>`;
+                }
             }
             // 後を検出
-            try {
-                // file existing check
-                fs.accessSync(path.resolve(context.projdir, `site/javascript/${section}_${page+1}.dust`), fs.F_OK);
-                next_link = `<a rel="next" href="./${section}_${page+1}.html">${pageTitle(section, page+1)}</a>`;
-            } catch(e){
+            if (data.js.page[`${section}_${page+1}`]) {
+                const t = pageTitle(section, page+1);
+                next_link = `<a rel="next" href="./${section}_${page+1}.html" title="${t}　${data.js.page[section+'_'+(page+1)]}">${t}</a>`;
+            } else if (data.js.page[`${section+1}_1`]) {
+                const t = pageTitle(section+1, 1);
+                next_link = `<a rel="next" href="./${section+1}_1.html" title="${t}　${data.js.page[(section+1)+'_'+1]}">${t}</a>`;
             }
         }else{
             r = rel.match(/^site\/javascript\/kiso(\d+)\.dust$/);

@@ -22,7 +22,9 @@
     </nav>
   {/navlinks}
   <section class="language-javascript">
-    <h2>{page_title}</h2>
+    {?page_title}
+      <h2>{page_title}</h2>
+    {/page_title}
     <p class="last-modified-time">
       {last_modified|s}
     </p>
