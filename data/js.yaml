@@ -83,3 +83,8 @@ page:
   '15_3': Performance Timeline
   '15_4': Resource Timing
   '15_5': User Timing
+  '16_1': WeakMapとWeakSet
+  '16_2': イテレータ
+  '16_3': 代入
+  '16_4': シンボル
+  '16_5': Promise

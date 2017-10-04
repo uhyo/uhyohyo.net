@@ -12,7 +12,7 @@
   // XHRで非同期通信をするPromiseを返す関数
   function xhrPromise(url){
     return new Promise(function(fulfill,reject){
-      var xhr=new XMLHttpRequest();
+      const xhr=new XMLHttpRequest();
       xhr.open("GET",url);
       xhr.send(null);
 
@@ -30,7 +30,7 @@
   }
 
   //Promise.allに3つのPromiseを渡す
-  var p=Promise.all([xhrPromise("/index.html"), xhrPromise("/javascript/"), xhrPromise("/javascript/17_3.html")]);
+  const p=Promise.all([xhrPromise("/index.html"), xhrPromise("/javascript/"), xhrPromise("/javascript/17_3.html")]);
   p.then(function(results){
     // resultsは配列になっているのでつなげて表示する
     document.getElementById('resultarea').textContent=results.join("\n\n");

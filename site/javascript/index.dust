@@ -138,6 +138,7 @@
   <h2>第二篇 新しいJavaScript</h2>
   <p>JavaScriptの中でも割と新しい部類の技術について紹介します。</p>
   <p>具体的にはES5以降のJavaSciptやHTML5の関連技術、また最近標準化されたAPIなどを紹介します。</p>
+  <p>なお、新しいというのは講座が最初に執筆された当時から見て新しいということなので、だいたい2010年くらいからです。</p>
 
   <h3>第十一章　ES5</h3>
   <ol>
@@ -189,7 +190,7 @@
     <li><a href="15_5.html">User Timing</a></li>
   </ol>
   
-  <h3>第十六章　ECMAScript6</h3>
+  <h3>第十六章　ES2015</h3>
   <ol>
     <li><a href="16_1.html">WeakMapとWeakSet</a></li>
     <li><a href="16_2.html">イテレータ</a></li>

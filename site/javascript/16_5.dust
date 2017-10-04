@@ -1,0 +1,320 @@
+<p>今回はES2015で追加された<b>Promise</b>を解説します。Promiseは、簡単にいうと<strong>非同期処理</strong>を抽象化したオブジェクトです。</p>
+
+<h3>従来の非同期処理</h3>
+<p>非同期処理というのはおおざっぱに言えばすぐには結果が得られない処理です。今までにもいくつかの例を紹介しました。例えば、<a href="13_1.html">XMLHttpRequest</a>です。これは、次のように使いました。</p>
+<pre><code>
+const xhr=new <mark>XMLHttpRequest</mark>();
+xhr.open("GET","/index.html");
+xhr.send(null);
+xhr.<mark>addEventListener</mark>("load",function(e){
+  console.log(xhr.status, xhr.responseText);
+});
+</code></pre>
+<p>これは非常に単純なコードで、/index.htmlをGETで読み込んでその結果を表示するというものです。もちろん実際はエラー処理なども行う必要があるのでさらに複雑なコードを書く必要がありますが、ここでは必要最低限の記述としました。</p>
+<p>このような通信というのは、すぐには結果が得られない処理の代表例です。インターネット上でデータをやりとりするには当然時間がかかります。さらに、PCに保存されているファイルの読み書きなども一般には非同期の処理になります。自分のパソコンの中のことなのにと思うかもしれませんが、実際に処理を行うCPUの動作速度に比べてハードディスクなどの動作速度は遅いので、CPU側からしたら待たされることに変わりはありません。</p>
+<p>さて、このコードでは、XHRの結果を得るために<strong>イベントを登録</strong>しています。イベントというのは、何かが起こったときに予め登録しておいた関数（イベントハンドラ）を呼んでもらうという方式ですね。今回の場合はloadイベントで、これは通信が正常に完了して結果を得たことを表すものです。</p>
+<p>ちなみに、HTTPリクエストの発行はsendメソッドで行われますが、通信は非同期なのでプログラムはそのまま進み、addEventListenerが実行されます。これにより、通信が完了した時点ではちゃんとイベントが登録されていることが保証されます。</p>
+
+<p>非同期処理の方法としていままで紹介したものの多くはこのようにイベントを使うものです。これは、このサイトで多く紹介してきたDOMがもともとイベントをベースにした設計になっており、多くの非同期処理的APIがその延長上のものとして定められてきたことによります。</p>
+
+<p>非同期処理の他の方式としては、コールバックを渡すというものがあります。この方式は恐らく今まで紹介したことがないですが、ある関数の引数として関数を渡して、処理が終わったら呼んでもらうというものです。</p>
+<p>単純な例としては<strong>setTimeout</strong>があります。これは今まで紹介していなかったかもしれませんが、一定時間後に引数に渡した関数を呼んでくれる関数です。</p>
+<pre><code>
+<mark>setTimeout</mark>(function(){
+  console.log("foo");
+},5000);
+</code></pre>
+<p>このコードは5000ミリ秒後、すなわち5秒後に関数を呼んでもらうものです。実際に実行してみると5秒後にコンソールにログが表示されます。</p>
+<p>これは「5秒待つ」という処理を非同期的に行なったと考えることもできます。</p>
+
+<p>より有用な例としては、すぐには試すことができないかもしれませんが、node.jsのfsモジュールによるファイル読み込みの例を挙げてみます。</p>
+<pre><code>
+var fs=require('fs');
+
+<mark>fs.readFile</mark>("ファイル名",{encoding:"utf8"},function(err,data){
+  console.log(data);
+});
+</code></pre>
+<p>このコードでは、fs.readFileメソッドを呼び出すとファイル読み込みを行い、読み込みが完了したら第3引数に指定したコールバック関数が呼ばれます。引数dataにファイルの中身が文字列で入っています。</p>
+<p>特徴は、コールバックに引数が2つあることです。第1引数のerrはその名の通りエラーを表します。非同期処理の途中でエラーが発生した場合、この引数errにErrorオブジェクトが入っています。エラーがないときはnullになります。エラーの例は読み込もうとしているファイルが無かった、あるいはファイルを読み込む権限がなかったなどです。コールバック関数では、errに何か入っているかどうか調べることでエラーに対応することができます。</p>
+
+<p>ここまで非同期処理の例を紹介して何が言いたかったかというと、<em>非同期処理には複数のパターンがある</em>ということです。もっとも、どの例においても関数を呼び出してもらうということは共通していますが。</p>
+<p>ES2015では、Promiseを導入することで非同期処理を抽象化しています。これにより非同期処理に関する処理を書きやすくなります。</p>
+
+<h3>Promiseの利用</h3>
+<p>ではいよいよ、Promiseをどう使うのか紹介します。Promiseを使った非同期処理を行う関数は、コールバックを受け取ったりする代わりにPromiseオブジェクトを返します。例えば先ほどのファイル読み込みを例にとると、従来の方法では</p>
+<pre><code>
+readFile("ファイル名",function(err,data){
+  //コールバック関数
+});
+</code></pre>
+<p>としていたのを、次のようにすることができます。<small>（注：これはあくまで説明用の例です。node.jsでこう書けるわけではありません。）</small></p>
+<pre><code>
+const p = readFile("ファイル名");
+p.then(function(data){
+  // ...
+});
+</code></pre>
+
+<p>Promiseが表す非同期処理には結果が伴うことがあります。そうでないと、ファイル読み込みなどを表現できませんね。結果はコールバック関数の引数として受け取ることができます。</p>
+
+<p>実は、Promiseが表す非同期処理が終了する場合には2種類あります。成功（fulfilled）と失敗（rejected）です。上の例で登録したのは成功時の処理です。失敗時の処理も登録するには、thenメソッドに引数を2つ渡します。1つ目の関数が成功時の処理、2つ目の関数が失敗時の処理になります。</p>
+<pre><code>
+p.<mark>then</mark>(function(result){
+  /* ここで処理終了時の動作 */
+},function(err){
+  /* ここでエラー時の動作 */
+});
+</code></pre>
+<p>上の例から分かるように、失敗時も結果があり、コールバック関数に渡されます。一般にこれはエラーを表すオブジェクトになります。</p>
+<p>失敗時の処理のみを登録するには、thenの代わりに<strong>catchメソッド</strong>を呼び出します。Promiseのインスタンスが持つメソッドはthenとcatchの2つです。</p>
+
+<p>長々と書きましたが、要するにPromiseオブジェクトを得たら、thenメソッドで成功時の処理と失敗時の処理を登録すればOKということです。簡単ですね。</p>
+
+<h3>Promiseを作る</h3>
+<p>Promiseの使い方は分かりました。次の話題は、どうやってPromiseを作るかということです。非同期処理を実装したいときは自分でPromiseオブジェクトを作って返してあげる必要があります。</p>
+<p>これもそんなに難しくありません。newでPromiseのインスタンスを作ればよいのです。そのとき、引数として関数を渡します。</p>
+<pre><code>
+let p = new Promise(function(fulfill,reject){
+});
+</code></pre>
+<p>Promiseコンストラクタに渡された関数は即座に呼び出されます。この関数の中で具体的な非同期処理を行うことになります。このとき渡される2つの引数がポイントです。ここではfulfillとrejectと名づけたこの引数はそれぞれ関数です。fulfillを呼び出すとこのPromiseは成功になり、rejectを呼び出すと失敗になります。これらに引数を渡すことで、それがPromiseの結果となります。例えば、先ほど紹介したsetTimeoutを使って、5秒後に成功するPromiseを作るには次のようにします。</p>
+<pre><code>
+let p = new Promise(function(fulfill,reject){
+  setTimeout(fulfill,5000);
+});
+</code></pre>
+<p>この例ではPromiseに渡した関数の中で非同期処理（setTimeout）を行います。この処理は、5秒後にfulfillを呼び出します。fulfillが呼び出されたのでこのPromiseは成功となります。</p>
+
+<p>作り方は以上です。より具体的な例として、XHRをPromiseでラップして利用する<a href="16_5_sample.html">サンプル</a>を用意してみました。</p>
+<p>内部でXHRを使ってHTTP通信を行うPromiseを返すxhrPromise関数を用意して、それを使うサンプルです。ページを開いて少ししたらXHRで取得したトップページのソースが表示されます。</p>
+<p>内部はXHRの方式に従って処理を行なっていますが、それを隠蔽してPromiseを返しています。使う側は、内部がどうなっているのかをあまり気にせず、HTTP通信を行うPromiseであるということがわかっていればOKです。</p>
+
+<h3>Promiseのメソッド</h3>
+<p>さて、Promiseの作り方も分かったので、ここからは少し細かい話題です。複数のPromiseを組み合わせて新しいPromiseを作るためのメソッドがあらかじめ用意されています。</p>
+<p>例えば、非同期処理なので、複数の処理を同時に行うことができます。すると「全ての処理が終わるまで待つ」ということをやりたくなります。これを実現するのが<strong>Promise.all</strong>メソッドです。引数としてPromiseの配列を渡すと、それらが全て成功したら成功となるような新しいPromiseを作って返してくれます。そのときの結果は、各Promiseの結果を配列でまとめたものになります。</p>
+<p>引数で渡したPromiseが一つでも失敗すると、その時点で返されたPromiseも失敗となります。</p>
+<p>Promise.allは、渡されたPromiseがどんな処理をするかは一切気にしません。Promiseが成功するか失敗するか、またそれがいつかということにのみ興味を持ちます。（というより、それ以外の情報をPromiseは提供してくれません。）</p>
+<p>そこで、先ほどのサンプルで作ったPromiseをPromise.allに渡してみるのが<a href="16_5_sample2.html">サンプル2</a>です。ちゃんと動作していることが分かりますね。</p>
+<p>ちなみに、Promise.allに渡すのは配列だけでなくiterable（<a href="16_2.html">一六章第二回</a>）でも構いません。</p>
+
+<p>もうひとつ、<strong>Promise.race</strong>というメソッドもあります。こちらは渡された全てのPromiseが解決するまで待つのではなく、どれか1つが解決した時点で終了するPromiseを返します。なお、解決（resolve）というのはPromiseが成功または失敗することを指します。</p>
+<p>最も早く解決したPromiseが成功した場合、その結果を伴って新しいPromiseも成功します。同様に、最も早く解決したPromiseが失敗した場合は新しいPromiseも失敗で終わります。他のPromiseの結果は無視されます（結果が無視されるだけで、非同期処理自体が停止するようなことはありません）。raceという名前は一番早く解決したのを採用するという動作を表しています。</p>
+<p>こちらも使ってみました。<a href="16_5_sample3.html">サンプル3</a>です。これはなかなか面白い動作をします。3つの通信のどれが一番早く完了するかというのは運によるところもあるので、開くたびにどれが表示されるか変わるかもしれません。</p>
+
+<p>次に、<strong>Promise.resolve</strong>メソッドを紹介します。これは、即座に（ただし非同期的に）成功するPromiseを作って返します。そのとき結果の値は、Promise.resolveメソッドに渡した値になります。つまり、例えば</p>
+<pre><code>
+Promise.resolve(4)
+</code></pre>
+<p>というのは、おおよそ次と同様です。</p>
+<pre><code>
+new Promise(function(fulfill,resolve){ fulfill(4); })
+</code></pre>
+
+<p>また、<strong>Promise.reject</strong>メソッドもあり、こちらは常に失敗するPromiseを作って返すものです。結果の値はPromise.rejectメソッドに渡した値です。</p>
+<p>これら2つのメソッドは大したことをしているわけではありませんが、このようなPromiseを作る必要があるときに簡単に、また分かりやすく書くことができるので有用です。</p>
+<p>作った時点で既に結果がわかっているようなPromiseを作る意味も、無いわけではありません。例えばPromiseを返すメソッドを作るときに、引数がおかしいのでエラーを出したい場合などは、必ず失敗するPromiseを返すことができます。</p>
+
+<p>ちなみに、Promise.resolveの引数として別のPromiseを渡した場合は、そのPromiseをそのまま返します。これは、Promise.resolveが「値をPromiseに変換する」という役割を持っていると見なせば理解できます。既にPromiseならばそのままで問題ないわけですね。</p>
+
+<h3>Promiseチェーン</h3>
+<p>Promiseに関する最後の話題は、Promiseチェーンです。</p>
+<p>実は、Promiseのメソッドthenやcatchは、<strong>新しいPromiseを返します</strong>。次の場合を考えてください。</p>
+<pre><code>
+const p1 = makeSomePromise();
+p1.then(function(result){
+  console.log(result);
+});
+</code></pre>
+<p>ここでmakeSomePromise関数は何らかのPromiseを作って返す関数だと思ってください。先ほどのサンプルのxhrPromise関数とかでもいいです。これは先ほどまでと同様にthenで成功時の処理を記述しています。いままではthenの返り値などというものに注目していませんでしたが、実はここでPromiseが返されているのです。すなわち、</p>
+<pre><code>
+const p1 = makeSomePromise();
+<mark>const p2 = </mark>p1.then(function(result){
+  console.log(result);
+});
+</code></pre>
+<p>とすると、p2は別のPromiseになっています。このPromiseはどんな振る舞いをするのでしょうか。</p>
+<p>実はp2は、p1.thenに渡された関数の<strong>返り値</strong>を結果として成功するようなPromiseになっています。実際に実行可能な以下のサンプルで確かめてみます。</p>
+<pre><code>
+var p1 = Promise.resolve(4);
+var p2 = p1.then(function(result){
+  console.log("p1: ",result);
+  <mark>return 5;</mark>
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+});
+</code></pre>
+<p>p1.thenによって返されたPromiseであるp2に対してさらにthenメソッドを呼び出し、p2がどう解決されるのか確かめました。次の結果になります。</p>
+<pre class="language-none"><code>
+p1: 4
+p2: 5
+</code></pre>
+<p>ここで、p1.thenに渡すメソッドを次のように変えてみましょう。</p>
+<pre><code>
+var p1 = Promise.resolve(4);
+var p2 = p1.then(function(result){
+  console.log("p1: ",result);
+  return <mark>result*2</mark>;
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+});
+</code></pre>
+<p>p1.thenのメソッドの返り値、すなわちp2の結果に、p1の結果を利用しています。これの結果は以下です。</p>
+<pre class="language-none"><code>
+p1: 4
+p2: 8
+</code></pre>
+<p>いま、p1の結果に注目せずp2の結果のみ注目しましょう。</p>
+<pre><code>
+var p1 = Promise.resolve(4);
+var p2 = p1.then(function(result){
+  return result*2;
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+});
+</code></pre>
+<p>さらに、変数p1やp2は実は要らないですね。次のようにできます。</p>
+<pre><code>
+Promise.resolve(4)
+.then(function(result){
+  return result*2;
+})
+.then(function(result){
+  console.log("p2: ",result);
+});
+</code></pre>
+<p>thenメソッドの返り値に対してそのままthenメソッドを呼ぶ形になりました。このようにメソッドを続けて呼ぶ形は一般にメソッドチェーンと呼ばれます。</p>
+<p>こうなると、1つめのthenは結果を利用するというより、<em>Promiseの結果を変換する</em>という役割を果たしていることが分かります。このようにthenをつなげて値を変換するのが最も簡単なPromiseチェーンの形です。</p>
+<p>さらに、上の例ではthenのコールバックは普通の値を返しましたが、ここでPromiseを返すことができます。そうすると、返されたPromiseが解決した時点で外側のPromiseも解決します。つまり、値の変換を非同期的に行うことができるのです。例えば、5秒かけて値を倍にするPromiseを返すdoublePromise関数を用意します。これで作ったPromiseを返り値にしてみましょう。</p>
+<pre><code>
+function doublePromise(value){
+  return new Promise(function(fulfill,resolve){
+    setTimeout(function(){
+      fulfill(value*2);
+    },5000);
+  });
+}
+
+Promise.resolve(4)
+.then(function(result){
+  return <mark>doublePromise(result)</mark>;
+})
+.then(function(result){
+  console.log("p2: ",result);
+});
+</code></pre>
+<p>実行すると、5秒たって<code>p2: 8</code>と表示されます。</p>
+<p>p1自体は一瞬で解決されるはずですが、1つ目のthenの処理（のPromise）が5秒かかるので、その次のthenに進むのも5秒後となっています。このように、Promiseチェーンでは複数のPromiseをつなげて逐次的に非同期処理を実行することもできるのです。なお、上のサンプルの後半はよく見ると次のように書けることが分かります。</p>
+<pre><code>
+Promise.resolve(4)
+.then(<mark>doublePromise</mark>)
+.then(function(result){
+  console.log("p2: ",result);
+});
+</code></pre>
+<p>こう書くと多少わかりにくくなるかもしれませんが、間に処理を挟んでいるという感じがとてもしますね。</p>
+
+<h3>エラーの処理</h3>
+<p>Promiseチェーンについてもう少し考えてみましょう。何事もなければthenを順に巡っていくような動作をすることがわかりましたが、Promiseには成功だけでなく失敗もあります。失敗が発生したときにPromiseチェーンがどんな挙動をするのか見ておきましょう。</p>
+
+<p>実は、thenのコールバック関数の処理中に例外が発生した場合、そのthenが返したPromiseは失敗します。例外を発生させる一番簡単な方法はthrowすることですので、throwしてみましょう。次のサンプルを見てください。この例ではどのPromiseで何が起こっているのか分かりやすいようにいちいち変数に入れています。</p>
+<pre><code>
+var p1 = Promise.resolve(4);
+var p2 = p1.then(function(result){
+  <mark>throw "foo";</mark>
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+},function(err){
+  console.log("p2 fails: ",err);
+});
+</code></pre>
+<p>これを実行すると<code>p2 fails: foo</code>という結果になります。何が起こったかというと、まずp1は成功してp1.thenで登録された関数が呼ばれます。これの実行中に例外が発生したので、p1.thenが返したPromise返り（今回はp2）が失敗となります。p1.thenの実行がちゃんと返り値を返して終了すればPromiseは成功ですから、それに対応する振る舞いとしてはとても妥当ですね。</p>
+<p>なお、返り値にPromiseを返すというパターンの場合、そのPromiseが失敗ならp2も失敗となります。次の例です。</p>
+<pre><code>
+var p1 = Promise.resolve(4);
+var p2 = p1.then(function(result){
+  <mark>return Promise.reject("foo");</mark>
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+},function(err){
+  console.log("p2 fails: ",err);
+});
+</code></pre>
+
+<p>次に、以下の場合を見てみましょう。</p>
+<pre><code>
+var p1 = <mark>Promise.reject("err");</mark>
+var p2 = p1.then(function(result){
+  return result*2;
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+},function(err){
+  console.log("p2 fails: ",err);
+});
+</code></pre>
+<p>p1が失敗する場合です。この場合p2はどう解決されるでしょうか。p2は、thenの第2引数は指定されていないので、p1が成功したときの振る舞いは設定されていますが、p1が失敗したときの振る舞いは指定されていません。この場合は<strong>デフォルトの動作</strong>をされます。失敗時のデフォルトの動作は以下です。</p>
+<pre><code>function(err){ throw err; }</code></pre>
+<p>よって、p2はp1が失敗したことを受けてデフォルト動作によりthrowするので、p2も失敗となります。直感的には、p1の失敗がp2に伝播したようなイメージです。</p>
+<p>では、p2がp1の失敗を処理できた場合はどうでしょう。</p>
+<pre><code>
+var p1 = Promise.reject("err");
+var p2 = p1.<mark>catch</mark>(function(err){
+  //errを無視して値を返す
+  return 10;
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+},function(err){
+  console.log("p2 fails: ",err);
+});
+</code></pre>
+<p>今回はcatchで登録したので、p1の失敗を受けてp2は登録した処理を実行し、10を返します。するとp2は結果10で成功ということになります。従って、これの結果は<code>p2: 10</code>ということになります。ここで注目すべきは、Promiseチェーンの中で失敗が発生しても、catchすれば成功に戻して続けることができるという点です。これは、thenの第二引数でも大丈夫です。thenを使うことで、成功と失敗を両方扱うことが可能です。</p>
+<p>さて、このままでp1を成功に変えたらどうなるでしょうか。
+<pre><code>
+var p1 = <mark>Promise.resolve(5);</mark>
+var p2 = p1.<mark>catch</mark>(function(err){
+  //errを無視して値を返す
+  return 10;
+});
+p2.then(function(result){
+  console.log("p2: ",result);
+},function(err){
+  console.log("p2 fails: ",err);
+});
+</code></pre>
+<p>この場合、p1は成功となります。p2はp1が失敗した場合の処理は登録されていますが成功した場合の処理は登録されていませんので、やはりデフォルト動作が適用されます。成功時のデフォルト動作は以下です。</p>
+<pre><code>function(value){ return value; }</code></pre>
+<p>つまり、p1の結果の値が素通りしてp2の結果となります。よってこの場合はp2は結果5で成功することになります。</p>
+<p>先ほど見た失敗時のデフォルト処理も、結局失敗が素通りするということになるので、処理が登録されていない場合は成功でも失敗でも素通りするということになります。</p>
+
+<p>さて、今まで紹介したPromiseチェーンですが、よく見るのは次のような形でしょう。</p>
+<pre><code>
+var p = makeSomePromise();
+p.then(function(){
+  /* 成功時の処理 */
+}).catch(function(){
+  /* 失敗時の処理 */
+});
+</code></pre>
+<p>thenには2つの引数を渡すことで成功時と失敗時の処理を両方書くことができますが、このようにthenとcatchに分けて書くこともできます。</p>
+<p>pが成功した場合thenで処理されて、catchは素通りします。pが失敗した場合はthenを素通りしてcatchで処理されます。これは基本的には、</p>
+<pre><code>
+var p = makeSomePromise();
+p.then(function(){
+  /* 成功時の処理 */
+},function(){
+  /* 失敗時の処理 */
+});
+</code></pre>
+<p>と同じですが、1つ違いがあります。thenの処理の中で例外が発生した場合です。上の場合は、thenが返したPromiseが失敗したという扱いになるので、次のcatchでエラーが処理されます。一方下の場合は、thenでエラーが発生するとそのPromiseは失敗となりますが、その次のPromiseはないので失敗時の処理は呼ばれません。下のやつに書いてある失敗時の処理は、あくまでpが失敗したときの処理となっています。</p>
+
+<p>以上で説明は終わりです。thenやcatchがメソッドチェーンで繋がっているのを見たら、実はこういう仕組みになっているということを思い浮かべてみましょう。
+<hr>
+<p>まとめとしては、Promiseの作り方と使い方を紹介しました。非同期処理をする関数やライブラリを作るときは、Promiseを返してみるのが今風ということです。</p>
+

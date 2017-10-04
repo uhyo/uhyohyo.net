@@ -1,0 +1,252 @@
+<p><dfn>シンボル</dfn>は、ES6で導入された<strong>新しいプリミティブ</strong>です。</o>
+<p>新しいプリミティブであるということは、オブジェクトではなく、文字列でも数値でも真偽値でもない値ということです。</p>
+<p>ただ、シンボルは既存のプリミティブとは違い、リテラルによる表現を持ちません。文字列はコード中に<code>"foo"</code>とか文字列リテラルを書けば得られるし、数値や真偽値もそれを表すリテラルがあり、まさに「値」という感じがしました。シンボルはそういう表現を持ちません。</p>
+<p>シンボルを作るには、<code>Symbol</code>という組み込み関数を呼び出します。</p>
+<pre><code>
+let s = <mark>Symbol</mark>();
+</code></pre>
+
+<h3>シンボルの使い方</h3>
+<p>シンボルは、<strong>オブジェクトのプロパティのキー（プロパティ名）にすることができます</strong>。</p>
+<p>今までオブジェクトのプロパティ名は必ず文字列でした。それが、文字列ではなくシンボルでもいいということです。次の例を見てください。</p>
+<pre><code>
+const obj = {};
+obj["foo"]="hoge";
+
+const s = Symbol();
+obj[s]="piyo";
+
+console.log(obj.foo,obj[s]);
+</code></pre>
+<p>これを実行すると<code>hoge piyo</code>と表示され、<code>obj[s]</code>により<code>"piyo"</code>が取得できていることが分かります。</p>
+<p>ただ、今までも配列など、見かけ上キーとして数値を指定するような場合もありました。その場合は文字列に変換されていましたね。例えば次の例です。</p>
+<pre><code>
+const obj={};
+obj[3]="foo";
+
+console.log(obj["3"]);
+</code></pre>
+<p>これにより、<code>3</code>をキーにした場合と<code>"3"</code>をキーにした場合で同じプロパティを参照していることがわかります。</p>
+<p>一方、シンボルは文字列に変換されるわけではありません。次の例で確かめてみましょう。</p>
+<pre><code>
+const obj={}, s=Symbol();
+obj[s]="foo";
+console.log(obj[String(s)]);
+</code></pre>
+<p>undefinedが表示され、<code>s</code>をキーにした場合と<code>String(s)</code>をキーにした場合で異なることが分かります。String関数は渡されたものを文字列に変換する関数でしたね。</p>
+<p>つまり、シンボルsがオブジェクトのキーとして使われた場合はあくまでシンボルのままオブジェクトのキーになっているのであり、文字列に変換されているわけではないということです、このように、文字列以外をオブジェクトのキーにできるというのはいままでにない概念ですね。</p>
+<p>オブジェクトのキーとしては、シンボルはあらゆる文字列と異なります。すなわち、シンボルをキーとして作ったプロパティは、どんな文字列をキーとしても取得できません。逆も同様です。</p>
+
+<p>なお、複数回<code>Symbol()</code>を呼び出すと、<strong>毎回異なるシンボルが返されます</strong>。シンボルはプリミティブですが、作らなければいけないという点、そして作ると毎回異なるという点でオブジェクトに似ていますね。</p>
+
+<p>このことを利用して、<a href="16_1.html">WeakMap</a>のときに紹介した例と似たことができます。下のような例がありました。</p>
+<pre><code>
+function saveValueInObject(obj,value){
+  obj.<mark>_myvalue</mark>=value;
+}
+function getValueFromObject(obj){
+  return obj.<mark>_myvalue</mark>;
+}
+</code></pre>
+<p>適当なオブジェクトに勝手に値を結び付けたい場合の例ですね。これの問題点は、外部から勝手に_myvalueというプロパティをいじられたり、あるいは参照されたりする危険性があるということでした。</p>
+<p>キーをシンボルにすればその危険性が下がります。</p>
+<pre><code>
+const myhiddensymbol=Symbol();  //実際はグローバル変数にせずにどこかに隠しておく
+
+function saveValueInObject(obj,value){
+  obj[myhiddensymbol]=value;
+}
+function getValueFromObject(obj){
+  return obj[myhiddensymbol]=value;
+}
+</code></pre>
+<p>リテラルを使えばどこでも任意のキーを作れる文字列とは異なり、今回キーとして使った<code>myhiddensymbol</code>と同じシンボルを別のところで作る方法はありません。シンボルは作るたびに新しい新しいものができるからですね。</p>
+<p>なので、外部から勝手にこのフィールドをいじることはできないだろうというわけです。</p>
+
+<p>ただし、この方法には抜け穴があります。</p>
+<p>まず思い出されるのは、<a href="11_4.html">Object.keys</a>や<a href="11_4.html">Object.getOwnPropertyNames</a>ではないでしょうか。こういったメソッドを使えばオブジェクトのプロパティ名を全て得ることができるので、これを使えばオブジェクトのキーとなっているシンボルも発見できると思うかもしれません。</p>
+<p>ところが、実はこれらはシンボルを発見できません。これらのメソッドは文字列のキーのみ列挙するのです。</p>
+<p>その代わりに、ES2015の新しいメソッド<dfn>Object.getOwnPropertySymbols</dfn>が存在して、これがオブジェクトのキーとなっているシンボルを全て列挙して返してくれます。</p>
+<pre><code>
+var obj={}, s=Symbol();
+obj[s]="foo";
+console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
+</code></pre>
+<p>これを使えば、上の例のmyhiddensymbolは結局見つかってしまうというわけです。</p>
+
+<p>なお、Object.keysやObject.getOwnPropertyNamesではシンボルを発見できないという仕様は、一つには後方互換性を保つという目的があると考えられます。オブジェクトにシンボルをキーとするプロパティが存在しても、シンボルがない時代（ES5まで）のコードには発見できません。つまり、任意のオブジェクトに勝手にシンボルをキーとするプロパティが追加されていても動作に影響を与えません。</p>
+<p>つまり、JavaScriptをバージョンアップするにあたって既存の機能を変更・追加したときに既存のES5プログラムが壊れたら困るので、ES5プログラムからは見えないシンボルを使って機能拡張を行ったということです。</p>
+
+<h3>Well-Known Symbols</h3>
+<p>さて、<dfn>Well-Known Symbols</dfn>とは、特別なシンボルです。</p>
+<p>特別なシンボルといっても何か特殊な機能を持つわけではなく、それ自体はただのシンボルです。</p>
+<p>ただ、プログラムの実行の内部処理から参照されるという点で特別な意味を持ちます。</p>
+<p>Well-Known Symbolsは予め作られたシンボルで、<code>Symbol</code>のプロパティとして参照可能です。例えばiterateというwell-known symbolは、<code>Symbol.<mark>iterate</mark></code>として参照可能です。</p>
+<p>Well-Known Symbolsには今のところ以下の種類がありますが、言語仕様の追加に伴って増えるかもしれません。</p>
+<ul>
+  <li>hasInstance</li>
+  <li>isConcatSpreadable</li>
+  <li>iterator</li>
+  <li>match</li>
+  <li>replace</li>
+  <li>search</li>
+  <li>species</li>
+  <li>split</li>
+  <li>toPrimitive</li>
+  <li>toStringTag</li>
+  <li>unscopables</li>
+</ul>
+<p>それぞれどのような意味があるのかは追々紹介するとしましょう。主に、組み込み関数の動作をカスタマイズするために使うことができます。</p>
+
+<h3>イテレータ</h3>
+<p>ところで、<a href="16_2.html">イテレータ</a>の話で@@iteratorメソッドなるものを紹介しましたが、実はその実体はこのwell-known symbolです。つまり、@@iteratorというのは<code>Symbol.iterator</code>のことです。なんということはありません。プロパティ名がwell-known symbolときにいちいち<code>Symbol.iterator</code>と書くのは大変なので代わりに@@iteratorと書いているだけの話だったのです。</p>
+<p>つまり結局のところ、iterableなメソッドは、<code>Symbol.iterator</code>をキーとして参照できるメソッドを持てばいいのです。例えば配列はiterableだったから、@@iteratorメソッドを持ちます（実際は<code>Array.prototype[Symbol.iterator]</code>に存在しています）。次のようにすれば確かめられるでしょう。</p>
+<pre><code>
+var arr=[1,2,3]; //適当な配列
+console.log(arr[<mark>Symbol.iterator</mark>]);
+</code></pre>
+<p>何らかの関数があることが確認できたと思います。</p>
+<p>iterableからイテレータをを得る場合は、こうして得られるメソッドを呼び出してイテレータを得るのです。</p>
+<p>そこで、とりあえずiterableを作ってみましょう。とりあえず、以前やったフィボナッチ数のイテレータを返すiterableをつくります。
+<pre><code>
+var iterable={};
+iterable[Symbol.iterator] = function(){
+  //イテレータを返す
+  return {
+    a:1,
+    b:0,
+    next:function(){
+      if(this.a&gt;100){
+        //無限ループ防止のため100を超えたら打ち切り
+        return {
+          done: true,
+          value: undefined,
+        };
+      }
+      var n=this.a+this.b, oldb=this.b;
+      this.a=oldb, this.b=n;
+      return {
+        value: oldb,
+        done: false,
+      };
+    }
+  };
+};
+
+//ためしに回してみる
+for(var n of iterable){
+  console.log(n);
+}
+</code></pre>
+<p>これでiterableが作れました。</p>
+<p>ただし前にも説明したとおり、これはあまりよいiterableではありません。なぜなら、これはイテレータから出てくるデータがイテレータ自体に内包されていて、iterableがただの飾りになっているからです。本来は、データはiterableの中にあって、イテレータはそのデータを参照して順番に返す仕事をするだけでなければなりません。この例はiterableではなくイテレータがデータを持っているからだめですね。</p>
+<p>ならばということで、ここで使われているaやbというプロパティをiterableのほうに移してみましょう。</p>
+<pre><code>
+var iterable={
+  a:1,
+  b:0
+};
+iterable[Symbol.iterator] = function(){
+  //イテレータを返す
+  return {
+    iterable: this,
+    next:function(){
+      if(this.iterable.a&gt;100){
+        //無限ループ防止のため100を超えたら打ち切り
+        return {
+          done: true,
+          value: null
+        };
+      }
+      var n=this.iterable.a+this.iterable.b, oldb=this.iterable.b;
+      this.iterable.a=oldb, this.iterable.b=n;
+      return {
+        value: oldb,
+        done: false
+      };
+    }
+  };
+};
+
+//ためしに回してみる
+for(var n of iterable){
+  console.log(n);
+}
+</code></pre>
+<p>これはデータをiterableのほうが持っていて、イテレータはiterableの参照とnextメソッドだけになりました。</p>
+<p>しかしこれならいいかというと、そうでもありません。これでは複数のイテレータを作ったときに動作が連動してしまいます。</p>
+<p>イテレータは、どこまで進んだかという情報自体はイテレータが持っていなければならないのです。そのため、あるイテレータが途中まで読み進んでいたとしても、別のイテレータを作って回したら最初から順番に値が出てこなければなりません。</p>
+<p>結論としては、フィボナッチ数という例がiterableに相応しくなかったわけですね。計算によって求められるので、参照すべきデータをiterable自体が持つことができません（同じ計算を省くためにメモしておくという方法はありますが）。</p>
+<p>とにかくこれでiterableの作り方がわかりました。何か回せそうなものを作るときは、iterableにしてみるのがよいでしょう。</p>
+
+<p>この例に、well-known symbolsが特殊な意味を持つということが表れています。for-of文などがiterableからイテレータを得るときに、内部的に@@iteratorメソッドを呼び出しているのです。このようにwell-known symbolsは処理系から使用されるという意味で特殊で、これらを使うことによりオブジェクトの挙動（@@iteratorの場合はどのようなイテレータを返すかという挙動）を制御することができるわけです。他のwell-known symbolsもそれぞれ処理系により使用される場面があります。</p>
+
+<h3>補足</h3>
+<p>シンボルはプリミティブなのですが、<a href="11_5.html#anchor-typeof">typeof演算子</a>を使うとどうなるのでしょう。</p>
+<p>実は、<code>"symbol"</code>が返ります。新しい値ですね。</p>
+<pre><code>
+console.log(typeof Symbol());  <em>//symbol</em>
+</code></pre>
+
+<p>また、さっきからシンボルをキーとするオブジェクトを作るのに、いちいち</p>
+<pre><code>
+var obj={}, s=Symbol();
+obj[s]="foo";
+</code></pre>
+<p>のように、空のオブジェクトを作ってからシンボルをキーにして値を代入するということをしていました。これは、オブジェクトリテラルでプロパティを作るやり方だと文字列をキーとするプロパティになってしまうからです。</p>
+<pre><code>
+var s=Symbol(), obj= {
+  s:"foo"
+};
+
+console.log(obj.s); //foo
+</code></pre>
+<p>ここでのオブジェクトリテラル中のプロパティ名sは、当然ながら変数sではなく文字列<code>"s"</code>というプロパティ名になります。これは、文字列として表すことができないシンボルをキーとしたい場合に少し不便です。そこで、ES2015では新しい記法が追加されました。<code>[ ]</code>で囲むことで、オブジェクトリテラル中のプロパティ名を式にできます。つまり、</p>
+<pre><code>
+var s=Symbol(), obj= {
+  <mark>[</mark>s<mark>]</mark>: "foo"
+};
+
+console.log(obj[s]);  //foo
+</code></pre>
+<p>この記法により、文字列<code>"s"</code>ではなく、変数sの中身をキーとするプロパティを作ることができます。ちなみに、これはシンボルに限らず任意の式を入れることができます。例えば、</p>
+<pre><code>
+var x="foo", y="bar";
+var obj={
+  [<mark>x+y</mark>]: 3
+};
+console.log(obj.foobar);  //3
+</code></pre>
+<p>これはなかなか便利ですね。使う機会もあることでしょう。</p>
+
+<p>また、実はSymbolには第1引数として文字列を渡すことができます。これはそのシンボルの名前、あるいは説明を指定するものです。</p>
+<pre><code>
+var s = Symbol(<mark>"foo"</mark>);
+console.log(s) // <em>Symbol(foo)</em>
+</code></pre>
+<p>これにより、シンボルをconsole.logで変換したりあるいは文字列に変換したときに名前が表示されて分かりやすくなります。</p>
+<p>注意しておくと、このようにSymbolに名前を付けたとしても、作られるのは毎回新しいシンボルです。よって、Symbolに同じ引数を渡して作ったシンボルでも、それぞれは異なります。</p>
+<pre><code>
+console.log(Symbol("foo") !== Symbol("foo"));  //true
+</code></pre>
+
+<h4>Symbol.for</h4>
+<p>最後に<dfn>Symbol.for</dfn>メソッドを紹介しておきます。これは文字列に対してシンボルを登録しておける機能です。正直どこに需要があるのかいまいち分かりませんが、あるので紹介しておきます。</p>
+<p>Symbol.forの引数に<em>文字列</em>を渡すと、やはり<b>シンボル</b>が作られて返されます。Symbol.forが特別なのは、このとき渡された文字列に対していま返されたシンボルが登録されるという点です。もしもう一度同じ文字列をSymbol.forに渡すと、新しいシンボルが作られる代わりに以前同じ文字列のときに作ったシンボルが返されます。</p>
+<pre><code>
+var a=Symbol.for("foo");
+var b=Symbol.for("foo");
+console.log(a===b); //true
+</code></pre>
+<p>この例では1回目のSymbol.forの呼び出しで新しいシンボルが作られましたが、2回目の呼び出しでは引数が前と同じ<code>"foo"</code>なので前と同じシンボルが返ります。その結果、aとbには同じシンボルが入っていることになります。</p>
+<p>なお、例えば<code>Symbol.for("foo")</code>によって作られたシンボルは<code>Symbol("foo")</code>の場合と同様に名前が付けられたシンボルとなります。</p>
+<p>どこに需要があるのかいまいち分からないと述べた理由は、シンボルに名前を付けて管理したければこんな感じで適当なオブジェクトに入れておけば自分で管理できそうだからです。</p>
+<pre><code>
+const dict = {
+  "foo": Symbol("foo"),
+  "bar": Symbol("bar"),
+};
+</code></pre>
+
+<p>なお、<code>Symbol.for</code>で得られたシンボルから元の文字列を得る方法もあります。<code>Symbol.keyFor</code>にそのシンボルを渡して呼び出すと文字列が返ってきます。<code>Symbol.for</code>以外で作ったシンボルを渡しても対応する文字列はないのでundefinedが返ります。</p>
+

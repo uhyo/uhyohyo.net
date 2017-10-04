@@ -12,7 +12,7 @@
   // XHRで非同期通信をするPromiseを返す関数
   function xhrPromise(url){
     return new Promise(function(fulfill,reject){
-      var xhr=new XMLHttpRequest();
+      const xhr=new XMLHttpRequest();
       xhr.open("GET",url);
       xhr.send(null);
 
@@ -30,7 +30,7 @@
   }
 
   //実際に使ってみる
-  var p=new xhrPromise("/index.html");
+  const p=new xhrPromise("/index.html");
   p.then(function(text){
     //成功した場合
     document.getElementById('resultarea').textContent=text;

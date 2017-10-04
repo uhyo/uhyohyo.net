@@ -12,7 +12,7 @@
   // XHRで非同期通信をするPromiseを返す関数
   function xhrPromise(url){
     return new Promise(function(fulfill,reject){
-      var xhr=new XMLHttpRequest();
+      const xhr=new XMLHttpRequest();
       xhr.open("GET",url);
       xhr.send(null);
 
@@ -30,7 +30,7 @@
   }
 
   //Promise.raceに3つのPromiseを渡す
-  var p=Promise.race([xhrPromise("/index.html"), xhrPromise("/javascript/"), xhrPromise("/javascript/17_3.html")]);
+  const p=Promise.race([xhrPromise("/index.html"), xhrPromise("/javascript/"), xhrPromise("/javascript/16_5.html")]);
   p.then(function(result){
     // 一番早く通信完了したどれかのソースが得られる
     document.getElementById('resultarea').textContent=result;

@@ -159,7 +159,7 @@ console.log(Object.getOwnPropertyDescriptor(Object.prototype,"toString"));
 <p>先ほど説明したようにenumerableがfalseになっていることが分かります。valueのfunction toString() { [native code] }というのは、これがtoStringの本体にあたる関数ですが、中身はブラウザの内部処理なのでJavaScriptでは表現できないという意味です。</p>
 <p>ちなみに、メソッド名にOwnと入っていることからも分かる通り、オブジェクト自身のプロパティしか得られません。このように、基本的にプロパティをいじるときはそのオブジェクト自身のプロパティが対象になります。</p>
 
-<p>では次に、プロパティデスクリプタを変更する方法を紹介します。変更するというより新しいプロパティデスクリプタをまるごと用意してあげるというほうが正しいですが、それには<dfn>Object.defineProperty</dfn>メソッドを使います。</p>
+<p id="anchor-object-defineproperty">では次に、プロパティデスクリプタを変更する方法を紹介します。変更するというより新しいプロパティデスクリプタをまるごと用意してあげるというほうが正しいですが、それには<dfn>Object.defineProperty</dfn>メソッドを使います。</p>
 
 <p>例えば、writable属性がfalseであるプロパティhogeを、objに追加には次のようにObject.definePropertyを呼び出します。</p>
 <pre><code>
