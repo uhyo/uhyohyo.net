@@ -6,13 +6,13 @@ module.exports = (context)=>{
     context.addPostLoadFileHook((context, filename, data)=>{
         // 講座ページは{ }を使えるようにアレする
         const rel = path.relative(context.projdir, filename).replace(path.sep, '/');
-        if (/^site\/javascript\/(?:kiso|\d+_)\d+\.dust$/.test(rel)){
+        if (/^site\/javascript\/(?:his|(?:kiso|\d+_)\d+)\.dust$/.test(rel)){
             // ページ名を抽出
             const r1 = data.match(/^page_title:\s*(\S+)\s*/);
             let page_title = null;
             if (r1 != null){
                 page_title = r1[1];
-                data = data.slice(data[0].length);
+                data = data.slice(r1[0].length);
             }
             // 講座ページ
             const hd1 = page_title != null ?
@@ -31,11 +31,14 @@ module.exports = (context)=>{
     });
     context.addPreRenderHook((context, filename, data)=>{
         const rel = path.relative(context.projdir, filename).split(path.sep).join('/');
-        let r = rel.match(/^site\/javascript\/(\d+)_(\d+)\.dust$/);
         let back_link = null;
+        if (rel !== 'site/javascript/index.dust'){
+            back_link = '<a href="./index.html">戻る</a>';
+        }
         let prev_link = null;
         let next_link = null;
         let page_title = null;
+        let r = rel.match(/^site\/javascript\/(\d+)_(\d+)\.dust$/);
         if (r != null){
             const section = parseInt(r[1]);
             const page = parseInt(r[2]);
@@ -43,7 +46,6 @@ module.exports = (context)=>{
             if (data.js.page[`${section}_${page}`] != null){
                 page_title += "　" + data.js.page[`${section}_${page}`];
             }
-            back_link = '<a href="./index.html">戻る</a>';
             // 前を検出
             if (page > 1){
                 const t = pageTitle(section, page-1);
