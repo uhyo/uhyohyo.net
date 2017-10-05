@@ -6,7 +6,7 @@ module.exports = (context)=>{
     context.addPostLoadFileHook((context, filename, data)=>{
         // 講座ページは{ }を使えるようにアレする
         const rel = path.relative(context.projdir, filename).replace(path.sep, '/');
-        if (/^site\/javascript\/(?:his|(?:kiso|\d+_)\d+)\.dust$/.test(rel)){
+        if (/^site\/javascript\/(?:his|(?:kiso|qa|\d+_)\d+)\.dust$/.test(rel)){
             // ページ名を抽出
             const r1 = data.match(/^page_title:\s*(\S+)\s*/);
             let page_title = null;
@@ -15,7 +15,7 @@ module.exports = (context)=>{
                 data = data.slice(r1[0].length);
             }
             // 講座ページ
-            const hd1 = page_title != null ?
+            const hd1 = page_title == null ?
                 `{>"$PROJ/templates/javascript.dust" /}` :
                 `{>"$PROJ/templates/javascript.dust" page_title="${page_title}" /}`;
             const header = `${hd1}
@@ -30,6 +30,10 @@ module.exports = (context)=>{
         return null;
     });
     context.addPreRenderHook((context, filename, data)=>{
+        const ext = path.extname(filename);
+        if (ext !== '.dust'){
+            return;
+        }
         const rel = path.relative(context.projdir, filename).split(path.sep).join('/');
         let back_link = null;
         if (rel !== 'site/javascript/index.dust'){
@@ -106,7 +110,9 @@ module.exports = (context)=>{
         } catch(e){
         }
 
-        data.page_title = page_title;
+        if (page_title != null){
+            data.page_title = page_title;
+        }
         return {
             data,
         };

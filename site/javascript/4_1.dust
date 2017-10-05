@@ -54,7 +54,7 @@ console.log(idx);
 <h3>文字列から抜き出す</h3>
 <p>文字列のうち指定した一部分だけを抜き出した文字列を取得することは、文字列に対する基本的な操作のひとつです。この方法はいくつかあります。</p>
 
-<h4>slice・substring</h4>
+<h4 id="anchor-slice-substring">slice・substring</h4>
 <p>まず、<dfn>slice</dfn>を使う方法を紹介します。</p>
 <pre><code>
 var str = "abcde";
