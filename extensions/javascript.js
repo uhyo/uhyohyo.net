@@ -117,6 +117,29 @@ module.exports = (context)=>{
             data,
         };
     });
+    // 一部のページで使うためのhelper
+    const {
+        dust,
+    } = context.getRenderer('dummy.dust');
+    dust.helpers.listJSPages = (chunk, context, bodies, params)=>{
+        const section = parseInt(params.section, 10);
+        if (Number.isNaN(section)){
+            dust.log('WARN', `illegal section number passed to listPages: ${params.section}`);
+            return chunk;
+        }
+        // olとliでrender
+        let str = '<ol>';
+        const prefix = `js.page.${section}_`;
+        let i = 1;
+        let val;
+        while (val = context.get(`${prefix}${i}`)){
+            str += `<li><a href="${section}_${i}.html">${val}</a></li>`;
+            i++;
+        }
+        str += '</ol>';
+        chunk.write(str);
+        return chunk;
+    };
 };
 
 function pageTitle(section, page){
