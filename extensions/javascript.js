@@ -6,7 +6,7 @@ module.exports = (context)=>{
     context.addPostLoadFileHook((context, filename, data)=>{
         // 講座ページは{ }を使えるようにアレする
         const rel = path.relative(context.projdir, filename).replace(path.sep, '/');
-        if (/^site\/javascript\/(?:his|(?:kiso|qa|\d+_)\d+)\.dust$/.test(rel)){
+        if (/^site\/javascript\/(?:kiso|qa|\d+_)\d+\.dust$/.test(rel)){
             // ページ名を抽出
             const r1 = data.match(/^page_title:\s*(\S+)\s*/);
             let page_title = null;
