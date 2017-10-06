@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link href="/css/css.css" rel="stylesheet">
+    <link rel="icon" href="/images/icons/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" href="/images/icons/144x144.png" sizes="144x144">
     {+additionalHead/}
     {?page_title}
       {?page_title_suffix}
