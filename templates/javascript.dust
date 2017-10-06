@@ -2,6 +2,17 @@
 {<additionalHead}
   <link href="/css/js.css" rel="stylesheet">
   <link href="/css/prism.css" rel="stylesheet">
+  {?twitter_description}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@uhyo_">
+    {?page_title}
+      <meta name="twitter:title" content="{page_title} &#x2014; JavaScript初級者から中級者になろう">
+    {:else}
+      <meta name="twitter:title" content="JavaScript初級者から中級者になろう">
+    {/page_title}
+    <meta name="twitter:description" content="{twitter_description}">
+    <meta name="twitter:image" content="http://uhyohyo.net/images/icons/144x144.png">
+  {/twitter_description}
 {/additionalHead}
 {<content}
   <h1>JavaScript初級者から中級者になろう</h1>

@@ -7,17 +7,21 @@ module.exports = (context)=>{
         // 講座ページは{ }を使えるようにアレする
         const rel = path.relative(context.projdir, filename).replace(path.sep, '/');
         if (/^site\/javascript\/(?:kiso|qa|\d+_)\d+\.dust$/.test(rel)){
+            // 属性
+            let attrs = '';
             // ページ名を抽出
             const r1 = data.match(/^page_title:\s*(\S+)\s*/);
-            let page_title = null;
             if (r1 != null){
-                page_title = r1[1];
                 data = data.slice(r1[0].length);
+                // ページ名あった
+                attrs += ` page_title="${r1[1]}"`;
             }
+            // ページの説明を生成
+            const description = generateDescription(data).replace(/"/g,'\\"');
+            attrs += ` twitter_description="${description}"`;
+
             // 講座ページ
-            const hd1 = page_title == null ?
-                `{>"$PROJ/templates/javascript.dust" /}` :
-                `{>"$PROJ/templates/javascript.dust" page_title="${page_title}" /}`;
+            const hd1 = `{>"$PROJ/templates/javascript.dust" ${attrs}/}`;
             const header = `${hd1}
 {<js_content}
 `;
@@ -46,14 +50,11 @@ module.exports = (context)=>{
         if (r != null){
             const section = parseInt(r[1]);
             const page = parseInt(r[2]);
-            page_title = pageTitle(section, page);
-            if (data.js.page[`${section}_${page}`] != null){
-                page_title += "　" + data.js.page[`${section}_${page}`];
-            }
+            page_title = pageNumber(section, page) + '　' + pageTitle(data, section, page);;
             // 前を検出
             if (page > 1){
-                const t = pageTitle(section, page-1);
-                prev_link = `<a rel="prev" href="./${section}_${page-1}.html" title="${t}　${data.js.page[section+'_'+(page-1)]}">${t}</a>`;
+                const t = pageNumber(section, page-1);
+                prev_link = `<a rel="prev" href="./${section}_${page-1}.html" title="${t}　${pageTitle(data, section, page-1)}">${t}</a>`;
             } else if (section > 1){
                 // 前章の最終を探す
                 let i = 1;
@@ -62,34 +63,34 @@ module.exports = (context)=>{
                 }
                 i--;
                 if (i >= 1){
-                    const t = pageTitle(section-1, i);
-                    prev_link = `<a rel="prev" href="./${section-1}_${i}.html" title="${t}　${data.js.page[(section-1)+'_'+i]}">${t}</a>`;
+                    const t = pageNumber(section-1, i);
+                    prev_link = `<a rel="prev" href="./${section-1}_${i}.html" title="${t}　${pageTitle(data, section-1, i)}">${t}</a>`;
                 }
             }
             // 後を検出
             if (data.js.page[`${section}_${page+1}`]) {
-                const t = pageTitle(section, page+1);
-                next_link = `<a rel="next" href="./${section}_${page+1}.html" title="${t}　${data.js.page[section+'_'+(page+1)]}">${t}</a>`;
+                const t = pageNumber(section, page+1);
+                next_link = `<a rel="next" href="./${section}_${page+1}.html" title="${t}　${pageTitle(data, section, page+1)}">${t}</a>`;
             } else if (data.js.page[`${section+1}_1`]) {
-                const t = pageTitle(section+1, 1);
-                next_link = `<a rel="next" href="./${section+1}_1.html" title="${t}　${data.js.page[(section+1)+'_'+1]}">${t}</a>`;
+                const t = pageNumber(section+1, 1);
+                next_link = `<a rel="next" href="./${section+1}_1.html" title="${t}　${pageTitle(data, section+1, 1)}">${t}</a>`;
             }
         }else{
             r = rel.match(/^site\/javascript\/kiso(\d+)\.dust$/);
             if (r != null){
                 const page = parseInt(r[1]);
-                page_title = pageTitle('基礎', page);
+                page_title = pageNumber('基礎', page);
                 if (data.js.page[`kiso${page}`] != null){
                     page_title += "　" + data.js.page[`kiso${page}`];
                 }
                 back_link = '<a href="./index.html">戻る</a>';
                 if (page > 1){
-                    prev_link = `<a rel="prev" href="./kiso${page-1}.html">${pageTitle('基礎', page-1)}</a>`;
+                    prev_link = `<a rel="prev" href="./kiso${page-1}.html">${pageNumber('基礎', page-1)}</a>`;
                 }
                 try {
                     // file existing check
                     fs.accessSync(path.resolve(context.projdir, `site/javascript/kiso${page+1}.dust`), fs.F_OK);
-                    next_link = `<a rel="next" href="./kiso${page+1}.html">${pageTitle('基礎', page+1)}</a>`;
+                    next_link = `<a rel="next" href="./kiso${page+1}.html">${pageNumber('基礎', page+1)}</a>`;
                 } catch(e){
                 }
             }
@@ -142,11 +143,19 @@ module.exports = (context)=>{
     };
 };
 
-function pageTitle(section, page){
+function pageNumber(section, page){
     if ('number' === typeof section){
         return `${kanji(section)}章第${kanji(page)}回`;
     }else{
         return `${section}第${kanji(page)}回`;
+    }
+}
+function pageTitle(data, section, page){
+    const n = data.js.page[`${section}_${page}`];
+    if (n != null){
+        return n || '';
+    } else {
+        `${section}第${kanji(page)}回`;
     }
 }
 function kanji(num){
@@ -207,4 +216,18 @@ function kanji(num){
         }
     }
     return result;
+}
+
+function generateDescription(data){
+    // 適当に抜き出す
+    let pre = data.slice(0, 400);
+    // 見出しを削除
+    pre = pre.replace(/<h([1-6])>.+?<\/h\1>/g, '');
+    // HTMLタグをざっくり削除
+    pre = pre.replace(/<.+?\>/g, '');
+    // 改行を消す
+    pre = pre.replace(/^\s*|\s*$/, '');
+    pre = pre.replace(/(?:\r|\n)+/g, ' ');
+    // 160文字くらい
+    return pre.slice(0, 160) + '……';
 }
