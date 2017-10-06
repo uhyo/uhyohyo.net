@@ -98,7 +98,7 @@ console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
 </ul>
 <p>それぞれどのような意味があるのかは追々紹介するとしましょう。主に、組み込み関数の動作をカスタマイズするために使うことができます。</p>
 
-<h3>イテレータ</h3>
+<h3 id="anchor-iterator">イテレータ</h3>
 <p>ところで、<a href="16_2.html">イテレータ</a>の話で@@iteratorメソッドなるものを紹介しましたが、実はその実体はこのwell-known symbolです。つまり、@@iteratorというのは<code>Symbol.iterator</code>のことです。なんということはありません。プロパティ名がwell-known symbolときにいちいち<code>Symbol.iterator</code>と書くのは大変なので代わりに@@iteratorと書いているだけの話だったのです。</p>
 <p>つまり結局のところ、iterableなメソッドは、<code>Symbol.iterator</code>をキーとして参照できるメソッドを持てばいいのです。例えば配列はiterableだったから、@@iteratorメソッドを持ちます（実際は<code>Array.prototype[Symbol.iterator]</code>に存在しています）。次のようにすれば確かめられるでしょう。</p>
 <pre><code>

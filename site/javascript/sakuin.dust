@@ -16,6 +16,8 @@
   <dd><a href="11_4.html">第十一章第四回</a></dd>
   <dt>for-of文</dt>
   <dd><a href="16_2.html">第十六章第二回</a></dd>
+  <dt>Generator</dt>
+  <dd><a href="16_6.html">第十六章第六回</a></dd>
   <dt>get・set</dt>
   <dd><a href="9_6.html">第九章第六回</a></dd>
   <dt>if・else・条件分岐</dt>
@@ -45,6 +47,8 @@
   <dd><a href="2_14.html">第二章第十四回</a></dd>
   <dt>while・do</dt>
   <dd><a href="kiso5.html">基礎編第五回</a></dd>
+  <dt>yield</dt>
+  <dd><a href="16_6.html">第十六章第六回</a></dd>
 
 
   <dt>イテレータ</dt>
@@ -72,6 +76,8 @@
   <dd><a href="1_2.html">第一章第二回</a></dd>
   <dt>真偽値</dt>
   <dd><a href="kiso3.html">基礎編第三回</a></dd>
+  <dt>ジェネレータ</dt>
+  <dd><a href="16_6.html">第十六章第六回</a></dd>
   <dt>シンボル</dt>
   <dd><a href="16_4.html">第一六章第四回</a></dd>
   <dt>数値</dt>

@@ -1,0 +1,135 @@
+<p>今回は<dfn>ジェネレータ</dfn>（<i lang="en">generator</i>）を解説します。これは、ざっくり言うと途中で抜けたりまた入ったりできる関数です。</p>
+<p>今まで、関数が実行されると必ずその関数は最後まで（またはreturn文にたどり着くまで）実行されました。今回紹介する<b>ジェネレータ関数</b>（<i lang="en">generator function</i>）を使うとそうではない関数を作ることができます。</p>
+
+<h3>function*</h3>
+<p>では、例を見てみましょう。</p>
+<pre><code>
+<em>// ジェネレータ関数を定義</em>
+<mark>function*</mark> gen(x){
+  console.log(x);
+  <mark>yield;</mark>
+  console.log(x*2);
+  <mark>yield;</mark>
+  console.log(x*3);
+}
+
+var g = gen(10);
+console.log("1回目");
+g.<mark>next</mark>();
+console.log("2回目");
+g.<mark>next</mark>();
+console.log("3回目");
+g.<mark>next</mark>();
+
+</code></pre>
+<p>この例には2つ新しい文法が出てきました。ひとつは、<strong>function*による関数宣言</strong>です。これは関数宣言のようですが、functionキーワードのあとに<code>*</code>（アスタリスク）が付いています。このように宣言された関数はジェネレータ関数となります。</p>
+<p>もうひとつは<strong>yield文</strong>です。yield文はジェネレータ関数の中でのみ使用できる構文で、これは<em>プログラムから抜ける</em>ことを意味します。</p>
+
+<p>では、上の例を実行するとどうなるでしょうか。以下のようにコンソールにログが表示されるはずです。</p>
+<pre class="language-none"><code>
+1回目
+10
+2回目
+20
+3回目
+30
+</code></pre>
+<p>細かいことはこれから説明しますが、関数の外のconsole.logと関数の中のconsole.logが交互に実行されており、関数を出たり入ったりしていることが分かると思います。</p>
+
+<h3>ジェネレータオブジェクト</h3>
+<p>実は、ジェネレータ関数（上の例だとgen）を呼び出しただけでは関数は実行されません。代わりに、関数の実行を制御するためのオブジェクトである<strong>Generatorオブジェクト</strong>が生成されて返されます。</p>
+<p>Generatorは<dfn>next</dfn>メソッドを持ちます。nextメソッドを呼び出すことで初めてgenが実行されます。なので、ジェネレータ関数の基本的な使い方は、まずGeneratorオブジェクトを取得してnextメソッドで関数を実行するということになります。</p>
+<p>ただし、先に述べたようにジェネレータ関数の実行はyield文で止まります。つまり、1回のnext()では次のyield文までしか行かないのです（または、yieldがもう無い場合は関数の最後まで進みます）。上のサンプルでは、nextメソッドを何回も呼び出すことで関数の実行を進めています。</p>
+<p>これは単純な例でしたが、適切にyieldが挿入されたジェネレータ関数は、このようにGeneratorオブジェクトを通じて実行を制御できます。</p>
+
+<h3>関数とのコミュニケーション</h3>
+<p>従来、関数との間でデータをやり取りする方法は、引数で関数にデータを渡し、戻り値で関数からデータをもらうだけでした。これは、一度関数に入ったら関数が終了するまで関数から出てこないので仕方がないですね。</p>
+<P>一方、ジェネレータ関数は関数から出たり入ったりできるという特徴があります。実は、そのときにデータの受け渡しが可能なのです。ひとつずつ紹介します。</p>
+<p>関数から出るときにデータを渡すには、<em>yield文</em>にデータを渡します。return文と同じ感じですね。</p>
+<pre><code>
+// ジェネレータ関数を定義
+function* gen(x){
+  yield x;
+  yield x*2;
+  yield x*3;
+}
+
+var g = gen(10);
+console.log("1回目", g.next());
+console.log("2回目", g.next());
+console.log("3回目", g.next());
+</code></pre>
+<p>yield文が実行されると関数が一時停止します（すなわち、関数を呼び出した<code>g.next()</code>から返ってきます）。このとき、yield文に渡された値は<code>next()</code>の返り値に現れます。ただし、このサンプルを実際に実行してみると分かるように、nextの返り値は次のようなオブジェクトです。</p>
+<pre><code>
+{
+  value: 10,
+  done: false,
+}
+</code></pre>
+<p>すなわち、yield文により関数から返された値は<code>next()</code>の返り値のオブジェクトのvalueプロパティに入っています。また、もし関数が終了した（関数の最後に到達したかreturn文が実行された）場合はvalueプロパティにはその返り値が入っており、その場合doneがtrueとなっています。</p>
+<p>記憶力がいい方はあることに気づいたと思いますが、その話は後ですることにします。</p>
+
+<p>まず関数から抜けるときに関数から値をもらう方法を学びました。となると、次は逆ですね。関数に再び入るときに関数に値を渡すには次のようにします。</p>
+<pre><code>
+// ジェネレータ関数を定義
+function* gen(x){
+  console.log('x:', x);
+  const y = yield;
+  console.log('y:', y);
+  const z =yield;
+  console.log('z:', z);
+}
+
+var g = gen(10);
+g.next();
+g.next(100);
+g.next(1000);
+</code></pre>
+<p>関数に入るときにa<code>g.next()</code>の引数で値を渡します。すると、その値は<em>yield文の返り値</em>として関数の中で取得できます。</p>
+<p>このサンプルを実行すると次のようにログが出ます。これはなぜなのか考えてみてください。</p>
+<pre><code>
+x: 10
+y: 100
+z: 1000
+</code></pre>
+<p>特に、1回目のnextの呼び出しだけ引数がないことに注意してください。これは、1回目の<code>next()</code>では関数の最初から実行が始まるので対応するyield文がないからです。最初の実行は1回目のyield文で止まり、2回目のnextに渡された引数が1回目のyield文の返り値となります。</p>
+<p>この仕様は不自然ですが、そうなっている以上仕方ありません。1回目の<code>next()</code>は関数の実行開始用であると割り切るのもよいでしょう。</p>
+<p>まとめとして、両方向のコミュニケーション方法を組み合わせた例を出しておきます。</p>
+<pre><code>
+function* sum(){
+  let acc = 0;
+  while (true){
+    const x = yield acc;
+    acc += x;
+  }
+}
+
+var g = sum();
+g.next(); // 実行を開始
+
+console.log(g.next(1)); // {value: <em>1</em>, done: false}
+console.log(g.next(2)); // {value: <em>3</em>, done: false}
+console.log(g.next(3)); // {value: <em>6</em>, done: false}
+console.log(g.next(4)); // {value: <em>10</em>, done: false}
+</code></pre>
+<p>このジェネレータ関数は渡された数値を全部足していき、そのたびに現在までの合計を返すものです。この関数はwhileの無限ループの中でyield文を実行しているので、無限にyieldし続けることができます。</p>
+
+<h3>ジェネレータとイテレータ</h3>
+<p>さっき記憶力かどうのと言いましたが、それは<a href="16_2.html">イテレータ</a>を覚えていますかということです。</p>
+<p>Generatorオブジェクトはnextメソッドを持ち、その返り値はvalueとdoneプロパティを持つオブジェクトでした。これは<b>イテレータ</b>の特徴を満たしていますね。ただしイテレータのnextメソッドは一般には引数を持ちませんから、ジェネレータのほうが高機能です。とはいえ、ということは、ジェネレータオブジェクトはイテレータとしても使えるということです。</p>
+<p>さらに、実はGeneratorオブジェクトは自身をイテレータとするiterableでもあります。言い換えると、自分自身を返す<a href="16_4.html#anchor-iterator">Symbol.iterator</a>プロパティを持つということですね。この事実を用いると、iterableを簡単に作るためにジェネレータ関数を使うことができます。例えば、こんな例はなかなか実用的ではないでしょうか。</p>
+<pre><code>
+<em>// startからendまでの整数を順番に発生させるジェネレータ関数</em>
+function* ran(start, end){
+  for (let currentValue = start; currentValue <= end; currentValue++){
+    yield currentValue;
+  }
+}
+
+for (const i of ran(5, 10)){
+  console.log(i);
+}
+</code></pre>
+<p>この例ではran関数が返すジェネレータオブジェクトをイテレータとして使っています。つまり、ranは2つの引数を受け取り、その間の整数を順に列挙するイテレータを返すものとして使うことができます。</p>
+
+<p>以上がジェネレータの基礎です。まだ細かい話が色々あるのですが、それは次回にしましょう。</p>
