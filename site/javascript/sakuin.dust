@@ -16,6 +16,8 @@
   <dd><a href="11_4.html">第十一章第四回</a></dd>
   <dt>for-of文</dt>
   <dd><a href="16_2.html">第十六章第二回</a></dd>
+  <dt>function.sent</dt>
+  <dd><a href="16_6.html">第十六章第七回</a></dd>
   <dt>Generator</dt>
   <dd><a href="16_6.html">第十六章第六回</a></dd>
   <dt>get・set</dt>
@@ -49,6 +51,8 @@
   <dd><a href="kiso5.html">基礎編第五回</a></dd>
   <dt>yield</dt>
   <dd><a href="16_6.html">第十六章第六回</a></dd>
+  <dt>yield*</dt>
+  <dd><a href="16_7.html">第十六章第七回</a></dd>
 
 
   <dt>イテレータ</dt>

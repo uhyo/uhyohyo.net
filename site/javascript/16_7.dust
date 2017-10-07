@@ -1,0 +1,213 @@
+<p>今回は前回に引き続き<b>ジェネレータ</b>について解説します。</p>
+<p>基礎は前回済ませてしまったので、今回は少し細かい話になります。</p>
+
+<h3>Generatorのメソッド</h3>
+<p>まず、Generatorのメソッドについて紹介します。Generatorはジェンレータ関数を呼び出したときに返ってくるオブジェクトでしたね。</p>
+<p>前回は最も基本的なメソッドである<b>next</b>を紹介しましたが、実はあと2つあります。ひとつは<dfn>return</dfn>でもうひとつは<dfn>throw</dfn>です。この2つはnextに比べて使用頻度が圧倒的に低いですが、役に立つ場面があるかもしれないので紹介しておきます。</p>
+
+<h4>return</h4>
+<p>returnはジェネレータ関数の実行を強制終了するメソッドです。次の例を見てください。</p>
+<pre><code>
+function* gen(){
+  yield 1;
+  yield 10;
+  yield 100;
+}
+
+var g = gen();
+console.log(g.next()); // {value: 1, done: false}
+console.log(g.<mark>return</mark>('foo')); // {value: <mark><em>"foo"</em></mark>, done: <mark><em>true</em></mark>}
+console.log(g.next()); // {value: undefined, done: true}
+</code></pre>
+<p>genは3回値をyieldする単純なジェネレータ関数です。genを呼び出して得たGeneratorオブジェクトに対して1度<code>next()</code>を呼ぶと、1回目のyieldから1が返りました。ここまでは通常通りですね。</p>
+<p>次にreturnを呼びました。すると、返り値はnextと同様のオブジェクトですがdoneがtrueになっています。また、valueはreturnの引数に与えた値になっています。つまり、returnを呼び出すことでジェネレータが強制的に終了状態になり、その時返ってくる値もreturnの引数で指定することができるのです。</p>
+<p>この時点でジェネレータは終了状態になったため、nextメソッドを呼んでも値は返らず、doneがtrueとなっています。</p>
+
+<p>これでreturnメソッドの動作は分かりましたが、なぜreturnという名前なのでしょうか。実は、これは<b>return文</b>と関係があります。</p>
+<p>上の例で1回目の<code>g.next()</code>が呼ばれたあと、ジェネレータ関数は1回目のyieldの評価で止まっています。</p>
+<pre><code>
+function* gen(){
+  <mark>yield 1;</mark> <em>// ←この文の評価で止まっている</em>
+  yield 10;
+  yield 100;
+}
+</code></pre>
+<p>評価で止まっているというのは、yieldは（nextメソッドで渡された）返り値を返すかもしれないので、関数の中から見るとyieldの値を計算しようとしたところで止まっているということです。次のnextメソッドが呼ばれると、関数の中から見るとyieldから値が返ったように見えます。</p>
+<p>この状態でnextではなくreturnメソッドを呼ぶと、直感的には次のようなことが起こります。</p>
+<pre><code>
+function* gen(){
+  <mark>return 'foo';</mark> <em>// これはyieldじゃなくて実はreturn文でした！！！！！！</em>
+  yield 10;
+  yield 100;
+}
+</code></pre>
+<p>returnメソッドは、ジェネレータ関数の中で止まっているyieldをreturn文に書き換えてしまうのです。<small>（ただし、厳密には本当に構文が書き換わっているわけではありません。yieldは式中で使えるのに対しreturnは式中に書けないから当たり前ですが。）</small></p>
+<p>こうなると、ジェネレータ関数が実行しているのは実はreturn文だったのでジェネレータ関数の実行はもう終了しなければなりません。そのときの結果がreturnメソッドの返り値として現れます。結局やっていることはジェネレータ関数を強制終了しているだけですが、その実態はこのようになっているためこのメソッドはreturnという名前なのです。</p>
+
+<h4>throw</h4>
+<p>となると、もうひとつのメソッド<b>throw</b>はどういうメソッドなのか想像がつきますね。そう、<a href="9_8.html#anchor-throw">throw文</a>です。throwメソッドを呼び出した場合、当該のyieldをthrow文で書き換えます。もっと簡単に言えば、yieldから例外が発生します。発生する例外は、throe文の引数で指定します。</p>
+<pre><code>
+function* gen(){
+  yield 1;
+  yield 10;
+  yield 100;
+}
+
+var g = gen();
+console.log(g.next()); // {value: 1, done: false}
+console.log(g.<mark>throw</mark>(new Error('Hey!'))); // エラー
+</code></pre>
+<p>こうすると、2回目のconsole.logは行われません。なぜなら、<code>g.throw</code>メソッドを実行した時点でジェネレータ関数内で例外が発生するからです。つまり、これはgenの中が次のように書き換わったのに相当します。</p>
+<pre><code>
+function* gen(){
+  <mark>throw new Error('Hey!');</mark>
+  yield 10;
+  yield 100;
+}
+</code></pre>
+<p>上の例では、例外が発生してプログラムが止まってしまいました。しかし、例外はtry-catch文でキャッチすることができるのでした。もちろん、yieldから発生した例外もキャッチできます。</p>
+<pre><code>
+function* gen(){
+  try {
+    yield 1;
+    yield 10;
+    yield 100;
+  } catch(e) {
+    yield -42;
+  }
+}
+
+var g = gen();
+console.log(g.next()); // {value: 1, done: false}
+console.log(g.<mark>throw</mark>(new Error('Hey!'))); // {value: <em>-42</em>, done: false}
+</code></pre>
+<p>こうすると、throwメソッドを呼んだ時点でジェネレータ関数の<code>yield 1;</code>から例外が発生します。しかしジェネレータ関数はそれをキャッチして処理を続けます。そうすると<code>yield -42;</code>にたどり着いて値をyieldします。この結果がthrowメソッドの返り値として現れています。このように、ジェネレータ関数が例外を処理できた場合、次のyield（またはreturn）から発生した結果がthrowの返り値となります。</p>
+
+<p>余談ですが、例外が発生してキャッチできなかったイテレータは終了状態となります。</p>
+<pre><code>
+function* gen(){
+  throw new Error('gya---');
+  yield 1;
+}
+
+var g = gen();
+try {
+  console.log(g.next());
+} catch(e){
+  console.error(e); // Error: gya---
+  console.log(g.next()); // {value: undefined, done: <em>true</em>}
+}
+</code></pre>
+
+<h3>yield*式</h3>
+<p>実は、yield式の仲間として<dfn>yield*式</dfn>というのがあります。</p>
+<p>結論から述べると、これは<strong><a href="16_2.html#anchor-iterable">iterable</a>を渡すとイテレータから出力された値を全部yieldします</strong>。</p>
+<p>iterableの代表例は配列なので、次の例で試してみましょう。</p>
+<pre><code>
+function* gen(){
+  console.log(<mark>yield*</mark> [1, 2, 3]);
+}
+
+var g = gen();
+console.log(g.next()); // {value: <em>1</em>, done: false}
+console.log(g.next()); // {value: <em>2</em>, done: false}
+console.log(g.next()); // {value: <em>3</em>, done: false}
+console.log(g.next()); // {value: undefined, done: true}
+</code></pre>
+<p>yield*により、1，2，3が順番にyieldされたことが分かります。</p>
+<p>yield*式ということはこれにも返り値があります。yield*の返り値はyieldとは異なり、外からの入力ではありません。返り値は<em>イテレータがdone:trueを返したときのvalueの値</em>となります。</p>
+<p>以前に見たように、普通のイテレータは終了時（done:trueのとき）はもう値が出てこないのでvalueの意味はありません。ただ、ものによってはdone:trueを返すときでもvalueを伴っている場合があります。そのようなイテレータの代表例はまさにジェネレータオブジェクトですね。ジェネレータ関数がreturnしたとき、done:trueとなりつつ返り値の値がvalueとして返ってきます。これを試してみたのが次の例です。</p>
+<pre><code>
+function* gen1(){
+  yield* [1, 2, 3];
+  return 'foo';
+}
+function* gen2(){
+  const result = yield* gen1();
+  console.log('resultは', result);
+}
+
+var g = gen2();
+console.log(g.next()); // {value: <em>1</em>, done: false}
+console.log(g.next()); // {value: <em>2</em>, done: false}
+console.log(g.next()); // {value: <em>3</em>, done: false}
+// ここで<em>resultは foo</em>と表示
+console.log(g.next()); // {value: undefined, done: true}
+</code></pre>
+<p>このようにジェネレータ関数の中から別のジェネレータ関数を呼び出すというパターンは結構使いどころがあるかもしれません。</p>
+
+<h3>細かい話</h3>
+<p>以上で紹介したい機能は終わりです。ここからは細々とした話をしていきます。</p>
+
+<h4>ジェネレータ関数式</h4>
+<p>今までの例ではfunctionによる関数宣言と同様にfunction*によりジェネレータ関数を宣言していました。普通の関数と同様に、次のように関数式の形でもfunction*は使えます。</p>
+<pre><code>
+var gen = function*(){
+  yield* [1, 2, 3];
+};
+</code></pre>
+
+<h4>ジェネレータ関数内でのthis</h4>
+<p>実は、ジェネレータ関数がメソッドとして呼ばれた場合はthisの値も使えます。</p>
+<pre><code>
+var obj = {
+  foo: 100,
+  bar: 200,
+  gen: function*(){
+    yield <mark>this</mark>.foo;
+    yield <mark>this</mark>.bar;
+  },
+};
+
+var g = obj.gen();
+console.log(g.next()); // {value: 100, done: false}
+console.log(g.next()); // {value: 200, done: false}
+</code></pre>
+
+<h4>ジェネレータ関数はコンストラクタではない</h4>
+<p>第九章で紹介したように、JavaScriptでは関数は自動的にコンストラクタとなり、newで呼び出すことができるのでした（もっとも、コンストラクタを意図して作られたわけではない関数をnewしてもあまり嬉しいことはありませんが）。</p>
+<p>一方、ジェネレータ関数はコンストラクタではないことになっています。よって、普通に呼び出すことはできても、newで呼び出すことはできません。</h4>
+
+<h3>function.sent</h3>
+<p>最後に<code>function.sent</code>の話をして終わりにします。ただしこの機能はES2015の範囲ではなく、それどころか<em>まだ正式なJavaScriptの機能ではありません</em>。2017年10月現在、Stage 2のProposalです。つまり機能が提案段階であり、まだ確定していないということです。そのため、ブラウザで実行しようとしてもまだ対応していないと思います。まあジェネレータに関係する話ですので、こういうのもあるんだという参考程度に知っておいてもらえればよいでしょう。</p>
+<p>function.sentは<b>メタプロパティ</b>の一種です。メタプロパティとは、プロパティのような構文だけどプロパティではないもののことです。実際、これはfunctionというオブジェクトのsentというプロパティを参照しているように見えますが、これは不可能です。なぜなら、functionはキーワードなので、functionと書いてもfunctionという名前の変数であるとは認識されないからです。あくまで<code>function.sent</code>でひとまとまりの構文です。</p>
+
+<p><code>function.sent</code>はジェネレータ関数の中で使えるメタプロパティです。これは、<em>直近のnextメソッドに引数として渡された値</em>が入っています。</p>
+<p>前回の説明では、これはyieldの返り値として取得できるものでした。これを取得する別の方法ということになります。</p>
+<p>これの必要性を理解するためには、前回のこのサンプルを思い出してください。</p>
+<pre><code>
+function* sum(){
+  let acc = 0;
+  while (true){
+    const x = yield acc;
+    acc += x;
+  }
+}
+
+var g = sum();
+g.next(); // 実行を開始
+
+console.log(g.next(1)); // {value: <em>1</em>, done: false}
+console.log(g.next(2)); // {value: <em>3</em>, done: false}
+console.log(g.next(3)); // {value: <em>6</em>, done: false}
+console.log(g.next(4)); // {value: <em>10</em>, done: false}
+</code></pre>
+<p>このジェネレータは、nextメソッドに値を渡すとそれが足されていくというサンプルでした。問題は、1回目の<code>g.next()</code>だけ例外的な扱いになっているとです。その理由は、最初のnextはジェネレータ関数の実行を最初から開始するのであり、yieldで止まっていたところを再開するわけではないので、最初のnextメソッドに引数として渡された値を取得する方法が無かったからです。<code>function.sent</code>メタプロパティを用いることで1回目の実行でもsentに渡された値を取得することができ、1回目と2回目以降を同等に扱うことができます。今回の例の場合、具合的には次のようにします。</p>
+<pre><code>
+function* sum(){
+  let acc = 0;
+  while (true){
+    const x = <mark>function.sent</mark>;
+    acc += x;
+    yield acc;
+  }
+}
+
+var g = sum();
+
+console.log(g.next(1)); // {value: <em>1</em>, done: false}
+console.log(g.next(2)); // {value: <em>3</em>, done: false}
+console.log(g.next(3)); // {value: <em>6</em>, done: false}
+console.log(g.next(4)); // {value: <em>10</em>, done: false}
+</code></pre>
+
