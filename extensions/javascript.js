@@ -41,7 +41,7 @@ module.exports = (context)=>{
         const rel = path.relative(context.projdir, filename).split(path.sep).join('/');
         let back_link = null;
         if (rel !== 'site/javascript/index.dust'){
-            back_link = '<a href="./index.html">戻る</a>';
+            back_link = '<a href="./index.html" rel="contents">戻る</a>';
         }
         let prev_link = null;
         let next_link = null;
@@ -83,7 +83,7 @@ module.exports = (context)=>{
                 if (data.js.page[`kiso${page}`] != null){
                     page_title += "　" + data.js.page[`kiso${page}`];
                 }
-                back_link = '<a href="./index.html">戻る</a>';
+                back_link = '<a href="./index.html" rel="contents">戻る</a>';
                 if (page > 1){
                     prev_link = `<a rel="prev" href="./kiso${page-1}.html">${pageNumber('基礎', page-1)}</a>`;
                 }
