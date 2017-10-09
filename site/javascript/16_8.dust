@@ -19,8 +19,31 @@
 <p>かなり昔のJavaScriptではできなかったので後方互換性を気にして最後のカンマを付けない人もいましたが、最近はそのような心配をする必要はほぼ無くなりましたので遠慮なく最後のカンマを付けましょう。</p>
 <p>最後のカンマを付けられるのは非常に便利です。なぜなら、リテラルの一番最後に新しいプロパティを追加するときに、最後のカンマがないと「前のプロパティにカンマを追加する」「新しいプロパティを書く」という2ステップが必要になるからです。</p>
 
+<h3>プロパティ名</h3>
+<p>もうひとつ復習ですが、オブジェクトリテラルのプロパティ名の書き方は次の3種類があります。</p>
+<pre><code>
+var obj = {
+  // 直書き
+  foo: 'Hey!',
+  // 文字列
+  'foo bar': 123,
+  // 数値
+  12: 'hello',
+};
+</code></pre>
+<p>直書きで書けるプロパティ名には限りがあります。例えばスペースを含むプロパティ名は無理です。一方、文字列を指定する記法では上の例のように任意のプロパティ名を使うことができます。</p>
+<p>これはあまり知られていませんが、プロパティのところに数値リテラルを書くことができます。例えば上の例ではプロパティ名に<code>12</code>と書いてあり、これは<code>"12"</code>というプロパティ名に解釈されます。</p>
+<p>数値リテラルを書いた場合はその数値を文字列に変換したものがプロパティ名になります。次のような例に注意してください。</p>
+<pre><code>
+var obj = {
+  <mark>1e5</mark>: 'foo',
+};
+
+console.log(obj); // {<em>100000</em>: 'foo'}
+</code></pre>
+
 <h3>Computed Property Name</h3>
-<p>まずcomputed property nameの話をしましょう。これは、<a href="16_4.html">シンボル</a>のところでも少しでてきましたが、プロパティ名を計算によって決められる記法です。具体的には、<code>[<var>式</var>]: <var>値</var></code>のようにプロパティ名を<code>[ ]</code>で囲い、その中に式を書きます。式の結果がプロパティ名となります。</p>
+<p>では、まずcomputed property nameの話をします。これは、<a href="16_4.html">シンボル</a>のところでも少しでてきましたが、プロパティ名を計算によって決められる記法です。具体的には、<code>[<var>式</var>]: <var>値</var></code>のようにプロパティ名を<code>[ ]</code>で囲い、その中に式を書きます。式の結果がプロパティ名となります。</p>
 <pre><code>
 var str1 = 'foo', str2 = 'bar';
 var obj = {
@@ -86,27 +109,63 @@ var obj2 = {
 };
 </code></pre>
 
-<h3>プロパティ名</h3>
-<p>オブジェクトリテラルのプロパティ名は次の3種類があります。</p>
+<p>なお、これらの省略記法に対しても上で紹介した3種類のプロパティ名の記法が全て使えます。よって、こんなことも可能です。</p>
 <pre><code>
 var obj = {
-  // 直書き
-  foo: 'Hey!',
-  // 文字列
-  'foo bar': 123,
-  // 数値
-  12: 'hello',
+  'foo bar'(){
+    return 0;
+  },
+  1e5(){
+    return 1e5;
+  },
+  [Symbol.iterator](){
+    throw new Error('Hi');
+  },
 };
 </code></pre>
-<p>直書きで書けるプロパティ名には限りがあります。例えばスペースを含むプロパティ名は無理です。一方、文字列を指定する記法では上の例のように任意のプロパティ名を使うことができます。</p>
-<p>これはあまり知られていませんが、プロパティのところに数値リテラルを書くことができます。例えば上の例ではプロパティ名に<code>12</code>と書いてあり、これは<code>"12"</code>というプロパティ名に解釈されます。</p>
-<p>数値リテラルを書いた場合はその数値を文字列に変換したものがプロパティ名になります。次のような例に注意してください。</p>
+<p>やや余談になりますが、関数オブジェクトは<b>name</b>というプロパティを持ちます。その名の通り関数の名前です。次のようにfunction宣言で作られた関数は宣言された名前を持ちます。</p>
 <pre><code>
+function foo(){
+}
+
+console.log(foo.name); // "foo"
+</code></pre>
+<p>関数式で作った関数は名前がない場合（俗にいう無名関数ですね）もありますが、実は直接変数に代入する場合は適切に名前をつけてもらえます。</p>
+<pre><code>
+var func1 = function(){};
+var func2 = (function(){ return function(){}; })();
+var func3 = function <mark>foobar</mark>(){};
+
+console.log(func1.name); // "func1"
+console.log(func2.name); // ""
+console.log(func3.name); // "foobar"
+</code></pre>
+<p>プロパティについても基本的には同様です。ただし、nameプロパティ名は文字列ですので、シンボルをプロパティ名にした場合は名前無しになります。にもかかわらず、well-known symbolの場合は特殊な名前が付くこともあります。</p>
+<pre><code>
+var mysymbol = Symbol();
+
 var obj = {
-  <mark>1e5</mark>: 'foo',
+  foo: function(){
+  },
+  'foo bar'(){
+    return 0;
+  },
+  1e5(){
+    return 1e5;
+  },
+  [mysymbol](){
+    return 300;
+  },
+  [Symbol.iterator](){
+    throw new Error('Hi');
+  },
 };
 
-console.log(obj); // {<em>100000</em>: 'foo'}
+console.log(obj.foo.name); // "foo"
+console.log(obj['foo bar'].name); // "foo bar"
+console.log(obj[1e5].name); // "100000"
+console.log(obj[mysymbol].name); // ""
+console.log(obj[Symbol.iterator].name); // "[Symbol.iterator]"
 </code></pre>
 
 <h3>変数名・プロパティ名とエスケープ記法</h3>
