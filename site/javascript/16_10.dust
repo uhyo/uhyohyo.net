@@ -1,0 +1,75 @@
+<p>今回も短いです。今回紹介するのは<dfn>アロー関数式</dfn>です。これは関数を作る新しい文法です。</p>
+<p>関数を作る式は次のような形でしたね。</p>
+<pre><code>
+function (x, y, z){ ... }
+</code></pre>
+
+<p>ES2015で追加された<b>アロー関数式</b>を使うと、これは次のように書けます。</p>
+<pre><code>(x, y, z)=&gt;{ ... }</code></pre>
+<p>短いですね。functionというキーワードがなくなり、引数部分と本体部分を<code>=&gt;</code>でつなげた形です。アロー関数という名前はこの部分が矢印に見えることに由来しています。</p>
+
+<h3>アロー関数の特徴</h3>
+<p>このようにして作られたアロー関数には2つの特徴があります。ひとつは<em>コンストラクタとして使用できない</em>ということです。最近こういうのをよく見ますね。そもそも関数が普通の関数としてコンストラクタとしても使えるという状況にあまり需要がないのでわけられるときは分けようという魂胆なのでしょう。</p>
+<p>もうひとつは<em>thisを引き継ぐ</em>ということです。つまり、関数の中でのthisはこの関数が作られたとき（すなわち関数の外）のthisと同じになります。これはコールバック関数を作るときにthisをそのままにしたいときに便利です。<a href="9_5.html">クロージャ</a>の回で出てきた次のサンプルを思い出してください。</p>
+<pre><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.appendChild(document.createTextNode("このdiv要素は"+name+"です"));
+  document.body.appendChild(this.div);
+
+  this.div.addEventListener('click',(function(e){
+    console.log(<mark>this</mark>.name);
+  }).<mark>bind</mark>(<mark>this</mark>),false);
+}
+
+var div1 = new MyDiv("div1");
+</code></pre>
+<p>アロー関数を用いるとこれは次のように書けます。<a href="11_2.html">bind</a>が無くなり分かりやすくなりました。</p>
+<pre><code>
+function MyDiv(name){
+  this.div = document.createElement("div");
+  this.name=name;
+  this.div.appendChild(document.createTextNode("このdiv要素は"+name+"です"));
+  document.body.appendChild(this.div);
+
+  this.div.addEventListener('click', (e)=>{
+    console.log(<mark>this</mark>.name);
+  }, false);
+}
+
+var div1 = new MyDiv("div1");
+</code></pre>
+
+<h3>省略記法</h3>
+<p>アロー関数は、より簡潔に書けるようにするためにいくつかの省略記法があります。</p>
+
+<h4>引数の省略</h4>
+まず、引数がひとつのときは引数リストの括弧を省略して<code>x=&gt;{ ... }</code>とできます。</p>
+<p>ただし、引数が1つであってもただの変数ではなく<a href="16_3.html">分解代入</a>の形だったり、<code>...args</code>のような形のときは括弧を省略できません。</p>
+
+<p>なお、引数が0個のときは括弧を省略できません。<code>()=&gt;{ ... }</code>とする必要があります。</p>
+
+<h4>本体部分の省略</h4>
+<p>関数の本体部分が<code>return <var>式;</var></code>という形のとき、何かの計算をしてその値を返すだけの関数の場合はこれを<code>(...)=&gt; <var>式</var></code>と省略できます。具体例としては、次の2つの関数は同じです。</p>
+<pre><code>
+var func1 = (x, y)=&gt;{ return x+y; };
+
+var func2 = (x, y)=&gt; x+y;
+</code></pre>
+<p>めちゃくちゃ簡潔になりました。特にfunc2は、引数xとyを受け取ってx+yを返す関数であるということが分かりやすくなっています。ただ、この書き方はどこまでが関数定義なのか分かりにくい場合もあり、使い過ぎには注意が必要です。そして、この省略をする場合<code>{ }</code>は必ず省略する必要があります。<code>(x, y)=&gt;{ x+y }</code>とすると返り値がない変数になってしまいます。</p>
+<p>以上の2つの省略を組み合わせるとこんな感じで使えます。</p>
+<pre><code>
+var arr = [1, 2, 3, 4, 5];
+
+console.log(arr.map(<mark>x=&gt; x*2</mark>)); // [2, 4, 6, 8, 10]
+</code></pre>
+
+<p>注意点として、オブジェクトリテラルで作ったオブジェクトを返す関数で上記の省略を使う場合、このように括弧で囲まないとうまくいきません。これは括弧がないと<code>{ ... }</code>がオブジェクトリテラルではなく関数本体を囲むやつとして認識されるからです。</p>
+<pre><code>
+var func = x=&gt;({ x });
+
+console.log(func(3)); // {x: 3}
+</code></pre>
+
+<p>なお、この記法ではfunction式のときのように関数に名前をつけられません。ただし、前々回で説明したように変数に代入する場合などはいい感じに自動的に名前が付けられます。</p>
