@@ -1,0 +1,95 @@
+<p>ES2015の目玉機能のひとつが<dfn>クラス</dfn>です。JavaScriptにおけるクラスは、端的にいえばコンストラクタを作る新しい方法です。まず簡単な具体例から見ましょう。</p>
+
+<pre class="line-numbers"><code>
+class Foo{
+  constructor(arg){
+    this.prop = arg;
+  }
+}
+
+var obj = new Foo(100);
+console.log(obj); // Foo {prop: 100}
+</code></pre>
+<p>1行目から5行目が新しい構文、<b>クラス宣言</b>です。このように、<code>class <var>クラス名</var>{ ... }</code>の形で<b>クラス</b>を作ることができます。</p>
+<p>ただし、JavaScriptにおいてクラスという概念は本来存在しません。<a href="9_1.html">第九章</a>で見たように、その実体は関数（コンストラクタ）です。実際、<a href="11_5.html#anchor-typeof">typeof演算子</a>を使って調べると<code>typeof Foo === "function"</code>となるはずです。つまり、クラス宣言によって作られる“クラス”は関数なのです。</p>
+
+<p>ただし、クラスとして作られた関数はコンストラクタ専用なので、newをつけずに呼び出すことはできません。この章では「newでは呼び出せない関数」が何回か登場しましたが、その逆というわけですね。関数の役割の明文化の一環です。</p>
+
+<p>クラス宣言の中身は、実は<a href="16_8.html#anchor-method-shorthand">オブジェクトリテラル内の関数の省略記法</a>と同じ記法を使います。つまり、上のクラス宣言はconstructorという関数が定義されているものとして読むことができます。</p>
+<p>ただし、constructorという名前の関数は特別扱いとなり、この関数の処理がコンストラクタの処理となります。よって、上の例で<code>new Foo(100)</code>とされた場合、上で定義されたconstructor関数が呼ばれます。そこで<code>this.prop = arg;</code>が実行されたので、<code>new Foo(100)</code>の結果であるobjオブジェクトはプロパティpropに100が入っています。コンストラクタの中では、thisは当然今作られているオブジェクトです。</p>
+
+<h3>メソッドの定義</h3>
+<p>昔の方法では、メソッドは<a href="9_2.html">prototype</a>を用いて定義しました。クラスの構文を使うともっと楽に定義することができます。上ではconstructorという特殊な関数のみクラス内で定義しましたが、他の関数も定義することができます。そのようにして定義された関数がそのクラスのメソッドとなるのです。</p>
+<pre class="line-numbers" data-line="5-7"><code>
+class Teki{
+  constructor(name){
+    this.name = name;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+}
+
+var zako = new Teki("ザコ");
+zako.attack();
+</code></pre>
+<p>なんだか懐かしいサンプルですね。この例ではTekiオブジェクトにattackというメソッドが付きました。</p>
+<p>なお、裏で行われていることは基本的にこれまでと同じです。attackメソッドの実体は<code>Teki.prototype.attack</code>にあります。よって、例えば<code>zako.attack === Teki.prototype.attack</code>はtrueになります。</p>
+<p>ただし、<a href="11_4.html#anchor-property-attribute">enumerable属性</a>はfalseに設定されます。</p>
+<p>つまるところ、クラス宣言は我々が第九章で四苦八苦したことを簡単にやってくれる便利な構文だと理解するのがよいでしょう。</p>
+
+<h3>staticメソッド</h3>
+<p>クラス宣言の中でメソッドを定義するときは、定義の前に<code>static</code>と書くことによりstatic関数を定義することができます。</p>
+<pre class="line-numbers" data-line="8-10"><code>
+class Teki{
+  constructor(name){
+    this.name = name;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+  <mark>static</mark> makeZako(){
+    return new Teki("ザコ");
+  }
+}
+
+var zako = Teki.makeZako();
+zako.attack();
+</code></pre>
+<p>違いは単純であり、staticが付いた定義は<code>Teki.prototype</code>ではなく<code>Teki</code>のメソッドとして定義されます。すなわち、staticな定義はインスタンスのメソッドを定義するのではなく、コンストラクタにくっついたメソッドを定義します。当然ながら、この例では<code>zako.makeZako()</code>とはできません。</p>
+<p>この機能は、コンストラクタのメソッド（例えば<a href="16_2.html#anchor-array-from">Array.from</a>とか）を作りたいときに役に立ちます。</p>
+
+<p>クラスの基本的な機能は（現在のところ）これで終わりです。言語によってはクラスに「privateメソッド」とかいう機能が備わっていますが、それはありません。<small>（ただし、クラス宣言におけるプロパティ定義構文がStage 3、privateメソッド/プロパティはStage 2ですので（2017年10月現在）、ES2018くらいにこれらの機能が追加されるかもしれません。）</small></p>
+<p>ただし、クラスのもう1つの重要な機能である<em>継承</em>がまだ残っています。これは次回に紹介するとして、今回はやや細かい話をしておきます。</p>
+
+<h3>クラス宣言のスコープ</h3>
+<pre><code>
+{
+  class Foo{
+  }
+
+  var foo = new Foo();
+  console.log(foo); // Foo {}
+}
+
+console.log(typeof Foo); // "<em>undefined</em>"
+</code></pre>
+<p>この例から類推されるように、クラス宣言は任意のブロックの中に書くことができます。このとき、それにより定義されたクラスはそのブロックをスコープとして持ちます。すなわち、ここで定義されたクラスFooはこのブロックをスコープとするローカル変数として存在しているということです。</p>
+<p>余談ですが、クラスの定義はこのようにconstructor関数を省略することができます。その場合、コンストラクタは何もしない関数になります。</p>
+
+<h3>クラス式</h3>
+<p>今までは<em>クラス宣言</em>を説明しましたが、<em>クラス式</em>もあります。関数宣言に対する関数式みたいですね。これは言わずもがな、その場でクラスを生成して返す式です。</p>
+<pre><code>
+var Foo = class {
+  hello(){
+    console.log("Hi!");
+  }
+};
+
+var obj = new Foo();
+obj.hello(); // "Hi!"
+</code></pre>
+<p>関数式の場合と同様、クラス式の場合はクラス名を省略できます。</p>
+
+<p>今回の話はこれで終わりです。次回は引き続きクラスの話です。</p>
+<p>クラスの構文は分かりやすく便利なので、オブジェクト指向的なことをするときはぜひ使っていきましょう。</p>

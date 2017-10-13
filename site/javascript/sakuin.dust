@@ -8,6 +8,8 @@
   <dd><a href="9_3.html">第九章第三回</a></dd>
   <dt>break文・continue文</dt>
   <dd><a href="kiso5.html">基礎編第五回</a></dd>
+  <dt>class宣言, class式</dt>
+  <dd><a href="16_11.html">第十六章第十一回</a></dd>
   <dt>const宣言</dt>
   <dd><a href="16_3.html">第十六章第三回</a></dd>
   <dt>for文</dt>
@@ -70,6 +72,8 @@
   <dd><a href="kiso4.html">基礎編第四回</a></dd>
   <dt>関数・function</dt>
   <dd><a href="kiso1.html">基礎編第一回</a>・<a href="kiso4.html">基礎編第四回</a>・<a href="1_4.html">第一章第四回</a></dd>
+  <dt>クラス</dt>
+  <dd><a href="16_11.html">第十六章第十一回</a></dd>
   <dt>ゲッタ・セッタ</dt>
   <dd><a href="9_6.html">第九章第六回</a>・<a href="11_4.html">第十一章第四回</a></dd>
   <dt>コメント</dt>
