@@ -106,5 +106,5 @@
   </ol>
 </section>
 
-<p><a href="sakuin.html">索引</a></p>
+<p><a href="sakuin.html" rel="index">索引</a></p>
 {/js_content}
