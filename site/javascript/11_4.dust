@@ -238,7 +238,7 @@ Object.defineProperty(obj,"a",{
 
 <h3>Objectのインスタンスのプロパティ</h3>
 <p>さて、今まではObjectが直接持っているメソッドを紹介してきましたが、ここでObjectのインスタンスがもつメソッド（すなわち<code>Object.prototype</code>がもつメソッド）を1つ紹介します。</p>
-<p>まず紹介するのは<dfn>hasOwnProperty</dfn>です。これはプロパティの名前を引数として渡すと、そのプロパティを持っているかどうかを真偽値で返すメソッドです。</p>
+<p id="anchor-object-hasownproperty">まず紹介するのは<dfn>hasOwnProperty</dfn>です。これはプロパティの名前を引数として渡すと、そのプロパティを持っているかどうかを真偽値で返すメソッドです。</p>
 <pre><code>
 //敵を作る
 function Teki(n){

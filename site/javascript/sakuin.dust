@@ -35,12 +35,16 @@
   <dd><a href="16_3.html">第十六章第三回</a></dd>
   <dt>NaN</dt>
   <dd><a href="9_7.html">第九章第七回</a>・<a href="11_6.html">第十一章第六回</a></dd>
+  <dt>new.target</dt>
+  <dd><a href="16_12.html">第十六章第十二回</a></dd>
   <dt>null</dt>
   <dd><a href="2_14.html">第二章第十四回</a></dd>
   <dt>prototype</dt>
   <dd><a href="9_2.html">第九章第二回</a></dd>
   <dt>return</dt>
   <dd><a href="kiso4.html">基礎編第四回</a></dd>
+  <dt>super</dt>
+  <dd><a href="16_12.html">第十六章第十二回</a></dd>
   <dt>try〜catch〜finally</dt>
   <dd><a href="9_8.html">第九章第八回</a></dd>
   <dt>typeof</dt>
@@ -223,6 +227,10 @@
   <dd><a href="11_4.html">第十一章第四回</a></dd>
   <dt>Object.getOwnPropertySymbols</dt>
   <dd><a href="16_4.html">第十六章第四回</a></dd>
+  <dt>Object.getPrototypeOf</dt>
+  <dd><a href="11_7.html">第十一章第七回</a></dd>
+  <dt>Object.isPrototypeOf</dt>
+  <dd><a href="11_7.html">第十一章第七回</a></dd>
   <dt>Object.keys</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
 

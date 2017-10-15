@@ -1,0 +1,208 @@
+<p>今回は前回の続きで、<b>クラス</b>の構文について解説します。前回紹介しなかったクラスの機能がひとつあります。それは<em>継承</em>です。</p>
+<p>以前<a href="9_3.html">継承</a>について紹介したときは、prototypeを駆使して継承を実現していました。<a href="11_7.html">Object.create</a>などを使うと多少は楽になりましたが、結構苦労するし分かりにくいポイントでした。クラスの構文では、継承をもっと楽に行うことができます。</p>
+
+<p>例によって、まず例を見ましょう。</p>
+<pre class="line-numbers"><code>
+class Teki{
+  constructor(name, hp){
+    this.name = name;
+    this.hp = hp;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+}
+
+class Dragon <mark>extends Teki</mark>{
+  hello(){
+    console.log(`${this.name}のHPは${this.hp}です。`)
+  }
+}
+
+var boss = new Dragon('どらごん', 3000);
+
+boss.attack(); // どらごんの攻撃！
+boss.hello();  // どらごんのHPは3000です。
+</code></pre>
+<p>このように、クラスの宣言時に<em>extends</em>というキーワードによって継承元のクラスを指定できます。この例では、DragonはTekiを継承しています。</p>
+<p>よって、DragonのインスタンスであるbossはTekiのメソッドattackとDragonのメソッドhelloを利用できます。とても簡単ですね。</p>
+<p>これの裏では、以前解説したprototypeチェーンがちゃんとあります。<a href="11_4.html#anchor-object-hasownproperty">hasOwnProperty</a>や<a href="11_7.html#anchor-object-getprototypeof">Object.getPrototypeOf</a>を使って確かめてみましょう。</p>
+<pre><code>
+console.log(Dragon.prototype.hasOwnProperty('hello')); // true
+console.log(Dragon.prototype.hasOwnProperty('attack')); // false
+console.log(Object.getPrototypeOf(Dragon.prototype) === Teki.prototype); // true
+</code></pre>
+
+<p>上の例からは、Dragonのインスタンスであるbossはnameとかhpのプロパティを持っていることが分かります。これらのプロパティはTekiのコンストラクタで代入されているものです。ということは、コンストラクタの継承（Dragonのコンストラクタが呼ばれたらTekiのコンストラクタも呼ぶ）も自動で行われていることが分かります。</p>
+
+<p>ちなみに、継承元の指定は式でできますので、下のようなこともできます（この例はとくに意味はないですが）。
+<pre><code>
+class Foo extends <mark>(class {})</mark>{}
+</code></pre>
+
+<h4>静的プロパティの継承</h4>
+<p>静的プロパティは、前回も話に出たような、コンストラクタに直接ついているプロパティ（あるいはメソッド）のことです。継承を行った場合、実は静的プロパティも継承されます。つまり、こういうことです。</p>
+<pre><code>
+class Foo{
+  static prop(){
+    return 'hi';
+  }
+}
+class Bar extends Foo{
+}
+
+console.log(Bar.prop()); // 'hi'
+</code></pre>
+<p>この例では、Fooについている静的メソッドpropを、Barに付いているものとして呼び出すことができました。</p>
+<p>これはある種のprototypeチェーンによって実現されています。具体的には次のようになっています。</p>
+<pre><code>
+console.log(Object.getPrototypeOf(Bar) === Foo); // true
+</code></pre>
+
+<h3>super呼び出し</h3>
+<p>さっきの例では、Dragonのコンストラクタは省略されていました。その結果Tekiのコンストラクタが自動で呼び出されています。では、Dragonのコンストラクタを作りたい場合はどうでしょうか。</p>
+<pre class="line-numbers" data-line="12-14"><code>
+class Teki{
+  constructor(name, hp){
+    this.name = name;
+    this.hp = hp;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+}
+
+class Dragon extends Teki{
+  constructor(name, hp){
+    console.log('がおーーーー');
+  }
+  hello(){
+    console.log(`${this.name}のHPは${this.hp}です。`)
+  }
+}
+
+var boss = new Dragon('どらごん', 3000);
+
+boss.attack(); // どらごんの攻撃！
+boss.hello();  // どらごんのHPは3000です。
+</code></pre>
+<p>実は、こうすると<em>エラーが出ます</em>。クラス構文を使って継承する場合、<em>子のコンストラクタ内で親クラスのコンストラクタを必ず呼ばなければいけない</em>のです。子クラスのコンストラクタを自分で用意する場合はこの点に気をつけなければなりません。</p>
+<p>そして、親クラスのコンストラクタを呼ぶための構文が用意されています。コンストラクタの中では<dfn>super</dfn>という特別なキーワードが用意されており、これを関数として呼ぶことで親クラスのコンストラクタを呼んだことになります。すなわち、次のようにします。</p>
+<pre class="line-numbers" data-line="13"><code>
+class Teki{
+  constructor(name, hp){
+    this.name = name;
+    this.hp = hp;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+}
+
+class Dragon extends Teki{
+  constructor(name, hp){
+    <mark>super</mark>(name, hp);
+    console.log('がおーーーー');
+  }
+  hello(){
+    console.log(`${this.name}のHPは${this.hp}です。`)
+  }
+}
+
+var boss = new Dragon('どらごん', 3000);
+
+boss.attack(); // どらごんの攻撃！
+boss.hello();  // どらごんのHPは3000です。
+</code></pre>
+<p>一般にコンストラクタではthisのプロパティに代入するなどしてオブジェクトの初期化を行いますが、super呼び出しは<em>thisを触る前</em>である必要があります（thisに全く触らないでもsuperは呼び出す必要があります）。子クラスというのは親クラスの拡張だから、まず親クラスで初期化されたオブジェクトをいじるべきだということです。以前<a href="9_3.html#anchor-apply-call">apply</a>などを使って親クラスのコンストラクタを呼び出していたのに比べるととても簡単ですね。</p>
+
+<h3>superメソッド呼び出し</h3>
+<p>superというキーワードにはもうひとつ機能があります。それは、親クラスのメソッドを呼び出すことができる機能です。</p>
+<p>たとえば、ドラゴンの攻撃は強力なので勇者を毒状態にできるという場合を考えます。攻撃はattackメソッドなので、Dragonにもattackメソッドを作ることになります。このとき、普通の攻撃（Tekiクラスの攻撃）に追加機能を与えるように実装するときれいです。それには、次のようにします。</p>
+<pre class="line-numbers" data-line="16-19"><code>
+class Teki{
+  constructor(name, hp){
+    this.name = name;
+    this.hp = hp;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+}
+
+class Dragon extends Teki{
+  constructor(name, hp){
+    super(name, hp);
+    console.log('がおーーーー');
+  }
+  attack(){
+    <mark>super.attack();</mark>
+    console.log('勇者は毒状態になった！');
+    return super.name;
+  }
+  hello(){
+    console.log(`${this.name}のHPは${this.hp}です。`)
+  }
+}
+
+var boss = new Dragon('どらごん', 3000);
+
+boss.attack(); // どらごんの攻撃！勇者は毒状態になった！
+boss.hello();  // どらごんのHPは3000です。
+</code></pre>
+<p>ポイントは17行目の<code>super.attack();</code>です。このように、<code>super.<var>メソッド名</var></code>とすると、親クラスのメソッドを得ることができます（<code>super[<var>文字列</var>]</code>の形でもいいです）。この場合、Dragonのattackメソッドの中で<code>super.attack</code>としたので、これはその親クラスのattackメソッド、すなわち<code>Teki.prototype.attack</code>となります。</p>
+<p>この文法にはひとつ特別な点があります。それは、<code>super.<var>メソッド名</var></code>として得たメソッドを呼び出す場合、thisの値は現在の値と同じになるということです。</p>
+<p>上の例では<code>boss.attack()</code>としたので、Dragonのattackメソッド中でのthisの値はbossになっています。そこで<code>super.attack()</code>によりTekiのattackメソッドを呼び出したので、その中でもthisはbossのままです。よって、そこで参照された<code>this.name</code>がちゃんと<code>"どらごん"</code>になっているのです。</p>
+<p>このsuper参照の機能により親クラスのメソッド呼び出しが楽になっています。</p>
+
+<p>なお、この文法はsuperというオブジェクトのメソッドを参照しているように見えますが、そうではなく、この形でひとつの構文になっています。よって、これ以外の形でsuperを使おうとするのは文法エラーとなります。例えばこういうのはエラーです。</p>
+<pre class="line-numbers" data-line="19"><code>
+class Teki{
+  constructor(name, hp){
+    this.name = name;
+    this.hp = hp;
+  }
+  attack(){
+    console.log(`${this.name}の攻撃！`);
+  }
+}
+
+class Dragon extends Teki{
+  constructor(name, hp){
+    super(name, hp);
+    console.log('がおーーーー');
+  }
+  attack(){
+    <mark>super.attack();</mark>
+    console.log('勇者は毒状態になった！');
+    console.log(super); // <em>文法エラー</em>
+    return super.name;
+  }
+  hello(){
+    console.log(`${this.name}のHPは${this.hp}です。`)
+  }
+}
+</code></pre>
+<p>これがエラーとなるのは、superという変数が存在しているわけではないことを意味しています。superが使えるのは、コンストラクタ内で関数として呼び出す場合と、上のように親クラスのメソッドを参照する場合のみです。</p>
+<p>クラスの機能はこれで全てです。今までのJavaScriptらしからぬ文法ですがとても便利なので、使える時は使うとよいでしょう。</p>
+
+<h3>new.target</h3>
+<p>ややクラスに関連する話題があるのでついでに紹介しておきます。それは<dfn>new.target</dfn>です。これはES2015で追加されたメタプロパティのひとつです。メタプロパティという言葉は<a href="16_7.html#anchor-function-sent">function.sent</a>の話のときにちらっとでてきました。</p>
+<p>new.targetは関数の中で使うことができ、newで呼ばれたときはそのときのコンストラクタが入っています。また、ただの関数として呼ばれたときはundefinedとなります。</p>
+<p>ひとつの使い方は、関数がnewで呼ばれたのかそうでないのかを判別することです。また、クラスの間に継承関係があるときに親クラスのコンストラクタ内で<code>new.target</code>を見ると子クラスを得ることができます。</p>
+<pre class="line-numbers" data-line="3"><code>
+class Teki{
+  constructor(){
+    console.log('コンストラクタは', <mark>new.target</mark>.name);
+  }
+}
+
+class Dragon extends Teki{
+  constructor(){
+    super();
+  }
+}
+
+var zako = new Teki(); // コンストラクタは Teki
+var boss = new Dragon(); // コンストラクタは Dragon
+</code></pre>

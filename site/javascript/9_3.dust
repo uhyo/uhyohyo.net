@@ -1,6 +1,6 @@
 <p>今回は<dfn>継承</dfn>というものについて解説します。継承とはざっくり言うと、あるオブジェクトの特徴をもったままで、さらに拡張したオブジェクトをつくるというものです。</p>
 <p>ただ、先に少し、今回必要な予備知識について解説します。</p>
-<h3>apply, call</h3>
+<h3 id="anchor-apply-call">apply, call</h3>
 <p><dfn>apply</dfn>および<dfn>call</dfn>とは、<strong>関数が持つメソッド</strong>です。どちらも<strong>関数を呼び出す</strong>ことができます。</p>
 <p>まずapplyから見ましょう。関数を呼び出すだけなら普通に<code><var>関数</var>()</code>でいいような気がしますが、applyには2つの特徴があります。1つは<strong>関数内でのthisの値を指定できる</strong>こと、もう1つは<strong>引数列を配列で渡すことができる</strong>ことです。</p>
 <p>では、applyのサンプルを見ましょう。</p>

@@ -25,7 +25,7 @@ console.log(zako1.hasOwnProperty("appear"));	// false
 <p>一方、
 <code>zako1.appear=...</code>
 というような記述はありませんね。appearの実態はTeki.prototype.appearです。</p>
-<p>ここでまず、新しいメソッド<dfn>Object.getPrototypeOf</dfn>を紹介します。これはインスタンスを引数に渡すと、対応するprototypeオブジェクトが返ってくるわけです。つまり、zako1の場合はTekiのインスタンスですから、Teki.prototypeが返ってくるわけです。</p>
+<p id="anchor-object-getprototypeof">ここでまず、新しいメソッド<dfn>Object.getPrototypeOf</dfn>を紹介します。これはインスタンスを引数に渡すと、対応するprototypeオブジェクトが返ってくるわけです。つまり、zako1の場合はTekiのインスタンスですから、Teki.prototypeが返ってくるわけです。</p>
 <pre><code>console.log(Object.<mark>getPrototypeOf</mark>(zako1) === Teki.prototype);	// true</code></pre>
 
 <p>このように、インスタンスの側からprototypeを取得できるのは、今までに無かったES5の新しい機能です<small>（ただし、非標準の__proto__というやつはありました）</small>。</p>
