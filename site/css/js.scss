@@ -65,10 +65,20 @@ div.sidenote {
 
 // 広告
 aside.ad-javascript {
-  float:right;
-  background-color:white;
-  width:200px;
-  padding:10px;
+  width: 100%;
+}
+@media (min-width: 600px) {
+  aside.ad-javascript {
+    float:right;
+    background-color:white;
+    width: 200px;
+    padding:10px;
+  }
+}
+@media (min-width: 1024px) {
+  aside.ad-javascript {
+    width: 310px;
+  }
 }
 
 // 質問ページ

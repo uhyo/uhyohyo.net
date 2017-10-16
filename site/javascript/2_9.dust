@@ -38,7 +38,8 @@
 <p>また、逆にtheadやtfootをテーブルから除去するメソッドもあります。それぞれtableが持つ<dfn>deleteTHead</dfn>と<dfn>deleteTFoot</dfn>です。引数はなく、返り値もありません。呼び出すと、除去されます。既に無かった場合も、特にエラーになることはありません。</p>
 <p>また、tbodyは、複数ある可能性があるので、table要素の<dfn>tBodies</dfn>というプロパティにHTMLCollectionが入っています。これがtbody要素の一覧です。これを使って取得しましょう。</p>
 <p>実際のサンプルで見てみましょう。</p>
-<pre><code>&lt;table <mark class="ins">id="aaaaa"</mark>&gt;
+<pre class="language-html"><code>
+&lt;table <mark class="ins">id="aaaaa"</mark>&gt;
   &lt;thead&gt;
     &lt;tr&gt;
       &lt;td&gt;thead1&lt;/td&gt;
