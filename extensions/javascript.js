@@ -107,7 +107,7 @@ module.exports = (context)=>{
             } = fs.statSync(filename);
             const datetime = mtime.toISOString();
             //人間に読みやすい
-            const last_modified = `このページの最終更新日：<time datetime="${datetime}">${mtime.getFullYear()}年${mtime.getMonth()+1}月${mtime.getDate()}日</time>`;
+            const last_modified = `このページの最終更新日：<time itemprop="dateModified" datetime="${datetime}">${mtime.getFullYear()}年${mtime.getMonth()+1}月${mtime.getDate()}日</time>`;
             data.last_modified = last_modified;
         } catch(e){
         }

@@ -45,15 +45,15 @@
       <p>{navlinks|s}</p>
     </nav>
   {/navlinks}
-  <section class="language-javascript">
+  <article class="language-javascript" itemscope itemprop="http://schema.org/Article">
     {?page_title}
-      <h2>{page_title}</h2>
+      <h2 itemprop="name">{page_title}</h2>
     {/page_title}
     <p class="last-modified-time">
       {last_modified|s}
     </p>
     {+js_content/}
-  </section>
+  </article>
   {?navlinks}
     <nav>
       <p>{navlinks|s}</p>
