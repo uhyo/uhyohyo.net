@@ -66,6 +66,16 @@ div.sidenote {
 // 広告
 aside.ad-javascript {
   width: 100%;
+  & > p {
+    text-align: center;
+    font-size: #999999;
+    font-size: 0.6em;
+  }
+}
+// あぶない
+aside.ad-javascript + nav {
+  border-top: 1px solid #888888;
+  margin-top: 0.8em;
 }
 @media (min-width: 600px) {
   aside.ad-javascript {
@@ -73,6 +83,10 @@ aside.ad-javascript {
     background-color:white;
     width: 200px;
     padding:10px;
+  }
+  aside.ad-javascript + nav {
+    border-top: none;
+    margin-top: 0;
   }
 }
 @media (min-width: 1024px) {
