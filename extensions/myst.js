@@ -12,7 +12,7 @@ module.exports = (context)=>{
     });
     // HTMLをminify
     context.addPostRenderHook((context, content, target)=>{
-        if (!/\.html$/.test(target)){
+        if (!/\.html$/.test(target) || /javascript\/.*sample/.test(target)){
             return content;
         }
         return minify(String(content), {
