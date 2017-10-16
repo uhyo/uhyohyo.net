@@ -121,7 +121,7 @@ console.log(g.next(4)); // {value: <em>10</em>, done: false}
 <pre><code>
 <em>// startからendまでの整数を順番に発生させるジェネレータ関数</em>
 function* ran(start, end){
-  for (let currentValue = start; currentValue <= end; currentValue++){
+  for (let currentValue = start; currentValue &lt;= end; currentValue++){
     yield currentValue;
   }
 }

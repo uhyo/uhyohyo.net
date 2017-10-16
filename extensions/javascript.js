@@ -2,6 +2,7 @@
 // JavaScript講座用のextension
 const path = require('path');
 const fs = require('fs');
+const escape = require('escape-html');
 module.exports = (context)=>{
     context.addPostLoadFileHook((context, filename, data)=>{
         // 講座ページは{ }を使えるようにアレする
@@ -17,7 +18,7 @@ module.exports = (context)=>{
                 attrs += ` page_title="${r1[1]}"`;
             }
             // ページの説明を生成
-            const description = generateDescription(data).replace(/"/g,'\\"');
+            const description = escape(generateDescription(data));
             attrs += ` twitter_description="${description}"`;
 
             // 講座ページ
