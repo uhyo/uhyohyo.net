@@ -1,0 +1,119 @@
+<p>今回は<dfn>Map</dfn>と<dfn>Set</dfn>の解説です。しばらくES2015の新しい文法の話をしてきましたが、それもほとんど終わりました。ここからは新しい組み込みオブジェクトを中心として話をしていきます。</p>
+<p>この章の第一回で<a href="16_1.html">WeakMapとWeakSet</a>の話をしたのを覚えているでしょうか。</p>
+<p>今回はそのWeakでない版、すなわち普通の<b>Map</b>と<b>Set</b>を紹介します。</p>
+<p>基本的な使い方はWeakMap・WeakSetと同じです。どちらもnewで作り、Mapはsetメソッドで値を追加し、hasメソッドで値があるかどうか確認できます。また、getメソッドでキーに対応する値を取り出せます。Setはaddで要素を追加し、hasで値があるか確認します。どちらもdeleteメソッドやclearメソッドを持ちます。</p>
+<p>ただし、WeakMap・WeakSetはキーとしてオブジェクトしか使えなかったのに対して、Map・Setではキーにたいして任意の値を使うことができます。端的に言えば、プリミティブも使えるということです。</p>
+<pre><code>
+var m = new Map();
+
+m.set(2, 'foo');
+m.set(null, 'bar');
+
+console.log(m.get(2), m.get(null)); // foo bar
+</code></pre>
+<p>オブジェクトをキーにする場合は、WeakMapやWeakSetと同様に、同じオブジェクトでないと値を取り出すことはできません。プリミティブの場合も、setと同じ値をgetに渡すと値を取り出すことができます。ここで「同じ」というのは、<code>===</code>演算子で比較して同じということです。ただし、ひとつ例外があります。それは<em>NaN</em>です。NaNは<code>===</code>でNaNどうしを比較してもfalseになるという特異な値でした。しかし、MapやSetのキーとして使う場合はNaNどうしは同じ値と見なされます。つまり、NaNをキーとしてsetしたものはNaNをキーとしてgetで取り出すことができます。</p>
+
+<p>そして、WeakMapやWeakSetとMapやSetで異なる点は、後者らは<strong>今中に何が入っているかという情報が使える</strong>という点です。前者はキーへの参照がWeakでないといけなかったので、いまどんな値が中に入っているのか（すなわちどんなキーが今使われているのか）という情報を得ることができませんでした。MapやSetではこのような情報を得ることができます。具体的には、そのためのメソッドがWeakMapやWeakSetに比べて増えています。</p>
+<p>では、それらのメソッドを紹介していきます。</p>
+
+<h3>Map</h3>
+<p>まずはMapですが、先に<b>コンストラクタ</b>の機能を紹介しておきます。今まではまず空のmapを作ってsetで要素を追加していましたが、コンストラクタの引数により、最初から中に要素が入った状態でMapを作ることができます。それには、<code>[<var>キー</var>, <var>値</var>]</code>という2要素の配列を1つの組とし、この組の配列をコンストラクタに渡します。</p>
+<pre><code>
+var m = new Map(<mark>[['alpha', 'α'], ['beta', 'Β'], ['gamma', 'γ']]</mark>);
+
+console.log(m.get('alpha')); // 'α'
+console.log(m.get('beta')); // 'Β'
+console.log(m.get('gamma')); // 'γ'
+</code></pre>
+<p>ただし、ここでは配列といいましたが、iterableであればなんでもよいです。そのため、<a href="16_2.html#anchor-keys-entries">Array#entries</a>を使えばこのように配列をMapに変換できます。</p>
+<pre><code>
+var arr = ['John Smith', 'Taro Tanaka', 'Gonbe Nanashino'];
+var m = new Map(arr.entries());
+
+console.log(m.get(0)); // John Smith
+</code></pre>
+<p>これはサンプルの説明に便利なので使っていきます。</p>
+
+<p>では、メソッドの説明に移ります。<dfn>forEach</dfn>メソッドは、Mapに入っている全ての要素に対して順にコールバック関数を呼び出すメソッドです。コールバック関数の引数は<a href="11_1.html#anchor-foreach">Array#forEach</a>と同様に、第1引数が値、第2引数がキーとなります。さらに、第3引数には勝利されているMapオブジェクトそのものが入っています。</p>
+<pre><code>
+var m = new Map([[Boolean, 'Boolean'], [Number, 'Number'], [String, 'String']]);
+
+m.forEach((value, key)=&gt;{
+  console.log(`${value}(3):`, key(3));
+});
+</code></pre>
+<p>余談ですが、このようにサンプルでも最近紹介した<a href="16_9.html">テンプレート文字列</a>や<a href="16_10.html">アロー関数</a>などをバシバシ使っていきます。もし分からなければ戻って復習しましょう。</p>
+
+<p>また、上でArray#entriesが話題に出ましたが、Mapも<dfn>keys</dfn>, <dfn>values</dfn>, <dfn>entries</dfn>の3つのメソッドを持ちます。これはそれぞれキー、値、そして<code>[キー, 値]</code>ペアの<em>イテレータ</em>を返します。イテレータなので、<a href="16_2.html#anchor-for-of">for-of文</a>で回したり<a href="16_2.html#anchor-array-from">Array.from</a>で配列にしたりできます。例えば、上のforEachの例は次のようにできるでしょう。</p>
+<pre><code>
+var m = new Map([[Boolean, 'Boolean'], [Number, 'Number'], [String, 'String']]);
+
+for (const [key, value] of m.entries()){
+  console.log(`${value}(3):`, key(3));
+}
+</code></pre>
+<p>forEachを使うよりこちらのほうが今どきですね。for文なのでcontinueやbreakも使えます。</p>
+<p>もっと言えば、Mapのインスタンスは<b>@@iterator</b>メソッドも持ちます。これは<a href="16_4.html#anchor-iterator">シンボル</a>の回でやったwell-knownシンボルのひとつ、<b>Symbol.iterator</b>のことでしたね。@@iteratorメソッドを持つオブジェクトはiterableです。なお、@@iteratorメソッドが返すイテレータはentriesメソッドと同様のものです。</p>
+<p>ということは、Mapオブジェクト自体がiterable上の例のようにentries()を使ってfor文を回すときはentries()を呼び出す必要すらないということです。</p>
+<pre><code>
+var m = new Map([[Boolean, 'Boolean'], [Number, 'Number'], [String, 'String']]);
+
+for (const [key, value] of m){
+  console.log(`${value}(3):`, key(3));
+}
+</code></pre>
+<p>なお、イテレートされる順番はMapに追加された順番となります。</p>
+<p>これらから分かることは、Mapでは<code>[キー, 値]</code>というペアが基本単位として使われており、コンストラクタやイテレータにおいて現れてくるということです。</p>
+
+<p>そして、なんとMapのメソッドはこれで終わりです。他に、プロパティとして<dfn>size</dfn>があります。これは配列でいうlengthみたいなもので、そのMapに入っているkey-valueペアの数を整数で返します。</p>
+<pre><code>
+var arr = ['John Smith', 'Taro Tanaka', 'Gonbe Nanashino'];
+var m = new Map(arr.entries());
+
+console.log(m.<mark>size</mark>); // <em>3</em>
+</code></pre>
+
+<h3>Set</h3>
+<p>ではSetの話に移ります。先ほど、<code>[キー, 値]</code>がMapの基本単位だと述べましたが、Setの場合は値が入っているかどうかという情報しかないので、値そのものが基本単位となります。</p>
+<p>よって、コンストラクタでSetの要素を指定するには例えば次のようにすればよいことになります。この例では、sには<code>"foo"</code>，<code>"bar"</code>，<code>3</code>という3つの値が入ったSetが入ります。</p>
+<pre><code>
+var s = new Set(['foo', 'bar', 3]);
+
+console.log(s); // Set {"foo", "bar", 3}
+console.log(s.has('foo')); // true
+</code></pre>
+<p>SetのメソッドはMapのものと似ています。add, clear, delete, hasはWeakSetと同じです。また、<b>values</b>メソッドが存在し、これはSetに入っている値をひとつずつ取り出すイテレータを返します。これを用いるとSetの全ての要素を順に処理することができるでしょう。</p>
+<pre><code>
+var s = new Set(['foo', 'bar', 3]);
+
+for (const value of s.values()){
+  console.log(value);
+}
+</code></pre>
+<p>ほかの2つのメソッド、すなわち<b>entries</b>と<b>keys</b>も実はあります。特にentriesは、Setの場合は少し変な働きをします。entriesを呼び出すとやはりイテレータを返しますが、Setの各要素に対して<code>[値, 値]</code>という形の配列を返します。次の例で確かめてみましょう。</p>
+<pre><code>
+var s = new Set(['foo', 'bar', 3]);
+
+for (const value of s.entries()){
+  console.log(value);
+}
+</code></pre>
+<p>この例を実行すると、次のようなログが出るはずです。</p>
+<pre><code>
+['foo', 'foo']
+['bar', 'bar']
+[3, 3]
+</code></pre>
+<p>どんな使いどころがあるのかはとても微妙ですが、返されるオブジェクトがMapと同じ形をしているのがポイントです。MapとSetを同様に扱いたい場合に役に立つかもしれません。</p>
+<p>Mapのvaluesがこのペアの右側の値をイテレートするイテレータを返したのに対して、keysは左側（すなわちキー）のイテレータでした。Setのkeysも同様です。といっても、Setの場合は左右は常に同じなので結局<em>keysはvaluesと同じ</em>挙動をすることになります。</p>
+<p>もちろんSetにも@@iteratorメソッドがあり、これはvaluesと同じ挙動です。よって、次のようにしてSetの要素を処理できます。</p>
+<pre><code>
+var s = new Set(['foo', 'bar', 3]);
+
+for (const value of s){
+  console.log(value);
+}
+</code></pre>
+<p>あと、例によって<b>forEach</b>メソッドと<b>size</b>プロパティがあります。</p>
+
+<p>以上でMapとSetの紹介は終わりです。WeakMapやWeakSetと比べると、entriesに代表される、中身の一覧を得られるようなメソッドが増えています。もちろん、これによりWeakMapやWeakSetの特徴であった「参照が弱い」という性質は失われています。</p>

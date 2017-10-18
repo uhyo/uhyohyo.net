@@ -152,12 +152,16 @@
 <dl>
   <dt>Array#concat</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
+  <dt>Array#entries</dt>
+  <dd><a href="16_2.html">第十六章第二回</a></dd>
   <dt>Array#every</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#forEach</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#join</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
+  <dt>Array#keys</dt>
+  <dd><a href="16_2.html">第十六章第二回</a></dd>
   <dt>Array#map</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#pop</dt>
@@ -180,6 +184,8 @@
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#unshift</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
+  <dt>Array#values</dt>
+  <dd><a href="16_2.html">第十六章第二回</a></dd>
   <dt>Array.from</dt>
   <dd><a href="16_2.html">第十六章第二回</a></dd>
   <dt>Array.isArray</dt>
@@ -195,6 +201,9 @@
   <dd><a href="9_5.html">第九章第五回</a>・<a href="11_2.html">第十一章第二回</a></dd>
   <dt>Function#name</dt>
   <dd><a href="16_8.html">第一六章第八回</a></dd>
+
+  <dt>Map</dt>
+  <dd><a href="16_13.html">第十六章第一三回</a></dd>
 
   <dt>Number.NaN, Number.isNaN</dt>
   <dd><a href="9_7.html">第九章第七回</a>・<a href="11_6.html">第十一章第六回</a></dd>
@@ -249,6 +258,9 @@
   <dt>RegExp#test</dt>
   <dd><a href="4_2.html">第四章第二回</a></dd>
 
+  <dt>Set</dt>
+  <dd><a href="16_13.html">第十六章第一三回</a></dd>
+
   <dt>setTimeout</dt>
   <dd><a href="16_5.html">第十六章第五回</a></dd>
 
@@ -301,7 +313,7 @@
 
   <dt>WeakMap</dt>
   <dd><a href="16_1.html">第十六章第一回</a></dd>
-  <dt>WeakMap#add</dt>
+  <dt>WeakMap#set</dt>
   <dd><a href="16_1.html">第十六章第一回</a></dd>
   <dt>WeakMap#clear</dt>
   <dd><a href="16_1.html">第十六章第一回</a></dd>
