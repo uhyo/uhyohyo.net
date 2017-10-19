@@ -77,6 +77,24 @@ aside.ad-javascript + nav {
   border-top: 1px solid #888888;
   margin-top: 0.8em;
 }
+
+// 質問ページ
+div.q {
+  background-color:#eefff3;
+  padding:0.6em;
+  margin:0.6em 0.2em;
+}
+nav.re {
+  background-color:#eeffee;
+  padding:0.6em;
+  margin:0.6em 0.2em;
+}
+em.rec {
+  //おすすめ
+  color:#cc0000;
+}
+
+// いま流行りのレスポンシブ
 @media (min-width: 600px) {
   aside.ad-javascript {
     float:right;
@@ -93,20 +111,4 @@ aside.ad-javascript + nav {
   aside.ad-javascript {
     width: 310px;
   }
-}
-
-// 質問ページ
-div.q {
-  background-color:#eefff3;
-  padding:0.6em;
-  margin:0.6em 0.2em;
-}
-nav.re {
-  background-color:#eeffee;
-  padding:0.6em;
-  margin:0.6em 0.2em;
-}
-em.rec {
-  //おすすめ
-  color:#cc0000;
 }

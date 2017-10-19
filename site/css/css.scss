@@ -94,3 +94,14 @@ body.top-page div.top-contents {
     }
   }
 }
+// レスポンシブな感じ
+@media (max-width: 600px) {
+  body > header > h1 a {
+    width: 50vw;
+    height: 10vw;
+    background-size: contain;
+  }
+  h1 {
+    font-size: 1.16em;
+  }
+}
