@@ -1,0 +1,11 @@
+{>"$PROJ/templates/javascript.dust" page_title="問い合わせ" /}
+{<js_content}
+<p>本講座について<b>ミスを発見した</b>、または<b>質問がある</b>という場合の問い合わせ方法です。</p>
+<p><b>Twitter</b>アカウントをお持ちの場合は、管理者のアカウント<a href="https://twitter.com/uhyo_">@uhyo_</a>に連絡するのが簡単です。</p>
+<p><b>GitHub</b>のissuesでも可能です。<a href="https://github.com/uhyo/uhyohyo.net/issues">GitHub</a></p>
+<p><b>メール</b>による問い合わせ先は現在準備中です。</p>
+
+<hr>
+<p>いずれの連絡方法でも返事まで時間がかかることがあります。ご了承ください。</p>
+<p>また、質問の内容はウェブサイト上の「質問と回答」に掲載することがあります。</p>
+{/js_content}

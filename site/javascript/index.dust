@@ -7,7 +7,7 @@
 {<js_content}
 <p>JavaScript。主にWebページを作るのに使われるほか、現在ではさまざまなところで活躍しているプログラミング言語です。</p>
 <p>このページはJavaScriptの<strong>中級</strong>講座です。最新鋭ではないかもしれませんが、読み進めれば大抵のものを自分で作れるようになることでしょう。</p>
-<p><a href="his.html">言い訳とJavaScriptの歴史</a></p>
+<p><a href="his.html">言い訳とJavaScriptの歴史</a> / <a href="inquiry.html" rel="help">問い合わせ</a></p>
 <section>
   <h2>最近の更新</h2>
   <ul class="recent">
