@@ -138,7 +138,6 @@ class Dragon extends Teki{
   attack(){
     <mark>super.attack();</mark>
     console.log('勇者は毒状態になった！');
-    return super.name;
   }
   hello(){
     console.log(`${this.name}のHPは${this.hp}です。`)
