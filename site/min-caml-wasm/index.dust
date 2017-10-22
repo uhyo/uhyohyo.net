@@ -1,0 +1,31 @@
+{>"$PROJ/templates/top.dust" page_title="min-caml用WebAssemblyバックエンドのデモ" /}
+{<additionalHead}
+<style>
+#status p {
+  margin: 0.4em 0;
+}
+</style>
+{/additionalHead}
+{<content}
+  <article>
+    <h2>min-caml用WebAssemblyバックエンドのデモ</h2>
+    <p><b><a rel="external" href="http://esumii.github.io/min-caml/">min-caml</a></b> (<a ref="external" href="https://github.com/esumii/min-caml">GitHub</a>)向けに実装したWebAssemblyバックエンドのデモです。</p>
+    <p>動作環境は新しいブラウザです。スマートフォンの場合はiOS11以降、Android 5以降（未確認）です。</p>
+    <p>関連リンク：</p>
+    <ul>
+      <li><a rel="external" href="https://github.com/uhyo/min-caml/tree/wasm">WebAssemblyバックエンドの実装 (GitHub)</a></li>
+      <li><a rel="external" href="http://uhyo.hatenablog.com/entry/2017/10/22/230850">ブログ記事</a></li>
+      <li>生成されたWebAssemblyコード（<a href="./min-rt.wat">テキストフォーマット</a>，<a href="./min-rt.wasm">バイナリフォーマット</a>）</li>
+    </ul>
+    <hr>
+    <div id="status">
+      <p>ここの表示が変わらない場合は多分動作しない環境です。</p>
+    </div>
+  </article>
+  <script src="./libmincaml.js"></script>
+  <script src="./ppmparser.js"></script>
+  <script src="./runwasm.js"></script>
+  <script>
+    LibMinCaml.main();
+  </script>
+{/content}
