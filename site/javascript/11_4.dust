@@ -36,7 +36,7 @@ for(var <mark>key</mark> <strong>in</strong> <mark>obj</mark>){
   console.log(<mark>obj[key]</mark>);
 }
 </code></pre>
-<p>従来（ES5以前）はプロパティの一覧にアクセスする方法はこれだけでしたが、ES5においては新しい方法が用意されました。</p>
+<p id="anchor-object-keys">従来（ES5以前）はプロパティの一覧にアクセスする方法はこれだけでしたが、ES5においては新しい方法が用意されました。</p>
 <p>それは<dfn>Object.keys</dfn>メソッドです。これは、引数として渡されたオブジェクトが持つプロパティの名前の一覧を配列にして返すメソッドです。ちなみに、このときの順番はfor-in文で列挙される順番と同じことが保証されています。</p>
 <p>これを使って上のfor-in文と同じことをしたければ、こうです。</p>
 <pre><code>
@@ -260,7 +260,7 @@ console.log(zako.<mark>hasOwnProperty</mark>("appear"));	//false
 console.log(zako.<mark>hasOwnProperty</mark>("attack"));	//false
 </code></pre>
 <p>この例を見てわかるように、prototypeチェーンを遡ったりしないことは、Ownと名前に入っていることからも明らかです。また、このメソッドはenumerableがfalseなプロパティであっても正しく判定してくれます。</p>
-<p>対照的に、<strong>in演算子</strong>というのがあります。これも同じようにプロパティが存在するかどうかを確かめる動作をしますが、prototypeチェーンまでさかのぼって探すという違いがあります。</p>
+<p id="anchor-in">対照的に、<strong>in演算子</strong>というのがあります。これも同じようにプロパティが存在するかどうかを確かめる動作をしますが、prototypeチェーンまでさかのぼって探すという違いがあります。</p>
 <pre><code>
 //敵を作る
 function Teki(n){

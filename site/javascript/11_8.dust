@@ -1,0 +1,81 @@
+<p>今回はES5で追加された、オブジェクトに関するいくつかのメソッドを紹介します。これらのメソッドは、<strong>オブジェクトに対する変更を制限する</strong>ことが主な目的です。</p>
+<p>ご存知のように、JavaScriptにおけるオブジェクトは、自由にプロパティを追加したり書き換えたり削除したりできます。しかし、場合によっては他人に勝手にオブジェクトをいじれらたくないこともあるでしょう。</p>
+<p><a href="11_4.html">プロパティの属性</a>のひとつであるwritable属性をfalseにすれば、個々のプロパティについては書き換え不能にすることができます。しかし、新しいプロパティを追加されるような事態に対しては対応不可能です。今回紹介するメソッドを使えばこれを制限することができます。</p>
+
+<h3>Object.preventExtensions</h3>
+<p>まず最初に紹介するのが<dfn>Object.preventExtensions</dfn>です。これはオブジェクトを引数にとって呼び出すと、そのオブジェクトは<b>拡張不可能</b>になります。すなわち、<em>新しいプロパティを追加できなくなります</em>。</p>
+<pre class="line-numbers"><code>
+var obj = {
+  foo: 'Hi',
+};
+
+<mark>Object.preventExtensions</mark>(obj);
+
+obj.bar = 3;
+console.log(obj.bar); // <em>undefined</em>
+console.log('bar' in obj); // <em>false</em>
+</code></pre>
+<p>この例では、オブジェクトobjに対してObject.preventExtensionsを適用しています。preventExtensionsの効果により、これ以降objに対して新しいプロパティを追加することはできません。そのため、上の例では7行目でbarプロパティに代入しているにも関わらず、それは無視され、その後8，9行目でbarプロパティの存在を確かめても存在しないという結果になっています。<small>（なお、近々紹介する予定のstrictモードでは、拡張不可能なオブジェクトに対してこのような操作を行うとエラーになります。）</small></p>
+<p>また、<a href="11_4.html#anchor-object-defineproperty">Object.defineProperty</a>により新しいプロパティを作ることもやはりできません。</p>
+<p>ただし、オブジェクトを拡張不可能にしても、delete演算子によりプロパティを削除することはできます。また、既存のプロパティに対する操作は自由にできます。</p>
+
+<p>また、オブジェクトが拡張可能かどうかを調べるメソッド<dfn>Object.isExtensible</dfn>があります。例えば、上で定義されたオブジェクトobjに対して<code>Object.isExtensible(obj)</code>はfalseとなります。</p>
+<p><code>Object.preventExtensions</code>が呼ばれていないオブジェクトは拡張可能です。また、一度拡張不可能にされたオブジェクトは拡張可能に戻すことはできません。</p>
+
+<h3>Object.seal</h3>
+<p>次に紹介するのは<dfn>Object.seal</dfn>です。順番が前後しますが、これが<b>封印</b>ですね。</p>
+<p>このメソッドは、オブジェクトを拡張不可能にするのに加えて全てのプロパティの<b>configurable属性</b>をfalseに設定します。以前に説明した通り、configurable属性がfalseとなったプロパティは、その後属性を変更したり、また削除したりすることができなくなります。これにより、オブジェクトの形（どのプロパティがあるかとか）を変更することができなくなります。</p>
+<p>ただし、プロパティの<b>writable属性</b>は変更されません。ということは、既存のプロパティは依然として変更可能であるということです。</p>
+<pre class="line-numbers"><code>
+var obj = {
+  foo: 'Hi',
+};
+
+<mark>Object.seal</mark>(obj);
+
+obj.foo = 'foo';
+obj.bar = 3;
+console.log(obj); // {foo: "foo"}
+</code></pre>
+
+<p>そして、オブジェクトが封印されているかどうかを確かめる<code>Object.isSealed</code>メソッドもあります。</p>
+<p>ただし、封印されているかどうかの判定は、オブジェクトが拡張不可能で全てのプロパティのconfiguragble属性がfalseになっているかどうかの判定により行われます。したがって、上のpreventExtensionsメソッドを用いつつ手動でconfigurableをfalseにした場合でも<code>Object.isSealed</code>の結果がtrueになります。</p>
+<pre><code>
+var obj = {
+  prop: 'Hi',
+};
+
+Object.preventExtensions(obj);
+
+console.log(Object.isSealed(obj)); // false
+
+// propのconfigurable属性をfalseに
+Object.defineProperty(obj, 'prop', {
+  value: 'Hi',
+  writable: true,
+  configurable: false,
+});
+
+console.log(Object.isSealed(obj)); // true
+</code></pre>
+
+<h3>Object.freeze</h3>
+<p>最後に<dfn>Object.freeze</dfn>です。これが<b>凍結</b>にあたります。</p>
+<p>このメソッドもやはり与えられたオブジェクトを拡張不可能にします。さらに、既存の全てのプロパティのconfigurable属性及びwritable属性をfalseにします。</p>
+<p>要するに、Object.sealの機能に加えて各プロパティのwritable属性もfalseにするということです。これにより、与えられたオブジェクトはプロパティが固定されたオブジェクトとなります。すなわち、プロパティが増えたり減ったりしないし、既存のプロパティも変わることはありません。さらにconfigurable属性もfalseになっているため設定を変更してプロパティを無理やり書き換えるようなこともできません。</p>
+<p>そして、オブジェクトが凍結状態になっているかどうか判定するメソッドが<dfn>Object.isFrozen</dfn>です。</p>
+<pre><code>
+var obj = {
+  prop: 'Hi',
+};
+
+Object.freeze(obj);
+
+obj.prop = '吉野家';
+
+console.log(obj.prop); // "Hi"
+
+console.log(Object.isFrozen(obj)); // true
+</code></pre>
+
+<p>結局、今回全く新しく出てきた概念はオブジェクトが拡張可能かどうか、そしてそれを操作するObject.preventExtensionsメソッドです。Object.sealとObject.freezeはそれとプロパティの属性を組み合わせた便利メソッドというわけです。</p>
