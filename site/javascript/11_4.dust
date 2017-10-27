@@ -117,7 +117,7 @@ for(var key in obj){
 <p>デフォルトは全てtrueで、普通にプロパティに代入するだけでは全てtrueのプロパティしか作れません。</p>
 <p>writableは「書き込み可能かどうか」ということで、writableがfalseのプロパティは書き換えられません。また、configurableは「設定可能かどうか」です。この2つの具体的な動作は後述します。</p>
 
-<h3>プロパティデスクリプタ</h3>
+<h3 id="anchor-property-descriptor">プロパティデスクリプタ</h3>
 <p>ES5より前のJavaScriptにおいてはこれらの属性は完全に内部的なもので、スクリプト側からどうこうすることはできませんでした。しかしES5ならば、属性に干渉することができます。</p>
 <p>属性（など）をいじるには、<dfn>プロパティデスクリプタ</dfn>を使います。これはプロパティの属性を含む諸々の情報を表すオブジェクトです。これを得るには、<dfn>Object.getOwnPropertyDescriptor</dfn>メソッドを使います。</p>
 <pre><code>
@@ -159,12 +159,12 @@ console.log(Object.getOwnPropertyDescriptor(Object.prototype,"toString"));
 <p>先ほど説明したようにenumerableがfalseになっていることが分かります。valueのfunction toString() { [native code] }というのは、これがtoStringの本体にあたる関数ですが、中身はブラウザの内部処理なのでJavaScriptでは表現できないという意味です。</p>
 <p>ちなみに、メソッド名にOwnと入っていることからも分かる通り、オブジェクト自身のプロパティしか得られません。このように、基本的にプロパティをいじるときはそのオブジェクト自身のプロパティが対象になります。</p>
 
-<p id="anchor-object-defineproperty">では次に、プロパティデスクリプタを変更する方法を紹介します。変更するというより新しいプロパティデスクリプタをまるごと用意してあげるというほうが正しいですが、それには<dfn>Object.defineProperty</dfn>メソッドを使います。</p>
+<p id="anchor-object-defineproperty">では次に、プロパティデスクリプタを変更する方法を紹介します。それは<dfn>Object.defineProperty</dfn>メソッドです。</p>
 
-<p>例えば、writable属性がfalseであるプロパティhogeを、objに追加には次のようにObject.definePropertyを呼び出します。</p>
+<p>例えば、writable属性がfalseであるプロパティhogeを、objに追加するには次のようにObject.definePropertyを呼び出します。</p>
 <pre><code>
 <mark>Object.defineProperty</mark>(obj,"<mark>hoge</mark>",{
-  writable:<strong>false</strong>,
+  writable:<mark>false</mark>,
   enumerable:true,
   configurable:true,
   value:"hogehoge"
@@ -192,13 +192,12 @@ obj.hoge="piyopiyo";	//代入してみる
 
 console.log(obj.hoge);	//結果は…?
 </code></pre>
-<p>結果をみると分かると思いますが、<code>obj.hoge</code>に違うものを代入したはずなのに変わりません。これがwritableをfalseにしたことの効果です。<small>（注：strictモードの場合何も起こらないのではなくエラーが出ますが、それについてはまた今度解説します。）</small></p>
+<p>結果をみると分かると思いますが、<code>obj.hoge</code>に違うものを代入したはずなのに変わりません。これがwritableをfalseにしたことの効果です。<small>（注：<a href="11_9.html">strictモード</a>の場合何も起こらないのではなくエラーが出ますが、それについてはまた今度解説します。）</small></p>
 
 <p>それでは最後にconfigurableについて解説します。configurableは日本語でいうと「設定可能」といった感じです。</p>
 <p>これはすごい力をもっていて、configurableがfalseであるプロパティの属性はいじれません。すなわち、definePropertyしようとするとエラーになります。</p>
 <p>加えてwritableもfalseにしておけば、もはやそのプロパティの内容は絶対に不変であることが保証されたようなものです。</p>
 <p>例えば、Object.prototypeのようにいじられたら大惨事になるプロパティは、いじれないようにwritableとconfigurableがfalseになっています。</p>
-<p>ちなみに、definePropertyのときにプロパティデスクリプタのwritable,enumerable,configurableプロパティ省略された場合falseとして扱われます。</p>
 
 <p>また、実は、<a href="9_6.html">ゲッタとセッタ</a>についてもdefinePropertyを用いて設定できます。</p>
 <p>というのも、その時は既存のオブジェクトにゲッタ・セッタを設定するのに__defineGetter__と__defineSetter__という2つのメソッドを使っていましたが、これは名前が明らかに怪しいことからもわかるように、非標準のメソッドでした。それに対してES5においてdefinePropertyを用いた正式な設定方法が用意されたのです。</p>
@@ -217,6 +216,21 @@ Object.defineProperty(obj,"a",{
 });
 </code></pre>
 <p>getとsetがある場合writable属性は無視されます。もちろん、ゲッタとセッタがあるのでvalueも要りません。</p>
+
+<p>今までの例ではObject.definePropertyで新しいプロパティを作りましたが、既存のプロパティに対してObject.definePropertyを使うこともできます。このとき、第3引数に渡すオブジェクトはプロパティデスクリプタを<em>部分的に</em>指定することができます。これにより、プロパティの属性を部分的に書き換えることができます。</p>
+<pre><code>
+var obj={
+  foo: "bar",
+};
+
+Object.defineProperty</mark>(obj,"foo",{
+  configurable:false,
+});
+
+console.log(Object.getOwnPropertyDescriptor(obj, "foo"));
+</code></pre>
+<p>上の例では、Object.definePropertyによりobjのfooプロパティのconfigurableプロパティをfalseに設定しました。他の属性（あるいはvalueプロパティ）は設定されていないのでそのままになります。</p>
+<p>新規にプロパティを作るときにこのようにプロパティデスクリプタの一部を省略した場合は、省略された属性はfalseとして扱われます。</p>
 
 <h3>その他のメソッド</h3>
 <p>さて、属性の説明が一段落したところで、その他の関連メソッドを紹介します。</p>

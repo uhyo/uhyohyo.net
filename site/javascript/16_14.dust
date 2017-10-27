@@ -1,0 +1,437 @@
+<p>今回は<dfn>Proxy</dfn>を紹介します。これはES2015の新しい機能で、<strong>動作をカスタマイズしたオブジェクトを作成できる</strong>というものです。</p>
+<p>ここで皆さんが思い出すべきは<a href="9_6.html">ゲッタとセッタ</a>の話です。ゲッタやセッタを持つオブジェクトは、あるプロパティが参照されたとき及び代入されたときの動作を関数によりカスタマイズできるのでした。Proxyは、そのもっとすごいバージョンです。オブジェクトにまつわる様々な動作をカスタマイズできるのです。</p>
+<p>最初にとりあえず例を見せます。</p>
+<pre><code>
+var target = {};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name){
+    return name;
+  },
+});
+
+console.log(obj.foo); // "foo"
+console.log(obj['あいうえお']); // "あいうえお"
+
+obj.name = "Mary Sue";
+console.log(obj.name); // "name"
+console.log(target.name); // "Mary Sue"
+</code></pre>
+
+<p>Proxyオブジェクトはこのようにnewで作ります。引数は2つで、第1引数（今回は<code>target</code>）はカスタマイズされるオブジェクトです。第2引数は<b>トラップ</b> (<i lang="en">trap</i>)を定義するオブジェクトです。各トラップは関数であり、今回はgetというトラップのみ定義されていることになります。</p>
+<p>なお、これは<a href="16_8.html">オブジェクトリテラル</a>の話の復習になりますが、</p>
+<pre><code>
+{
+  get(target, name){
+    return name;
+  },
+}
+</code></pre>
+<p>というのは</p>
+<pre><code>
+{
+  get: function(target, name){
+    return name;
+  },
+}
+</code></pre>
+<p>とだいたい同じ意味です。</p>
+<p>Proxyオブジェクトに対する各種の操作の挙動は、ここで指定したトラップによりカスタマイズできます。上の例ではgetという操作をカスタマイズしていることになります。後で説明しますが、getというのはプロパティアクセスに対応しています。</p>
+<p>トラップが存在しない操作が行われた場合、それは<code>target</code>（Proxyコンストラクタの第1引数に指定されたオブジェクト）に対する通常の操作として振る舞います。先ほど<code>target</code>を<em>カスタマイズされるオブジェクト</em>と呼んだのはそのためです。ある意味で、Proxyオブジェクトはもとのオブジェクトをトラップによってカスタマイズしたものと見ることができます。</p>
+<p>上の例では、<code>obj.name = "Mary Sue";</code>の行が該当します。プロパティへの代入は（後で説明しますが）setというトラップによって処理されるので、今回setトラップを用意していないためこれは<code>target</code>に対する操作として処理されます。よって、<code>target.name = "Mary Sue";</code>が行われたことになり、その後<code>target.name</code>を表示すると<code>"Mary Sue"</code>となっています。</p>
+
+<p>では、どのようなトラップが存在するのかを見ていきましょう。</p>
+
+<h3>getトラップ</h3>
+<p>上の例で出てきたgetトラップから見ていきましょう。</p>
+<pre><code>
+var target = {};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name){
+    return name;
+  },
+});
+
+console.log(obj.foo); // "foo"
+console.log(obj['あいうえお']); // "あいうえお"
+</code></pre>
+<p>getトラップは<em>全てのプロパティアクセス</em>に対して呼ばれます。引数は2つで、第1引数はカスタマイズされるオブジェクト、第2引数はプロパティ名です。これはゲッタの場合とは違いますね。ゲッタは各プロパティに対して設定されるもので、そのプロパティに対するアクセスが関数によりカスタマイズできるものでした。</p>
+<p>それに対してProxyのgetトラップは、どんなプロパティに対するアクセスも一律で処理することができます。そして、関数の返り値がそのプロパティの値となります。</p>
+<p>今回のgetトラップは、渡されたプロパティ名自体を結果として返すという変なトラップです。その結果、<code>obj.name</code>は<code>"name"</code>というように、どんなプロパティ名に対してもその名前自体が入っているようなオブジェクトができました。</p>
+
+<p>これは役に立たない例ですが、もう少し役に立つ例としてよく紹介されるのが<em>デフォルト値</em>を持つオブジェクトです。</p>
+<pre><code>
+var target = {
+  apple: 'りんご',
+  orange: 'みかん',
+};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name){
+    if (target.hasOwnProperty(name)){
+      return target[name];
+    } else {
+      return 'hello';
+    }
+  },
+});
+
+console.log(obj.apple); // "りんご"
+console.log(obj.peach); // "hello"
+
+obj.peach = 'もも';
+console.log(obj.peach); // "もも"
+</code></pre>
+<p>このオブジェクトは、プロパティが参照されたら<a href="11_4.html#anchor-object-hasownproperty">hasOwnProperty</a>メソッドでその名前のプロパティがもとのオブジェクトに存在するかどうか調べます。存在する場合はプロパティを返し、存在しない場合は<code>'hello'</code>を返します。その結果、このオブジェクト<code>obj</code>はもとのオブジェクト<code>target</code>に対し、存在しないプロパティには（undefinedではなく）<code>'hello'</code>を返すという機能を加えたものになります。</p>
+<p>もっと過激に、存在しないプロパティを見ようとしたら怒るというメソッドも可能ですね。</p>
+<pre><code>
+var target = {
+  apple: 'りんご',
+  orange: 'みかん',
+};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name){
+    if (target.hasOwnProperty(name)){
+      return target[name];
+    } else {
+      throw new Error('は？');
+    }
+  },
+});
+
+console.log(obj.apple); // "りんご"
+console.log(obj.peach); // エラー
+</code></pre>
+
+<h3>setトラップ</h3>
+<p>では次のトラップの話に移ります。getトラップがあれば<b>setトラップ</b>もあります。</p>
+<p>例えば、値は数値しか許さないという厳しいオブジェクトは次のように作ります。</p>
+<pre><code>
+var obj = new <mark>Proxy</mark>({}, {
+  set(target, name, value){
+    if ('number' === typeof value){
+      target[name] = value;
+    } else {
+      throw new Error('は？');
+    }
+  },
+});
+
+obj.foo = 3;  // OK
+console.log(obj.foo); // 3
+obj.bar = 'hello'; // エラー
+</code></pre>
+<p>見て分かるように、今回のトラップの引数は3つです。第1引数はカスタマイズされるオブジェクト（実はこれはどのトラップでも共通です）、第2引数はプロパティ名、第3引数は代入されようとしている値です。今回は<a href="11_5.html#anchor-typeof">typeof演算子</a>を使って値が数値かどうか確かめ、数値の場合のみ代入するというsetトラップを作りました。</p>
+<p>なお、トラップは複数同時に指定することができます。次の例はgetとsetを両方指定した例です。これはプロパティの値をただ返すのではなく100倍にして返すという見えっ張りなオブジェクトです。</p>
+<pre><code>
+var obj = new <mark>Proxy</mark>({}, {
+  get(target, name){
+    return target[name] * 100;
+  },
+  set(target, name, value){
+    if ('number' === typeof value){
+      target[name] = value;
+    } else {
+      throw new Error('は？');
+    }
+  },
+});
+
+obj.foo = 3;  // OK
+console.log(obj.foo); // 300
+</code></pre>
+
+<p>ところで、最後のほうの例では<code>var target = {};</code>とせずにProxyの第1引数に新しく作ったオブジェクト<code>{}</code>を直接渡しています。こうすることでもとのオブジェクトを隠蔽でき、トラップを介さない操作を防ぐことができるでしょう。</p>
+
+<h3>hasトラップ</h3>
+<p>以上の2つが恐らく最もよく使われるトラップですが、他にも愉快なトラップがいくつもあります。まずは<dfn>hasトラップ</dfn>です。</p>
+<p>これは<a href="11_4.html#anchor-in">in演算子</a>の挙動に影響を与えるトラップです。in演算子は、あるプロパティがあるオブジェクトの中に存在するかどうか調べる演算子でした。</p>
+<p>hasトラップを使うと、これの結果を詐称することができます。</p>
+
+<pre class="line-numbers"><code>
+var obj = new Proxy({}, {
+  has(target, name){
+    return true;
+  },
+});
+
+console.log(obj.foo); // undefined
+console.log('foo' in obj); // true
+</code></pre>
+<p>このオブジェクトはどんなプロパティ名に対してもそれを持っていると答えるオブジェクトです。ただし、in演算子しか詐称することができません。<a href="11_4.html#anchor-object-hasownproperty">hasOwnProperty</a>に対しては無力です（hasトラップの挙動に関わらず本来の結果が返ります）。</p>
+<p>また、いくつか結果を詐称できない場合があります。ひとつは、もとのオブジェクトに<a href="11_4.html#anchor-property-attribtute">configurable属性</a>がfalseのプロパティがある場合です。configurable属性がfalseのオブジェクトは、delete演算子によって削除することができないのでした。この力は強大なので、Proxyの力をもってしても消えたように見せかけることすらできないのです。</p>
+<p>具体的には、次のようにするとエラーになります。</p>
+<pre class="line-numbers"><code>
+var target = {
+  prop: 3,
+};
+// もとのオブジェクトにconfigurableがfalseのプロパティfooを作る
+Object.defineProperty(target, 'foo', {
+  value: 'Hi',
+  writable: true,
+  configurable: false,
+});
+
+// 全てのプロパティがないと詐称するProxyオブジェクトを作る
+var obj = new Proxy(target, {
+  has(target, name){
+    return false;
+  },
+});
+
+console.log('prop' in obj); // false
+console.log('foo' in obj); // <em>エラー</em>
+</code></pre>
+
+<p>もうひとつは、もとのオブジェクトが<a href="11_8.html">拡張不可能</a>の場合です。この場合、プロパティが存在するのに存在しないと詐称することができません。</p>
+<pre class="line-numbers"><code>
+var target = {
+  prop: 3,
+};
+Object.preventExtensions(target);
+
+var obj = new Proxy(target, {
+  has(target, name){
+    return false;
+  },
+});
+
+console.log('prop' in obj); // <em>エラー</em>
+</code></pre>
+
+<h3>getOwnPropertyDescriptorトラップ</h3>
+<p>トラップはまだまだあります。この<b>getOwnPropertyDescriptor</b>というトラップは、その名から容易に推測できる通り、<a href="11_4.html#anchor-property-descriptor">Object.getOwnPropertyDescriptor</a>の結果を操作することができます。</p>
+<p>ぶっちゃけ使い道がよくわからないのでさらっと流しますが、このトラップが呼ばれたらObject.getOwnPropertyDescriptorの返り値として妥当な（すなわちプロパティデスクリプタとして妥当な）オブジェクトを返さなければなりません。また、undefinedを返すことができます。この場合はプロパティが存在しないという意味になります。</p>
+<p>このトラップがundefinedを返す場合に関しては、上のhasトラップの場合と同様の制限があります。すなわち、configurableがfalseなプロパティが存在しないと詐称したり、拡張不可能なオブジェクトのプロパティが存在しないと詐称したりすることはできません。</p>
+<p>また、追加の制限として、configurableなプロパティをconfigurableでないと詐称することはできません。これは、外から見たらconfigurableでないオブジェクトが設定変更されるという矛盾が発生するのを防ぐためですね。</p>
+<pre><code>
+var obj = new Proxy({}, {
+  getOwnPropertyDescriptor(target, name){
+    return {
+      value: name,
+      writable: false,
+      enumerable: true,
+      configurable: true,
+    };
+  },
+});
+
+console.log(Object.getOwnPropertyDescriptor(obj, 'prop'));
+</code></pre>
+<p>これが例です。この例では、Object.getOwnPropertyDescriptorで調べるとobjのpropプロパティには<code>"prop"</code>という値が入っているかのような返り値が返ってきますが、実際に<code>obj.prop</code>を調べるともちろんそんなプロパティは無いのでundefinedです。また、<code>'prop' in obj</code>もfalseとなります。この例から分かることは、Proxyといえどもオブジェクトのプロパティに関する諸々を詐称するのは大変だということですね。setトラップやhasトラップをうまいこと詐称してもgetOwnPropertyDescriptorをちゃんと設定しないと詐称がバレるということもあるかもしれません。</p>
+<p>そこまでする意味があるのかどうかという問題もありますから、Proxyを使って変なオブジェクトを作るときはそのオブジェクトを作る目的が何なのかも考えつつ適切に各トラップを設定してやる必要があります。</p>
+<p>そんなことを念頭に置きつつ、次のトラップに進みます。</p>
+
+<h3>ownKeysトラップ</h3>
+<p>この<dfn>ownKeysトラップ</dfn>は、<a href="11_4.html">Object.getOwnPropertyNames</a>の結果を詐称するためのトラップです。また、<a href="16_4.hrml">Object.getOwnPropertySymbols</a>の結果にも影響を与えることができます。</p>
+<p>ownKeysトラップの返り値は配列でなければいけません。この配列が、当該オブジェクトに存在するプロパティの名前の一覧として扱われます。よって、配列の要素は文字列かシンボルに制限されます。</p>
+<pre><code>
+var obj = new Proxy({}, {
+  ownKeys(target){
+    return ['foo', 'bar', 'baz'];
+  },
+});
+
+console.log(Object.getOwnPropertyNames(obj)); // ["foo", "bar", "baz"]
+console.log(Object.keys(obj)); // []
+</code></pre>
+<p>この例では、<a href="11_4.html">Object.keys</a>で調べると返り値は<code>[]</code>となることに注意してください。これは、Object.keysがenumerable属性がtrueのプロパティのみ列挙するためです。上のgetOwnPropertyDescriptorトラップを使ってこれらのプロパティのenumerable属性がtrueであると詐称することにより、Object.keysの返り値に出現させることができます。また、そうすることでfor-in文にも影響を及ぼすことができます。</p>
+<pre><code>
+var obj = new Proxy({}, {
+  ownKeys(target){
+    return ['foo', 'bar', 'baz'];
+  },
+  getOwnPropertyDescriptor(target, name){
+    if (name === 'foo' || name === 'bar' || name === 'baz'){
+      return {
+        value: 0,
+        enumerable: true,
+        configurable: true,
+      };
+    }else{
+      return undefined;
+    }
+  },
+});
+
+console.log(Object.getOwnPropertyNames(obj)); // ["foo", "bar", "baz"]
+console.log(Object.keys(obj)); // ["foo", "bar", "baz"]
+
+for (let key in obj){
+  console.log(key, obj[key]);
+}
+</code></pre>
+<p>そして、もはや恒例ですが、ownKeysトラップの結果にも制限があります。まず、もとのオブジェクトがconfigurableでないプロパティを持つ場合は、そのプロパティ名はかならず結果に含める必要があります。要するに、このトラップでもやはり、configurableでないプロパティが存在するのに存在しないと詐称することはできないということです。</p>
+<p>さらに、もとのオブジェクトが拡張不可能の場合もやはり制限があります。この制限は厳しく、拡張不可能なオブジェクトに対しては結果を一切詐称することができません。すなわち、返り値の配列は正確にもとのオブジェクトのプロパティを全て列挙する必要があります。一応、順番は決められるのでこのトラップに全く意味がないわけではありませんが。</p>
+
+<h3>definePropertyトラップ</h3>
+<p>プロパティ関係のトラップはまだあります。ひとつは<dfn>defineProperty</dfn>トラップです。言うまでもなく、これは<a href="11_4.html#anchor-object-defineproperty">Object.defineProperty</a>に対応するトラップです。プロパティへの普通の代入はsetトラップで対応できましたが、Object.definePropertyを使ってプロパティをいじろうとする試みにはこのdefinePropertyトラップで対応します。</p>
+<p>このトラップにはプロパティ名に加えて、Object.definePropertyに渡されたオブジェクトがそのままの形で<small>（プロパティデスクリプタに関係ないプロパティは削除されますが）</small>渡されます。そして、このトラップの返り値は<strong>真偽値</strong>でなければなりません。trueがプロパティ書き換えの成功、falseがプロパティ書き換えの失敗を表します。例えば、プロパティfoo以外へのdefinePropertyを許さないオブジェクトです。</p>
+<pre><code>
+var obj = new Proxy({}, {
+  defineProperty(target, name, desc){
+    if (name === 'foo'){
+      Object.defineProperty(target, name, desc);
+      return true;
+    } else {
+      return false;
+    }
+  },
+});
+
+Object.defineProperty(obj, 'hoge', {
+  value: 'hi',
+  configurable: true,
+}); // <em>ここでエラー (TypeError)</em>
+</code></pre>
+<p>この例から分かるように、definePropertyトラップがfalseを返した場合はObject.definePropertyはエラーを発生させます。エラーを出す必要がない場合は、無視しつつtrueを返すなどの工夫が必要かもしれません。</p>
+<p>ただし、trueを返すということは「definePropertyの成功」を表すので、例によって拡張不可能オブジェクト等に関する制限が発生します。（この場合、trueを返してもエラーになるので制限にひっかかる値が渡されると問答無用でエラーになるというのが正しいですが。）</p>
+<p>まず、拡張不可能オブジェクトに対して、現在存在しないプロパティをdefinePropertyで作ろうとするのはエラーとなります。さらに、configurableがfalseのプロパティに対して、enumerable属性やwritable属性を変えることもできません。これらは要するに、通常のObject.definePropertyを逸脱する挙動はできないということです。また、実はProxyオブジェクトに対するdefinePropertyでconfigurableがfalseのプロパティを作ったり、configurableがtrueのプロパティをfalseに変えようとすることはできません。これもエラーになります。</p>
+
+<h3>deletePropertyトラップ</h3>
+<p>プロパティ関連のトラップの最後は<dfn>deleteProperty</dfn>トラップです。</p>
+<p>これは、delete演算子によりオブジェクトのプロパティが削除される場合に呼ばれます。今回も返り値は真偽値で、trueが削除の成功を表します。</p>
+<p>configurableに関する制限はやはり存在し、configurableがfalseのプロパティの削除に対してtrueを返すとエラーとなります。configurableでないプロパティを削除できましたという嘘はつけないわけですね。</p>
+<p>次の例は、プロパティを削除するとプロパティが断末魔をあげるという例です。
+
+<pre><code>
+var obj = new Proxy({
+  foo: 3,
+  bar: 100,
+}, {
+  deleteProperty(target, name){
+    if (delete target[name]){
+      console.log(`${name}「ぎゃああああああ」`);
+      return true;
+    } else {
+      return false;
+    }
+  },
+});
+
+delete obj.foo;
+delete obj.bar;
+</code></pre>
+<p>これはあほみたいな例ですが、このオブジェクトはdeleteの本来の動作を邪魔せずに追加の処理を行っており、今までのように結果を詐称するような例とは毛色が少し違います。このような例のほうがProxyオブジェクトの本来の使いみちに近いかもしれません。</p>
+
+<h3>preventExtensionsトラップ</h3>
+<p>ここからはプロパティ関連以外のトラップです。この<dfn>preventExtensions</dfn>トラップは、名前から明らかな通り<a href="11_8.html#anchor-object-preventextensions">Object.preventExtensions</a>に対応するトラップです。</p>
+<p>このトラップの返り値はやはり真偽値です。preventExtensions（オブジェクトを拡張不可能にする操作）に成功したならtrue、失敗したならfalseを返します。なお、Object.preventExtensionsは、このトラップがfalseを返した場合は失敗ということでエラーを発生させます。</p>
+<p>このトラップに関する制限は、trueを返すならカスタマイズされているオブジェクトは実際に拡張不可能になっていないといけないということです。オブジェクトを拡張不可能にしていないのに成功しましたと嘘をつくことはできません。このトラップが呼ばれたときの選択肢は、ちゃんと指示通りにオブジェクトを拡張不可能にするか、あるいは拒否してfalseを返すかです。</p>
+<pre><code>
+var obj = new Proxy({}, {
+  preventExtensions(target){
+    console.log('preventExtensions');
+    Object.preventExtensions(target);
+    return true;
+  },
+});
+</code></pre>
+<p>この例は素直に指示に従ってオブジェクトを拡張不可能にしつつログを表示するオブジェクトです。</p>
+
+<h3>isExtensibleトラップ</h3>
+<p>Object.isExtensibleに対応する<dfn>isExtensible</dfn>トラップもあります。</p>
+<p>当然トラップの返り値は真偽値ですが、このトラップは制限が厳しく、詐称は一切許されません。本当はtrueなのにfalseを返したり、あるいはその逆はエラーとなります。面白くないですね。</p>
+
+<h3>getPrototypeOfトラップ</h3>
+<p>prototypeに関するトラップもあります。<dfn>getPrototypeOf</dfn>トラップは、自身のprototypeを詐称できるトラップです。言うまでもなく<a href="11_7.html#anchor-object-getprototypeof">Object.getPrototypeOf</a>に影響を及ぼしますが、他にも影響範囲があります。</p>
+<p>例えば、次のオブジェクトは自身のprototypeが<code>Array.prototype</code>であると詐称するトラップです。</p>
+<pre><code>
+var obj = new Proxy({}, {
+  getPrototypeOf(target){
+    return Array.prototype;
+  },
+});
+
+console.log(Object.getPrototypeOf(obj) === Array.prototype); // <em>true</em>
+</code></pre>
+<p>もしobjのprototypeがArray.prototypeならば、それはobjがArrayのインスタンスであることを意味しています。よって、このobjを<a href="11_7.html#anchor-instanceof">instanceof</a>で調べるとobjはArrayのインスタンスであるという結果が出ます。すなわち、<code>obj instanceof Array</code>がtrueとなります。</p>
+<p>ただし、getPrototypeOfトラップは実際のprototypeチェーンには影響を与えませんので、このようにしても本当にobjがArrayのインスタンスになるわけではありません。つまり、<code>obj.push</code>などとしてArrayのメソッドが使えるようになるわけではありません。</p>
+<p>getPrototypeOfトラップによって影響を与えることができるのは、Object.getPrototypeOf、instanceof、そして<a href="11_7.html#anchor-object-getprototypeof">Object.isPrototypeOf</a>です。</p>
+<p>このトラップの返り値はオブジェクトまたはnullでなければいけません。また、オブジェクトが拡張不可能である場合は嘘を付くことができません。</p>
+
+<h3>setPrototypeOfトラップ</h3>
+<p>今度は<dfn>setPrototypeOf</dfn>トラップです。これはObject.setPrototypeOfメソッドに対応するトラップです。</p>
+<p>……と言いたいのですが、まだこの<b>Object.setPrototypeOf</b>は紹介していませんでしたね。これはES2015で追加されたメソッドで、その名が示す通りObject.getPrototypeOfの逆で、あるオブジェクトに対応するprototypeオブジェクトを変更できるメソッドです。</p>
+<p>これはなかなかとんでもないメソッドですね。オブジェクトが、後からあるオブジェクトのインスタンスになったりなくなったりします。</p>
+<pre><code>
+var arr = [0, 1, 2];
+
+console.log(arr instanceof Array); // true
+
+<mark>Object.setPrototypeOf</mark>(arr, Object.prototype);
+
+console.log(arr instanceof Array); // false
+
+console.log(arr.pop()); // エラー
+</code></pre>
+<p>ただし、拡張不可能なオブジェクトに対してはprototypeオブジェクトを変更することができません（エラーになります）。</p>
+<p>このメソッドは気軽に使うべきではありません。本当に必要な場面でのみ使いましょう。</p>
+
+<p>では、話を戻します。このObject.setPrototypeOfの処理に割り込むことができるのが<dfn>setPrototypeOf</dfn>トラップです。</p>
+<p>このトラップの返り値はやはり真偽値で、変更に成功したらtrueです。falseの場合、Object.setPrototypeOfはエラーになります。</p>
+<p>例によって、拡張不可能オブジェクトに関する制限もあります。拡張不可能オブジェクトに対してもともとのprototypeオブジェクトと異なるものをセットするのはエラーです。</p>
+
+<h3>applyトラップ</h3>
+<p>なんと残りは2つです。ここからは<b>関数</b>に関するトラップです。</p>
+<p>まずは<dfn>apply</dfn>トラップ。これはProxyオブジェクトが関数として呼び出されたときのトラップです。<a href="9_3.html#anchor-apply-call">Function#apply</a>などによる関数呼び出しの場合もこのトラップが適用されます。（余談ですが、Function#applyというのはFunctionのインスタンスが持つapplyメソッド、すなわちFunction.prototype.applyのことです。以前にも出てきたと思いますが、よく使われる書き方なので覚えておくとよいでしょう。）</p>
+<p>applyトラップに渡される引数は3つです。第1引数はいつもどおりもとのオブジェクト、第2引数はメソッド呼び出し時のthisの値、第3引数は関数呼び出し時の引数の配列です。もとのオブジェクトとは言いますが、ひとつ注意点としては、<strong>もとのオブジェクトが関数でないとProxyオブジェクトを関数として呼び出すことはできない</strong>ということが挙げられます。つまり、関数でないただのオブジェクトに対してapplyトラップを設定したからといって、関数として使えるようにはならないということです。</p>
+<pre><code>
+var func = new Proxy(function(){}, {
+  apply(target, thisValue, args){
+    console.log('関数が次の引数で呼ばれました', args);
+    return target.apply(thisValue, args);
+  },
+});
+
+func('foo', 'bar', 3);
+</code></pre>
+<p>この例は、呼ばれたらログを表示してから本来の動作をするような関数をProxyにより作っています。見れば分かるように、applyトラップの返り値が元々の関数呼び出しの返り値となります。</p>
+<p>なお、上で「関数でないと」と述べましたが、正確にはこのように通常の関数呼び出しが行えるような関数でないといけません。要するに、<a href="16_11.html">クラス</a>は関数ですがnewを用いた呼び出ししかできないので、やはりapplyトラップを使っても通常の関数呼び出しはできません。</p>
+
+<h3>constructトラップ</h3>
+<p>関数は普通の呼び出し方の他にnewを用いた呼び出し方もあります。こちらに対応するのが<dfn>construct</dfn>トラップです。これもapplyトラップと同様に、コンストラクタとして使用できる（newができる）オブジェクトに対してProxyを作った場合しか意味がありません。</p>
+<p>constructトラップに渡される引数も3つです。第1引数は例によってもともとのオブジェクト、第2引数は引数の配列、そして第3引数はProxyオブジェクト自身です。返り値がnewの結果となります。</p>
+<pre><code>
+var Func = new Proxy(class{}, {
+  construct(target, args, newTarget){
+    return args;
+  },
+});
+
+var arr = new Func(1, 10, 100);
+
+console.log(arr); // [1, 10, 100]
+</code></pre>
+<p>この例で作ったFuncは、newでオブジェクトを作るとなぜか引数の配列を返すというひどいコンストラクタです。当然返り値はFuncのインスタンスではありません。このように、constructトラップの返り値がnewの結果となります。</p>
+<p>他には、コンストラクタとして使用されたくない場合はconstructトラップでエラーを投げるというような使用法もあります。</p>
+<p>constructトラップの返り値はnewの結果として妥当でなければいけないので、オブジェクトでなければいけません。トラップがプリミティブの値を返すとエラーになります。</p>
+
+<hr>
+<p>おめでとうございます、これでトラップを全種類網羅しました。プロパティ関連を中心として、オブジェクトに対する様々な操作をProxyによりカスタマイズできることが分かったと思います。</p>
+<p>Proxyはオブジェクトに対する操作に反応して何かの処理を行いたいという需要に対応することができます。また、工夫によっては特殊な挙動をする実用的なオブジェクトを作ることもできるでしょう。機会があれば活用してみてください。</p>
+<p>締めくくりの文を述べてしまいましたが、まだひとつ紹介するものがあるのでそれを紹介して終わりにします。</p>
+
+<h3>Proxy.revocable</h3>
+<p>revocableというのは「取り消し可能」という意味です。<dfn>Proxy.revocable</dfn>はProxyオブジェクトを作るメソッドです。すなわち、Proxyオブジェクトを作るもうひとつの方法です。引数は<code>new Proxy</code>とする場合と同じです。</p>
+<p>返り値は、<code>proxy</code>と<code>revoke</code>という2つのプロパティを持ったオブジェクトです。proxyプロパティに作成したProxyオブジェクトが入っています。もう1つのrevokeは関数であり、この関数を呼び出すと作成したProxyオブジェクトが<em>無効になります</em>。Proxyオブジェクトが無効になると、トラップが介入できるような操作は全てエラーとなります。</p>
+<p>言葉で説明しても分かりにくいので例を見ましょう。</p>
+<pre><code>
+var revocable = <mark>Proxy.revocable</mark>({}, {
+  get(target, name){
+    return name;
+  },
+});
+
+var obj = revocable.<mark>proxy</mark>;
+console.log(obj.foo); // "foo"
+
+// ここでProxyオブジェクト（今回はobj）を無効化
+revocable.<mark>revoke</mark>();
+
+obj.hoge = 0; // <em>エラー</em>
+</code></pre>
+<p>まず、<code>Proxy.revocable</code>を呼び出してProxyオブジェクトを作っています。<code>Proxy.revocable</code>を使う場合は、作成されたProxyオブジェクトは結果のオブジェクト（今回は変数revocableに代入）のproxyプロパティに入っています。今回はこれを変数objに代入しました。</p>
+<p>revokeメソッドを呼び出すと、作成されたProxyオブジェクト、すなわちobjが無効化されます。その結果、<code>obj.hoge = 0;</code>の行がエラーとなりました。これがエラーとなる理由は、Proxyオブジェクトのプロパティに値を代入するときは上で説明したsetトラップが介入できるからです。今回作ったProxyにはsetトラップはありませんでしたが、定義されていないものも含めて何らかのトラップが介入できる操作はこのように全てエラーとなります。</p>
+<p>実質的に、Proxyオブジェクトを無効化するというのはトラップの情報を全部捨てることに相当します。なので、トラップが関わる操作は全てエラーになるのです。トラップの情報を捨てる目的は主にメモリの節約です。Proxyオブジェクトそのものは必要だけどもう操作しないという稀有な状況が発生しそうで、しかもメモリを節約したいという状況なら使いみちがあるかもしれません。</p>
+
+<hr>
+<p>長かったですが、今回の内容はこれで終わりです。次回はProxyと関係の深いReflectを紹介します。</p>

@@ -257,6 +257,8 @@
   <dd><a href="11_8.html">第十一章第八回</a></dd>
   <dt>Object.seal</dt>
   <dd><a href="11_8.html">第十一章第八回</a></dd>
+  <dt>Object.setPrototypeOf</dt>
+  <dd><a href="16_14.html">第十六章第十四回</a></dd>
 
   <dt>Object#hasOwnProperty</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
@@ -265,6 +267,8 @@
 
   <dt>Promise</dt>
   <dd><a href="16_5.html">第十六章第五回</a></dd>
+  <dt>Proxy</dt>
+  <dd><a href="16_14.html">第十六章第十四回</a></dd>
 
   <dt>RegExp#exec</dt>
   <dd><a href="qa1.html#2012-11-17">質問と回答1</a></dd>

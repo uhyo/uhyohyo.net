@@ -2,7 +2,7 @@
 <p>ご存知のように、JavaScriptにおけるオブジェクトは、自由にプロパティを追加したり書き換えたり削除したりできます。しかし、場合によっては他人に勝手にオブジェクトをいじれらたくないこともあるでしょう。</p>
 <p><a href="11_4.html">プロパティの属性</a>のひとつであるwritable属性をfalseにすれば、個々のプロパティについては書き換え不能にすることができます。しかし、新しいプロパティを追加されるような事態に対しては対応不可能です。今回紹介するメソッドを使えばこれを制限することができます。</p>
 
-<h3>Object.preventExtensions</h3>
+<h3 id="anchor-object-preventextensions">Object.preventExtensions</h3>
 <p>まず最初に紹介するのが<dfn>Object.preventExtensions</dfn>です。これはオブジェクトを引数にとって呼び出すと、そのオブジェクトは<b>拡張不可能</b>になります。すなわち、<em>新しいプロパティを追加できなくなります</em>。</p>
 <pre class="line-numbers"><code>
 var obj = {
