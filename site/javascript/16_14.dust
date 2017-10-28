@@ -4,7 +4,7 @@
 <pre><code>
 var target = {};
 var obj = new <mark>Proxy</mark>(target, {
-  get(target, name){
+  get(target, name, receiver){
     return name;
   },
 });
@@ -46,7 +46,7 @@ console.log(target.name); // "Mary Sue"
 <pre><code>
 var target = {};
 var obj = new <mark>Proxy</mark>(target, {
-  get(target, name){
+  get(target, name, receiver){
     return name;
   },
 });
@@ -54,7 +54,7 @@ var obj = new <mark>Proxy</mark>(target, {
 console.log(obj.foo); // "foo"
 console.log(obj['あいうえお']); // "あいうえお"
 </code></pre>
-<p>getトラップは<em>全てのプロパティアクセス</em>に対して呼ばれます。引数は2つで、第1引数はカスタマイズされるオブジェクト、第2引数はプロパティ名です。これはゲッタの場合とは違いますね。ゲッタは各プロパティに対して設定されるもので、そのプロパティに対するアクセスが関数によりカスタマイズできるものでした。</p>
+<p>getトラップは<em>全てのプロパティアクセス</em>に対して呼ばれます。引数は3つで、第1引数はカスタマイズされるオブジェクト、第2引数はプロパティ名です。第3引数はプロパティを参照されているオブジェクト自身（今回は<code>obj.foo</code>として参照されているので<code>obj</code>になります）です。これはゲッタの場合とは違いますね。ゲッタは各プロパティに対して設定されるもので、そのプロパティに対するアクセスが関数によりカスタマイズできるものでした。</p>
 <p>それに対してProxyのgetトラップは、どんなプロパティに対するアクセスも一律で処理することができます。そして、関数の返り値がそのプロパティの値となります。</p>
 <p>今回のgetトラップは、渡されたプロパティ名自体を結果として返すという変なトラップです。その結果、<code>obj.name</code>は<code>"name"</code>というように、どんなプロパティ名に対してもその名前自体が入っているようなオブジェクトができました。</p>
 
@@ -65,7 +65,7 @@ var target = {
   orange: 'みかん',
 };
 var obj = new <mark>Proxy</mark>(target, {
-  get(target, name){
+  get(target, name, receiver){
     if (target.hasOwnProperty(name)){
       return target[name];
     } else {
@@ -88,7 +88,7 @@ var target = {
   orange: 'みかん',
 };
 var obj = new <mark>Proxy</mark>(target, {
-  get(target, name){
+  get(target, name, receiver){
     if (target.hasOwnProperty(name)){
       return target[name];
     } else {
@@ -106,7 +106,7 @@ console.log(obj.peach); // エラー
 <p>例えば、値は数値しか許さないという厳しいオブジェクトは次のように作ります。</p>
 <pre><code>
 var obj = new <mark>Proxy</mark>({}, {
-  set(target, name, value){
+  set(target, name, value, receiver){
     if ('number' === typeof value){
       target[name] = value;
     } else {
@@ -119,14 +119,14 @@ obj.foo = 3;  // OK
 console.log(obj.foo); // 3
 obj.bar = 'hello'; // エラー
 </code></pre>
-<p>見て分かるように、今回のトラップの引数は3つです。第1引数はカスタマイズされるオブジェクト（実はこれはどのトラップでも共通です）、第2引数はプロパティ名、第3引数は代入されようとしている値です。今回は<a href="11_5.html#anchor-typeof">typeof演算子</a>を使って値が数値かどうか確かめ、数値の場合のみ代入するというsetトラップを作りました。</p>
+<p>見て分かるように、今回のトラップの引数は4つです。第1引数はカスタマイズされるオブジェクト（実はこれはどのトラップでも共通です）、第2引数はプロパティ名、第3引数は代入されようとしている値、第4引数はgetの第3引数と同じです。今回は<a href="11_5.html#anchor-typeof">typeof演算子</a>を使って値が数値かどうか確かめ、数値の場合のみ代入するというsetトラップを作りました。</p>
 <p>なお、トラップは複数同時に指定することができます。次の例はgetとsetを両方指定した例です。これはプロパティの値をただ返すのではなく100倍にして返すという見えっ張りなオブジェクトです。</p>
 <pre><code>
 var obj = new <mark>Proxy</mark>({}, {
-  get(target, name){
+  get(target, name, receiver){
     return target[name] * 100;
   },
-  set(target, name, value){
+  set(target, name, value, receiver){
     if ('number' === typeof value){
       target[name] = value;
     } else {

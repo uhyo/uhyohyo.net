@@ -1,0 +1,144 @@
+<p>今回は<dfn>Reflect</dfn>を紹介します。Reflectは組み込みオブジェクトであり、いくつかのメソッドを持っています。これらのメソッドはオブジェクトの操作に利用することができます。</p>
+<p>Reflectが持っているメソッドを列挙すると以下の通りです：get, set, has, getOwnPropertyDescriptor, ownKeys, defineProperty, deleteProperty, preventExtensions, isExtensible, getPrototypeOf, setPrototypeOf, apply, construct。</p>
+<p>これを見ると明らかにあれを思い出しますね。そう、前回紹介したばかりの<a href="16_14.html">Proxy</a>です。実は、Reflectに存在するメソッドはProxyのトラップと一対一で対応しています。そして、Reflectの各メソッドに渡す引数はトラップに渡される引数と全く一緒です。ただしProxyではないので、第1引数（もとのオブジェクト）は今回の場合は対象のオブジェクトそのものとなります。</p>
+<p>たとえば、Reflect.getを使ってみましょう。</p>
+<pre><code>
+var obj = {
+  foo: 123,
+};
+
+// obj.foo と同じ意味
+console.log(Reflect.get(obj, 'foo', obj)); // 123
+</code></pre>
+<p><code>obj.foo</code>としてobjのfooプロパティを参照したいとしましょう。もしobjがProxyだったとすると、getトラップが第1引数がもとのオブジェクト、第2引数がプロパティ名（<code>'foo'</code>）、第3引数がobjで呼ばれることになります。よって、それらの引数をReflect.getで再現することにより、<code>obj.foo</code>を取得することができます。</p>
+<p>Reflectのメソッドは全てトラップと対応しているので、Proxyのトラップで対応できる操作はReflectのメソッドで再現できます。また、Reflectのメソッドの返り値もトラップのそれと同じです。トラップの場合は成功か失敗かを真偽値で返すメソッドがありましたが、そのような操作の場合はReflectの対応するメソッドの返り値も真偽値となります。</p>
+<p>なので、Reflectのメソッドの特徴は、<strong>エラーを発生させない</strong>ということです。</p>
+<p>例えば、<code>Reflect.defineProperty</code>メソッドを考えます。これの動作は<code>Object.defineProperty</code>とほとんど同じですが、不正な操作をしようとした場合の挙動が異なります。例として、configurableでないメソッドの設定を変えようとした場合を考えます。</p>
+<pre><code>
+var obj = {};
+
+// プロパティfooを作成
+Object.defineProperty(obj, 'foo', {
+  value: 'Hey!',
+  writable: false,
+  configurable: false,
+});
+
+// fooをwritableにしようとするとエラー
+Object.defineProperty(obj, 'foo', {
+  writable: true,
+});
+</code></pre>
+<p>この場合、Object.definePropertyの場合はエラーとなります。一方、Reflect.definePropertyを使うとエラーが発生せず、失敗を表すfalseが返り値として返ってきます。</p>
+<pre><code>
+var obj = {};
+
+// プロパティfooを作成
+Object.defineProperty(obj, 'foo', {
+  value: 'Hey!',
+  writable: false,
+  configurable: false,
+});
+
+// fooをwritableにしようとする (false)
+console.log(Reflect.defineProperty(obj, 'foo', {
+  writable: true,
+}));
+</code></pre>
+<p>このような特徴から、Reflectのメソッドは失敗してもエラーを発生させたくない場合に適しています。また、明らかにProxyとよく対応していることから、Proxyと一緒に使われることがあります。前回出てきたgetトラップの例を思い出してください。</p>
+<pre class="line-numbers"><code>
+var target = {
+  apple: 'りんご',
+  orange: 'みかん',
+};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name, receiver){
+    if (target.hasOwnProperty(name)){
+      return target[name];
+    } else {
+      return 'hello';
+    }
+  },
+});
+
+console.log(obj.apple); // "りんご"
+console.log(obj.peach); // "hello"
+
+obj.peach = 'もも';
+console.log(obj.peach); // "もも"
+</code></pre>
+<p>これはプロパティのデフォルト値を持つオブジェクトの例です。getトラップは指定されたプロパティを持っている場合は本来の動作（そのプロパティの値を取得する）をし、そうでない場合はデフォルト値を返しています。このようにトラップから「本来の動作」を行いたいという場面は結構あります。</p>
+<p>このような場合にReflectのメソッドを使うと綺麗に書くことができます。Reflectのメソッドに渡す引数はトラップに渡された引数と対応しているので、次のようにできます。</p>
+<pre class="line-numbers" data-line="8"><code>
+var target = {
+  apple: 'りんご',
+  orange: 'みかん',
+};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name, receiver){
+    if (target.hasOwnProperty(name)){
+      return Reflect.get(target, name, receiver);
+    } else {
+      return 'hello';
+    }
+  },
+});
+
+console.log(obj.apple); // "りんご"
+console.log(obj.peach); // "hello"
+
+obj.peach = 'もも';
+console.log(obj.peach); // "もも"
+</code></pre>
+<p>これがReflectの典型的な使いみちのひとつです。</p>
+
+<h3>receiverの意味</h3>
+<p>ここからは前回の補足のようになります。上2つの例（<code>target[name]</code>と<code>Reflect.get(target, name, receiver)</code>）は実は挙動が異なることがあります。挙動の違いは、オブジェクトが<a href="9_6.html">ゲッタ</a>を持つ場合に現れます。</p>
+<pre class="line-numbers"><code>
+var target = {
+  apple: 'りんご',
+  orange: 'みかん',
+  get foo(){
+    return this.peach;
+  },
+};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name, receiver){
+    if (target.hasOwnProperty(name)){
+      return target[name];
+    } else {
+      return 'hello';
+    }
+  },
+});
+
+console.log(obj.foo); // <em>undefined</em>
+</code></pre>
+<p>この例では、もとのオブジェクト（target）のfooというプロパティがゲッタとなっています。そして、ゲッタの中では<b>this</b>を使うことができます。例えば<code>obj.foo</code>としてプロパティを取得した場合はthisはobjとなります。これはメソッド呼び出しと同じですね。</p>
+<p>しかし、今回<code>obj.foo</code>とされると、objはProxyなのでまずgetトラップが処理され、<code>target[name]</code>（ここでnameは<code>"foo"</code>）の値が返されます。targetのfooプロパティはゲッタとなっているのでゲッタが呼ばれますが、この中でthisはtargetオブジェクトになります。ということは、<code>this.peach</code>としてもpeachプロパティは存在しないのでundefinedが返ります。</p>
+<p>これは、あるいは非直感的な挙動ではないでしょうか。objのfooプロパティを取得しようとしたのだから、thisはobjとなり、したがって<code>this.peach</code>はデフォルト値の<code>'hello'</code>になるべきだとは思いませんか。</p>
+<p>実は、<code>Reflect.get</code>を使えばそのような挙動とすることができます。</p>
+<pre class="line-numbers" data-line="11"><code>
+var target = {
+  apple: 'りんご',
+  orange: 'みかん',
+  get foo(){
+    return this.peach;
+  },
+};
+var obj = new <mark>Proxy</mark>(target, {
+  get(target, name, receiver){
+    if (target.hasOwnProperty(name)){
+      return Reflect.get(target, name, receiver);
+    } else {
+      return 'hello';
+    }
+  },
+});
+
+console.log(obj.foo); // <em>"hello"</em>
+</code></pre>
+<p>この秘密はgetトラップの第3引数、receiverにあります。前回の説明では、<code>obj.foo</code>としたときreceiverにはobjが入ると説明しました。実はreceiverというのは、ゲッタ（あるいはセッタ）内でthisになるべきオブジェクトを表しています。よって、Reflect.getは第3引数に渡されたもの（receiver）をゲッタの呼び出し時のthisとして扱うのです。</p>
+
+<p>これがreceiverの意味です。getトラップやsetトラップの引数のうち最後のもの（receiver）はあまり使う機会がないので忘れがちですが、Reflect.getなどを使う場合は忘れないようにしましょう。</p>
+<p>とはいえ、実は<code>Reflect.get</code>と<code>Reflect.set</code>においては最後の引数は省略可能です。一番最初の例で<code>Reflect.get(obj, 'foo', obj);</code>とするのはobjが2回出てきて無駄ですね。このような場合は第3引数を省略できます（省略すると第1引数と同じになります）。</p>
