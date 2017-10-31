@@ -1,0 +1,313 @@
+<p>第十六章はとても記事数が多いですね。ES2015というのはそれだけ大規模なバージョンアップだったので仕方がないのですが。</p>
+<p>今回の話題は<b>配列</b>です。ES2015では例によって、配列に新しい機能（メソッド）が追加されました。今回はそれを紹介します。今回からは、このように既存の機能への機能追加が主になってきます。</p>
+
+<h3>イテレータ系メソッド</h3>
+<p><a href="16_2.html">イテレータ</a>の回では、配列のもつ<b>keys</b>、<b>values</b>、<b>entries</b>の3つのメソッドを紹介しました。これらはそれぞれイテレータを返すメソッドです。また、<b>@@iterator</b>メソッドも存在するので配列自体がiterableであり、したがってfor-of文で使うことができるのでした。とりあえず例をひとつ出してこれはさらっと流します。</p>
+<pre><code>
+var arr = ['foo', 'bar', 'baz'];
+
+for (const [idx, value] of arr.<mark>entries</mark>()){
+  console.log(`${idx}: ${value}`);
+}
+/*
+0: foo
+1: bar
+2: baz
+*/
+</code></pre>
+
+<h3>fill</h3>
+<p><b>fill</b>メソッドは、配列の要素をまとめて変更できる便利なメソッドです。</p>
+<p>使い方は、<code>arr.fill(<var>値</var>, <var>開始位置</var>, <var>終了位置</var>)</code>とします。このメソッドは3つの引数を取り、第2引数と第3引数で指定された範囲の要素を全て第1引数の値にします。ただし、引数で示される範囲は第2引数（開始位置）の位置から第3引数（終了位置）の<em>直前</em>までであることに注意してください。ただし、これは<a href="11_1.html#anchor-array-slice">Array#slice</a>など既存のメソッドでも同じなのでそんなに変ではありませんね。</p>
+<pre><code>
+var arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+arr.<mark>fill</mark>(100, 0, 5);
+
+console.log(arr); // [<em>100, 100, 100, 100, 100</em>, 5, 6, 7, 8, 9]
+</code></pre>
+<p>この例では、0番目から5番目の前までの要素を100で書き換えました。</p>
+<p>今まではこのようなことを行いたい場合はループを回すしかなかったので、簡単にできるようになったのは嬉しいですね。</p>
+<p>なお、第2引数、第3引数は負の整数とすることもできます。この場合、例によって後ろから数えた位置になります。例えば-1は最後の要素、-2はその一つ前の要素を指します。配列の最初から、最後の1つを残して全て書き換えたい場合は<code>arr.fill(100, 0, <mark>-1</mark>)</code>とできます。</p>
+<p>また、第2引数、第3引数は省略可能です。第2引数は省略された場合0、第3引数は省略された場合配列の長さとなります。特に、第3引数を省略すると配列の最後まで書き換えられるのは便利です。第2引数と第3引数を両方省略した場合は配列を全部書き換えることになります。</p>
+
+<p>このメソッドの注意点は、<strong>配列を拡張することはできない</strong>ということです。</p>
+<pre><code>
+var arr = [];
+arr.fill(0, 0, 100);
+
+console.log(arr); // []
+</code></pre>
+<p>この例では、配列arrの0番目から99番目までを100個の0で埋めようとしているように見えます。しかし、arrは空の配列のままです。これは、最初<code>var arr = [];</code>として配列arrが作られた時点ではこの配列は長さが0であることが原因です。fillは配列のもともとの長さを超えて配列に書き込むことはできないのです。0が100個入った配列を作りたいならば、まず長さ100の配列を作る必要があります。</p>
+<p>ちなみに、これは次のようにすればできます。</p>
+<pre><code>
+var arr = <mark>new Array(100)</mark>;
+arr.fill(0, 0, 100);
+
+console.log(arr);
+</code></pre>
+<p>配列をArrayコンストラクタを用いて作り、その際に数値をひとつ引数として渡すと、その長さの配列ができます。配列の各要素にはundefinedが入った状態になります。これならarrは長さ100の配列となり、fullで埋めることができます。</p>
+<p>fillのこの特徴は忘れがちなので注意しましょう。</p>
+
+<h3>copyWithin</h3>
+<p><dfn>copyWithin</dfn>メソッドは、配列の要素をまとめてコピーできるメソッドです。ただし、<em>同じ配列の中で</em>ある場所から別の場所にコピーするのです。まずは例を見ましょう。</p>
+<pre><code>
+var arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+arr.<mark>copyWithin</mark>(5, 0, 3);
+
+console.log(arr); // [0, 1, 2, 3, 4, <mark><em>0, 1, 2,</em></mark> 8, 9]
+</code></pre>
+<p>copyWithinメソッドは3つの引数を取り、<code>arr.copyWithin(<var>コピー対象位置</var>, <var>開始位置</var>, <var>終了位置</var>)</code>のように使います。すなわち、arrの第2引数（開始位置）から第3引数（終了位置）までの要素を、第1引数（コピー対象位置）の位置にコピーします。</p>
+<p>上の例では、開始位置は0、終了位置は3なので、その位置にある3つの要素<code>0, 1, 2</code>をコピー対象位置である5番目の位置にコピーします。その結果、5番目から3つの要素、すなわち<code>5, 6, 7</code>が<code>0, 1, 2</code>で上書きされました。</p>
+<p>第2引数と第3引数を省略した場合の挙動はfillの場合と同じです。</p>
+<p>なお、このメソッドはコピーされる領域とコピーにより上書きされる領域が重なっていても正しく動作します。</p>
+<p>余談ですが、そう言われると、C言語を知っている方は標準ライブラリのmemmove関数を思い出すかもしれません。特にTypedArrayの場合（後述）はそれくらいのパフォーマンスが場合によっては期待できるでしょう。</p>
+
+<h3>find, findIndex</h3>
+<p>次に紹介する<dfn>find</dfn>と<dfn>findIndex</dfn>は検索系の便利なメソッドです。</p>
+<p>検索といえば、以前紹介した<a href="anchor-indexof">Array#indexOf</a>が思い出されます。これらのメソッドはindexOfが進化したメソッドです。</p>
+<p>indexOfは第1引数に検索する<em>値</em>を渡しましたが、findやfindIndexでは<em>関数</em>が渡されます。配列の各要素に対してこの関数が呼び出され、true<small>（または真偽値に変換するとtrueになる値）</small>を返す値を見つけたらその値が返されます。<b>find</b>の場合は見つかった値そのもの、<b>findIndex</b>の場合は見つかった値の位置が返されます。</p>
+<pre><code>
+var arr = [3, 7, 1, -5, 0, -2];
+
+console.log(arr.<mark>find</mark>(x=&gt; x &lt; 0)); // <em>-5</em>
+</code></pre>
+<p>この例では、findに渡された関数<code>x=&gt; x &lt; 0</code>は渡された値が負の数ならtrueを返す関数です。findやfindIndexはindexOfと同じく配列を前から探すため、最初に見つかる負の数である-5がfindの返り値として返されます。</p>
+<pre><code>
+var arr = [3, 7, 1, -5, 0, -2];
+
+console.log(arr.<mark>findIndex</mark>(x=&gt; x &lt; 0)); // <em>3</em>
+</code></pre>
+<p>このようにfindIndexを用いた場合は、見つかった-5は3番目の要素なので3が返り値となります。</p>
+<p>findやfindIndexに渡される関数には、実は引数が3つ渡されます。これは<a href="11_1.html#anchor-foreach">Array#forEach</a>などのコールバック関数と同じです。つまり、第1引数は判定対象の要素で、第2引数はそのインデックス、第3引数は配列そのものです。また、findやfindIndex自体にも第2引数を渡すことができます。これもforEachと同じで、ここに渡した値がコールバック関数が呼ばれるときのthisの値となります。</p>
+<p>なお、当てはまる要素が存在しなかった場合の返り値は、findの場合はundefined、findIndexの場合は-1となります。</p>
+
+<h3>includes</h3>
+<p>最後に検索繋がりでもうひとつ、<dfn>includes</dfn>メソッドも紹介しておきます。これは実はES2015ではなく<b>ES2016</b>で追加されたメソッドなのですが、ついでに紹介しておくことにします。のちのち詳しく説明しますが、ES2016で追加された機能は非常に少ないのです。</p>
+<p>このincludesメソッドは非常に単純です。与えられた値が配列に含まれるならtrue、含まれないならfalseを返します。</p>
+<p>一応、Array#indexOfでも同じようなことができます。Array#indexOfで値を検索して、返り値が0以上かどうかを判定すればいいですね。しかし、<code>arr.indexOf(value) &gt;= 0</code>と書くより<code>arr.includes(value)</code>のほうが直感的で分かりやすいと思いませんか。</p>
+<p>順番が前後しましたが、includesの例はこんな感じです。</p>
+<pre><code>
+var arr = ['foo', 'bar', 'baz'];
+
+console.log(arr.includes('bar')); // <em>true</em>
+</code></pre>
+<p>また、includesには第2引数を渡すことができます。これはindexOfの第2引数と同じで、どの位置から検索を開始するからです。指定された位置より前の要素は無視されます。第2引数が省略された場合、もちろん配列全部を検索します。第2引数に負の数を指定した場合は、fillなどの引数と同様に後ろから数えた位置になります。</p>
+
+<p>実は、includesの検索とindexOfの検索には少し違いがあります。それは<em>値の一致判定の方法</em>です。これらの配列検索系のメソッドは、まず配列の0番目の要素と引数で与えられた値が同じかどうか確かめ、違ったら次は配列の1番目……、のような挙動をします。ここで、「値が同じかどうか確かめる」というステップがありますが、値が同じというのはどういうことでしょうか。</p>
+<p>実は、indexOfの場合は値が同じというのは<code>===</code>で比較して同じということです。この演算子の名前は<a href="9_7.html#anchor-strict-equal">厳密等価演算子</a>というくらいなので、厳密で頼りになる比較です。なので、我々も基本的にはこの演算子で値の一致判定を行います。ただし、これにはひとつ罠があるのでしたね。それは、<code>NaN === NaN</code>がfalseになってしまうという点です。ということは、indexOfではNaNを検索できないということになります。</p>
+<pre><code>
+var arr = [1, 2, 3, NaN, 5, 6, 7];
+
+console.log(arr.indexOf(NaN)); // <em>-1</em>
+</code></pre>
+<p>この例では、配列の中にNaNがあるにも関わらず、indexOfでNaNを検索すると-1という結果になります。</p>
+<p>一方、includesでの値の一致判定は<code>===</code>とは異なり、NaN同士の一致を正しく判定してくれます。よって、includesを使えばNaNが含まれているかどうか判定できます。</p>
+<pre><code>
+var arr = [1, 2, 3, NaN, 5, 6, 7];
+
+console.log(arr.includes(NaN)); // <em>true</em>
+</code></pre>
+<p>これは嬉しいですね。NaNを判定するだけなら上のfindIndexとNumber.isNaNを組み合わせる方法もありますが、includesならNaNを特別扱いする必要がありません。</p>
+<div class="sidenote">
+  <p>これは余談ですが、includesが採用している値の一致判定方法は仕様書用語でいえばSameValueZeroです。Zeroというのは、+0と-0が一致と判定されるという意味です。<a href="16_13.html">MapとSet</a>の回でもNaNをキーとして使えるという話題が出ましたが、SameValueZeroはMapやSetで使われている値一致判定方法です。</p>
+</div>
+
+<h3>Arrayの静的メソッド</h3>
+<p>以上で配列のメソッドは紹介しおわりましたが、ES2015の配列の新機能はまだあります。それはArrayの静的メソッドです。静的メソッドというのはクラスの回で出てきましたが、（インスタンスではなく）コンストラクタについているメソッドを指す用語です。<code>Object.defineProperty</code>なども一例です。</p>
+<p>ひとつは既に紹介しましたね。そう、<a href="16_2.html#anchor-array-from">Array.from</a>です。これは、iterableを渡すとそれをもとに配列を作ってくれるメソッドでした。</p>
+<p>もうひとつは<dfn>Array.of</dfn>です。これは、引数を任意の数受け取り、それらを要素とする配列を作って返します。</p>
+<pre><code>
+var arr = Array.of(3, 5, 7);
+
+console.log(arr); // <em>[3, 5, 7]</em>
+</code></pre>
+<p>これなら<code>[3, 5, 7]</code>のように配列リテラルを使えばいいような気がしますね。実際その通りなのですが、関数として欲しい場合にはすこし役に立ちます。他にももう少し役に立つ場面がありますが、それは後で紹介します。</p>
+<p>ちなみに、Arrayに存在する静的メソッドはあとひとつです。以前も紹介したArray.isArrayですね。これはES5のメソッドです。</p>
+
+<h3>Arrayコンストラクタ</h3>
+<p>最後にこれはES2015の話ではありませんが、Arrayコンストラクタについてちゃんと説明したことがなかった気がするので、ここで紹介しておきます。</p>
+<p>Arrayコンストラクタはもちろん配列を作りますが、その使い方は2種類あります。ひとつは、できる配列の中身を指定する方法です。</p>
+<pre><code>
+var arr = new Array(3, 5, 7);
+
+console.log(arr); // [3, 5, 7]
+</code></pre>
+<p>これは要するに上で紹介したArray.ofと同じですね。これがArrayコンストラクタの基本的な使い方です。</p>
+<p>しかし、これには罠があります。それが、Arrayコンストラクタのもうひとつの使い方です。引数として数値を1つだけ渡した場合のみArrayコンストラクタは異なる挙動となります。</p>
+<pre><code>
+var arr = new Array(10);
+
+console.log(arr); // [empty &times; 10]
+console.log(arr.length); // 10
+console.log('0' in arr); // false
+</code></pre>
+<p>このようにArrayコンストラクタに整数値を渡した場合は、その長さを持つ配列が作られるのです。ただし、中身はまだありません。</p>
+<p>このように、配列は、長さだけ設定してあって中身がないという場合もあります。上でできた配列の場合、lengthプロパティを調べると10となります。中身がないというのは、undefinedが入っているとかそういう話ではありません。配列にはまだプロパティすら存在していないのです。実際、<code>'0' in arr</code>としてこの配列に0というプロパティが存在するかどうか調べるとfalseとなります。</p>
+<p>ただ、プロパティのあるなしが問題になることはあまりありません。for-of文などで上の配列を回すと10個のundefinedが出てきます。</p>
+<p>とにかく、Arrayコンストラクタにはこのような罠があることを覚えておきましょう。逆に言えば、この罠を解消した関数がArray.ofであるとも言えます。</p>
+
+<h3>型付き配列</h3>
+<p>ところで、配列に似たものとして、File APIの回で<a href="12_5.html#anchor-typedarray">型付き配列 (<i lang="en">Typed Array</i>)</a>を紹介しましたね。</p>
+<p>型付き配列の定義はES2015からECMAScript仕様に取り込まれました。ES2015で追加されたメソッドも含め、配列のメソッドはTypedArrayでも使えます。便利ですね。</p>
+<pre><code>
+var arr = new Uint8Array(10);
+
+arr.fill(100);
+
+console.log(arr); // Uint8Array [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+</code></pre>
+
+<h3>配列の継承</h3>
+<p>最後の話題として、配列の継承について解説します。クラスの回で説明した通り、ES2015では継承が楽に行えるようになっています。実は、配列をはじめとする組み込みオブジェクトも継承できるのです。例えば、配列の機能に加えて新しいメソッドdoubleを持つ独自のクラスを考えてみます。</p>
+<pre><code>
+class SuperArray extends Array{
+  constructor(...args){
+    super(...args);
+  }
+  double(){
+    const len = this.length;
+    this.length = len * 2;
+    this.copyWithin(len, 0, len);
+  }
+}
+
+var arr = new SuperArray(1, 2, 3);
+console.log(arr); // SuperArray [1, 2, 3]
+console.log(arr[1]); // 2
+
+arr.push(4);
+console.log(arr); // SuperArray [1, 2, 3, 4]
+
+arr.double();
+console.log(arr); // SuperArray [1, 2, 3, 4, 1, 2, 3, 4]
+</code></pre>
+<p>この例では、Arrayを継承したSuperArrayクラスを作っています。コンストラクタは、渡された引数を全て親（つまりArray）コンストラクタに渡すものです。なお、これはデフォルトのコンストラクタの挙動なので、このコンストラクタは省略できます。</p>
+<p>このクラスはメソッドdoubleを持ちます。これは自身の中身を繰り返して長さを2倍にするメソッドです。</p>
+<p><code>new SuperArray(1, 2, 3)</code>として作ったSuperArrayのインスタンスは、配列を継承しているので配列のような挙動をします。もちろん、配列のメソッド（上の例ではpush）を使うことができます。それに加えて独自のメソッド（double）も使うことができています。また、次の例は注目に値します。</p>
+<pre><code>
+var arr = SuperArray.of(1, 2, 3, 4, 5, 6);
+
+var arr2 = arr.filter(x=&gt; x % 2 === 0);
+
+console.log(arr2); // SuperArray [2, 4, 6];
+console.log(arr2 instanceof SuperArray); // true
+</code></pre>
+<p>まず、クラスの構文を用いてクラスを継承するとコンストラクタの静的メソッドも継承できます。よって、Array.ofに相当するSuperArray.ofを用いてSuperArrayのインスタンスを作ることができます。Array.ofはそれ自身はそこまで意味がありませんでしたが、継承先でも利用できるのは便利です。</p>
+<p>次に、このサンプルではfilterメソッドを用いてarr2を作っています。配列のfilterメソッドは結果として新しい配列を作って返すのでしたね。なんと、親切にも、Arrayを継承したオブジェクトの場合、filterなどのメソッドは継承先のオブジェクトのインスタンスを作って返します。つまり、filterの返り値であるarr2はちゃんとSuperArrayのインスタンスになっているということです。とても便利ですね。</p>
+
+<p>実はこの挙動はカスタマイズ可能です。ここで登場するのが、<a href="16_4.html#anchor-well-known-symbols">well-knownシンボル</a>が一、<dfn>@@species</dfn>です。@@speciesが<code>Symbol.species</code>のことであるというのは今更言うまでもありませんね。これはArrayコンストラクタのプロパティとして存在しています。試してみましょう。</p>
+<pre><code>
+console.log(Array[Symbol.species]); // Array
+</code></pre>
+<p>値はArrayコンストラクタそれ自身です。また、Arrayを継承したSuperArrayの場合はSuperArrayコンストラクタ自身になります。</p>
+<pre><code>
+console.log(SuperArray[Symbol.species]); // SuperArray
+</code></pre>
+<p>ここで、理解度の高い人はある疑問が浮かんだことでしょう。理解度が超高い人は自分で疑問の答えにたどり着いたことでしょう。@@speciesはコンストラクタが持つ静的プロパティの一種です。<a href="16_12.html">クラスの継承</a>の回で説明したことによれば、静的プロパティの継承はprototypeによって行われます。実際、<code>SuperArray.hasOwnProperty(Symbol.species)</code>はfalseとなります。その一方、<code>Array.hasOwnProperty(Symbol.species)</code>はtrueです。ということは、<code>SuperArray[Symbol.species]</code>と<code>Array[Symbol.species]</code>は同じでなければならないはずです。それにも関わらず両者は値が異なっています。これが疑問です。</p>
+<p>そして答えですが、<code>Array[Symbol.species]</code>はゲッタによって定義されています。定義を書くとすればこんな感じです。</p>
+<pre><code>
+  get [Symbol.species](){
+    return this;
+  }
+</code></pre>
+<p>つまり自分自身を返すプロパティであるということですね。</p>
+<p>肝心の@@speciesプロパティの意味ですが、これはfilterメソッドなど新しい配列を作って返すメソッドにおいて使われるコンストラクタです。</p>
+<p>concat、sliceなども含め、新しい配列を作って返すメソッドはこの@@speciesを尊重するようになっています。上で「filterの返り値がちゃんとSuperArrayになっている」と説明しましたが、これは@@speciesのおかげなのです。逆に言うと、@@speciesを定義しなおすことによってこの挙動を変えることができます。</p>
+<pre><code>
+class SuperArray extends Array{
+  static get [Symbol.species](){
+    return Array;
+  }
+}
+
+var arr = SuperArray.of(1, 2, 3);
+
+var arr2 = arr.slice(0);
+
+console.log(arr2 instanceof SuperArray); // false
+console.log(arr2 instanceof Array); // true
+</code></pre>
+<p>この機能がいつ役に立つのかはよく分かりませんが、万が一@@speciesが使われている場面にでくわしてもこれで大丈夫ですね。</p>
+<p>ちなみに、@@speciesはArray以外のコンストラクタにもあります。MapやSetやPromise、RegExpなどに存在しています。</p>
+
+<h3>配列のメソッドのジェネリック性</h3>
+<p>だんだんと細かい話になってきましたが、もう少し付き合ってください。実は、配列の多くのメソッドはジェネリック性と呼ばれる性質を持ちます。これは、「配列っぽいオブジェクトに対しても動く」という性質です。ここで、配列っぽいオブジェクトというのは、0，1，……という連番のプロパティを持ち、またlengthプロパティを持つオブジェクトのことです。</p>
+<p>オブジェクトのメソッドは当然thisを対象として動きますが、実は配列のメソッドはこのようなオブジェクトがthisとして渡されても動作するようになっています。</p>
+<pre><code>
+// 配列っぽいオブジェクトを作る
+var obj = {
+  0: 'foo',
+  1: 'bar',
+  2: 'baz',
+  length: 3,
+};
+
+// Array.prototype.filterをobjをthisとして呼び出す
+var result = Reflect.apply([].filter, obj, [x=&gt; /^b/.test(x)]);
+
+console.log(result); // ["bar", "baz"]
+</code></pre>
+<p>これは大した意味のある例ではありませんが、例えばNodeListなどの配列っぽいけど配列ではないオブジェクトに対して配列のメソッドを使いたいときに役立ちます。とはいえ、Array.fromを使えばそのようなオブジェクトは配列に変換できるし、DOMオブジェクトの中でも新しいものはこういう場合にちゃんと配列を返してくれるのでこのジェネリック性が役に立つ機会はあまりありませんが。</p>
+
+<h3>@@isConcatSpreadable</h3>
+<p>最後の話題として、配列に関係するもうひとつのwell-knownシンボルである@@isConcatSpreadableについても説明しておきます。@@speciesの例でなんとなく分かるように、well-knownシンボルでカスタマイズできる挙動は結構マニアックなものが多いです。@@isConcatSpreadableも例によって結構マニアックです。中級講座で紹介するような内容かはよく分かりませんが、せっかくなので紹介しておきます。</p>
+<p>このwell-knownシンボルはその名から類推できる通り、<a href="11_1.html#anchor-concat">concatメソッド</a>にかかわるものです。</p>
+<p>ではまず、concatメソッドの挙動を振り返りましょう。concatメソッドは、配列に他の配列をつなげて新しい配列を作ることができるメソッドです。</p>
+<pre><code>
+var arr = [1, 2, 3].concat([4, 5, 6]);
+
+console.log(arr); // [1, 2, 3, 4, 5, 6]
+</code></pre>
+<p>引数を複数渡すと、全部の配列をつなげてくれます。</p>
+<pre><code>
+var arr = [1, 2, 3].concat([4, 5], [6, 7, 8], [9]);
+
+console.log(arr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+<p>また、配列以外のものを引数に渡してもつなげることができます。</p>
+<pre><code>
+var arr = [1, 2, 3].concat([4, 5], 6, 7, [8, 9]);
+
+console.log(arr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+<p>ここで、concatによる引数の処理方法が2通りあることが分かります。配列が渡された場合はその中身を全部配列につなげますが、配列以外の場合はその値自体をそのまま配列につなげます。</p>
+<p>ちなみに、下の例のように、配列を継承したオブジェクトも配列と見なされます。</p>
+<pre><code>
+class SuperArray extends Array {}
+var arr = [1, 2, 3].concat([4, 5], 6, 7, SuperArray.of(8, 9));
+
+console.log(arr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+<p>しかし、TypedArrayは配列とは見なされず、中身ではなくそれ自身が配列に加わります。これは、TypedArrayは配列のようなオブジェクトであるものの、配列を継承しているわけではないからです。</p>
+<pre><code>
+var arr = [1, 2, 3].concat([4, 5], 6, 7, Uint32Array.of(8, 9));
+
+console.log(arr); // [1, 2, 3, 4, 5, 6, 7, Uint32Array [8, 9]]
+</code></pre>
+<p>では@@isConcatSpreadableの説明に戻りましょう。勘のいい方はお気づきかもしれません。そう、@@isConcatSpreadableを使うと、「中身が配列に加えられるかそれ自身が配列に加えられるか」を制御することができます。concatは、引数に与えられた値がオブジェクトの場合、その@@isConcatSpreadableプロパティを見てtrueならばその中身を、falseならばそのオブジェクト自身を配列に加えます。例えば、@@isConcatSpreadableをfalseにした配列をconcatに渡すとこうなります。</p>
+<pre><code>
+var arr1 = [8, 9];
+arr1[<mark>Symbol.isConcatSpreadable</mark>] = false;
+var arr = [1, 2, 3].concat([4, 5], 6, 7, arr1);
+
+console.log(arr); // [1, 2, 3, 4, 5, 6, 7, [8, 9]]
+</code></pre>
+<p>しかしこれは対して意味がありません。むしろ意味があるのは、配列っぽいが配列でないオブジェクトをconcatに渡したときに展開したい場合です。つまり、こんな例です。</p>
+<pre><code>
+// 配列っぽいオブジェクトを作る
+var obj = {
+  0: 8,
+  1: 9,
+  length: 2,
+  [Symbol.isConcatSpreadable]: true,
+};
+var arr = [1, 2, 3].concat([4, 5], 6, 7, obj);
+
+console.log(arr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></pre>
+<p>もとのオブジェクトを汚したくない場合は、Object.createや<a href="16_14.html">Proxy</a>で@@isConcatSpreadableを付け加えることもできますね。</p>
+<p>もっとも、そんな工夫をしてもconcat以外では意味がないので役に立つかどうかはとても微妙ですが。</p>
+
+<p>長くなりましたが、今回は以上です。だいぶ配列に詳しくなることができましたね。</p>

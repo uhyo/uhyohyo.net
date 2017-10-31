@@ -109,8 +109,8 @@
   <dt>テンプレート文字列</dt>
   <dd><a href="16_9.html">第一六章第九回</a></dd>
 
-  <dt>配列・添字・要素</dt>
-  <dd><a href="kiso6.html">基礎編第六回</a>・<a href="1_2.html">第一章第二回</a>・<a href="1_3.html">第一章第三回</a></dd>
+  <dt>配列</dt>
+  <dd><a href="kiso6.html">基礎編第六回</a>・<a href="1_2.html">第一章第二回</a>・<a href="1_3.html">第一章第三回</a>・<a href="16_16.html">第十六章第十六回</a></dd>
   <dt>プリミティブ（値）</dt>
   <dd><a href="1_2.html">第一章第二回</a>・<a href="11_5.html">第十一章第五回</a>・<a href="11_6.html">第十一章第六回</a></dd>
   <dt>プロパティ</dt>
@@ -159,12 +159,20 @@
   <dd><a href="16_2.html">第十六章第二回</a></dd>
   <dt>Array#every</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
+  <dt>Array#fill</dt>
+  <dd><a href="16_16.html">第十六章第十六回</a></dd>
   <dt>Array#forEach</dt>
+  <dd><a href="11_1.html">第十一章第一回</a></dd>
+  <dt>Array#includes</dt>
+  <dd><a href="16_16.html">第十六章第十六回</a></dd>
+  <dt>Array#indexOf</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#join</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#keys</dt>
   <dd><a href="16_2.html">第十六章第二回</a></dd>
+  <dt>Array#lastIndexOf</dt>
+  <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#map</dt>
   <dd><a href="11_1.html">第十一章第一回</a></dd>
   <dt>Array#pop</dt>
@@ -193,6 +201,8 @@
   <dd><a href="16_2.html">第十六章第二回</a></dd>
   <dt>Array.isArray</dt>
   <dd><a href="1_3.html">第一章第三回</a></dd>
+  <dt>Array.of</dt>
+  <dd><a href="16_16.html">第十六章第十六回</a></dd>
   <dt>Console</dt>
   <dd><a href="11_3.html">第十一章第三回</a></dd>
   <dt>console.log</dt>
@@ -294,7 +304,7 @@
   <dt>String#concat</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
   <dt>String#indexOf</dt>
-  <dd><a href="4_5.html">第四章第五回</a></dd>
+  <dd><a href="4_1.html">第四章第一回</a></dd>
   <dt>String#lastIndexOf</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
   <dt>String#length</dt>
@@ -321,10 +331,14 @@
   <dd><a href="16_4.html">第十六章第四回</a></dd>
   <dt>Symbol.for</dt>
   <dd><a href="16_4.html">第十六章第四回</a></dd>
+  <dt>Symbol.isConcatSpreadable</dt>
+  <dd><a href="16_16.html">第十六章第十六回</a></dd>
   <dt>Symbol.iterator</dt>
   <dd><a href="16_4.html">第十六章第四回</a></dd>
   <dt>Symbol.keyFor</dt>
   <dd><a href="16_4.html">第十六章第四回</a></dd>
+  <dt>Symbol.species</dt>
+  <dd><a href="16_16.html">第十六章第十六回</a></dd>
 
   <dt>__defineGetter__・__defineSetter__</dt>
   <dd><a href="9_6.html">第九章第六回</a></dd>

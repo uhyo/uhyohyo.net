@@ -77,7 +77,7 @@ console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
 <p>なお、Object.keysやObject.getOwnPropertyNamesではシンボルを発見できないという仕様は、一つには後方互換性を保つという目的があると考えられます。オブジェクトにシンボルをキーとするプロパティが存在しても、シンボルがない時代（ES5まで）のコードには発見できません。つまり、任意のオブジェクトに勝手にシンボルをキーとするプロパティが追加されていても動作に影響を与えません。</p>
 <p>つまり、JavaScriptをバージョンアップするにあたって既存の機能を変更・追加したときに既存のES5プログラムが壊れたら困るので、ES5プログラムからは見えないシンボルを使って機能拡張を行ったということです。</p>
 
-<h3>Well-Known Symbols</h3>
+<h3 id="anchor-well-known-symbols">Well-Known Symbols</h3>
 <p>さて、<dfn>Well-Known Symbols</dfn>とは、特別なシンボルです。</p>
 <p>特別なシンボルといっても何か特殊な機能を持つわけではなく、それ自体はただのシンボルです。</p>
 <p>ただ、プログラムの実行の内部処理から参照されるという点で特別な意味を持ちます。</p>
@@ -85,18 +85,19 @@ console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
 <p>Well-Known Symbolsには今のところ以下の種類がありますが、言語仕様の追加に伴って増えるかもしれません。</p>
 <ul>
   <li>hasInstance</li>
-  <li>isConcatSpreadable</li>
+  <li><a href="16_16.html">isConcatSpreadable</a></li>
   <li>iterator</li>
   <li>match</li>
   <li>replace</li>
   <li>search</li>
-  <li>species</li>
+  <li><a href="16_16.html">species</a></li>
   <li>split</li>
   <li>toPrimitive</li>
   <li>toStringTag</li>
   <li>unscopables</li>
 </ul>
 <p>それぞれどのような意味があるのかは追々紹介するとしましょう。主に、組み込み関数の動作をカスタマイズするために使うことができます。</p>
+<p>well-knownシンボルの紹介があるものにはリンクが張ってありますが、どれもここより先の記事なので注意してください。</p>
 
 <h3 id="anchor-iterator">イテレータ</h3>
 <p>ところで、<a href="16_2.html">イテレータ</a>の話で@@iteratorメソッドなるものを紹介しましたが、実はその実体はこのwell-known symbolです。つまり、@@iteratorというのは<code>Symbol.iterator</code>のことです。なんということはありません。プロパティ名がwell-known symbolときにいちいち<code>Symbol.iterator</code>と書くのは大変なので代わりに@@iteratorと書いているだけの話だったのです。</p>
