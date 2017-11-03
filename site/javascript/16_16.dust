@@ -83,7 +83,7 @@ console.log(arr.<mark>findIndex</mark>(x=&gt; x &lt; 0)); // <em>3</em>
 <p>findやfindIndexに渡される関数には、実は引数が3つ渡されます。これは<a href="11_1.html#anchor-foreach">Array#forEach</a>などのコールバック関数と同じです。つまり、第1引数は判定対象の要素で、第2引数はそのインデックス、第3引数は配列そのものです。また、findやfindIndex自体にも第2引数を渡すことができます。これもforEachと同じで、ここに渡した値がコールバック関数が呼ばれるときのthisの値となります。</p>
 <p>なお、当てはまる要素が存在しなかった場合の返り値は、findの場合はundefined、findIndexの場合は-1となります。</p>
 
-<h3>includes</h3>
+<h3 id="anchor-includes">includes</h3>
 <p>最後に検索繋がりでもうひとつ、<dfn>includes</dfn>メソッドも紹介しておきます。これは実はES2015ではなく<b>ES2016</b>で追加されたメソッドなのですが、ついでに紹介しておくことにします。のちのち詳しく説明しますが、ES2016で追加された機能は非常に少ないのです。</p>
 <p>このincludesメソッドは非常に単純です。与えられた値が配列に含まれるならtrue、含まれないならfalseを返します。</p>
 <p>一応、Array#indexOfでも同じようなことができます。Array#indexOfで値を検索して、返り値が0以上かどうかを判定すればいいですね。しかし、<code>arr.indexOf(value) &gt;= 0</code>と書くより<code>arr.includes(value)</code>のほうが直感的で分かりやすいと思いませんか。</p>

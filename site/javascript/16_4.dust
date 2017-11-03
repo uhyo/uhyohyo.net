@@ -66,7 +66,7 @@ function getValueFromObject(obj){
 <p>ただし、この方法には抜け穴があります。</p>
 <p>まず思い出されるのは、<a href="11_4.html">Object.keys</a>や<a href="11_4.html">Object.getOwnPropertyNames</a>ではないでしょうか。こういったメソッドを使えばオブジェクトのプロパティ名を全て得ることができるので、これを使えばオブジェクトのキーとなっているシンボルも発見できると思うかもしれません。</p>
 <p>ところが、実はこれらはシンボルを発見できません。これらのメソッドは文字列のキーのみ列挙するのです。</p>
-<p>その代わりに、ES2015の新しいメソッド<dfn>Object.getOwnPropertySymbols</dfn>が存在して、これがオブジェクトのキーとなっているシンボルを全て列挙して返してくれます。</p>
+<p id="anchor-object-getownpropertysymbols">その代わりに、ES2015の新しいメソッド<dfn>Object.getOwnPropertySymbols</dfn>が存在して、これがオブジェクトのキーとなっているシンボルを全て列挙して返してくれます。</p>
 <pre><code>
 var obj={}, s=Symbol();
 obj[s]="foo";

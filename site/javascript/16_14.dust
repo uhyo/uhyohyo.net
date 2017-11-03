@@ -348,7 +348,7 @@ console.log(Object.getPrototypeOf(obj) === Array.prototype); // <em>true</em>
 <p>getPrototypeOfトラップによって影響を与えることができるのは、Object.getPrototypeOf、instanceof、そして<a href="11_7.html#anchor-object-getprototypeof">Object.isPrototypeOf</a>です。</p>
 <p>このトラップの返り値はオブジェクトまたはnullでなければいけません。また、オブジェクトが拡張不可能である場合は嘘を付くことができません。</p>
 
-<h3>setPrototypeOfトラップ</h3>
+<h3 id="anchor-setprototypeof">setPrototypeOfトラップ</h3>
 <p>今度は<dfn>setPrototypeOf</dfn>トラップです。これはObject.setPrototypeOfメソッドに対応するトラップです。</p>
 <p>……と言いたいのですが、まだこの<b>Object.setPrototypeOf</b>は紹介していませんでしたね。これはES2015で追加されたメソッドで、その名が示す通りObject.getPrototypeOfの逆で、あるオブジェクトに対応するprototypeオブジェクトを変更できるメソッドです。</p>
 <p>これはなかなかとんでもないメソッドですね。オブジェクトが、後からあるオブジェクトのインスタンスになったりなくなったりします。</p>

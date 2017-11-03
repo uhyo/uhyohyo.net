@@ -1,0 +1,189 @@
+<p>最近長い記事が続いたので、今回はさらっとした記事です。とはいえ、この記事でするのはもちろんES2015の新機能の話です。</p>
+<p>今回は<b>Object</b>に加えられた新機能を解説します。Objectの機能というのは、つまりObjectの静的メソッドのことです。ES5以前でも、<a href="11_4.html#anchor-object-defineproperty">Object.defineProperty</a>などがありましたね。</p>
+<p>実はひとつはもう紹介してしまいました。<a href="16_14.html#anchor-setprototypeof">Object.setPrototypeOf</a>ですね。オブジェクトのインスタンスに紐付けられているprototypeオブジェクトをあとから変更できるというとんでもないメソッドでした。</p>
+<p>実はすでにもうひとつ紹介していますが、覚えているでしょうか。それは、<a href="16_4.html#anchor-object-getownpropertysymbols">Object.getOwnPropertySymbols</a>でした。これはあるオブジェクトが持つプロパティのうち、名前がシンボルであるものを列挙するメソッドでした。</p>
+<p>ES2015でObjectにくらえられた静的メソッドはあと2つです。</p>
+
+<h3>Object.is</h3>
+<p><dfn>Object.is</dfn>は、引数を2つ受け取り、その2つが<em>同じ</em>ならばtrueを返すメソッドです。Objectにあるメソッドとはいえ、プリミティブどうしの比較にも使うことができます。</p>
+<p>聡明な読者ならば、2つのことが頭に浮かんだと思います。ひとつは、<a href="9_7.html#anchor-strict-equal">厳密等価演算子</a> <code>===</code>です。この演算子も、2つの値が同じかどうか判定できるものでした。もうひとつは、前回の<a href="16_16.html#anchor-includes">Array#includes</a>に出てきた値の一致性判定です。</p>
+<p>前者（<code>===</code>）による値の判定は厳密ですが、NaNどうしを比較するとfalseになるという特徴を持つのでした。後者（Array#includesのときの値の判定）はその点を克服し、NaNどうしを比較するとtrueになります。</p>
+<p>Object.isによる比較は最も厳密です。よって、後者と同様にNaNどうしを比較するとtrueになります。</p>
+<pre><code>
+console.log(<mark>Object.is</mark>(Number.NaN, Number.NaN)); // true
+</code></pre>
+
+<p>また、Object.isによる比較は<em>+0と-0を区別します</em>。つまり、+0と-0を比較すると異なる値となり、falseとなります。</p>
+<p>しかし、+0と-0とは何でしょうか。数学においては、ゼロはゼロであり、プラスもマイナスもないはずです。ところが、JavaScriptには実は0に2種類あります。それが+0と-0です。</p>
+<p>通常我々が0と呼んでいるものは+0にあたります。もうひとつのゼロ、すなわち-0は、滅多なことでは出現しませんが、浮動小数点数まわりの演算で出現することがあります。例えば、負の数を正のInfinityで割ったり、正の数を負のInfinityで割ったりした結果は-0となります。</p>
+<pre><code>
+console.log(-3 / Infinity); // <em>-0</em>
+</code></pre>
+<p>-0は普通に<code>-0</code>と書くことでも（すなわち、+0にマイナス演算子を付けることでも）得ることができます。-0にはいろいろ面白い性質があります。たとえば+0と-0を加算すると+0ですが、-0と-0を加算した場合は-0となります。掛け算に関しては、もちろん+0と-0をかけると-0になります。</p>
+<p>このように、じつは2種類あったゼロですが、やはりどちらもゼロだということで、通常はこれらは等しいものとして扱われます。しかし、Object.isは非常に厳密なので、+0と-0を区別します。よって、次のように+0と-0を引数にわたすとfalseとなります。</p>
+<pre><code>
+console.log(Object.is(0, -0)); // <em>false</em>
+</code></pre>
+<p>この+0と-0を区別するという性質は、Array#includesによる比較とは異なります。Array#includesの場合（SameValueZero）は+0と-0は等しいとして扱われます。</p>
+<pre><code>
+var arr = [2, 3, 5, 0, 1];
+
+console.log(arr.includes(-0)); // <em>true</em>
+</code></pre>
+
+<p>何にせよ、NaNどうしが等しいような比較は今までJavaScriptで使うことはできませんでした（自分で頑張って実装すれば不可能ではありませんが）。それがこのように簡単に利用できるのはありがたいですね。</p>
+
+<h3>Object.assign</h3>
+<p>ES2015で追加されたもうひとつのメソッドは<dfn>Object.assign</dfn>です。これは、あるオブジェクトに他のオブジェクトのプロパティを全てコピーして書き込むという、なかなかに便利なメソッドです。</p>
+<p>言葉で説明しても分かりにくいと思うので、まず例を見てください。</p>
+<pre><code>
+var obj1 = {
+  name: 'John Smith',
+  age: 42,
+};
+
+var obj2 = {
+  age: 28,
+  job: 'Time-traveller',
+};
+
+<mark>Object.assign</mark>(obj1, obj2);
+
+console.log(obj1);
+/*
+  {
+    name: "John Smith",
+    age: 28,
+    job: "Time-traveller",
+  }
+*/
+</code></pre>
+<p>この例では、2つのオブジェクトobj1とobj2を作ったあと、Object.assignを用いてobj2の内容をobj1に書き込んでいます。よって、obj2のプロパティであるageとjobがobj1に書き込まれています。</p>
+<p>この操作は結構需要がある操作なので、ES2015ではそのためのメソッドが追加されたのです。</p>
+<p>Object.assignは見ての通り、破壊的な操作を行います。すなわち、新しいオブジェクトを作って返すのではなく、最初の引数に渡されたオブジェクトに書き込みます。ちなみに、Object.assignの返り値は最初の引数に渡されたオブジェクトそのものです。</p>
+<p>しかし、Object.assignの典型的な利用法のひとつは、あるオブジェクトをコピーした新しいオブジェクトを作るというものです。これは次のように行うことができます。</p>
+<pre><code>
+var obj1 = {
+  name: 'John Smith',
+  age: 42,
+};
+
+var obj2 = Object.assign({}, obj1);
+
+console.log(obj1 === obj2); // false
+console.log(obj1, obj2);
+</code></pre>
+<p>Object.assignの第1引数に<code>{}</code>を渡しています。ということは、その場で作った新しいオブジェクトにobj1の内容を書き込むということです。上の説明にある通り、Object.assignの返り値は新しく作られたオブジェクトです。このようにして、obj1と同じ中身を持つ新しいオブジェクトを作ることができました。当然ながら、上のコードで確かめているように、obj1とobj2は別のオブジェクトとなります。</p>
+<p>また、実はObject.assignにはさらに多くの引数を渡すことができます。その場合、2つ目以降の引数に渡されたオブジェクトの中身が順に最初のオブジェクトに書き込まれます。よって、例えばobj1にobj2の内容を書き込んだ新しいオブジェクトを作りたい場合は次のようにすることができます。</p>
+<pre><code>
+var obj1 = {
+  name: 'John Smith',
+  age: 42,
+};
+
+var obj2 = {
+  age: 28,
+  job: 'Time-traveller',
+};
+
+var obj3 = Object.assign({}, obj1, obj2);
+
+console.log(obj3);
+/*
+  {
+    name: "John Smith",
+    age: 28,
+    job: "Time-traveller",
+  }
+*/
+</code></pre>
+<p>この例では、obj3は、<code>{}</code>（空のオブジェクト）にまずobj1の内容を書き込み、次にobj2の内容を書き込んだ結果のオブジェクトとなります。</p>
+
+<p>いくつか細かい注意をすると、まずObject.assignによって書き込まれるのは実は<a href="11_4.html#anchor-property-attribute">enumerable属性</a>がtrueのプロパティだけです。Object.assignに対してそのようなプロパティを持つオブジェクトを渡す機会はそうそう無いと思いますが、罠になるかもしれませんので気をつけてください。</p>
+<p>また、Object.assignはオブジェクトをコピーすることができるため便利ですが、ここで行われるのは<em>浅いコピー</em> (<i lang="en">shallow copy</i>）です。</p>
+<pre><code>
+var obj1 = {
+  prop: {
+    foo: 'bar',
+  },
+};
+
+var obj2 = Object.assign({}, obj1);
+
+console.log(obj1.prop === obj2.prop); // <em>true</em>
+</code></pre>
+<p>この例では、obj1のpropプロパティがobj2にコピーされていますが、その中身は同じオブジェクトになっています。同じということは、obj1.propをいじった影響は当然obj2.propにも現れるということです。もしかしたらこれは不思議に思えるかもしれませんが、そんなことはありません。上のコードは、次のようにしてobj2を作った場合とおおよそ同じです。</p>
+<pre><code>
+var obj1 = {
+  prop: {
+    foo: 'bar',
+  },
+};
+
+var obj2 = {};         // まず空のオブジェクトを作る
+obj2.prop = obj1.prop; // プロパティをコピー
+
+console.log(obj1.prop === obj2.prop); // <em>true</em>
+</code></pre>
+<p>こうすると、obj1.propとobj2.propが同じオブジェクトなのは極めて当然ですね。</p>
+<p>このように、Object.assignはオブジェクトの各プロパティに対して<code>obj2.prop = obj1.prop;</code>のような代入に相当する操作を行います。このとき代入されるプロパティがそれ自身オブジェクトだったとしてもお構いなしです。</p>
+<p>Object.assignは「オブジェクトのコピー」に利用されることが多いと思いますが、その実態はあくまでプロパティをひとつずつ新しいオブジェクトに代入しているだけです。このようにプロパティの中身はただ代入されるだけであるようなコピーのことを浅いコピーと呼びます。Object.assignをオブジェクトのコピーに利用するときは、それが浅いコピーであることを理解していないといけません。</p>
+
+<h3>Object.entries, Object.values</h3>
+<p>以上でES2015で追加された4つのメソッドは終わりなのですが、続いて<b>ES2017</b>で追加されたObjectの静的メソッドを紹介します。それは<dfn>Object.entries</dfn>と<dfn>Object.values</dfn>です。</p>
+<p>この名前を見ると、どこかで見たような気がしますね。そう、この名前のメソッドは<a href="16_2.html">配列</a>や<a href="16_3.html">Map</a>などにも存在していました。</p>
+<p>一方、entries, valuesとくればもうひとつ仲間がいるはずです。そう、keysですね。ご存知の通り、<a href="11_4.html#anchor-object-keys">Object.keys</a>はES5の時点から存在していました。これはオブジェクトの持つ（enumerableな）プロパティ名の配列を返すメソッドです。ES2017ではこれの仲間としてvalues、entriesが追加されたわけです。</p>
+<p>となると、entriesやvaluesがどういう動作をするのか想像がつきますね。サンプルで確かめてみましょう。</p>
+<pre><code>
+var obj1 = {
+  name: 'John Smith',
+  age: 28,
+  job: 'Time-traveller',
+};
+
+console.log(Object.values(obj1)); // ["John Smith", 28, "Time-traveller"]
+
+console.log(Object.entries(obj1)); // [["name", "John Smith"], ["age", 28], "job", "Time-traveller"]]
+</code></pre>
+<p>このように、Object.valuesはプロパティ名ではなく各プロパティに入っている値を列挙します。Object.entriesは<code>[プロパティ名, 値]</code>という2要素の配列をプロパティの分だけ列挙します。これはMapなどのメソッドと同じなので分かりやすいですね。</p>
+<p>ただし、注意すべき点があります。ES2017で追加というだけあってとても今どきなこれらのメソッドですが、Object.valuesやObject.entriesでは<a href="16_4.html">シンボル</a>をキーとするプロパティは列挙できません。これは、列挙されるプロパティをObject.keysに合わせるためです。</p>
+<p>また、Object.valuesやObject.entriesの返り値は、Object.keysと同様に<strong>配列</strong>です。配列やMapの場合とは異なりイテレータではありません。これもObject.keysの動作に合わせるためです。</p>
+<p>要するに、Object.keysだけ仲間がいなくてかわいそうなのでentriesとvaluesを仲間に加えてあげたということです。特にentriesは便利に使える場面が結構あるのではないかと思います。</p>
+
+<h3>Object.getOwnPropertyDescriptors</h3>
+<p>この<dfn>Object.getOwnPropertyDescriptors</dfn>メソッドは同じくES2017で追加されたもので、指定したオブジェクトの全てのプロパティのプロパティデスクリプタをまとめて返してくれるメソッドです。</p>
+<p>実際に使ってみるとだいたい理解できると思います。</p>
+<pre><code>
+var obj1 = {
+  name: 'John Smith',
+  age: 28,
+  job: 'Time-traveller',
+};
+
+console.log(<mark>Object.getOwnPropertyDescriptors</mark>(obj1));
+/*
+{
+  "name": {
+    "value": "John Smith",
+    "writable": true,
+    "enumerable": true,
+    "configurable": true
+  },
+  "age": {
+    "value": 28,
+    "writable": true,
+    "enumerable": true,
+    "configurable": true
+  },
+  "job": {
+    "value": "Time-traveller",
+    "writable": true,
+    "enumerable": true,
+    "configurable": true
+  }
+}
+*/
+</code></pre>
+<p>このように返り値はオブジェクトで、各プロパティの中身がプロパティデスクリプタになっています。これは<a href="11_4.html#anchor-object-defineproperties">Object.defineProperties</a>でそのまま使える形ですね。このメソッドはさっきとは違い、名前がシンボルのプロパティやenumerable属性がfalseのプロパティも扱ってくれます。オブジェクトのコピーに使えるかもしれません。</p>
+
+<p>今回はこれで終わりです。これで皆さんは正真正銘、Objectが持つ静的メソッドを全て知ったことになります。おめでとうございます。（ES2018以降でまた増えたら話は違いますが）。</p>

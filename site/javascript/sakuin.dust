@@ -237,22 +237,30 @@
   <dt>Number#toString</dt>
   <dd><a href="11_6.html">第十一章第六回</a></dd>
 
+  <dt>Object.assign</dt>
+  <dd><a href="16_17.html">第十六章第十七回</a></dd>
   <dt>Object.create</dt>
   <dd><a href="11_7.html">第十一章第七回</a></dd>
   <dt>Object.defineProperties</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
   <dt>Object.defineProperty</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
+  <dt>Object.entries</dt>
+  <dd><a href="16_17.html">第十六章第十七回</a></dd>
   <dt>Object.freeze</dt>
   <dd><a href="11_8.html">第十一章第八回</a></dd>
   <dt>Object.getOwnPropertyDescriptor</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
+  <dt>Object.getOwnPropertyDescriptors</dt>
+  <dd><a href="16_17.html">第十六章第十七回</a></dd>
   <dt>Object.getOwnPropertyNames</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
   <dt>Object.getOwnPropertySymbols</dt>
   <dd><a href="16_4.html">第十六章第四回</a></dd>
   <dt>Object.getPrototypeOf</dt>
   <dd><a href="11_7.html">第十一章第七回</a></dd>
+  <dt>Object.is</dt>
+  <dd><a href="16_17.html">第十六章第十七回</a></dd>
   <dt>Object.isExtensible</dt>
   <dd><a href="11_8.html">第十一章第八回</a></dd>
   <dt>Object.isFrozen</dt>
@@ -269,6 +277,8 @@
   <dd><a href="11_8.html">第十一章第八回</a></dd>
   <dt>Object.setPrototypeOf</dt>
   <dd><a href="16_14.html">第十六章第十四回</a></dd>
+  <dt>Object.values</dt>
+  <dd><a href="16_17.html">第十六章第十七回</a></dd>
 
   <dt>Object#hasOwnProperty</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>

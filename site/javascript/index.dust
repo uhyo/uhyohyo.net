@@ -12,8 +12,8 @@
   <h2>最近の更新</h2>
   <ul class="recent">
     <li>2017/10/05 全ページを手直ししました。<a href="16_6.html">十六章第六回</a>を追加。</li>
-    <li>2017/10/28 <a href="16_14.html">十六章第十四回</a>・<a href="16_15.html">一六章第十五回</a>を追加。</li>
     <li>2017/10/30 <a href="16_16.html">十六章第十六回</a>を追加。</li>
+    <li>2017/11/3 <a href="16_17.html">十六章第十七回</a>を追加。</li>
   </ul>
 </section>
 <section>
@@ -93,7 +93,7 @@
   <h3>第十五章　Web Performance</h3>
   {@listJSPages section=15 /}
   
-  <h3>第十六章　ES2015</h3>
+  <h3>第十六章　ES2015〜ES2017</h3>
   {@listJSPages section=16 /}
   
   <h3>第十七章　DOM4</h3>
