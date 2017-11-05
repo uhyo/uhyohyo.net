@@ -17,7 +17,7 @@ console.log(<mark>0B00100000</mark>); // <em>32</em>
 console.log(<mark>0o755</mark>); // 493
 </code></pre>
 
-<p>なお、昔のJavaScriptでは、頭に<code>0o</code>ではなく<code>0</code>をつけることで8進数リテラルになる機能がありました。恐らく今のブラウザでも同様動作をするはずです。</p>
+<p>なお、昔のJavaScriptでは、頭に<code>0o</code>ではなく<code>0</code>をつけることで8進数リテラルになる機能がありました。恐らく今のブラウザでも同様の動作をするはずです。</p>
 <pre><code>
 console.log(0755); // 493
 </code></pre>
@@ -31,7 +31,7 @@ foo();
 </code></pre>
 
 <h3 id="anchor-exponentiation">冪乗演算子</h3>
-<p>これは<b>ES2016</b>の話なのですが、数値に関数新しい演算子があります。それは<dfn>冪乗演算子</dfn> <code>**</code> です。冪乗というのは、2<sup>3</sup> = 8 のような演算のことです。</p>
+<p>これは<b>ES2016</b>の話なのですが、数値に関する新しい演算子があります。それは<dfn>冪乗演算子</dfn> <code>**</code> です。冪乗というのは、2<sup>3</sup> = 8 のような演算のことです。</p>
 <pre><code>
 console.log(2 ** 3); // <em>8</em>
 </code></pre>
