@@ -218,12 +218,18 @@
   <dt>Map</dt>
   <dd><a href="16_13.html">第十六章第一三回</a></dd>
 
+  <dt>Number.isInteger</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
+  <dt>Number.isSafeInteger</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
   <dt>Number.NaN, Number.isNaN</dt>
   <dd><a href="9_7.html">第九章第七回</a>・<a href="11_6.html">第十一章第六回</a></dd>
   <dt>Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY</dt>
   <dd><a href="11_6.html">第十一章第六回</a></dd>
   <dt>Number.MAX_VALUE, Number.MIN_VALUE</dt>
   <dd><a href="11_6.html">第十一章第六回</a></dd>
+  <dt>Number.MAX_SAFE_VALUE, Number.MIN_SAFE_VALUE</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
 
 
   <dt>Number#toExponential</dt>
@@ -311,8 +317,14 @@
   <dd><a href="4_5.html">第四章第五回</a></dd>
   <dt>String#charCodeAt</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
+  <dt>String#codePointAt</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
   <dt>String#concat</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
+  <dt>String#endsWith</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
+  <dt>String#includes</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
   <dt>String#indexOf</dt>
   <dd><a href="4_1.html">第四章第一回</a></dd>
   <dt>String#lastIndexOf</dt>
@@ -323,6 +335,10 @@
   <dd><a href="11_5.html">第十一章第五回</a></dd>
   <dt>String#match</dt>
   <dd><a href="4_3.html">第四章第三回</a><a href="qa1.html#2012-11-17">質問と回答1</a></dd>
+  <dt>String#normalize</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
+  <dt>String#padStart, String#padEnd</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
   <dt>String#replace</dt>
   <dd><a href="4_3.html">第四章第三回</a></dd>
   <dt>String#search</dt>
@@ -331,12 +347,16 @@
   <dd><a href="4_5.html">第四章第五回</a>・<a href="qa1.html#2012-11-17">質問と回答1</a></dd>
   <dt>String#split</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
+  <dt>String#startsWith</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
   <dt>String#toLowerCase, String#toUpperCase</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
   <dt>String#toLocaleLowerCase, String#toLocaleUpperCase</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
   <dt>String#trim</dt>
   <dd><a href="11_5.html">第十一章第五回</a></dd>
+  <dt>String.fromCodePoint</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a></dd>
   <dt>Symbol</dt>
   <dd><a href="16_4.html">第十六章第四回</a></dd>
   <dt>Symbol.for</dt>
@@ -385,6 +405,8 @@
 <dl>
   <dt><kbd>+ - * / %</kbd>（算術演算子）</dt>
   <dd><a href="kiso2.html">基礎編第二回</a>
+  <dt><kbd>**</kbd>（冪乗演算子）</dt>
+  <dd><a href="16_18.html">第十六章第十八回</a>
   <dt><kbd>= += -= *= /= %=</kbd>（代入演算子）</dt>
   <dd><a href="kiso2.html">基礎編第二回</a>
   <dt><kbd>== != &gt; &lt; &gt;= &lt;=</kbd>（関係演算子）</dt>

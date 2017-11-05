@@ -251,7 +251,7 @@ console.log(result); // ["bar", "baz"]
 </code></pre>
 <p>これは大した意味のある例ではありませんが、例えばNodeListなどの配列っぽいけど配列ではないオブジェクトに対して配列のメソッドを使いたいときに役立ちます。とはいえ、Array.fromを使えばそのようなオブジェクトは配列に変換できるし、DOMオブジェクトの中でも新しいものはこういう場合にちゃんと配列を返してくれるのでこのジェネリック性が役に立つ機会はあまりありませんが。</p>
 
-<h3>@@isConcatSpreadable</h3>
+<h3 id="anchor-isconcatspreadable">@@isConcatSpreadable</h3>
 <p>最後の話題として、配列に関係するもうひとつのwell-knownシンボルである@@isConcatSpreadableについても説明しておきます。@@speciesの例でなんとなく分かるように、well-knownシンボルでカスタマイズできる挙動は結構マニアックなものが多いです。@@isConcatSpreadableも例によって結構マニアックです。中級講座で紹介するような内容かはよく分かりませんが、せっかくなので紹介しておきます。</p>
 <p>このwell-knownシンボルはその名から類推できる通り、<a href="11_1.html#anchor-concat">concatメソッド</a>にかかわるものです。</p>
 <p>ではまず、concatメソッドの挙動を振り返りましょう。concatメソッドは、配列に他の配列をつなげて新しい配列を作ることができるメソッドです。</p>

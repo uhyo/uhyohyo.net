@@ -58,7 +58,7 @@ console.log(typeof Number.NaN); // "number"
 <p>NaNを含む計算の結果が全てNaNとなるのは、<a href="9_7.html">九章第七回</a>で解説したとおりです。</p>
 <p>さらに、NaNが出てくるのは計算時だけではありません。文字列から数値への変換時に、変換できない文字列はNaNになります。</p>
 
-<h4>parseInt・parseFloat</h4>
+<h4 id="anchor-parseint">parseInt・parseFloat</h4>
 <p>数値への変換、<strong>parseInt</strong>もNaNを返す可能性があります。parseIntは<a href="kiso4.html">基礎第四回</a>に何気なく出てきた組み込み関数で、文字列を数値に変換するというものでした。</p>
 <pre><code>
 parseInt("<mark>123</mark>")	// 123
@@ -123,12 +123,12 @@ NaN===3	// false
 NaN&gt;3	// false
 </code></pre>
 
-<h4>isFinite</h4>
+<h4 id="anchor-isfinite">isFinite</h4>
 <p>さてやはり、普通の数値と、InfinityやNaNは一線を画したところがあります。そこで、これらを区別する便利な方法を解説します。</p>
 <p>まずは関数<dfn>isFinite</dfn>です。Finiteとは、Infinite(無限の)と逆で、有限ということです。この関数は数値の引数を一つとって、InfinityやNaNならfalseを返し、普通の数値ならtrueを返します。これで判別が可能です。</p>
 <p>数値以外を渡したときは数値に変換してから判定します。</p>
 
-<h4>isNaN</h4>
+<h4 id="anchor-isnan">isNaN</h4>
 <p>もう一つ紹介するのが<dfn>isNaN</dfn>です。読んで字の如しという感じですが、引数に渡された数値が<strong>NaN</strong>ならばtrue、そうでなければ（Infinityなども含めて）falseになります。isFiniteとは逆の関係なので注意しましょう。</p>
 <pre><code>
 <mark>isNaN</mark>(3)	// false
@@ -334,7 +334,7 @@ console.log(a.<mark>toLocaleString</mark>()); // "30,000"
 <h3>Numberのプロパティ</h3>
 <p>Numberはコンストラクタであり、それ自体は関数です。しかし、Numberはそれ自身がいくつかのプロパティを持っています。</p>
 
-<h4>Number.MAX_VALUE, Number.MIN_VALUE</h4>
+<h4 id="anchor-number-max-value">Number.MAX_VALUE, Number.MIN_VALUE</h4>
 <p>それぞれ「最大値」、「最小値」という意味です。本来実数はどこまでも大きくなることができるので最大値などは無いのですが、コンピュータですから記憶できる量に上限があり、したがってJavaScriptの数値型で扱うことができる数にも限りがあります。もっとも、普段はこれが支障になることはないでしょう。なお、JavaScriptで扱える数値の範囲はIEEE 754倍精度浮動小数点数の範囲と同じです。</p>
 <pre><code>
 <mark>Number.MAX_VALUE</mark>	// 1.7976931348623157e+308

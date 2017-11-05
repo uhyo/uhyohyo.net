@@ -1,0 +1,308 @@
+<p>今回は<strong>プリミティブ</strong>に関する<b>ES2015</b>以降の新要素を紹介します。最近こういう網羅系の記事ばかりで申し訳ないですが、それだけ最先端のJavaScriptに近づいているということです。次の章も面白いので、飽きたらこの章は一旦先に置いておいて先に進んでみるのもよいでしょう。</p>
+<p>プリミティブは、ご存知の通り文字列、数値、真偽値、undefined、null、そしてES2015で追加されたシンボル、の6種類があります。これらにも、特に文字列と数値に対して、ES2015で新機能が追加されました。</p>
+
+<h3>数値リテラル</h3>
+<p>ますは<b>数値</b>を見ていきましょう。ES2015では新しい文法として、数値リテラルの種類が増えました。それは、<strong>2進数リテラル</strong>と<strong>8進数リテラル</strong>です。</p>
+<p>2進数は、0と1だけで数を表記する方法です。とくにビット列の操作などをするときは、数値を2進数で書けると分かりやすくなります。そこで、ES2015では数値を2進数で表すためのリテラルが追加されました。2進数リテラルは、<code>0b</code>のあとに0と1を用いて数を記述します。</p>
+<pre><code>
+console.log(<mark>0b1010</mark>); // <em>10</em>
+console.log(<mark>0B00100000</mark>); // <em>32</em>
+</code></pre>
+<p>このように、大文字を用いて<code>0B</code>としても構いません。これは16進数リテラルが<code>0x</code>で始まるのと似ていますね。ちなみに、bというのは2進（数）を表す単語 <i lang="en">binary</i>の頭文字です。</p>
+<p>余談ですが、16進数のxは16進を表す<i lang="en">hexadecimal</i>の3文字目です。<i lang="en">hexa</i>が6で<i lang="en">decimal</i>が10なのでxだと6なのか16なのか分からないような気もしますが、コンピュータの世界では6進数は使われないので問題ありません。</p>
+<p>上の例では、2進数で1010は10進数の10であり、2進数で100000は10進数の32に相当するためこのような結果になります。</p>
+
+<p>また、プログラムでは8進数も多少使われます。そこで、8進数を表すリテラルも追加されました。8進数は<i lang="en">octal</i>なので、<code>0o</code>または<code>0O</code>とします。ゼロとオーが紛らわしいような気がしますが、小文字を使えば大丈夫でしょう。</p>
+<pre><code>
+console.log(<mark>0o755</mark>); // 493
+</code></pre>
+
+<p>なお、昔のJavaScriptでは、頭に<code>0o</code>ではなく<code>0</code>をつけることで8進数リテラルになる機能がありました。恐らく今のブラウザでも同様動作をするはずです。</p>
+<pre><code>
+console.log(0755); // 493
+</code></pre>
+<p>しかし、これは8進数を意図していることが分かりにくいという問題があり、今は非推奨になっています。桁数を揃えるために頭に0を付けたのに数値が変わってしまうというような問題も起こるかもしれません。なので、8進数を表したい場合は<code>0o</code>リテラルを使いましょう。なお、この古い8進数リテラルは<a href="11_9.html">strictモード</a>では禁止されており、文法エラーとなります。したがって、strictモードをちゃんと使う偉い人にとってはES5において8進数リテラルが存在せず、ES2015で改めて追加されたという形です。</p>
+<pre><code>
+function foo(){
+  "use strict";
+  console.log(0755); // <em>ここで文法エラー</em>
+}
+foo();
+</code></pre>
+
+<h3 id="anchor-exponentiation">冪乗演算子</h3>
+<p>これは<b>ES2016</b>の話なのですが、数値に関数新しい演算子があります。それは<dfn>冪乗演算子</dfn> <code>**</code> です。冪乗というのは、2<sup>3</sup> = 8 のような演算のことです。</p>
+<pre><code>
+console.log(2 ** 3); // <em>8</em>
+</code></pre>
+<p>冪乗を行いたい場面はそんなに多くないかもしれませんが、この演算子があると簡単に行うことができます。ちなみに、従来はMath.powメソッドで冪乗を計算できました。</p>
+<p>ちなみに、この演算子はなかなか愉快な性質を持ちます。例えば、ほとんどの計算ではNaNを含む計算の結果はNaNになりましたが、この演算子でNaNの0乗を計算すると1になります。</p>
+<pre><code>
+console.log(Number.NaN ** 0); // <em>1</em>
+</code></pre>
+<p>他に、Infinityを含む計算もだいたい直感通りの結果になります。たとえば正の数を-Infinity乗すると0になります。</p>
+
+<h3>Numberの静的メソッド</h3>
+<p>いままで、数値にかかわるメソッドをいくつか紹介してきました。<a href="11_6.html#anchor-isfinite">isFinite</a>や<a href="11_6.html#anchor-isnan">isNaN</a>のように数値の性質を判定するメソッド、そして<a href="11_6.html#anchor-parseint">parseIntやparseFloat</a>のように文字列を数値に変換するメソッドです。</p>
+<p>これらの関数は、ES2015では<em>Numberの静的メソッド</em>となりました。つまり、<code>Number.isFinite</code>や<code>Number.parseInt</code>のように使うということです。ただし、従来の関数を消してしまうと動かないコードが大量にできてしまい困るので、従来のものも使用できます。しかし、将来的にはNumberの静的メソッドバージョンが推奨されていくことになるでしょうから、こちらを使うことをおすすめします。</p>
+<p>このような機能追加が行われた背景には、JavaScriptをきれいにモジュールに分けたいという意図があります。つまり、isFiniteやparseIntなどの個々の関数がグローバル変数として散らばっているのはよろしくないということです。数値に関わるメソッドはNumberの下に置くことにすれば、グローバル変数として存在するのはNumberのみで済みますね。前回紹介したようにオブジェクトに関わる種々のメソッドはObjectの静的メソッドとして存在しているのも同じような理由からでしょう。</p>
+
+<h4>Number.isInteger</h4>
+<p>さて、ES2015では、数値の判定に関するメソッドがいくつか追加されました。これらは新しいので、Numberの静的メソッドとしてのみ利用できます。</p>
+<p>ひとつは<dfn>Number.isInteger</dfn>です。Integerというのは<b>整数</b>のことなので、これは与えられた数値が整数かどうか判定するというメソッドです。当然、返り値は真偽値となります。</p>
+<p>ご存知の通り、JavaScriptの数値には整数と小数（浮動小数点数）の区別がありません。そこで、数値の中でも整数のみを特別扱いする場面もきっとあることでしょう。このメソッドを使うと、楽に判定できます。</p>
+<pre><code>
+console.log(Number.isInteger(3)); // true
+console.log(Number.isInteger(2.5)); // false
+console.log(Number.isInteger(2 ** 128)); // true
+</code></pre>
+<p>なお、InfinityやNaNをNumber.isIntegerに渡すとfalseが返ります。</p>
+
+<h4>Number.isSafeInteger</h4>
+<p>このメソッドは、与えられた数値が<i lang="en">safe integer</i>（安全な整数）かどうか判定します。</p>
+<p>safe integerは、絶対値が2<sup>53</sup>-1 (9007199254740991) 以下の整数です。</p>
+<p>これは浮動小数点数（特にIEEE 754 倍精度形式）にかかわる概念です。実は、IEEE 754 倍精度形式の浮動小数点数（すなわちJavaScriptにおける小数）では、絶対値が2<sup>53</sup>より大きい整数は正確表すことができません。これはビット数が足りないからです。例えば、次のように2<sup>53</sup> + 1という数を作ったつもりでも、それは2<sup>53</sup>と同じになります。一方、この大きさ帯の浮動小数点で表すことができる最小の差は2であるため、2<sup>53</sup> + 2は2<sup>53</sup>とは異なる数として表現されます。</p>
+<pre><code>
+console.log(2 ** 53 === 2 ** 53 + 1); // <em>true</em>
+console.log(2 ** 53 === 2 ** 53 + 2); // <em>false</em>
+</code></pre>
+<p>この現象は浮動小数点数を使う限り避けられないことです。ただ、一般に浮動小数点数を扱う場合はその精度が問題となりますから、2<sup>53</sup>などの大きな数を扱う場合に1とか2とかという小さい誤差を気にすることはありません。一方、整数を扱う場合あまり精度が落ちるというイメージはわかないでしょう。JavaScriptの場合、整数だけを扱っている場合でもあまりに絶対値が大きくなった場合は精度が落ちます。</p>
+<p>今のところ、JavaScriptでこのレベルに大きな整数を精度を保ったまま簡単に扱う方法はありませんが<small>（BigIntという機能が提案されています）</small>、せめて計算結果が正確でない領域に突入したことを簡単に知ることができると嬉しい場面もあるかもしれません。</p>
+<p>計算結果がsafe integerならば、その計算結果は十分正確である（計算結果が実は他の整数であるということはありえない）ことが保証されます。Number.isSafeIntegerはそのような判定に用いることができるのです。</p>
+<p>この理屈でいけば、2<sup>53</sup>はsafe integerではありません。なぜなら、上で見たように、2<sup>53</sup> + 1 という別の整数が2<sup>53</sup>に変化しているかもしれないからです。絶対値が2<sup>53</sup>-1の整数ではこのようなことは起こらないのです。</p>
+
+<p>以上でNumber.isSafeIntegerの話は終わりです。浮動小数点数に関する込み入った話が出てきましたが、そして多分これを呼んでいるほとんどの人はこのメソッドのお世話になることはないかもしれませんが、JavaScriptの数値のあり方と結構深く関わっているメソッドですので、小話と思って知っておくのもよいのではないかと思います。</p>
+<p>なお、safe integerという用語を検索するとこのNumber.isSafeIntegerの話ばかり出てきます。どうも浮動小数点数にかかわる一般的な用語ではないような気がします。</p>
+
+<h4>Numberの静的プロパティ</h4>
+<p>浮動小数点数の話をもう少しだけ続けます。特定の数値を知るためのNumberの静的プロパティを以前紹介しましたね。例えば<a href="11_6.html#anchor-number-max-value">Number.MAX_VALUE</a>には<code>1.7976931348623157e+308</code>が入っています。</p>
+<p>ES2015でも3つそのようなプロパティが追加されましたので、紹介だけしておきます。</p>
+<p><dfn>Number.EPSILON</dfn>には<code>2.220446049250313e-16</code>が入っています。これは、浮動小数点数の世界で<code>1 + x !== x </code>となるような（絶対値が）最初のxです。このときの<code>1 + x</code>は1より大きい最小の浮動小数点数です。</p>
+<p><dfn>Number.MAX_SAFE_INTEGER</dfn>と<dfn>Number.MIN_SAFE_INTEGER</dfn>はそれぞれ最大・最小のsafe integerです。上の説明の通り、具体的にはそれぞれ2<sup>53</sup> - 1と-(2<sup>53</sup> - 1)です。</p>
+
+<h3>文字列</h3>
+<p>以上で数値の話は終わり、次は文字列の話です。</p>
+
+<h4>Unicodeサポート</h4>
+<p>ES2015で文字列に関して特筆すべきことは、<em>Unicodeサポートの充実</em>です。</p>
+<p>以前説明したように、JavaScriptの文字列はUTF-16コードユニットの列として表されています。ひとつひとつの文字はこのコードユニット1つに相当します。ということは、UTF-16でサロゲートペアにより表される文字（言い方を変えれば、コードポイントU+10000以上を持つ文字、あるいはUTF-8で4バイトで表される文字）は、JavaScriptにおいて2文字として数えられるということです。</p>
+<p>例えば、絵文字はほとんどが4バイト文字です。絵文字1つだけからなる文字列はJavaScriptでは2文字と数えられるでしょう。</p>
+<pre><code>
+console.log("😂".length); // <em>2</em>
+</code></pre>
+<p>要するに、従来のJavaScriptは文字の数を数えることすらまともにできなかったのです。非常に残念ですね。</p>
+<p>そこで、ES2015ではU+10000以上の文字もちゃんと扱えるようなメソッドが追加されています。それらを紹介します。</p>
+
+<p>それは<dfn>String#codePointAt</dfn>です。これは<a href="11_5.html#anchor-charcodeat">String#charCodeAt</a>の4バイト文字対応版です。指定した位置にある文字の<em>コードポイント</em>を返します。例えば、😂のコードポイントはU+1F602（10進数に直すと128514）なので、次のようになります。</p>
+<pre><code>
+console.log("😂".<mark>codePointAt</mark>(0)); // <em>128514</em>
+</code></pre>
+<p>これはコードポイントを簡単に取得できて便利ですね。従来のcharCodeAtを使って取得できるのは個々のコードユニット（サロゲートペア）なので、コードポイントを得るには自分で計算する必要がありました。</p>
+<p>ただし、<em>指定した位置</em>というのがどういう意味かについては注意してください。例えば、<code>"😂🙈"</code>という2文字の文字列において、🙈のコードポイントを取得するには位置として<b>2</b>を指定する必要があります。</p>
+<pre><code>
+console.log("😂🙈".codePointAt(2)); // <em>128584</em>
+</code></pre>
+<p>これはなぜかというと、codePointAtに指定する位置というのはあくまでJavaScript文字列（すなわちUTF-16コードユニットの列）における位置で指定する必要があるからです。😂はサロゲートペアで表される文字列なので、JavaScriptの文字列においてはコードユニット2つで表されます。それが位置0と位置1のコードユニットになります。よって、🙈がはじまるのは位置2となるのです。</p>
+<p>なお、codePointAtに文字の開始位置ではない位置を指定した場合はその位置のコードユニットが返されます。</p>
+
+<p>ちなみに、コードポイントを渡すと対応する文字を返す静的メソッド<dfn>String.fromCodePoint</dfn>もあります。</p>
+<pre><code>
+console.log(String.fromCodePoint(128514)); // "😂"
+</code></pre>
+
+<p>もうひとつUnicode対応が進んでいるのは、文字列を<a href="16_2.html">イテレータ</a>として扱った場合です。以前、文字列をイテレータとして扱った場合は1文字ずつ文字が出力されるイテレータになると解説しましたが、ここでいう1文字というのは、ちゃんとU+10000以上の文字も1文字として扱ってくれます。</p>
+<pre><code>
+console.log(Array.from("😂🙈")); // ["😂", "🙈"]
+</code></pre>
+<p>上で見たようにcodePointAtの位置指定は少し扱いにくいので、文字数にちょうど対応した文字の位置指定をしたい場合はこのようにイテレータ経由で配列にしてしまうとよいかもしれません。</p>
+
+<h4>startsWith, endsWith</h4>
+<p>文字列のメソッド<dfn>startsWith</dfn>, <dfn>endsWith</dfn>は、文字列がそれぞれある文字列で始まるか、及びある文字列で終わるかどうかを判定するメソッドです。返り値はもちろん真偽値です。</p>
+<pre><code>
+var str = "こんにちは。私は田中です。";
+
+console.log(str.<mark>startsWith</mark>("こんにちは")); // <em>true</em>
+console.log(str.<mark>startsWith</mark>("こんばんは")); // <em>false</em>
+console.log(str.<mark>endsWith</mark>("です。")); // <em>true</em>
+console.log(str.<mark>endsWith</mark>("です！")); // <em>false</em>
+</code></pre>
+
+<p>これらのメソッドには第2引数として数値を指定することができます。startsWithの第2引数に数値を指定した場合、文字列の一番最初の代わりに指定した位置から判定を行います。例えば、上の文字列strにおいて6文字目から先は<code>"私は田中です。"</code>なので、</p>
+<pre><code>
+var str = "こんにちは。私は田中です。";
+console.log(str.startsWith("私は", <mark>6</mark>)); // <em>true</em>
+</code></pre>
+<p>となります。</p>
+<p>この機能により、startsWithは実質指定した位置に指定した文字列があるかどうか判定するメソッドとして利用できますね。</p>
+<p>なお、残念なことに、このメソッドは従来と同様に、U+10000以上の文字は2文字として扱います。</p>
+<pre><code>
+console.log("😂🙈".startsWith("🙈", 2)); // true
+</code></pre>
+
+<p>endsWithの第2引数に数値を渡した場合は、文字列のその位置で終わるように指定した文字列があるかどうかを判定してくれます。</p>
+<pre><code>
+var str = "こんにちは。私は田中です。";
+console.log(str.endsWith("田中", 10)); // <em>true</em>
+</code></pre>
+<p>これがtrueになる理由は、文字列strは<code>"田中"</code>の直後がちょうど10文字目となっているからです。</p>
+
+<h4>repeat</h4>
+<p><dfn>repeat</dfn>メソッドは、指定した回数だけ文字列を繰り返した文字列を返すメソッドです。便利ですね。</p>
+<pre><code>
+console.log("foobar".repeat(5)); // "foobarfoobarfoobarfoobarfoobar"
+</code></pre>
+
+<h4>includes</h4>
+<p><dfn>includes</dfn>メソッドは、指定した文字列がもとの文字列に含まれているかどうかを判定するメソッドです。<a href="16_16.html#anchor-includes">Array#includes</a>と似ていますね。<a href="4_1,html#anchor-indexof">String#indexOf</a>を使えば似たようなことができるのも同じですが、便利で分かりやすいので使えるときは使うとよいでしょう。</p>
+<pre><code>
+console.log("こんにちは。私は田中です。".includes("田中")); // <em>true</em>
+</code></pre>
+
+<h4>normalize</h4>
+<p><dfn>normalize</dfn>メソッドは文字列を指定した方法で<em>正規化</em>するメソッドです。方法は第1引数で指定します。指定できるのは<code>"NFC"</code>, <code>"NFD"</code>, <code>"NFKC"</code>, <code>"NFKD"</code>の4種類の文字列です。</p>
+<p>正規化というのはUnicodeの概念です。ここでは詳しく解説しませんので、知りたい方は調べてみてください。</p>
+
+<p>以上でES2015で追加された文字列のメソッドは終わりですが、実はES2017で追加されたメソッドが2つあるのでそれも紹介しておきます。</p>
+
+<h4>padStart, padEnd</h4>
+<p>これらのメソッドは、文字列の長さが足りないときに指定した文字で埋めてしまうことができるメソッドです。<dfn>padStart</dfn>は文字列の先頭に、<dfn>padEnd</dfn>は文字列の最後に文字列を付け足します。</p>
+<p>例えば、数値の桁数が足りない時に先頭に0を付け足したい場合は、次のようにできます。</p>
+<pre><code>
+console.log("1234".padStart(10, "0")); // <em>"0000001234"</em>
+</code></pre>
+<p>このように、padStart及びpadEndの第1引数には数値を渡します。文字列の長さが指定された数値より短い場合、足りない分だけ第2引数に指定された文字を付け足した文字列が返されます。</p>
+<p>なお、第2引数には複数文字からなる文字列を渡すことができます。</p>
+<pre><code>
+console.log("12345".padStart(10, "-*")); // <em>"-*-*-12345"</em>
+</code></pre>
+<p>また、第2引数は省略することができ、その場合は<code>" "</code>（半角スペース）が補われます。</p>
+<p>padEndの場合も同様に、文字列の最後に第2引数で指定した文字列が付け足されます。</p>
+<pre><code>
+console.log("12345".padEnd(10, "-*")); // <em>"12345-*-*-"</em>
+</code></pre>
+
+<p>文字列の長さを揃えたいという需要は結構いろいろな場面であります。padStart, padEndはそのような需要を叶えるメソッドです。とても便利ですね。</p>
+
+<h3 id="anchor-toprimitive">@@toPrimitive</h3>
+<p>以上で文字列のメソッドも全部紹介しました。だんだんJavaScript中級者に近づいてきましたね。</p>
+<p>この記事ではあと2つ紹介することがあります。まずは<b>@@toPrimitive</b>です。ここまで読んだ読者の方なら、これが<a href="16_4.html#anchor-well-known-symbols">well-knownシンボル</a>のひとつである<code>Symbol.toPrimitive</code>のことであるのはお分かりだと思います。</p>
+<p>Well-knownシンボルは、<a href="16_16.html#anchor-isconcatspreadable">@@isConcatSpreadable</a>などの例に顕著なように、オブジェクトの動作をカスタマイズするのに使われることが多いものです。@@toPrimitiveも例外ではありません。名前から類推できるかもしれませんが、このwell-knownシンボルは<em>オブジェクトをプリミティブに変換するとき</em>の動作をカスタマイズするのに使われます。</p>
+<p>オブジェクトが@@toPrimitiveメソッドを持つ場合、そのオブジェクトが<em>プリミティブに変換</em>される場合にそのメソッドが呼ばれます。以前、オブジェクトがプリミティブに変換される場合に呼ばれるメソッドは<a href="9_7.html#anchor-object-translation">toStringやvalueOf</a>であると説明しました。ES2015で追加された@@toPrimitiveはそれらよりも優先されます。</p>
+<p>@@toPrimitiveメソッドが呼ばれる場合、第1引数として<em>期待されている型</em>が渡されます。具体的には、<code>"string"</code>、<code>"number"</code>、<code>"default"</code>の3種類の文字列のうちどれかが渡されます。以前、文字列に変換したい場合はtoStringが呼ばれ、数値に変換したい場合はvalueOfが呼ばれると説明しましたが、@@toPrimitiveの場合はどの場合でも@@toPrimitiveが呼ばれます。よって、各場合に対してより柔軟な対応をすることができます。</p>
+<p>言うまでもなく、引数に<code>"string"</code>が渡されるのはオブジェクトが文字列に変換されようとしているときです。同様に、数値に変換されようとしているときは<code>"number"</code>が渡されます。プリミティブなら何でも良い場合（というとちょっと語弊がありますが）は<code>"default"</code>が渡されることになっています。</p>
+<p>ただし、返り値の型は必ずしもこれに従う必要はありません。<code>"string"</code>が渡されたのに数値を返すようなことも一応は可能です。ただし、その場合その数値はどうせ文字列に変換されることになりますが。</p>
+<p>しかし、返り値としてオブジェクトを返した場合はエラーが発生します。返すのはプリミティブでなければいけません。</p>
+<p>では、例を見ましょう。</p>
+<pre><code>
+var obj = {
+  [Symbol.toPrimitive](hint){
+    if (hint === "string"){
+      return "三百";
+    } else {
+      return 300;
+    }
+  },
+};
+
+console.log(String(obj)); // "三百"
+console.log(Number(obj)); // 300
+console.log(obj * 3); // 900
+</code></pre>
+<p>ここで作ったオブジェクトobjは、数値に変換されるときは300という数値になりますが、文字列に変換されるときはなぜか漢数字になるという意味不明なオブジェクトです。String関数やNumber関数で文字列や数値に変換するとたしかにその通りになっていることが分かります。また、<code>obj * 3</code>という式ではobjは数値に変換されます。なぜなら、掛け算は数値どうしで行う必要があるからです。</p>
+
+<p>これはやや細かい話ですが、引数として<code>"default"</code>が来る場合、すなわちプリミティブなら何でもいいという場合はあまり多くありません。そのひとつは<code>+</code>演算子の場合です。<code>+</code>演算子は足し算ですが、片方が文字列の場合は文字列の連結になります。よって、<code>+</code>演算子にオブジェクトが渡された場合、とりあえず指定なし（引数<code>"default"</code>）で両辺をプリミティブに変換してみて、どちらかが文字列だったら文字列の連結になるという動作をします。運良く両方とも数値<small>（もしくは真偽値など）</small>に変換された場合は数値の足し算になります。</p>
+<p>もうひとつは<code>==</code>演算子に渡された場合です。この演算子は<code>===</code>とは異なり、両辺が異なる型の場合は型変換を行って型を合わせようとするというはた迷惑な演算子でしたね。</p>
+<p><code>==</code>の片方が数値または文字列、もう片方がオブジェクトの場合はオブジェクトが<code>"default"</code>モードでプリミティブに変換されます。よって、例えば次のような比較はtrueになります。</p>
+<pre><code>
+var obj = {
+  [Symbol.toPrimitive](hint){
+    if (hint === "string"){
+      return "hello";
+    } else if (hint === "number"){
+      return 100;
+    } else {
+      return 5;
+    }
+  },
+};
+
+console.log("5" == obj); // <em>true</em>
+</code></pre>
+<p>あともうひとつはDateコンストラクタに渡された場合ですが、詳細は省略します。</p>
+
+<p>今回紹介した@@toPrimitiveにより、オブジェクトがプリミティブに変換されるときの挙動を制御できます。楽しいですね。</p>
+
+<h3 id="anchor-tostringtag">@@toStringTag</h3>
+<p>オブジェクトをプリミティブに変換するという話題が出てきましたが、普通のオブジェクトを文字列に変換した場合はどんな文字列になるのでしょうか。</p>
+<pre><code>
+var obj = {
+  foo: 3,
+};
+
+console.log(String(obj)); // <em>"[object Object]"</em>
+
+var obj2 = Promise.resolve(4);
+
+console.log(String(obj2)); // <em>"[object Promise]"</em>
+</code></pre>
+<p>このように、普通のオブジェクトは<code>"[object Object]"</code>という文字列になります。また、Promiseを文字列にすると<code>"[object Promise]"</code>となります。</p>
+<p>このような変換結果は<code>Object.prototype.toString</code>メソッドによって生成されます。このメソッドの結果は必ず<code>"[object <var>なんとか</var>]"</code>という形になります。普通のオブジェクトの場合はなんとかの部分はObjectとなりますが、Promiseの場合はPromiseとなります。</p>
+<p>こうなるとこの部分はコンストラクタの名前が入るように思えますが、実はそうではありません。自分でクラスを作るとそのことを確かめることができます。</p>
+<pre><code>
+class MyClass{}
+
+var obj = new MyClass();
+
+console.log(obj.toString()); // <em>"[object Object]"</em>
+</code></pre>
+<p>このように、自分でクラスを作った場合もこの部分はObjectとなります。</p>
+<p>ちなみに、配列などは独自のtoStringメソッドを持っているのでこの形にはなりません。</p>
+<pre><code>
+var arr = ['foo', 'bar'];
+
+console.log(String(arr)); // <em>"foo,bar"</em>
+</code></pre>
+<p>ただし、<code>Object.prototype.toString</code>を無理やり呼び出すと面白い結果を見ることができます。</p>
+<pre><code>
+var arr = ['foo', 'bar'];
+
+console.log(Object.prototype.toString.call(arr)); // <em>"[object Array]"</em>
+</code></pre>
+<p>なんと、オブジェクトではなくnullやundefinedなどにも独自の結果が用意されています。オブジェクトでないのにobjectと書いてあるのは面白いですね。</p>
+<pre><code>
+console.log(Object.prototype.toString.call(null)); // <em>"[object Null]"</em>
+</code></pre>
+<p>なお、ものによってはこの部分が一単語ではないこともあります。</p>
+<pre><code>
+console.log(Object.prototype.toString.call([].entries())); // <em>"[object Array Iterator]"</em>
+</code></pre>
+
+<p>では本題に入ります。<b>@@toStringTag</b>を使うと、この部分をカスタマイズすることができるのです。このプロパティには文字列で自分の好きな値を入れましょう。</p>
+<pre><code>
+var obj = {
+  [Symbol.toStringTag]: 'Hello',
+};
+console.log(String(obj)); // <em>"[object Hello]"</em>
+</code></pre>
+<p>もちろん、prototypeにこれを入れておくことで自分のクラスのインスタンスのtoString結果をカスタマイズすることもできます。</p>
+<pre><code>
+class MyClass{
+  get [Symbol.toStringTag](){
+    return 'MyClass';
+  }
+}
+
+var obj = new MyClass();
+
+console.log(String(obj)); // <em>"[object MyClass]"</em>
+</code></pre>
+<p>なお、先ほど説明した通り、@@toStringTagプロパティは<code>Object.prototype.toString</code>からのみ使われます。なので、独自のtoStringメソッドを定義したり、上で紹介したばかりの@@toPrimitiveメソッドを定義した場合は@@toStringTagは意味がありません。（上の例でやったように、無理やり<code>Object.prototype.toString</code>を適用される可能性もあるので全くないというわけではありませんが。）</p>
+
+<p>余談ですが、組み込みのオブジェクトに対する独自の結果は@@toStringTagを使っている場合と使っていない場合があります。一貫していない理由は歴史的経緯です。</p>
+<pre><code>
+var arr = [];
+console.log(arr[Symbol.toStringTag]); // undefined
+
+var iterator = [].entries();
+console.log(iterator[Symbol.toStringTag]); // "Array Iterator"
+</code></pre>

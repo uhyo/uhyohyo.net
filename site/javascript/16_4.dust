@@ -92,8 +92,8 @@ console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
   <li>search</li>
   <li><a href="16_16.html">species</a></li>
   <li>split</li>
-  <li>toPrimitive</li>
-  <li>toStringTag</li>
+  <li><a href="16_18.html#anchor-toprimitive">toPrimitive</a></li>
+  <li><a href="16_18.html#anchor-tostringtag">toStringTag</a></li>
   <li>unscopables</li>
 </ul>
 <p>それぞれどのような意味があるのかは追々紹介するとしましょう。主に、組み込み関数の動作をカスタマイズするために使うことができます。</p>

@@ -41,7 +41,7 @@ if(typeof a=="object" <mark>&amp;&amp; a!=null</mark>){
 <h3>文字列のメソッド</h3>
 <p>文字列のメソッドについては<a href="4_1.html">四章第一回</a>でも少し紹介したので、忘れている方はあわせて参照してください。もちろん今回はES5で追加されたメソッドも紹介していきますが、ES5より前からあるメソッドについてもまだ紹介していないものがあったので紹介しています。</p>
 
-<h4>charCodeAt</h4>
+<h4 id="anchor-charcodeat">charCodeAt</h4>
 <p>これは<a href="4_1.html#anchor-charat">charAt</a>と少し似ています。charAtは引数(1つ)で指定された位置の文字1つを返しますが、charCodeAtはそのかわりにその文字の<strong>コードポイント</strong>を返します。例えば文字aはUnicodeコードポイントU+0061（十進数で97）を持つので、<code>"abc".<mark>charCodeAt</mark>(0)</code>は97となります。</p>
 
 <h4>concat</h4>
