@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>モジュールのサンプル1</title>
+  </head>
+  <body>
+    <p><a href="16_20.html">戻る</a></p>
+    <p>このページでは、<a href="16_20_sample_foo.js">16_20_sample_foo.js</a>から関数fooFunctionを読み込んで実行します。関数実行に成功すれば、コンソールに"hello from module!"と表示されます。</p>
+    <script type="module">
+      import {
+        fooFunction,
+      } from "./16_20_sample_foo.js";
+
+      fooFunction();
+    </script>
+  </body>
+</html>
+

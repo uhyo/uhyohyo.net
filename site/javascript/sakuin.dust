@@ -12,6 +12,8 @@
   <dd><a href="16_11.html">第十六章第十一回</a></dd>
   <dt>const宣言</dt>
   <dd><a href="16_3.html">第十六章第三回</a></dd>
+  <dt>export文</dt>
+  <dd><a href="16_20.html">第十六章第二十回</a></dd>
   <dt>for文</dt>
   <dd><a href="kiso6.html">基礎編第六回</a></dd>
   <dt>for-in文</dt>
@@ -26,6 +28,8 @@
   <dd><a href="9_6.html">第九章第六回</a></dd>
   <dt>if・else・条件分岐</dt>
   <dd><a href="kiso3.html">基礎編第三回</a>・<a href="2_14.html">第二章第十四回</a></dd>
+  <dt>import文</dt>
+  <dd><a href="16_20.html">第十六章第二十回</a></dd>
   <dt>in</dt>
   <dd><a href="11_4.html">第十一章第四回</a></dd>
   <dt>Infinity</dt>
@@ -124,6 +128,8 @@
   <dd><a href="1_4.html">第一章第四回</a></dd>
   <dt>メソッド</dt>
   <dd><a href="1_4.html">第一章第四回</a></dd>
+  <dt>モジュール</dt>
+  <dd><a href="16_20.html">第十六章第二十回</a></dd>
   <dt>文字列</dt>
   <dd><a href="kiso1.html">基礎編第一回</a>・<a href="4_1.html">第四章第一回</a>・<a href="11_5.html">第十一章第五回</a></dd>
 

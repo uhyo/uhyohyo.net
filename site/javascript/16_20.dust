@@ -1,0 +1,266 @@
+<p>第十六章は長いですね。20回に到達したのは初めてです。</p>
+<p>最近の記事は細かい話が続いており皆さんも飽き飽きしているだろうということで、今回は新しい文法を紹介します。それは<b>モジュール</b>に関する文法です。</p>
+<p>モジュールとは、プログラムを分割したそれぞれの単位のことです。どんなプログラミング言語でも、大きなものを作るときソースコードを全部ひとつのファイルに書くことはまずありません。機能ごととか、適切な単位でプログラムをファイルに分割して整理するのが普通です。</p>
+<p>そうなると、複数のファイルを協調させて動作させる仕組みが必要になります。それがモジュールシステムです。JavaScriptにおいては、ES2015で追加された<b>モジュール</b>関連の機能によってこれを成し遂げることができます。</p>
+
+<h3>従来の方法</h3>
+<p>このモジュール関連の機能はES2015で追加されたと述べましたが、その後実際にブラウザ等で使えるようになるにはかなり時間がかかりました。現在（2017年11月）、やっとChromeやSafariでこの機能が動くようになりました。Firefoxはまだ（フラグ無しでは）動作しません。</p>
+<p>しかし、JavaScriptはつい最近流行りだしたような言語ではありません。これまではどのようにJavaScriptでファイル分割を行っていたのでしょうか。</p>
+<p>ブラウザの場合、もっとも原始的な方法は、分割したJavaScriptファイルをscript要素で順番に実行することです。例えばfoo.jsとbar.jsという2つのファイルがあるとしましょう。</p>
+<pre><code>
+// foo.js
+function fooFunction(){
+  console.log('Hi');
+}
+
+// bar.js
+fooFunction();
+</code></pre>
+<p>2つのファイルの中身がこのようになっていた場合、これらはHTMLから次のように読み込んで使用することができます。</p>
+<pre class="language-html"><code>
+&lt;script src="<mark>foo.js</mark>"&gt;&lt;/script&gt;
+&lt;script src="<mark>bar.js</mark>"&gt;&lt;/script&gt;
+</code></pre>
+<p>この順番で読み込むことで、まずfoo.jsによりfooFunction関数が定義され、次にbar.jsがその関数を使うことができます。これは順番が大事です。逆にすると、fooFunctionが定義される前にそれを使用しようとしてエラーになります。</p>
+<p>この例では、2つのファイルの間の協調は<em>グローバル変数</em>によって成されています。この例ではfooFunctionというグローバル変数が2つのファイルの間の橋渡しをしています。これまでは、事実上グローバル変数を用いるのが唯一の方法でした。</p>
+
+<p>一方、近年はブラウザ以外の環境でもJavaScriptが動くようになり、そういった環境用の独自のモジュールシステムが整備されてきた歴史もあります。その代表例がnode.jsに採用された<b>CommonJS</b>です。CommonJSではrequireという組み込み関数を用いて他のファイルを呼び出し、結果を得ることができます。CommonJSについてはここでは解説しませんが、上に対応する例だけ出しておきます。</p>
+<pre><code>
+// foo.js
+exports.fooFunction = function(){
+  console.log('Hi');
+};
+
+// bar.js
+const {
+  fooFunction,
+} = require('./foo.js');
+
+fooFunction();
+</code></pre>
+
+<p>このような独自のモジュールシステムが先に育ってきた歴史があるため、それに対比して今回紹介するモジュールシステムは<b>ES Modules</b>と呼ばれることがあります。ES ModulesはJavaScript (ECMAScript)の言語仕様に含まれる正統なモジュールシステムなので、今後node.jsなどの環境でもES Modulesを用いたモジュールシステムが主体となっていくでしょう。</p>
+
+<h3>import, export</h3>
+<p>では、今回の内容であるES Modulesの話に移りましょう。モジュールのために、新しい文法<dfn>import文</dfn>と<dfn>export文</dfn>が追加されました。</p>
+<p>import文は、他のモジュール（他のファイル）から値を読み込みます。export文は、自分が他のファイルから読みこまれるときにどんな値を提供するか宣言します。つまり、export文で提供された内容をimport文で読み込むことができるのです。</p>
+<p>export文により値を他のモジュールに提供することをエクスポートするといい、import文で他のモジュールから値を読み込むことはインポートするといいます。</p>
+<p>とりあえずまず例を見てみることにしましょう。上のfoo.jsとbar.jsの例はこのように書けます。</p>
+<pre><code>
+// foo.js
+<mark>export</mark> function fooFunction(){
+  console.log('Hi');
+}
+
+// bar.js
+<mark>import</mark> {
+  fooFunction,
+} from 'foo.js';
+</code></pre>
+
+<h4>export文</h4>
+<p>まずexport文から解説していきます。export文にはいくつかの種類があります。</p>
+<p>まず、<em>宣言</em>系の文にはexportをつけてexport文にすることができます。上の例は、fooFunctionの関数宣言にexportをつけています。これは普通の関数ですが、<a href="16_6.html">ジェネレータ関数</a>の宣言なども可能です。他に、var、let、constによる変数宣言にもexportを付けることができます。</p>
+<pre><code>
+export const someValue = 100;
+
+export let one = 1, two = 2, three = 3;
+
+export var foo, bar;
+
+foo = 10;
+bar = 20;
+</code></pre>
+<p>このように、var、let、const宣言にexportを付けることができます。また、export文を含むファイルもJavaScriptプログラムであることは変わりませんので、ちゃんと上から実行されます。上の例のfoo、barのように、まずexport付きvarで変数を宣言しておき、あとから変数に値を代入することも可能です。この場合、他のファイルがfooやbarを読み込むとちゃんと10、20という値になります。</p>
+
+<p>また、<a href="16_11.html">クラス</a>宣言もexportすることができます。</p>
+<pre><code>
+export class VeryUsefulClass{
+  constructor(){
+    console.log('Hello');
+  }
+}
+</code></pre>
+
+<p>他には、既に宣言されている変数をexportするための構文が用意されています。</p>
+<pre><code>
+let foo = 3;
+const bar = 5;
+
+export {
+  foo,
+  bar,
+};
+</code></pre>
+<p>このように、この構文では、exportのあとに<code>{ }</code>の中に変数名をコンマで区切って書きます。これにより変数fooとbarがエクスポートされます。</p>
+<p>また、エクスポートするときに名前を変えることができます。それには、次のように<code>as</code>を使います。</p>
+<pre><code>
+let foo = 3;
+const bar = 5;
+
+export {
+  foo <mark>as</mark> superFoo,
+  bar,
+};
+</code></pre>
+<p>この例の場合、変数fooはfooという名前でなくsuperFooという名前でエクスポートされます。</p>
+
+<h4>defaultエクスポート</h4>
+<p>また、defaultエクスポートという種類のexportもあります。詳しくはあとで説明しますが、defaultエクスポートによりエクスポートされたものは対応するimport構文により簡単にインポートすることができます。そのモジュールの中心的なものをdefaultエクスポートにするのがよいでしょう。defaultエクスポートは必ず用意する必要はありません。</p>
+<p>defaultエクスポートをするには、エクスポートしたいものの前に<code>export default</code>と書きます。先ほどと同様、関数宣言やクラス宣言はdefaultエクスポートにできます。</p>
+<pre><code>
+<mark>export default</mark> function fooFunction(){
+  console.log('Hi');
+}
+</code></pre>
+<p>ただし、変数宣言はだめです。よって、<code>export default const foo = 3;</code>のようなエクスポートはできません。</p>
+<p>また、好きな値をdefaultエクスポートにすることができます。そのためには、<code>export default <var>値</var>;</code>とします。値の部分は式で計算することもできます。</p>
+<pre><code>
+let foo = 5, bar = 10;
+
+export default foo + bar;
+</code></pre>
+<p>こうすると15がdefaultエクスポートになります。</p>
+
+<p>なお、defaultエクスポートは1つしか作ることができません。</p>
+
+<h4>import文</h4>
+<p>以上でexport文は終わりです。今度は他のモジュールから値をインポートするために使う、import文を見ていきましょう。</p>
+<p>import文の基本的な形は次の形です。</p>
+<pre><code>
+import {
+  foo,
+  bar,
+} from "./foo.js";
+</code></pre>
+<p>このように、importというキーワードのあとに<code>{ }</code>の中に名前をコンマで区切ったものを書きます。そして、<code>from "ファイル名"</code>の部分でどのファイルから読み込むのか指定します。この例では、./foo.jsによりfooとbarがエクスポートされていれば読み込むことができます。</p>
+<p>この場合、読み込んだものはそのまま変数foo、barに入り、使うことができます。このとき、exportのときと同様に、asを使って名前を変えることができます。</p>
+<pre><code>
+import {
+  foo <mark>as superFoo</mark>,
+  bar,
+} from "./foo.js";
+</code></pre>
+<p>こうした場合、./foo.jsからfooという名前でエクスポートされたものはsuperFooという変数に入り使えるようになります。</p>
+
+<p>さらに、あるモジュールからエクスポートされているものを全部まとめて得るための構文もあります。</p>
+<pre><code>
+import * as obj from "./foo.js";
+
+console.log(obj.foo);
+</code></pre>
+<p>このように<code>* as <var>変数名</var></code>としてインポートした場合、./foo.jsからエクスポートされているものが全てまとまったオブジェクトを得ることができます。例えば、./foo.jsからfooとbarがエクスポートされている場合、それらは<code>obj.foo</code>および<code>obj.bar</code>に入っています。</p>
+
+<p>残りはdefaultエクスポートをインポートするための構文です。これは簡単です。</p>
+<pre><code>
+import foo from "./foo.js";
+
+console.log(foo);
+</code></pre>
+<p>このように<code>import <var>変数名</var> from "モジュール名";</code>とした場合、当該モジュールにdefaultエクスポートがあればそれが指定した変数に入ります。簡単ですね。このように簡単にインポートできるようにしたいものをdefaultエクスポートに指定するとよいでしょう。</p>
+
+<p>そして、defaultエクスポートとその他のエクスポートを同時に読み込む構文もあります。</p>
+<pre><code>
+import obj, {
+  foo,
+  bar,
+} from "./foo.js";
+</code></pre>
+<p>このようにすると、defaultエクスポートがobjに入り、foo, barという名前でエクスポートされているものがfoo, barという変数にそれぞれ入ります。</p>
+<p>他に、<code>import obj, * as obj2 from "./foo.js";</code>という構文も可能です。</p>
+
+<p>最後に、これらとは別に一風変わった構文もあります。</p>
+<pre><code>
+import "./foo.js";
+</code></pre>
+<p>これは、モジュールを読み込むけど何もインポートしないという場合に使う構文です。何もインポートしないのにモジュールを読み込む意味があるのかとお思いかもしれませんが、読みこまれると何らかの動作をするというモジュールも考えられます。そういう場合に使うとよいでしょう。</p>
+
+<p>最後に、exportとimportを合わせたような構文があるのでそれも紹介します。</p>
+<pre><code>
+export {
+  foo,
+  bar,
+} from "./foo.js";
+</code></pre>
+<p>これはいわゆる再エクスポートの構文です。つまり、./foo.jsから読み込んだfooとbarをそのまま自分のモジュールからエクスポートします。</p>
+
+<pre><code>
+export * from "./foo.js";
+</code></pre>
+<p>また、これは./foo.jsからエクスポートされているものを全て自分のモジュールからエクスポートします。ただし、defaultエクスポートは再エクスポートできません。</p>
+
+<p>以上で構文の説明は終わりです。地味に数が多いので大変に思うかもしれませんが、使ううちに慣れていきます。今回もサンプルを用意していますから、そのサンプルを通じて慣れていきましょう。</p>
+
+<h3>HTMLにおけるモジュールの使用法</h3>
+<p>ここまでで、import文とexport文を学習しました。実際にHTMLからこれらの構文を用いてファイルの協調を行う方法をここから見ていきます。</p>
+<p>まず、プログラムがimport文やexport文を使うためには、そのプログラムが<em>モジュール</em>であると宣言する必要があります。それには、script要素の<strong>type属性</strong>に<code>"module"</code>という値を指定します。これを忘れたままimport文やexport文を使った場合文法エラーとなります。</p>
+<p>ちなみに、モジュールでないプログラムは<em>スクリプト</em>と呼ぶことになっています。スクリプトでは、importやexportは使えないのです。</p>
+<p>例はこんな感じです。</p>
+<pre class="language-html"><code>
+&lt;script <mark>type="module"</mark>&gt;
+  import {
+    fooFunction,
+  } from "./foo.js";
+
+  fooFunction();
+&lt;/script&gt;
+</code></pre>
+
+<p>実際にやってみた<a href="16_20_sample.html">サンプル1</a>を用意しています。先にも述べた通り、ブラウザによってはまだ動作しないかもしれません。記事執筆時点でEdge, Chrome, Safariは上のサンプルが動作しますが、FirefoxやOperaは設定でモジュールを有効にしないと動作しません。</p>
+<p>なお、モジュール名に指定できるのはJavaScriptファイルですが、ファイルはURL、絶対パス（<code>/javascript/foo.js</code>のような形）か相対パス（<code>./foo.js</code>のような形）のいずれかで指定します。特に注意しなければいけないのは、諸事情により、例えば同じディレクトリにファイルがあったとしても、<code>foo.js</code>と指定することはできないという点です。この場合は<code>./foo.js</code>としなければいけません。</p>
+
+<h3>モジュールの利点と既存の方法の欠点</h3>
+<p>HTMLでJavaScriptのモジュールを利用する場合、従来の方法に比べると利点があります。せっかくなのでそれについて解説しておきます。</p>
+
+<p>まず、従来の方法の欠点を解説します。実は、普通のJavaScriptがHTML中に現れると、それは<strong>パーサーをブロックします</strong>。パーサーをブロックするというのは、そのスクリプトの実行が終わるまでHTMLの読み込みが止まるということです。例えば、</p>
+<pre class="language-html"><code>
+……
+&lt;p&gt;ここはすぐ表示されます。&lt;/p&gt;
+&lt;script&gt;
+  // <em>何らかのすごく時間がかかる処理</em>
+&lt;/script&gt;
+&lt;p&gt;ここはなかなか表示されません。&lt;/p&gt;
+</code></pre>
+<p>というように、HTML中にscript要素でJavaScriptが書いてある場合を考えます。</p>
+<p>HTMLは前から順番に読みこまれていきます。その過程でscript要素に行き当たった場合、HTMLの読み込みは中断されJavaScriptが即座に実行されます。もしこれに時間がかかった場合、それ以降のHTMLが読みこまれるのが遅くなってしまいます。</p>
+<p>こんなところにすごく時間がかかる処理なんて書かないよと思うかもしれませんが、次の場合はどうでしょうか。</p>
+<pre class="language-html"><code>
+……
+&lt;p&gt;ここはすぐ表示されます。&lt;/p&gt;
+&lt;script src="foo.js"&gt;&lt;/script&gt;
+&lt;p&gt;ここはなかなか表示されないかもしれません。&lt;/p&gt;
+</code></pre>
+<p>何らかのJavaScriptファイルをscirpt要素で読み込む場合です。</p>
+<p>この場合でも、スクリプトの実行が完了するまでHTMLの読み込みは進みません。しかし、今回スクリプトを実行するにはfoo.jsをサーバーから取得する必要があります。となると、サーバーからファイルを取得してそれを実行するまで待つことになるわけで、どうしてもインターネット上を1往復するだけのタイムラグが発生します。もちろん工夫の余地が無いわけではありませんが、ラグを完全に克服することはできません。</p>
+<p>また、これは特に上で話に出たような原始的なファイル分割の際は問題となります。</p>
+<pre class="language-html"><code>
+&lt;script src="ライブラリ1.js"&gt;&lt;/script&gt;
+&lt;script src="ライブラリ2.js"&gt;&lt;/script&gt;
+&lt;script src="ライブラリ3.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  // ライブラリたちを使う処理
+&lt;/script&gt;
+</code></pre>
+<p>このようにファイル読み込みが並んでいた場合、インターネットを3往復しないと次に進むことができません。さすがにこれはよろしくないですね。</p>
+
+<p>ただ、HTML5で追加されたscript要素の<strong>defer属性</strong>を使うと、状況は少しよくなります。defer属性を付けたscript要素でスクリプトを読み込む場合、実行は後回しにしてHTMLの読み込みが続行されます。そして、HTMLの読み込みが終了したあとでスクリプトが実行されます。なお、script要素が出た時点でファイル読み込みは開始されます。ファイル読み込みの待ち時間でHTMLの読み込みを進めることができるわけです。</p>
+<pre class="language-html"><code>
+&lt;script defer src="ライブラリ1.js"&gt;&lt;/script&gt;
+&lt;script defer src="ライブラリ2.js"&gt;&lt;/script&gt;
+&lt;script defer src="ライブラリ3.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  // ライブラリたちを使う処理
+&lt;/script&gt;
+</code></pre>
+<p>こうすることにより、ライブラリ1〜3は裏で同時に読み込むことができ、読み込み時間の短縮が期待できます。</p>
+<p>ただし、これにはひとつ問題があります。それは、<em>src属性を持たないscript要素にdefer属性を付けることはできない</em>という点です。つまり、直前の例はうまく動きません。なぜなら、この例ではライブラリの処理はdeferにより後回しにされているので、それより前にライブラリを使う処理を実行してしまうからです。</p>
+<p>これはライブラリを使う処理も外部ファイルにしてしまうことで一応解決します。</p>
+
+<p>では、モジュールの話に移りましょう。実は、<code class="language-html">type="module"</code>を指定されたscript要素は、deferと同様に実行が遅延されます。これは、たとえsrc属性がなくても有効です。このことを確かめられる<a href="16_20_sample2.html">サンプル2</a>を用意しました、</p>
+<p>このサンプルでは、モジュールを読み込んで利用するscript要素を先、その場でconsole.logを呼び出すscript要素を後に書いたのに、実際に表示される順番は逆になります。これは、前者はdefer同様の扱いになりHTMLが読み込み終わったあとに実行されるからです。</p>
+<p>こうなる理由はやはりパーサーをブロックしないためです。モジュールであるプログラムは、import文により別のモジュールを読み込む可能性があります。別のモジュールを読み込むには当然ながらインターネットへのアクセスが必要です。ですから、パーサーをブロックしてしまうと長い時間ブロックしてしまう可能性があり好ましくありません。</p>
+
+<p>モジュールを使うことで、deferを使うよりも自然にブロックしないスクリプトを書くことができます。これがモジュールの利点です。</p>
+<p>また、読みこまれた先のモジュールがまたimport文で別のモジュールを読み込むということも、もちろん可能です。ファイル間のこのような階層的な依存関係を記述できるのはモジュールならではの魅力です。従来の方法では、読み込みたいファイルのscript要素を書き並べるしかありませんでした。<small>（動的にscript要素を追加するとかそういう工夫はありますが。）</small></p>
+<p>また、近頃実用化が進んでいる<b>HTTP2</b>は細かいファイルを同時に何個も受信するのが得意とされており、モジュールによるファイル分割とは相性がよくなっています。</p>
+<p>ただし、注意すべき点は、あるモジュールがどの別のモジュールに依存しているかはファイルを読み込んでみないと分からないという点です。依存関係の階層が深い場合、次々新しい依存先が発覚して結局インターネットを何往復もすることになりかねません。Server Pushを用いるなどの工夫が必要になるでしょう。</p>

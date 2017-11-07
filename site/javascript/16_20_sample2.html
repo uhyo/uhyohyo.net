@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>モジュールのサンプル2</title>
+  </head>
+  <body>
+    <p><a href="16_20.html">戻る</a></p>
+    <p>このページでは、<a href="16_20_sample_foo2.js">16_20_sample_foo2.js</a>から関数fooを読み込んで実行します。また、このページ内のscript要素からもconsole.logを実行します。コンソールにログが表示される順番は必ず"hello from this page!"が先で"hello from module!"が後になります。</p>
+    <script type="module">
+      import foo from "./16_20_sample_foo2.js";
+
+      foo();
+    </script>
+    <script>
+      console.log('hello from this page!');
+    </script>
+  </body>
+</html>
+
