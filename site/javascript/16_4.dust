@@ -87,11 +87,11 @@ console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
   <li>hasInstance</li>
   <li><a href="16_16.html">isConcatSpreadable</a></li>
   <li>iterator</li>
-  <li>match</li>
-  <li>replace</li>
-  <li>search</li>
+  <li><a href="16_19.html">match</a></li>
+  <li><a href="16_19.html">replace</a></li>
+  <li><a href="16_19.html">search</a></li>
   <li><a href="16_16.html">species</a></li>
-  <li>split</li>
+  <li><a href="16_19.html">split</a></li>
   <li><a href="16_18.html#anchor-toprimitive">toPrimitive</a></li>
   <li><a href="16_18.html#anchor-tostringtag">toStringTag</a></li>
   <li>unscopables</li>

@@ -1,0 +1,76 @@
+<p>ES2015の追加機能を網羅しようシリーズは今回で最後です。今回は<b><a href="4_2.html">正規表現</a></b>を扱います。この講座で正規表現を解説したのは相当昔ですが、やはりとても便利な言語機能のひとつです。そこで、ES2015では正規表現にも機能拡張が行われました。</p>
+
+<h3>Unicodeサポート</h3>
+<p>前回、<a href="16_18.html#anchor-unicode-support">String#codePointAt</a>などの、U+10000以上の文字を正しく扱える文字列のメソッドを紹介しました。実は、正規表現も従来はU+10000以上の文字を正しく扱えませんでしたが、ES2015では正しく扱う方法が追加されました。</p>
+<p>まず、うまく扱えない例を見ましょう。</p>
+<pre><code>
+var str = "foo😂bar";
+
+console.log(/^foo.bar$/.test(str)); // <em>false</em>
+</code></pre>
+<p>この例において、<code>/^foo.bar$/</code>という正規表現はfooとbarの間に1文字あるような文字列を表します。<code>.</code>は任意の文字ひとつ（ただし改行は除く）を表すのでしたね。変数strの中身はfooとbarの間に😂という文字がある文字列です。しかし、この文字列はこの正規表現にはマッチしません。この理由は、従来の正規表現においてもやはり文字というのは実は<em>コードユニット</em>を指しており、😂という文字はサロゲートペア（すなわちコードユニット2つ）で表されるからです。実際、次のように<code>.</code>を2つ用意してあげるとマッチします。</p>
+<pre><code>
+var str = "foo😂bar";
+
+console.log(/^foo..bar$/.test(str)); // <em>true</em>
+</code></pre>
+
+<p>しかしやはり、これは直感的ではありませんね。サロゲートペアに関する知識がないと、U+10000以上の文字を含む文字列を正しく扱うのが困難です。</p>
+<p>ということで、今回紹介する新機能は<strong>uフラグ</strong>です。uフラグを持つ正規表現は、U+10000以上の文字も1文字として扱います。</p>
+<p>これまでに登場したフラグは<a href="4_3.html#anchor-options">iとg</a>でしたね。uフラグも同様に正規表現リテラルに書くことができます。</p>
+<pre><code>
+var str = "foo😂bar";
+
+console.log(/^foo.bar$/<mark>u</mark>.test(str)); // <em>true</em>
+</code></pre>
+<p>uフラグをつけた正規表現を用いることで、<code>.</code>が😂という文字にマッチするようになりました。</p>
+<p>また、前回紹介した<code>\u{1f602}</code>のようなエスケープシーケンスは、uフラグありの正規表現の中でも使うことができます。</p>
+<pre><code>
+var str = "foo😂bar";
+
+console.log(/<mark>\u{1f602}</mark>/u.test(str)); // <em>true</em>
+</code></pre>
+
+<h3>yフラグ</h3>
+<p>もうひとつ、ES2015では<b>yフラグ</b>という新しいフラグが追加されました。これはパーサーなどを書くときに便利なフラグです。ちなみに、yは<i lang="en">sticky</i>のyらしいです。これはさらっと紹介するので、興味がある方はより詳しく調べてみてください。</p>
+<p>yフラグを持つ正規表現は、指定した位置からしかマッチしなくなります。位置は、正規表現オブジェクトのlastIndexプロパティで指定します。</p>
+<pre><code>
+var str = "foobar";
+var reg = /bar/y;
+
+reg.lastIndex = 0;
+
+console.log(reg.test(str)); // <em>false</em>
+
+reg.lastIndex = 3;
+
+console.log(reg.test(str)); // <em>true</em>
+
+console.log(reg.lastIndex); // 6
+</code></pre>
+<p>この例では<code>"foobar"</code>という文字列に対して<code>/bar/y</code>という正規表現をマッチさせようとしています。この正規表現は文字列の3文字目からマッチすることができますが、最初は<code>reg.lastIndex</code>を0にセットしているためマッチに失敗します。次に<code>reg.lastIndex</code>を3に変えると、マッチが成功するようになります。</p>
+<p>また、yフラグを持つ正規表現がマッチに成功したとき、lastIndexが書き換えられるという特徴があります。このときlastIndexはマッチした文字列の長さ分だけ進みます。今回の場合、文字列の3文字目から<code>"bar"</code>という3文字にマッチしたので、その分だけlastIndexが進み6となります。</p>
+
+<h3>well-knownシンボルによるカスタマイズ</h3>
+<p>ここからは、もはやおなじみの<b>well-knownシンボル</b>の話です。正規表現に関連するwell-knownシンボルは4つもあります。これらのシンボルにより正規表現関連の動作をカスタマイズすることができます。</p>
+
+<p>最初は<b>@@match</b>です。名前が示すように、これを使うと<a href="4_3.html#anchor-match">String#match</a>メソッドの動作をカスタマイズできます。matchメソッドに、正規表現の代わりに<b>@@match</b>メソッドを持つようなオブジェクトを渡すと、その@@matchメソッドが呼ばれます。</p>
+
+<pre><code>
+var myregexp = {
+  [Symbol.match](str){
+    return 'hello';
+  },
+};
+
+console.log('foobar'.match(myregexp)); //<em>"hello"</em>
+</code></pre>
+<p>なんだか意味がわかりませんね。なお、正規表現オブジェクトは@@matchメソッドを持っているので、String#matchを使う代わりにそれを使うことも一応可能です。</p>
+<pre><code>
+var reg = /bar/;
+
+console.log(reg[Symbol.match]('foobar'));
+</code></pre>
+
+<p>他に<b>@@replace</b>, <b>@@search</b>, <b>@@split</b>というメソッドがwell-knownシンボルがあり、役割は@@matchとほぼ同じです。</p>
+<p>これらのwell-knownシンボルはどれも正規表現が関わる文字列のメソッドに対応しています。これらのシンボルは正直、使いみちが全然ありませんが、万一ものすごくカスタマイズした正規表現オブジェクトを作りたくなった場合には役に立つのかもしれません。</p>
