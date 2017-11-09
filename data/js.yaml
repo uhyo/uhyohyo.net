@@ -106,5 +106,6 @@ page:
   '16_19': ES2015の正規表現
   '16_20': モジュール
   '16_21': async/await
+  '16_22': TC39とJavaScriptの標準化
   '17_1': MutationObserver
   '17_2': DOM4的なメソッド

@@ -129,7 +129,7 @@ console.log(obj1.prop === obj2.prop); // <em>true</em>
 <p>このように、Object.assignはオブジェクトの各プロパティに対して<code>obj2.prop = obj1.prop;</code>のような代入に相当する操作を行います。このとき代入されるプロパティがそれ自身オブジェクトだったとしてもお構いなしです。</p>
 <p>Object.assignは「オブジェクトのコピー」に利用されることが多いと思いますが、その実態はあくまでプロパティをひとつずつ新しいオブジェクトに代入しているだけです。このようにプロパティの中身はただ代入されるだけであるようなコピーのことを浅いコピーと呼びます。Object.assignをオブジェクトのコピーに利用するときは、それが浅いコピーであることを理解していないといけません。</p>
 
-<h3>Object.entries, Object.values</h3>
+<h3 id="anchor-object-entries">Object.entries, Object.values</h3>
 <p>以上でES2015で追加された4つのメソッドは終わりなのですが、続いて<b>ES2017</b>で追加されたObjectの静的メソッドを紹介します。それは<dfn>Object.entries</dfn>と<dfn>Object.values</dfn>です。</p>
 <p>この名前を見ると、どこかで見たような気がしますね。そう、この名前のメソッドは<a href="16_2.html">配列</a>や<a href="16_3.html">Map</a>などにも存在していました。</p>
 <p>一方、entries, valuesとくればもうひとつ仲間がいるはずです。そう、keysですね。ご存知の通り、<a href="11_4.html#anchor-object-keys">Object.keys</a>はES5の時点から存在していました。これはオブジェクトの持つ（enumerableな）プロパティ名の配列を返すメソッドです。ES2017ではこれの仲間としてvalues、entriesが追加されたわけです。</p>
