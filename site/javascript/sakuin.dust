@@ -6,6 +6,8 @@
 <dl>
   <dt>arguments</dt>
   <dd><a href="9_3.html">第九章第三回</a></dd>
+  <dt>async/await</dt>
+  <dd><a href="16_21.html">第十六章第二十一回</a></dd>
   <dt>break文・continue文</dt>
   <dd><a href="kiso5.html">基礎編第五回</a></dd>
   <dt>class宣言, class式</dt>

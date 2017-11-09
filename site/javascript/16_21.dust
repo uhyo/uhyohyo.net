@@ -1,0 +1,438 @@
+<p>今回紹介する<dfn>async/await</dfn>は、またもや新しい文法機能です。これは<b>ES2017</b>の目玉機能として追加されたもので、<b>非同期処理</b>と深い関係があります。</p>
+<p>そして、このasync/awaitを理解すれば、<small>（いくつか解説を省略している機能がありますが）</small>ES2017までのおおよそ全ての言語機能が分かったことになります。長かった第16章も終わりはもうすぐです。</p>
+
+<p>今回解説する機能は<b>async/await</b>という名前が定着していますが、これは<dfn>async関数</dfn>とその中で使える<dfn>await式</dfn>の2つの要素から成ります。これから詳しく説明しますが、asyncというのは<i lang="en">asynchronous</i> (非同期)という意味で、async関数は非同期的な処理を記述できる関数なのです。</p>
+
+<h3>async関数</h3>
+<p>async関数は新しいタイプの関数です。イメージとしては、<a href="16_6.html">ジェネレータ関数</a>とyield式の関係に近い感じです。</p>
+<p>async関数を作る場合は、functionというキーワードの前にasyncと書きます。</p>
+<pre><code>
+<mark>async</mark> function foo(x){
+  return x*10;
+}
+</code></pre>
+<p>例えば、このように宣言された関数fooはasync関数となります。</p>
+
+<p>繰り返しになりますが、async関数は非同期的な処理を行う関数です。思い出してほしいのですが、JavaScriptで非同期処理といえば、そう、<a href="16_5.html">Promise</a>ですね。非同期処理を行う関数は結果をPromiseで返すことで、処理が完了したあとの処理をいい感じに書くことができるのでした。</p>
+<p>なので、<strong>async関数の返り値は必ずPromiseとなります</strong>。</p>
+<p>上のasync関数はreturn文で値を返す関数です。この場合、返り値のPromiseの結果がその値となります。試してみましょう。</p>
+<pre><code>
+async function foo(x){
+  return x*10;
+}
+
+foo(5)
+.then(v=&gt; console.log(v));
+</code></pre>
+<p>こうすると50と表示されるはずです。</p>
+<p>なお、この動作は、返り値の値が<a href="16_5.html#anchor-promise-resolve">Promise.resolve</a>相当の変換によりPromiseに変換されていると見ることができます。よって、Promiseを返した場合はそのPromiseがそのまま返り値になります。</p>
+<pre><code>
+async function foo(x){
+  return new Promise((resolve)=>{
+    setTimeout(()=&gt;{ resolve(x*10); }, 1000);
+  });
+}
+
+foo(5).then(v=&gt; console.log(v));
+</code></pre>
+<p>こうすると1秒後に50と表示されることになります。</p>
+
+<h3>await式</h3>
+<p>さて、これだけだと返り値がPromiseに変換されるだけで面白くありません。async関数の真髄は、async関数の中でのみ使うことができる構文である<dfn>await式</dfn>にあります。</p>
+<p>await式はPromiseを受け取り、<strong>そのPromiseが解決されるまで待ちます</strong>。この「待つ」という挙動は非同期ならではですね。例として、解決に3秒かかるPromiseを用意してそれを待ってみましょう。</p>
+<pre><code>
+function waitFor3Seconds(){
+  return new Promise((resolve)=>{
+    setTimeout(resolve, 3000);
+  });
+}
+
+async function main(){
+  <mark>await</mark> waitFor3Seconds();
+  console.log('done!');
+}
+
+main();
+</code></pre>
+<p>main関数を呼ぶと、3秒経ってから<code>"done!"</code>と表示されることが分かります。つまり、await式のところで実行が一時停止して、3秒経ったら再開したのです。</p>
+<p>この例を見て分かるように、await式には任意の式を与えることができます。今回与えた式は<code>waitFor3Seconds()</code>です。waitFor3Secondsを呼ぶと、3秒経つと解決されるPromiseを返すので、今回await式に渡されたのはそのPromiseになります。よって、await式はそのPromiseが解決されるまで、すなわち3秒経つまで待ったのです。</p>
+
+<p>なお、ここで「待つ」と言っているのは、Promiseにコールバックを登録しておいて終わったら関数を呼んでもらうのと本質的に同じです。つまり、async関数がawaitによって実行を停止している間にJavaScriptは他の処理を進めることができます。このことは、次の例を試してみると分かります。</p>
+
+<pre><code>
+function waitFor3Seconds(){
+  return new Promise((resolve)=>{
+    setTimeout(resolve, 3000);
+  });
+}
+
+async function main(){
+  console.log('main started');
+  <mark>await</mark> waitFor3Seconds();
+  console.log('done!');
+}
+
+main();
+console.log('called main');
+</code></pre>
+<p>この例を実行すると、「main started」「called main」と表示され、3秒経つと「done!」と表示されます。皆さんはなぜこうなるのか分かるでしょうか。</p>
+<p>まずmain関数が呼ばれます。main関数はasync関数ですが、async関数が呼ばれた場合は通常の関数と同様に、即座に関数内の実行が始まります。したがって「main started」のログが出ます。そのあと実行はawait文に行き当たります。await文はPromiseが解決されるのを待ちますから、その時点でこのmain関数の実行は待ち状態に入ります。async関数が待ち状態になると、関数の実行はそこで一旦中断されます。そして、関数の実行が中断されたので、main関数の呼び出しはここで終了となるのです。そのため、次に出るログは「called main」となります。</p>
+<p>3秒たつとawaitで待たれていたPromiseが解決されます。こうなるとmain関数の待ち状態が解除され、実行が再開されます。main関数の実行は、最後に到達する（またはreturn文に到達する）か、次のawaitに行き当たるまで続きます。main関数の実行が終了した場合それでmain関数（が行う非同期処理）が完了したと見なされるため、main関数が返したPromiseが解決されます。</p>
+
+<p>以上がawait式の基本です。このように、async関数は「Promiseを待つ」という処理が可能であり、そのために使うのがawait式なのです。</p>
+
+<h3>Promiseの結果を得る</h3>
+<p>ところで、最初のほうの例にあったように、Promiseは結果を伴うことができます。
+<p>awaitでPromiseを待ったとき、Promiseの結果は<em>awaitの返り値</em>として得ることができます。例として、1秒かけて値を倍にするPromiseを用意し、それをawaitで待ってみます。</p>
+<pre><code>
+// 1秒かけて値を倍にする関数
+function double(x){
+  return new Promise(resolve=&gt;{
+    setTimeout(()=&gt;{ resolve(2*x); }, 1000);
+  });
+}
+
+async function main(){
+  const x = 10;
+  // 1秒かけてxを倍にしてもらう
+  const y = await double(x);
+  console.log(y);
+}
+
+main();
+</code></pre>
+<p>この例を実行すると、1秒後に20と表示されます。今回はawaitの返り値を変数yに代入しました。</p>
+<p>なお、当然ながら、awaitは何回でも使うことができます。例えばdoubleを3回使ってみましょう。これは3秒後に80と表示されます。</p>
+<pre><code>
+// 1秒かけて値を倍にする関数
+function double(x){
+  return new Promise(resolve=&gt;{
+    setTimeout(()=&gt;{ resolve(2*x); }, 1000);
+  });
+}
+
+async function main(){
+  const x = 10;
+  const x2 = await double(x);
+  const x3 = await double(x2);
+  const x4 = await double(x3);
+  console.log(x4);
+}
+
+main();
+</code></pre>
+<p>待つという処理をawaitを使って書くことで、非同期処理を行う関数が見通しよく書けるようになりました。ちなみに、async関数とかawaitが扱っているのは結局Promiseなので、これをPromiseチェーンで書くこともできます。具体的には次のようになりますね。</p>
+<pre><code>
+// 1秒かけて値を倍にする関数
+function double(x){
+  return new Promise(resolve=&gt;{
+    setTimeout(()=&gt;{ resolve(2*x); }, 1000);
+  });
+}
+
+function main(){
+  const x = 10;
+  double(x)
+  .then(x2=> double(x2))
+  .then(x3=> double(x3))
+  .then(x4=> {
+    console.log(x4);
+  });
+}
+
+main();
+</code></pre>
+<p>また、これは上の例と合わせる形で書きましたが、Promiseチェーンの場合はx2やx3は省略することができます。</p>
+<pre><code>
+// 1秒かけて値を倍にする関数
+function double(x){
+  return new Promise(resolve=&gt;{
+    setTimeout(()=&gt;{ resolve(2*x); }, 1000);
+  });
+}
+
+function main(){
+  const x = 10;
+  double(x)
+  .then(double)
+  .then(double)
+  .then(x4=> {
+    console.log(x4);
+  });
+}
+
+main();
+</code></pre>
+<p>人によってはこのほうがきれいに見えるかもしれません。Promiseを明示的に扱いながら書くのが良いか、async/awaitを使って書くのが良いかは場合によっても変わります。Promiseを使った例のメリットは、中間変数であるx2やx3が消えたことです（一応await版でも<code>const x4 = await double(await double(await double(x)));</code>とすれば消せますがこれはさすがに微妙ですね）。一方、Promiseを使った例のデメリットは、最終結果（x4）を使う部分はコールバックの内側に入らざるを得ないということです。</p>
+<p>awaitは任意のPromiseを待つことができることを用いれば、これらのメリットを併せ持つ次のような書き方もできます。</p>
+<pre><code>
+// 1秒かけて値を倍にする関数
+function double(x){
+  return new Promise(resolve=&gt;{
+    setTimeout(()=&gt;{ resolve(2*x); }, 1000);
+  });
+}
+
+async function main(){
+  const x = 10;
+  const x4 = await double(x).then(double).then(double);
+  console.log(x4);
+}
+
+main();
+</code></pre>
+<p>このあたりをどう書くかは好みにもよりますが、async関数は非同期処理を行う処理の記述を強力に支援してくれます。</p>
+
+<p>さらに理解するためにもう1つ例を出しておきます。この関数は1秒ごとに値を倍にし表示し続けます。この場合、main関数は終了しません。</p>
+<pre><code>
+// 1秒かけて値を倍にする関数
+function double(x){
+  return new Promise(resolve=&gt;{
+    setTimeout(()=&gt;{ resolve(2*x); }, 1000);
+  });
+}
+
+async function main(){
+  let x = 10;
+  while(true){
+    x = await double(x);
+    console.log(x);
+  }
+}
+
+main();
+</code></pre>
+
+<h3>エラー処理</h3>
+<p>以上がasync関数の基本です。しかし、これまでの説明ではひとつ触れていないことがあります。それは、<em>Promiseは成功だけでなく失敗することがある</em>という点です。そこで、ここからはasync関数とPromiseの失敗の関係について見ていきます。</p>
+
+<p>失敗、すなわちエラーと関わりが深いのが<a href="9_8.html">例外</a>です。そうなると、普通の処理における例外が非同期処理におけるPromiseの失敗に対応すると考えるのが自然ではないでしょうか。</p>
+<p>実は、async関数内で例外が発生した場合、それはその関数が返したPromiseの失敗として現れます。</p>
+
+<pre><code>
+async function fail(){
+  throw new Error('ぎゃーーーー');
+}
+
+fail()
+.catch(err=&gt;{
+  console.log(err);
+});
+</code></pre>
+<p>この例で、failというのは中で例外を投げるasync関数です。今回はfailを呼び出して返ってきたPromiseに対してcatchメソッドで失敗時の処理を登録しています。これを実行してみると、確かに投げられたErrorオブジェクトがconsole.logで表示されていることが分かります。</p>
+<p>このように、<em>async関数の失敗を表すには例外を投げればよい</em>のです。また、別の方法として、async関数の返り値がPromiseだった場合はそのPromiseの結果が全体の結果になるという機能を用いると、<a href="16_5.html#anchor-promise-resolve">Promise.reject</a>で作ったPromiseを返り値として返すという方法でも可です。</p>
+
+<p>次に、await式とエラーの関係を見ていきます。await式で待っているPromiseが成功した場合は結果の値がawait式の返り値となりますが、ではPromiseが失敗したらどうなるでしょうか。</p>
+<p>実は、<em>await式で待っているPromiseが失敗したら、その場で例外が投げられます</em>。つまり、await式から例外が発生したような扱いとなります。</p>
+<p>試しに、失敗するPromiseをawaitで待ってみましょう。</p>
+<pre><code>
+// 失敗するPromiseを返すメソッド
+async function fail(){
+  throw new Error('ぎゃーーーー');
+}
+
+async function main(){
+  console.log('main start');
+  await fail();
+  console.log('main end');
+}
+
+main()
+.catch(err=&gt;{
+  console.log('main error: ', err);
+});
+</code></pre>
+<p>これを実行すると、まず「main start」と表示されます。次に<code>fail()</code>をawaitで待ちます。しかし、failはさっき作った常に失敗するPromiseを返す関数です。ということは、このawaitが待っているPromiseは失敗となり、このawaitから例外が発生します。例外が発生した場合、関数の処理は中断されるのでしたね。</p>
+<p>実行中の関数mainはasync関数なので、先ほど説明したように、async関数の返り値であるPromiseが失敗となります。</p>
+<p>その結果、mainの返り値にcatchで登録した失敗時のハンドラが実行されることとなり、「main error: Error: ぎゃーーーー」みたいな表示がされるはずです。main関数は例外により途中で終了したので、「main end」は表示されません。</p>
+<p>まとめると、await式のPromiseが失敗した場合、それが例外となり伝播して、外側のasync関数自体が失敗となるということです。この仕組みにより、async関数を書く場合、大抵の場合はPromiseの失敗を意識する必要がなくなります。内側のPromiseの失敗が自動的の外側のPromiseの失敗となるからです。</p>
+
+<p>しかし、それでは困るという場合もあります。実は、エラーを制御するために、<strong>try-catch文</strong>を使うことができます。</p>
+<p>Promiseが失敗した場合await式から例外が発生すると述べました。このとき発生した例外は、throw文で発生するような例外と同じで、try-catch文によりキャッチすることができます。</p>
+
+<pre><code>
+// 失敗するPromiseを返すメソッド
+async function fail(){
+  throw new Error('ぎゃーーーー');
+}
+
+async function main(){
+  console.log('main start');
+  try{
+    await fail();
+  }catch(e){
+    console.log('catched error:', e);
+  }
+  console.log('main end');
+}
+
+main()
+.then(()=&gt;{
+  console.log('returned from main');
+});
+</code></pre>
+<p>これを実行すると、await式から発生したエラーがtry-catch文にキャッチされ、<code class="language-none">catched error: Error: ぎゃーーーー</code>と表示されます。もちろんmain関数の実行は続行され、関数の最後までふつうにたどり着いたのでmain関数は成功裏に終了することとなります。</p>
+<p>このように、非同期処理のエラーをいい感じに処理したいという場面でも、awaitを用いて非同期処理を待つことによって、try-catchを用いで直感的にエラー処理を行うことができます。Promiseの場合、catchメソッドを用いてエラー処理を行う必要があるのでどうしてもエラー処理がコールバックの中に入ることになります。</p>
+<p>ただし、やはり場合によってはcatchメソッドのほうが都合が良い場合もあります。次の例を見てください。</p>
+<pre><code>
+// 2倍するけど3の倍数は2倍できない謎の関数
+async function double(x){
+  if (x % 3 === 0){
+    throw new Error('failed to double');
+  }else{
+    return x*2;
+  }
+}
+
+async function main(){
+  const x = 5;
+  let result1;
+  try{
+    result1 = await double(x);
+  }catch(e){
+    result1 = 0;
+  }
+  console.log(result1);
+}
+
+main();
+</code></pre>
+<p>ここで定義したdouble関数は、与えられた値を2倍する非同期関数です。ただし、時々（具体的には3の倍数が与えられたとき）2倍できずに失敗するというとんでもない仕様を持っています。これはすごく変な仕様ですが、要は失敗するかもしれないなら何でもいいのです。</p>
+<p>main関数では、ある値（ここではx）を2倍したいけど、もし失敗したら結果は0にしたいという処理をしています。</p>
+<p>try-catch文を用いてdoubleの失敗に対処したいとすると、上のような書き方になるでしょう。結果を入れる変数result1をまず用意しておき、tryの中でresult1にdoubleの結果を入れます。もし失敗したらresult1には0を入れます。</p>
+<p>ここで、tryの中で<code>let result1 = ...</code>とするわけにはいきません。その場合result1のスコープがtry部分のブロックになってしまい外で使えないからです。</p>
+<p>JavaScriptを書き慣れている人なら、ここでconstではなくletになるのが気持ち悪いと思います。この場合Promiseのcatchを使うと綺麗に書けますね。</p>
+
+<pre><code>
+// 2倍するけど3の倍数は2倍できない謎の関数
+async function double(x){
+  if (x % 3 === 0){
+    throw new Error('failed to double');
+  }else{
+    return x*2;
+  }
+}
+
+async function main(){
+  const x = 5;
+  const result1 = await double(x).catch(e=&gt; 0);
+  console.log(result1);
+}
+
+main();
+</code></pre>
+<p>このように、async/awaitを基調として使いつつ、ここぞというときにPromiseのメソッドを用いると綺麗で分かりやすいコードを書くことができます。</p>
+<p>そして、以上でasync/awaitの説明は終わりです。非同期処理をこういう感じで書くことができるのはとても便利です。Promiseを扱ったり、Promiseを作る場面があるときはasync/awaitを使って綺麗に書けるか検討してみるのもよいでしょう。ただ、async/awaitはあくまでPromise相手に動くものなので、Promiseではない古い同期処理（コールバック関数とか）を相手にするのは苦手です。そのようなものをPromise化にするには生のPromiseを扱う必要があるのです。上の例にも出てきたwaitFor3Secondsがその例ですね。</p>
+<pre><code>
+function waitFor3Seconds(){
+  return new Promise((resolve)=>{
+    setTimeout(resolve, 3000);
+  });
+}
+</code></pre>
+<p>Promiseが増えれば増えるほどasync/awaitも便利になります。皆さんも、非同期処理は積極的にPromiseで書いていくとよいでしょう。</p>
+<p>以下の内容はasync関数に関する補足です。</p>
+
+<h3>async関数式</h3>
+<p>今までの例では全てasync関数は全て関数宣言の形で書かれていました。しかし、async関数は他の形で作ることもできます。例えば、関数式の場合も前にasyncと書くことでasync関数を作ることができます。</p>
+<pre><code>
+// 3秒待つ関数
+function waitFor3Seconds(){
+  return new Promise((resolve)=>{
+    setTimeout(resolve, 3000);
+  });
+}
+
+// 初期値xに対してasync関数fを2回適用する関数
+async function runTwice(x, f){
+  const x2 = await f(x);
+  console.log('done (1)');
+  const x3 = await f(x2);
+  console.log('done (2)');
+  return x3;
+}
+
+runTwice(10, async function(x){
+  await waitFor3Seconds();
+  return x*2;
+})
+.then(x=&gt;{
+  console.log('result:', x);
+});
+</code></pre>
+<p>やや長い例ですが、よく読んでみると何をやっているか分かるはずです。この例は、「3秒待って値を倍にする関数」を10に対して2回適用してその結果を表示します。よって、6秒後に40と表示されます。</p>
+<p>ポイントは、runTwiceの第2引数に渡されているものです。これが<em>async関数式</em>です。具体的には、</p>
+<pre><code>
+async function(x){
+  await waitFor3Seconds();
+  return x*2;
+}
+</code></pre>
+<p>の部分がasync関数式です。その場でasync関数を作りたいときはこのように作ることができます。</p>
+<p>また、<a href="16_10.html">アロー関数</a>も前にasyncをつけるとasync関数になります。それが<em>asyncアロー関数式</em>です。上の例をasyncアロー関数を使って書き換えるとこうなります。</p>
+<pre><code>
+// 3秒待つ関数
+function waitFor3Seconds(){
+  return new Promise((resolve)=>{
+    setTimeout(resolve, 3000);
+  });
+}
+
+// 初期値xに対してasync関数fを2回適用する関数
+async function runTwice(x, f){
+  const x2 = await f(x);
+  console.log('done (1)');
+  const x3 = await f(x2);
+  console.log('done (2)');
+  return x3;
+}
+
+runTwice(10, async x=&gt;{
+  await waitFor3Seconds();
+  return x*2;
+})
+.then(x=&gt;{
+  console.log('result:', x);
+});
+</code></pre>
+<p>その場でasync関数を作りたい場面はそんなに無いかもしれませんが、機会があったら使ってみましょう。</p>
+
+<h3>メソッド定義</h3>
+<p>関数を定義する他の方法として、<a href="16_8.html#anchor-method-shorthand">オブジェクトリテラル中で関数を作る省略記法</a>があります。この記法の場合も、やはりasyncと前に付けることでasync関数になります。</p>
+
+<pre><code>
+var obj = {
+  foo: 3,
+  async func(){
+    return this.foo;
+  },
+};
+
+obj.func().then(x=&gt;{
+  console.log(x);
+});
+</code></pre>
+<p>これを実行すると3と表示されるでしょう。</p>
+
+<p>ここからは比較的どうでもいい余談なのですが、async関数の中で変なところにawaitと書くと当然エラーになります。</p>
+<pre><code>
+async function foo(){
+  let <mark>await</mark> = 3; // <em>こういうのは文法エラー</em>
+  console.log(<mark>await</mark>);
+}
+
+foo();
+</code></pre>
+<p>しかし、実はasync関数ではない関数の中でawaitと書いてもエラーになりません。下の例ではawaitを変数として使えています。</p>
+
+<pre><code>
+function foo(){
+  let await = 3; // <em>これはOK</em>
+  console.log(await);
+}
+
+foo();
+</code></pre>
+<p>つまり、awaitがキーワードとなるのはasync関数の中だけなのです。これはもちろん例によって後方互換性のためです。async/awaitが無い時代にawaitという名前が変数名として使われていたら、それを禁止すると後方互換性が崩れてしまいます。</p>
+<p>とはいえ、asyncではない関数の中でawaitという変数名を使うのは分かりにくいだけなのでやめておきましょう。</p>
+<p>なお、<a href="16_6.html">ジェネレータ関数</a>の中のyieldについても同じことが言えます。</p>

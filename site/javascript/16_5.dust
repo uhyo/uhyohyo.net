@@ -110,7 +110,7 @@ var p = new Promise(function(fulfill,reject){
 <p>最も早く解決したPromiseが成功した場合、その結果を伴って新しいPromiseも成功します。同様に、最も早く解決したPromiseが失敗した場合は新しいPromiseも失敗で終わります。他のPromiseの結果は無視されます（結果が無視されるだけで、非同期処理自体が停止するようなことはありません）。raceという名前は一番早く解決したのを採用するという動作を表しています。</p>
 <p>こちらも使ってみました。<a href="16_5_sample3.html">サンプル3</a>です。これはなかなか面白い動作をします。3つの通信のどれが一番早く完了するかというのは運によるところもあるので、開くたびにどれが表示されるか変わるかもしれません。</p>
 
-<p>次に、<strong>Promise.resolve</strong>メソッドを紹介します。これは、即座に（ただし非同期的に）成功するPromiseを作って返します。そのとき結果の値は、Promise.resolveメソッドに渡した値になります。つまり、例えば</p>
+<p id="anchor-promise-resolve">次に、<strong>Promise.resolve</strong>メソッドを紹介します。これは、即座に（ただし非同期的に）成功するPromiseを作って返します。そのとき結果の値は、Promise.resolveメソッドに渡した値になります。つまり、例えば</p>
 <pre><code>
 Promise.resolve(4)
 </code></pre>
