@@ -2,7 +2,16 @@
 // JavaScript講座用のextension
 const path = require('path');
 const fs = require('fs');
+const vm = require('vm');
 const escape = require('escape-html');
+const jsdom = require('jsdom');
+
+// スクリプトを読んでおく
+const scripts = {
+    prismjs: new vm.Script(fs.readFileSync(`${__dirname}/scripts/prism.js`, 'utf8') +
+        ';Prism.highlightAll();'),
+};
+
 module.exports = (context)=>{
     context.addPostLoadFileHook((context, filename, data)=>{
         // 講座ページは{ }を使えるようにアレする
@@ -119,6 +128,14 @@ module.exports = (context)=>{
             data,
         };
     });
+    context.addPostRenderHook((context, content, target)=>{
+        if (/javascript\/.*\.html$/.test(target) && !target.includes('sample')){
+            return applyScripts(content);
+        } else {
+            return content;
+        }
+    });
+
     // 一部のページで使うためのhelper
     const {
         dust,
@@ -231,4 +248,15 @@ function generateDescription(data){
     pre = pre.replace(/(?:\r|\n)+/g, ' ');
     // 160文字くらい
     return pre.slice(0, 160) + '……';
+}
+
+// HTMLにDOMのアレをあれする
+function applyScripts(html){
+    const dom = new jsdom.JSDOM(html, {
+        runScripts: 'outside-only',
+    });
+    // Prismjsを実行
+    dom.runVMScript(scripts.prismjs);
+    const result = dom.serialize();
+    return result;
 }

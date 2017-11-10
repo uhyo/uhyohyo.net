@@ -4,7 +4,7 @@
     "data": "./data",
     "cache": ".myst.cache.json",
     "dependency": ["./templates"],
-    "extension": ["./extensions/myst.js", "./extensions/javascript.js"],
+    "extension": ["./extensions/javascript.js", "./extensions/myst.js"],
     "target": ["site/css/*.scss", "site/**/*"],
     "server": {
         "port": 8080
