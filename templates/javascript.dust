@@ -59,4 +59,11 @@
       <p>{navlinks|s}</p>
     </nav>
   {/navlinks}
+  <script src="/js/prism.js"></script>
+  <script src="/js/my-list-tree.min.js"></script>
+  <script>
+    MyListTree.run('.tree', {
+      noBranchClass: 'no-branch'
+    });
+  </script>
 {/content}

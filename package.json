@@ -20,10 +20,7 @@
   "dependencies": {
     "escape-html": "^1.0.3",
     "html-minifier": "^3.5.5",
-    "jsdom": "^11.3.0",
     "my-static": "^1.1.1",
     "node-sass": "^3.13.1"
-  },
-  "devDependencies": {
   }
 }
