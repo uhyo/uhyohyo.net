@@ -1,7 +1,7 @@
 <p><dfn>イベントオブジェクト</dfn>というものが存在します。実は、イベントが発生したときはイベントオブジェクトを通してイベントの様々な情報を得ることができます。</p>
 
 <h3>イベントオブジェクトの取得</h3>
-<p>では、そのイベントオブジェクトはどうすれば手に入るかというと、実は、addEventListenerで登録した<strong>イベントリスナ</strong>（<a href="3_2.html">三章第二回</a>）の<strong>第一引数</strong>（最初の引数）に、イベントオブジェクトが渡されます。つまり、</p>
+<p>では、そのイベントオブジェクトはどうすれば手に入るかというと、実は、addEventListenerで登録した<strong><a href="3_2.html">イベントリスナ</a></strong>の<strong>第1引数</strong>（最初の引数）に、イベントオブジェクトが渡されます。つまり、</p>
 <pre class="language-html"><code>
 &lt;!doctype html&gt;
 &lt;html&gt;
@@ -24,7 +24,20 @@
 &lt;/html&gt;
 </code></pre>
 <p>このソースコードでいうと引数<code>ev</code>です。これを通して、さまざまな情報を得ることができます。</p>
-<p>ちなみに、HTML要素に対して属性（例えば<code>onclick</code>）として記述されたイベントハンドラの場合は関数になっていませんが、この場合は「event」という変数にイベントオブジェクトが代入されています。</p>
+
+<p>また、HTML要素の<a href="3_1.html">イベント属性</a>（例えば<code>onclick</code>）を利用する場合もイベントオブジェクトが利用可能です。この場合は次の例のように、「event」という変数にイベントオブジェクトが自動的に代入されているので、それを利用します。</p>
+<pre class="language-html"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p onclick="console.log(<mark>event</mark>);"&gt;test&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>では、イベントオブジェクトの利用法を見ていきます。</p>
 
 <h3 id="anchor-target">targetとcurrentTarget</h3>
 <p>まず、イベントオブジェクトが持つ<dfn>target</dfn>と<dfn>currentTarget</dfn>という2つのプロパティを紹介します。</p>
