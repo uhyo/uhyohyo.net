@@ -101,6 +101,7 @@ em.rec {
     background-color:white;
     width: 200px;
     padding:10px;
+    min-height: 200px;
   }
   aside.ad-javascript + nav {
     border-top: none;
@@ -110,5 +111,6 @@ em.rec {
 @media (min-width: 1024px) {
   aside.ad-javascript {
     width: 310px;
+    min-height: 310px;
   }
 }

@@ -11,7 +11,7 @@
       <meta name="twitter:title" content="JavaScript初級者から中級者になろう">
     {/page_title}
     <meta name="twitter:description" content="{twitter_description}">
-    <meta name="twitter:image" content="http://uhyohyo.net/images/icons/144x144.png">
+    <meta name="twitter:image" content="https://uhyohyo.net/images/icons/144x144.png">
   {/twitter_description}
 {/additionalHead}
 {<content}
