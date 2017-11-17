@@ -68,8 +68,9 @@ aside.ad-javascript {
   width: 100%;
   & > p {
     text-align: center;
-    font-size: #999999;
-    font-size: 0.6em;
+    color: #777777;
+    font-size: 0.7em;
+    margin: 0 0 0.3em 0;
   }
 }
 // あぶない
@@ -101,7 +102,7 @@ em.rec {
     background-color:white;
     width: 200px;
     padding:10px;
-    min-height: 200px;
+    min-height: 230px;
   }
   aside.ad-javascript + nav {
     border-top: none;
@@ -111,6 +112,6 @@ em.rec {
 @media (min-width: 1024px) {
   aside.ad-javascript {
     width: 310px;
-    min-height: 310px;
+    min-height: 290px;
   }
 }
