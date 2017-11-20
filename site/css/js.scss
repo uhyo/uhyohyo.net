@@ -56,6 +56,16 @@ code em, code em span.token {
   font-weight: normal;
 }
 
+// テーブル図示用
+table.disp-table {
+  border-collapse: collapse;
+
+  th, td {
+    border: 1px solid currentColor;
+    padding: 2px;
+  }
+}
+
 // 余談
 div.sidenote {
   background-color: #eef3ff;

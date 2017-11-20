@@ -1,17 +1,12 @@
 <p>前回、thead要素とtfoot要素という要素を少し紹介しました。今回はこれについて詳しく解説します。</p>
-<pre class="language-html"><code>&lt;table&gt;
+<pre class="language-html"><code>
+&lt;table&gt;
   <mark>&lt;thead&gt;</mark>
     &lt;tr&gt;
       &lt;td&gt;thead1&lt;/td&gt;
       &lt;td&gt;thead2&lt;/td&gt;
     &lt;/tr&gt;
   <mark>&lt;/thead&gt;</mark>
-  <mark>&lt;tfoot&gt;</mark>
-    &lt;tr&gt;
-      &lt;td&gt;tfoot1&lt;/td&gt;
-      &lt;td&gt;tfoot2&lt;/td&gt;
-    &lt;/tr&gt;
-  <mark>&lt;/tfoot&gt;</mark>
   <mark>&lt;tbody&gt;</mark>
     &lt;tr&gt;
       &lt;td&gt;tbody1&lt;/td&gt;
@@ -22,21 +17,29 @@
       &lt;td&gt;tbody4&lt;/td&gt;
     &lt;/tr&gt;
   <mark>&lt;/tbody&gt;</mark>
+  <mark>&lt;tfoot&gt;</mark>
+    &lt;tr&gt;
+      &lt;td&gt;tfoot1&lt;/td&gt;
+      &lt;td&gt;tfoot2&lt;/td&gt;
+    &lt;/tr&gt;
+  <mark>&lt;/tfoot&gt;</mark>
 &lt;/table&gt;
-        </code></pre>
+</code></pre>
 <p>theadとtfootは、テーブルのそれぞれ「ヘッダ」と「フッタ」を記述するためのものです。ヘッダはテーブルの最初にある行、フッタは最後にある行です。それぞれ何行でも（tr要素が何個あっても）構いません。</p>
-<p>table要素の子要素として記述できるのは、thead,tfoot,tbodyの3つの要素と、さらに付属的にcaptionやcol,colgroupなどです。今回は、thead,tfoot,tbodyについて解説します。</p>
-<p>theadとtfootは、一つのtableにつき0個または1個あります。tbodyは、1個以上あります。tbodyは複数でも構いません。</p>
-<p>tbodyは省略できるので、tableの下に直接trを置いた場合、それらが省略されたtbodyで囲われているというようにみなされます。</p>
+<p>table要素の子要素として記述できるのは、thead,tbody,tfootの他にもcaptionやcol,colgroupなどがありますが、今回はthead,tfoot,tbodyを扱います。</p>
+<p>theadとtfootはあっても無くても構いませんが、それぞれ1個までです。tfootを2つといったことはできません。一方、tbodyは複数でも構いません。</p>
+<p>前回解説したようにtbodyは省略できるので、tableの下に直接trを置いた場合、それらが省略されたtbodyで囲われているというようにみなされます。</p>
 
-<p>また、tableの中に書く順は、thead,tfoot,tbodyの順だと決まっています（ただし、HTML5においてはtfootをtbodyの後に書く書き方も許可されました）。そのため、画面上でtfootの部分が最後にあっても、内部的にはあくまで要素はthead,tfoot,tbodyの順に並んでいます。</p>
-<p>これはどう影響するかというと、insertRowやdeleteRowなどで指定する「行の番号」に影響してきます。ここで指定するのはあくまで内部的な（木構造上の）番号なので、例えば上のサンプルの場合だと、theadの中のtrが0番目、その次がtfootの中のtrで1番目、その次にtbodyの中のtr2つが2番目、3番目となります。</p>
+<p>これら3種類の要素をtableの中に書く場合、順番はthead, tbody, tfootの順と決まっています。ヘッダはテーブルの最初、フッタはテーブルの最後なので自然ですね。</p>
+<div class="sidenote">
+  <p>ただし、昔のHTML（HTML5より前）ではこの順番はthead, tfoot, tbodyとする必要がありました。これは書いた順番と実際に表示される順番が違うのでややこしいですね。また、木構造上の列の順番と表示上の順番が違うという問題もありました。</p>
+</div>
 
-<p>さて、それではやりにくい場合というものあります。そこで、thead,tfoot,tbodyそれぞれに対して処理をする方法があります。</p>
-<p>まず、thead,tfoot,tbodyのHTMLElementは、HTMLTableSectionElementと呼ばれます。実は、このHTMLTabeSectionElementもそれぞれinsertRowとdeleteRowを持っています。使い方は同じなので、前回を参照して下さい。</p>
-<p>それでは、これらのHTMLTableSectionElementの取得の仕方ですが、まず、theadとtfootは、それぞれtable要素が持つ<dfn>createTHead</dfn>と<dfn>createTFoot</dfn>というメソッドで取得できます。引数はいらず、返り値がそれぞれthead,tfootのオブジェクトです。ちなみに、thead,tfootがテーブルに無かった場合は、新しく空のTHEADやTFOOTが作られて、それを返します（こちらがメソッド名の由来ですね）。</p>
-<p>また、逆にtheadやtfootをテーブルから除去するメソッドもあります。それぞれtableが持つ<dfn>deleteTHead</dfn>と<dfn>deleteTFoot</dfn>です。引数はなく、返り値もありません。呼び出すと、除去されます。既に無かった場合も、特にエラーになることはありません。</p>
-<p>また、tbodyは、複数ある可能性があるので、table要素の<dfn>tBodies</dfn>というプロパティにHTMLCollectionが入っています。これがtbody要素の一覧です。これを使って取得しましょう。</p>
+<p>せっかくthead, tbody, tfootを使ってテーブルの列が区分されているので、それらをJavaScriptから扱う方法もあります。</p>
+<p>まず、thead,tfoot,tbodyのHTMLElementは、HTMLTableSectionElementと呼ばれます。実は、このHTMLTabeSectionElementもそれぞれ<a href="2_8.html#anchor-insertrow">insertRow</a>と<a href="2_8.html#anchor-deleterow">deleteRow</a>を持っています。使い方は同じなので、前回を参照して下さい。</p>
+<p>そして、これらのHTMLTableSectionElementを取得するための専用の方法があります。まずtheadとtfootは、それぞれtable要素が持つ<dfn>createTHead</dfn>と<dfn>createTFoot</dfn>というメソッドで取得できます。引数は無く、返り値がそれぞれthead,tfootのオブジェクトです。ちなみに、thead,tfootがテーブルに無かった場合は、新しく空のthead要素やtfoot要素が作られて、それを返します（こちらがメソッド名の由来ですね）。これらのメソッドは何回呼び出してもtheadやtfootが2つ以上になることはありません。</p>
+<p>逆にtheadやtfootをテーブルから除去するメソッドもあります。それぞれtableが持つ<dfn>deleteTHead</dfn>と<dfn>deleteTFoot</dfn>です。これらは引数は無く、返り値もありません。呼び出すと、それぞれtheadやtfootが除去されます。既に無かった場合も特にエラーになることはなく、何も起きません。</p>
+<p>また、tbodyは複数ある可能性があるので、table要素の<dfn>tBodies</dfn>というプロパティにHTMLCollectionが入っています。これがtbody要素の一覧です。これを使って取得しましょう。</p>
 <p>実際のサンプルで見てみましょう。</p>
 <pre class="language-html"><code>
 &lt;table <mark class="ins">id="aaaaa"</mark>&gt;
@@ -46,12 +49,6 @@
       &lt;td&gt;thead2&lt;/td&gt;
     &lt;/tr&gt;
   &lt;/thead&gt;
-  &lt;tfoot&gt;
-    &lt;tr&gt;
-      &lt;td&gt;tfoot1&lt;/td&gt;
-      &lt;td&gt;tfoot2&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tfoot&gt;
   &lt;tbody&gt;
     &lt;tr&gt;
       &lt;td&gt;tbody1&lt;/td&gt;
@@ -62,6 +59,12 @@
       &lt;td&gt;tbody4&lt;/td&gt;
     &lt;/tr&gt;
   &lt;/tbody&gt;
+  &lt;tfoot&gt;
+    &lt;tr&gt;
+      &lt;td&gt;tfoot1&lt;/td&gt;
+      &lt;td&gt;tfoot2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
 &lt;/table&gt;
 
 &lt;script type="text/javascript"&gt;
@@ -76,7 +79,8 @@
     newtd.appendChild( document.createTextNode('testtest'+i) );
   }
 &lt;/script&gt;
-          </code></pre>
+</code></pre>
 <p>newtrにinsertRowの戻り値を代入した後は、前回のinsertRowのサンプルと全く同じなので、特に解説はしません。とりあえず、今回はtbodyをいじってみました。</p>
-<p>tbodyに、table.tBodies.item(0)を代入しています。これは、tableのもつ0番目のtbody要素です。tableにはtbody要素は1つしかありませんね。</p>
+<p>tbodyに、<code>table.tBodies.item(0)</code>を代入しています。これは、tableのもつ0番目のtbody要素です。tableにはtbody要素は1つしかないのでこうなっています。</p>
+<p>このサンプルをすこしいじってtheadやtfootをいじってみるのもよいでしょう。</p>
 

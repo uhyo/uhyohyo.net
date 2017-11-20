@@ -1,5 +1,6 @@
 <p>テーブルとは、こういうやつのことです。</p>
-<pre class="language-html"><code>&lt;table&gt;
+<pre class="language-html"><code>
+&lt;table&gt;
   &lt;tr&gt;
     &lt;td&gt;test1&lt;/td&gt;
     &lt;td&gt;test2&lt;/td&gt;
@@ -11,8 +12,20 @@
 &lt;/table&gt;
 </code></pre>
 
+<p>テーブルとはすなわち<b>表</b>です。このHTMLは次のような表を表しています。</p>
+<table class="disp-table">
+  <tr>
+    <td>test1</td>
+    <td>test2</td>
+  </tr>
+  <tr>
+    <td>test3</td>
+    <td>test4</td>
+  </tr>
+</table>
+
 <h3>テーブルの木構造</h3>
-<p>上のテーブルの木構造は、次のようだと考えられます。ただし、タグとタグの間の改行によって生じるテキストノードは省略しています。</p>
+<p>HTMLを見る限り、上のテーブルの木構造は次のようだと考えられます。ただし、タグとタグの間の改行によって生じるテキストノードは省略しています。</p>
 <div class="tree">
 table
 <ul>
@@ -72,11 +85,10 @@ table
 </ul>
 </div>
 <p>table直下にあるのはtbodyという要素で、trはその下にあります。</p>
-<p>詳しくはHTMLを勉強してほしいのですが、tableの中にはtbodyという要素があり、trはその中に入れます。</p>
-<p>他にもtheadやtfootという要素も、tbodyと並んでtableの中に存在する可能性があり、それらの中にもtrが存在する可能性があります。</p>
-<p>なぜこのようなことになるかというと、このtbodyという要素は省略可能であり、まったく書かなくても暗黙のうちに存在すると見なされます。</p>
+<p>詳しくはHTMLを勉強してほしいのですが、tableの中にはtbodyという要素があり、trはその中に入れます。このtbodyという要素は省略可能であり、まったく書かなくても暗黙のうちに存在すると見なされるのです。</p>
+<p>他にもtheadやtfootという要素も、tbodyと並んでtableの中に存在する可能性があり、それらの中にもtrが存在する可能性があります。（thead, tfootについては<a href="2_9.html">次回</a>詳しく紹介します。）</p>
 <div class="sidenote">
-  <p>昔のHTMLではtableの直下にtrを書くことは認められておらず、上のように書いたら必ず暗黙のtbodyが保管されていました。</p>
+  <p>昔のHTMLではtableの直下にtrを書くことは認められておらず、上のように書いたら必ず暗黙のtbodyが補完されていました。</p>
   <p>最近のHTMLでは、tbodyを書く代わりにtrを直にtableの中に書くことも実は認められていますが、実際のブラウザは後方互換性の観点からtbodyを補完するものが多いようです。</p>
 </div>
 <p>これらの要素のせいで、テーブルの中ではtr要素がいろいろな場所に分散してしまう可能性があり、前回までに紹介した木構造の操作によってテーブルの行を一元的に扱うのは難しいです。そこで、テーブルの操作のための特別なプロパティやメソッドが用意されています。</p>
@@ -167,7 +179,7 @@ table
 <p>さて、これで、テーブルの行やセル（1つ1つのtdやth要素のこと）をたどって、末端のテキストノードくらいは操作できるようになりました。</p>
 <p>次に、行を増やしたり、セルを増やしたりといったテーブル自体の操作について解説していきます。</p>
 
-<h4>列・セルの追加</h4>
+<h4 id="anchor-insertrow">列・セルの追加</h4>
 <pre class="language-html"><code>&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -325,7 +337,7 @@ table
 </div>
 <p>画面の結果を見るとこのとおりになっているのがわかります。</p>
 
-<h4>列・セルの除去</h4>
+<h4 id="anchor-deleterow">列・セルの除去</h4>
 <p>逆に、列やセルを除去する方法もあります。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;
 &lt;html&gt;
