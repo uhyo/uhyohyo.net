@@ -1,24 +1,30 @@
-<p>実は、DOM4では基本的な機能に対して新しいメソッドがいろいろ追加されました。これらのメソッドはjQueryという有名なライブラリの影響を受けていると考えられます。</p>
+<p>実は、DOM4では基本的な機能に対して新しいメソッドがいろいろ追加されました。今回はこれらのメソッドを紹介します。ちなみに、これらのメソッドはjQueryという有名なライブラリの影響を受けているようです。</p>
 
 <h3>ノードの分類</h3>
 <p>メソッドを紹介する前に、DOM4で導入されたノードの分類について解説します。ノードというのは、たくさん種類がありました。要素を表すElement、木構造の頂点にあるDocument、テキストノードであるTextを最もよく使うでしょう。他に<a href="7_4.html">DocumentFragment</a>も使い所がありましたね。他にも、Attr、Comment、DocumentTypeなど普段あまり目にしないタイプのノードもあります。</p>
-<p>これらのノードを特徴により分類したものがあります。まず最初に紹介するのは<dfn>ParentNode</dfn>です。これは名前の通り、他のノードの親になりえるノードが該当します。具体的には、Document、DocumentFragment、Elementです。その他のノード、例えばTextは、テキストノードなので子を持つということがありませんので、ParentNodeではありません。</p>
-<p>逆に<dfn>ChildNode</dfn>というのもあります。これは、他のノードの子になりえるノードの分類です。具体的には、DocumentType、Element, Text, Comment, ProcessingInstructionです。後者3つはテキストデータを保持するもので、CharacterDataという分類がつくられています（CharacterData自体の概念はDOM4より前から存在しました）。</p>
-<p>ちなみに、ProcessingInstructionというのはXML文書で登場するもので、こういうやつです。</p>
-<pre class="language-xml"><code>
-&lt;?xml-stylesheet href="foo.xsl" type="text/xsl" ?&gt;
-</code></pre>
-<p>このように、<code>&lt;?</code>で始まり<code>?&gt;</code>で終わるのがProcessing Instruction（処理命令）で、それを示すノードがProcessingInstructionです。</p>
-<p>一見属性があるタグのように見えますが、中身の書式は自由です。これはxml-stylesheetという処理命令がたまたまこういう文法を持っていただけです。ただし、<code>&lt;?</code>の直後の文字列（今回の場合はxml-stylesheet）の部分はtargetと呼ばれ、他の部分（data）と区別されます。</p>
-<p>dataの部分は一切文法を持たないので、XMLやDOM的には中身はただの文字列にすぎません。そこで文字列を保持するノードであるCharacterDataの一種とされています。コメントについても中身はただの文字列なわけですね。ちなみに、CharacterDataは共通して、その保持する文字列を<strong>data</strong>プロパティにより取得できます。</p>
+<p>これらのノードを特徴により分類したものがあります。まず最初に紹介するのは<dfn>ParentNode</dfn>です。これは名前の通り、他のノードの親になりえるノードが該当する分類です。具体的には、Document、DocumentFragment、Elementの3種類が該当します。その他のノードは子を持つことはありえません。例えばText、すなわちテキストノードは木構造中の文字列部分を表すノードなので、その中身がさらに子ノードとなることはありません。よって、ParentNodeではないのです。</p>
+<p>逆に<dfn>ChildNode</dfn>という分類もあります。これは、他のノードの子になりえるノードの分類です。具体的には、DocumentType, Element, Text, Comment, ProcessingInstructionです。</p>
+<div class="sidenote">
+  <p>何やら見慣れない種類のノードがいくつかありますね。DocumentType, Comment, ProcessingInstructionは今まで紹介したことがありません。まあ、あまり重要でないから紹介していなかったのですが。一応ここでさらっと紹介しておきます。</p>
+  <p>DocumentTypeはDOCTYPE宣言、すなわち<code class="language-html">&lt;!doctype html&gt;</code>の部分を表すノードです。こんなノードもあったのですね。とはいえ、HTML5の時代においてはこのノードはほとんど形骸化してしまったといってもいいでしょう。一応<code>document.doctype</code>で取得できます。</p>
+  <p>Commentはその名の通り、コメント、すなわち<code class="language-html">&lt;!-- こういうの --&gt;</code>を表すノードです。HTML中に書いたコメントは無視されますが、実は木構造中にノードとして存在しているのです。</p>
+  <p>最後のProcessingInstruction（処理命令）はXML文書でのみ登場するもので、こういうやつを表すノードです。</p>
+  <pre class="language-xml"><code>
+    &lt;?xml-stylesheet href="foo.xsl" type="text/xsl" ?&gt;
+  </code></pre>
+  <p>このように<code>&lt;?</code>で始まり<code>?&gt;</code>で終わるのがProcessing Instruction（処理命令）で、それを示すノードがProcessingInstructionです。</p>
+  <p>処理命令では中身の書式は自由です。上の例はhrefとtypeという属性を持つタグのように見えますが、これはxml-stylesheetという処理命令がたまたまこういう文法を持っていただけです。ただし、<code>&lt;?</code>の直後の文字列（今回の場合はxml-stylesheet）の部分はtargetと呼ばれ、他の部分（data）と区別されます。</p>
+  <p>まあCommentは扱うことがあるかもしれませんが、DocumentTypeとProcessingInstructionはまず使わないでしょう。</p>
+  <p>ちなみに、Text、Comment、ProcessingInstructionの3種類のノードをまとめた分類であるCharacterDataという分類が存在します。CharacterDataに該当するノードは、中身の文字列を<b>data</b>プロパティで取得できる点で共通しています。テキストノードは言わずもがな、コメントや処理命令も結局中身はただのテキストだというわけです。CharacterDataは中身がテキストであるノードを表す分類となっています。なお、CharacterDataの概念はDOM4より前から存在していました。</p>
+</div>
 
 <h3>メソッド・プロパティたち</h3>
 <p>さて、話を戻してメソッドを紹介することにします。上でParentNodeとChildNodeの定義を紹介したのは、これに対して定義されたメソッドが存在するからです。例えばParentNodeが持つメソッドというのは、Document、DocumentFragment、Elementに共通するメソッドということになります。</p>
-<p>ちなみに、従来は複数の種類のノードに存在すべきメソッドは全部Nodeに定義されていました。例えば<a href="2_5.html#anchor-append-child">appendChild</a>について考えます。これは実はNodeが持つメソッドです。だから、Elementに対してもDocumentFragmentに対しても共通に利用できました。しかし、Nodeが持つメソッドということは、子を持たないようなノード、例えばTextに対してもappendChildを呼び出すことができます。ところが、テキストノードに対して子を追加することはできないので、エラーになります。そこでDOM4では、メソッドをもつ範囲をParentNodeに制限することでこの問題を解消し、無意味なメソッドを無くそうとしています。</p>
-<p>とはいえ、互換性の問題から、appendChildといった旧来のメソッドをいきなり消すことができません。それでも新しいメソッドを作ることに意味はあります。最近はJavaScriptの開発環境が充実し、自動補完や（TypeScriptでは）型チェックなどもできるようになりました。その精度を向上させることができます。</p>
+<p>ちなみに、従来は複数の種類のノードに存在すべきメソッドは全部Nodeに定義されていました。これは、全ての種類のノード（DocumentとかElementとか）がNodeを継承していることを利用しています。例えば、はるか昔に紹介した<a href="2_5.html#anchor-append-child">appendChild</a>は実はNodeが持つメソッドです。だから、Elementに対してもDocumentFragmentに対しても共通に利用できました。しかし、Nodeが持つメソッドということは、子を持たないようなノード、例えばTextに対してもappendChildを呼び出すことができます。ところがテキストノードは子を持たないノードなので、当然子を追加することはできません。実際にやろうとするとエラーになります。そうなると、テキストノードに対してappendChildを呼び出すのは全く無意味ということです。そこでDOM4では、メソッドが無意味になる事態を無くすために、子に関わるメソッドの範囲をParentNodeに制限することにしたのです。</p>
+<p>とはいえ、互換性の問題から、appendChildといった旧来のメソッドをいきなり消すことはできません。そこで、ParentNodeにしかない新しいメソッドを導入することにしたのです。appendChildは依然として存在し続けますが、それでも新しいメソッドを作ることに意味はあります。というのも、最近はJavaScriptの開発環境が充実し、自動補完や（TypeScriptでは）型チェックなどもできるようになりました。その精度を向上させることができるでしょう。</p>
 
 <p>前置きが長くなりましたが、それでは最初はParentNodeが持つメソッドを紹介します。ParnetNodeの特徴は子を持てることだったので、子に関するメソッドやプロパティがあります。</p>
-<p>まずは<dfn>append</dfn>です。これは子ノードを追加するメソッドです。appendChildが進化したメソッドです。</p>
+<p>まずは<dfn>append</dfn>です。これは子ノードを追加するメソッドです。さきほどまでさんざん例に出してきたappendChildが進化したメソッドです。</p>
 <p>進化したポイントは、まず引数は1つだけではなく任意の数可能です。これにより、複数のノードを一度に追加することができます。一つ一つappendChildする手間が省けるのでとてもうれしいですね。</p>
 <p>もう1つは、テキストノードを挿入したいときは<a href="2_5.html#anchor-createtextnode">document.createTextNode</a>を使ってテキストノードを作るかわりに、引数に文字列を渡すと勝手にテキストノードに変換してくれる点です。</p>
 <p>前回のサンプルに登場した、p要素の中身を作る次の部分をappendを使って書き換えてみましょう。</p>
