@@ -96,7 +96,7 @@
   <h3>第十六章　ES2015〜ES2017</h3>
   {@listJSPages section=16 /}
   
-  <h3>第十七章　DOM4</h3>
+  <h3>第十七章　DOM4とHTML</h3>
   {@listJSPages section=17 /}
 </section>
 <section>

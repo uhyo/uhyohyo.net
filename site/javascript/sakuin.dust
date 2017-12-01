@@ -502,6 +502,11 @@
   <dt>CSSStyleDeclaration</dt>
   <dd><a href="5_1.html">第五章第一回</a>・<a href="5_2.html">第五章第二回</a></dd>
 
+  <dt>customElements</dt>
+  <dd><a href="17_3.html">第十七章第三回</a></dd>
+  <dt>CustomElementRegistry#define</dt>
+  <dd><a href="17_3.html">第十七章第三回</a></dd>
+
   <dt>DataTransfer</dt>
   <dd><a href="12_6.html">第十二章第六回</a></dd>
   <dt>DataTransferItemList</dt>

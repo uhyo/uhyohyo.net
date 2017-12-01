@@ -1,0 +1,264 @@
+<p>今回から、いわゆる<b>Web Components</b>に関する話を解説します。これは、ウェブページの構築に使える<em>再利用可能なパーツ</em>を作るための方法です。</p>
+<p>Web Componentsはいくつかの機能の組み合わせにより成り立っているとされており、その中のひとつが今回紹介する<dfn>Custom Elements</dfn>です。Custom Elementsはその名の通り、独自のHTML要素を定義する方法です。</p>
+<p>なお、現時点（2017年12月）でWeb Componentsを利用できるのはChromeだけです（設定を変更すればFirefoxでも使用できます）。すぐに実戦投入はできないかもしれませんが、最近とても注目されている技術ですので今のうちに理解しておいて損はないでしょう。</p>
+
+<h3>カスタム要素の定義</h3>
+<p>では、独自のHTML要素を定義する方法をまず紹介します。皆さんは、HTML要素は<b>HTMLElement</b>というオブジェクトによって表されていることを既にご存知だと思います。</p>
+<pre><code>
+console.log(document.body instanceof HTMLElement); // <em>true (body要素はHTMLElememtのインスタンス)</em>
+console.log(document.body instanceof Element); // <em>true (HTMLElementはElementを継承している)</em>
+</code></pre>
+
+<p>実は、独自のHTML要素を作るには、<strong>HTMLElementを継承したクラスを作ります。</strong>別にクラスではなく手動でprototypeをいじって実現しても構いませんが、やはり<a href="16_11.html">クラス</a>の構文を使うほうが楽ですね。では、そのようなクラスを作ってみましょう。</p>
+
+<pre><code>
+class MyElement extends HTMLElement{
+  constructor(){
+    super();
+
+    console.log('MyElement is created');
+  }
+}
+</code></pre>
+<p>とりあえず作られたらログが出るクラスにしてみました。そして、要素を定義したらそれを<strong>カスタム要素として登録</strong>する必要があります。そのためには、<dfn>window.customElements</dfn>を用います。このオブジェクトは<dfn>define</dfn>メソッドを持っており、このメソッドを用いてカスタム要素を登録します。このとき、<b>要素名</b>も決めます。</p>
+<pre><code>
+class MyElement extends HTMLElement{
+  constructor(){
+    super();
+
+    console.log('MyElement is created');
+  }
+}
+
+<mark>window.customElements.define</mark>('my-element', MyElement);
+</code></pre>
+<p>このように、第1引数に要素名、第2引数名にクラス（コンストラクタ）を渡します。この例では、今作ったMyElementがmy-elementという名前で登録されたことになります。</p>
+<p>要素名にはいくつか制限があります。まず、要素名は<strong>ハイフンマイナス(<code>-</code>)を含む必要があります</strong>。ハイフンを含むことで、カスタム要素ではない普通のHTML要素と区別することができます。また、<strong>アルファベットの大文字は使えません</strong>。これは、HTMLは本来要素名の大文字小文字は関係ないので、定義の上では小文字に統一しておきたいという意図があります。もうひとつの制限として、<strong>1文字目はアルファベットである必要があります</strong>。逆に言えば、これ以外の制限は緩いです。例えば、タグ名にはアルファベット以外も使うことができます。<code>"x-日本語😂😂😂"</code>などの要素名も可能です。</p>
+
+<h3>カスタム要素の使用</h3>
+<p>とりあえずカスタム要素が定義・登録できました。できた要素は使ってみましょう。</p>
+<pre><code>
+class MyElement extends HTMLElement{
+  constructor(){
+    super();
+
+    console.log('MyElement is created');
+  }
+}
+
+customElements.define('my-element', MyElement);
+
+// document.createElementを使って要素を作る
+var elm = document.createElement('my-element');
+
+console.log(elm instanceof MyElement); // <em>true</em>
+console.log(elm.tagName); // <em>"MY-ELEMENT"</em>
+
+document.body.appendChild(elm);
+</code></pre>
+<p>注目すべき点は、上のサンプルを実行すると、<code>document.createElement</code>を実行した時点でコンソールに<code>MyElement is created</code>とログが表示される点です。さらに、<code>document.createElement</code>の返り値はMyElementのインスタンスになっています。このサンプルでは作った要素をbodyに追加しています。実際body要素を調べると、最後に<code class="language-html">&lt;my-element&gt;&lt;/my-element&gt;</code>という要素が追加されています。</p>
+<p>なお、カスタム要素もHTML要素の一種（HTMLElementを継承しているし）ということで、tagNameとか、普通のHTML要素が持つプロパティはちゃんと持っています。tagNameプロパティを参照すると<code>"MY-ELEMENT"</code>となるはずです。なお、タグ名が全部大文字になっているのはDOMの慣習です。</p>
+
+
+<p>ちなみに、カスタム要素のインスタンスは<code>document.createElement</code>を使わずに、コンストラクタをnewすることでも作ることができます。</p>
+<pre><code>
+class MyElement extends HTMLElement{
+  constructor(){
+    super();
+
+    console.log('MyElement is created');
+  }
+}
+
+customElements.define('my-element', MyElement);
+
+document.body.appendChild(new MyElement());
+</code></pre>
+<p>このようにしてもbody要素に<code class="language-html">&lt;my-element&gt;&lt;/my-element&gt;</code>が追加されていることがわかります。</p>
+
+<h3>HTMLからの使用</h3>
+<p>実は、登録したカスタム要素は<code>document.createElement</code>とかを用いてJavaScriptから要素を作るほかに、HTMLから利用することができます。やや長いですが、このサンプルを見てください。</p>
+<pre class="language-html line-numbers" data-line="9"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;my-element id="elm"&gt;
+      &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement{
+        constructor(){
+          super();
+
+          console.log('MyElement is created');
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+
+      var elm = document.getElementById('elm');
+
+      console.log(elm instanceof MyElement); // <em>true</em>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>HTML文書中でmy-element要素が使われています。script要素中では、今までと同様にmy-element要素を登録した後、文書中のmy-element要素を<code>document.getElementById</code>で取得しています。これはやはりMyElementのインスタンスになっています。</p>
+<p>このように、登録したカスタム要素はHTML中で使用されているものにもちゃんと適用されます。</p>
+
+<p>ただ、よく考えるとこれは不思議ですね。HTML文書は上から順番に読みこまれるため、文書中でmy-elementが使われた時点ではまだmy-elementがどんな要素なのか不明です。そのため、実際にはmy-elementは一時的に謎の要素として扱われ、<code>customElements.define</code>により登録された時点でそのカスタム要素に置き換わります。</p>
+<p>この挙動は次のサンプルで見ることができます。</p>
+
+<pre class="language-html line-numbers" data-line="9"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;my-element id="elm"&gt;
+      &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement{
+        constructor(){
+          super();
+
+          console.log('MyElement is created');
+        }
+      }
+
+      var elm = document.getElementById('elm');
+      console.log(elm instanceof MyElement); // <em>false</em>
+
+      customElements.define('my-element', MyElement);
+
+      console.log(elm instanceof MyElement); // <em>true</em>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>今回はカスタム要素を登録する前にmy-element要素を取得しています。このときは当然ながらこの要素は謎の要素であり、MyElementのインスタンスではありません。ところが、<code>customElements.define</code>を呼び出すとMyElementのインスタンスに変化しました。既に取得した要素も変化するというのは興味深いというか面白いというかやばい挙動ですね。</p>
+
+<p>なお、この例やその前の例ではmy-element要素に対して特別な挙動を設定しているわけではないため、my-element要素にとくに意味はありません。上のサンプルでは中にp要素がありますが、普通にそれが表示されています。</p>
+
+<h3>カスタム要素の挙動を決める</h3>
+<p>以上で、カスタム要素の作り方と使い方が分かりました。しかし、今のままではせっかくカスタム要素を作っても何の意味もありません。そこで、次はカスタム要素の挙動をカスタマイズしてみましょう。</p>
+<p>実は、カスタム要素のクラスに特定のメソッドを定義しておくことで、ある状況での挙動を設定できます。例えば、<dfn>connectedCallback</dfn>メソッドは、その要素が文書に挿入されたときに呼び出されます（引数無し）。</p>
+
+<pre class="language-html line-numbers" data-line="14-16"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;my-element id="elm"&gt;
+      &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement{
+        connectedCallback(){
+          this.textContent = "hello";
+        }
+      }
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このページを開くと、my-elementの中身が「これはテストです。」ではなく「hello」となります。これは、connectedCallbackが呼び出されたことで中身が書き換えられたからです。</p>
+<p>この例では、<code>customElements.define</code>が呼び出された時点でmy-elementの実態であるMyElementが作られます。そして、それは既に文書中に追加されているので即座にconnectedCallbackが呼ばれるという流れになります。</p>
+<p>基本的には、カスタム要素の表示を制御するのはconnectedCallbackメソッドで行うのがよいでしょう。</p>
+<p>他のメソッドとしては、文書中からノードが取り除かれたときに呼ばれる<dfn>disconnectedCallback</dfn>メソッドや、ノードがある文書から他の文書に移管されたときに呼ばれる<dfn>adoptedCallback</dfn>メソッド、そして要素の属性が変更されたときに呼ばれる<dfn>attributeChangedCallback</dfn>メソッドがあります。</p>
+<p>特に、最後のattributeChangedCallbackはconnectedCallbackと並んでよく使うメソッドかもしれません。そこで、このメソッドの使い方も見ておきます。</p>
+<pre class="language-html line-numbers" data-line="14-18,20"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;my-element id="elm" content="Hello"&gt;
+      &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement{
+        attributeChangedCallback(name, oldValue, newValue){
+          if (name === 'content'){
+            this.textContent = newValue || '';
+          }
+        }
+      }
+      MyElement.observedAttributes = ['content'];
+      customElements.define('my-element', MyElement);
+
+      // 5秒後に属性を変更
+      setTimeout(()=&gt; {
+        document.getElementById('elm').setAttribute('content', 'Hi');
+      }, 5000);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>実は、このメソッドを利用するには先に<em>監視対象の属性</em>を設定しておきます。それが20行目です。このように、MyElementの静的プロパティとして<dfn>observedAttributes</dfn>を定義しておきます。これは文字列の配列であり、各要素が監視対象の属性名です。監視対象となっている属性に変化があったときにattributeChangedCallbackが呼ばれます。</p>
+<p>このメソッドは常に引数3つで呼ばれます。第1引数が変化のあった属性名、第2引数が変化前の値、第3引数が変化後の値です。第2引数・第3引数は属性の値なので文字列ですが、属性が存在しないことを表すnullとなることもあります。例えば、今まで存在しなかった属性が新しく作られた場合は第2引数がnullとなります。属性が消された場合は第3引数がnullとなります。すでに存在する属性が変更された場合は第2引数・第3引数とも文字列となります。</p>
+<p>上の例では、contentという属性が変化した場合にtextContentをそれに変化させています。ページを開くとまずmy-elementの中身は<code>Hello</code>となっており、5秒後に<code>Hi</code>に変化します。</p>
+<p>このことから分かるように、要素が作られた時点ですでに属性があった場合もちゃんとattributeChangedCallbackが呼ばれます。これは助かりますね。要素が作られたときとそれ以外のときで処理を別々に書く必要がありません。</p>
+<p>なお、observedAttributesという静的プロパティを作るのに上の例（20行目）のようにするのは少し格好悪いですね。クラスの構文では（今のところ）静的プロパティを作る構文はありませんが、静的メソッドを作る構文はあるのでそれをgetメソッドにすれば間接的に実現できます。すなわち、次のようにすることもできます。</p>
+<pre class="line-numbers" data-line="2-4"><code>
+class MyElement extends HTMLElement{
+  static get observedAttributes(){
+    return ['content'];
+  }
+  attributeChangedCallback(name, oldValue, newValue){
+    if (name === 'content'){
+      this.textContent = newValue || '';
+    }
+  }
+}
+</code></pre>
+
+<p>これがカスタム要素の基本的な使い方です。ただ、これだけではまだ使い物になりませんね。例えば、上の例のmy-elementは常に中身がcontent属性と一致する要素のように思えますが、手動でいくらでも中身をいじることができます。これはなんだか不安定ですね。</p>
+<pre class="language-html line-numbers" data-line="23-24"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;my-element id="elm" content="Hello"&gt;
+      &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement{
+        attributeChangedCallback(name, oldValue, newValue){
+          if (name === 'content'){
+            this.textContent = newValue || '';
+          }
+        }
+      }
+      MyElement.observedAttributes = ['content'];
+      customElements.define('my-element', MyElement);
+
+      // 中身を書き換える
+      document.getElementById('elm').textContent = 'Foo!';
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>それ以外にも、今回紹介した機能だけではなんだか機能が足りないように思います。そもそも、Web Componentsの目的は再利用可能なパーツを作ることです。上の例では「常にcontent属性が中身に反映される要素」というパーツを作ったことになります。実際はもっとすごく複雑な機能を持ったパーツを作りたいわけですが、今回紹介した諸々だけではとても面倒です。</p>
+<p>次回以降はCustom Elementsをより便利に使うための関連機能を紹介していきます。</p>

@@ -1,6 +1,7 @@
 <p>第十七章では、久しぶりに<strong>DOM</strong>の話題です。DOMは主に第一篇（第二章〜第十章）で詳しく紹介しました。第十二章のHTML5に関する内容は、これまでに紹介したDOMの内容を基礎としていました。というのも、第十二章で紹介したのはDOMを使ってHTMLの各機能を操作する方法、つまりDOMの枠組にHTML5を当てはめた結果です。実際、HTML5の仕様には、各要素の定義と同時にその要素のDOM定義も定められています。</p>
 <p>DOMも数回のバージョンアップを経験しており、伝統的にDOMのバージョンはレベルと呼ばれています。レベルが高いほど、後に定めれた高度な内容となっています。今までDOMにはレベル1から3までありました。例えば<a href="2_2.html#anchor-getelementbyid">getElementById</a>など基礎的なものはレベル1で、第十章で紹介した<a href="10_1.html">XPath</a>、また<a href="7_5.html#anchor-text-content">textContent</a>などがレベル3にあたります。レベル3までのDOMは2004年までに策定完了しており、比較的古典的な概念でした。</p>
 <p>そして今回、第十七章で紹介するのが<strong>DOM4</strong>です。DOM Level 3がさらに進化したものであるのは言うまでもありません。ちなみに、W3C仕様では、DOM3までは正式名称を「Document Object Model Level  3」といったのに対し、DOM4はそれが正式名称となっています。なお、HTML5と同様、WHATWGによるLiving Standardも策定されています。</p>
+<p>また、DOMの大きなターゲットはやはりHTML文書の操作です。本章ではDOM4とHTMLの関わりについても紹介していきます。</p>
 
 <h3>MutationObserver</h3>
 <p>DOM4にはいろいろな新要素が追加されたわけですが、今回紹介するのは<strong>MutationObserver</strong>です。どんなものか詳しく紹介する前に、まずはその使い所を見てみましょう。</p>

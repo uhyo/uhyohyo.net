@@ -45,7 +45,7 @@
       <p>{navlinks|s}</p>
     </nav>
   {/navlinks}
-  <article class="language-javascript" itemscope itemprop="http://schema.org/Article">
+  <article class="language-javascript" itemscope itemtype="http://schema.org/Article">
     {?page_title}
       <h2 itemprop="name">{page_title}</h2>
     {/page_title}
