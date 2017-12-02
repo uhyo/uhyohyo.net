@@ -575,6 +575,8 @@
   <dt>DragEvent</dt>
   <dd><a href="12_6.html">第十二章第六回</a></dd>
 
+  <dt>Element#attachShadow</dt>
+  <dd><a href="17_4.html">第十七章第四回</a></dd>
   <dt>Element#nodeName</dt>
   <dd><a href="4_3.html">第四章第三回</a></dd>
   <dt>Element#prefix,localName,namespaceURI</dt>
@@ -587,6 +589,8 @@
   <dd><a href="2_3.html">第二章第十回</a></dd>
   <dt>Element#getAttributeNS, setAttributeNS</dt>
   <dd><a href="6_3.html">第六章第三回</a></dd>
+  <dt>Element#shadowRoot</dt>
+  <dd><a href="17_4.html">第十七章第四回</a></dd>
 
   <dt>Event#target,Event#currentTarget</dt>
   <dd><a href="3_5.html">第三章第五回</a></dd>
@@ -999,6 +1003,8 @@
   <dd><a href="8_3.html">第八章第三回</a></dd>
   <dt>SessionStorage</dt>
   <dd><a href="14_1.html">第十四章第一回</a></dd>
+  <dt>ShadowRoot</dt>
+  <dd><a href="17_4.html">第十七章第四回</a></dd>
   <dt>Storage</dt>
   <dd><a href="14_1.html">第十四章第一回</a></dd>
 
