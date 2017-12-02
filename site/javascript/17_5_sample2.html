@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>slot要素のサンプル</title>
+  </head>
+  <body>
+    <p>これはテストです。</p>
+    <my-element>
+      <p>my-elementの中身です。</p>
+    </my-element>
+
+    <template id="mytmp">
+      <p>↓↓↓ここにスロットがあります。</p>
+      <slot></slot>
+      <p>↑↑↑ここにスロットがあります。</p>
+    </template>
+    <script>
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+
+          const tmp = document.getElementById('mytmp');
+          const content = tmp.content.cloneNode(true);
+
+          this.attachShadow({
+            mode: 'open',
+          }).appendChild(content);
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    </script>
+  </body>
+</html>

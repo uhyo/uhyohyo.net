@@ -1,0 +1,81 @@
+<p>今回も<b>Shadow DOM</b>の話です。とはいえ、大体のことは前回までで紹介してしまいました。</p>
+<p>今回のテーマは<b>Shadow DOMとイベント</b>です。具体的には、shadowツリーの中で発生したイベントはどうなるのでしょうか。</p>
+
+<p>早速ですが、次のサンプルを見てください（<a href="17_6_sample.html">サンプル1</a>）。</p>
+<pre class="language-html line-numbers" data-line="8"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Shadow DOMとイベントのサンプル&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div onclick="console.log(event.target)"&gt;
+      &lt;my-element&gt;&lt;/my-element&gt;
+    &lt;/div&gt;
+    &lt;template id="mytmp"&gt;
+      &lt;p&gt;
+        &lt;button&gt;ボタン&lt;/button&gt;
+      &lt;/p&gt;
+    &lt;/template&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+
+          this.attachShadow({
+            mode: 'open',
+          }).appendChild(document.getElementById('mytmp').content.cloneNode(true));
+        }
+      }
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>8行目に注目してください。ここにclickイベントに対するイベントハンドラが仕込んであり、<code>event.target</code>、すなわちイベントが発生した要素を表示しています。</p>
+<p>ここで、このページを開くとボタンがひとつ表示されます。それをクリックしてclickイベントが発生した場合を考えてみましょう。</p>
+<p>普通の場合、<code>event.target</code>、すなわちイベントオブジェクトのtargetプロパティはクリックされた要素になるはずです。この場合、クリックされた要素はbutton要素（13行目）です。問題は、button要素はmy-element要素により表示されており、shadowツリーの中に存在しているということです。</p>
+<p>結果を言ってしまうと、このとき<code>event.target</code>となるのは<strong>my-element要素</strong>です。</p>
+<p>つまり、<strong>shadowツリーの中で発生したイベントがshadowツリーの外に出た場合、shadowホストが発生源であるように偽装される</strong>のです。なお、shadowホストというのはshadowツリーを持っている要素のことです。</p>
+<p>今回の場合、my-elementのshadowツリーの中で発生したイベントは<a href="3_3.html">イベントバブリング</a>によって上へと伝わっていきますが、それがmy-elementの外に出た時点でshadowツリーの情報は隠蔽され、イベントの発生源はmy-element要素であることになります。</p>
+<p>これはWeb Components的観点からいけばとても妥当ですね。カスタム要素を使う側は、その要素の中でイベントが発生した場合、その中のどこで発生したかという情報には興味が無く、それよりはそのカスタム要素で発生したという情報のほうが重要です。カスタム要素を使う側はその内部構造を知らなくても要素を使えないといけないのです。</p>
+
+<p>ただし、shadowツリーがオープンな場合には、イベントに関する内部の情報が一応取得できるようになっています。そのためには、イベントオブジェクトが持つ<dfn>composedPath</dfn>メソッドを使います。次の例ではcomposedPathの結果を表示しています（<a href="17_6_sample2.html">サンプル2</a>）。</p>
+<pre class="language-html line-numbers" data-line="8"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Shadow DOMとイベントのサンプル2&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div onclick="console.log(event.composedPath())"&gt;
+      &lt;my-element&gt;&lt;/my-element&gt;
+    &lt;/div&gt;
+    &lt;template id="mytmp"&gt;
+      &lt;p&gt;
+        &lt;button&gt;ボタン&lt;/button&gt;
+      &lt;/p&gt;
+    &lt;/template&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+
+          this.attachShadow({
+            mode: 'open',
+          }).appendChild(document.getElementById('mytmp').content.cloneNode(true));
+        }
+      }
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>ボタンをクリックするとコンソールに<code>event.composedPath()</code>の結果が表示されます。これはノードの配列で、このイベントが通る全てのノードが列挙されています。一番最初はクリックされたbutton要素で、どんどん上へと遡り最後はdocument、及びその上のwindowまで遡って終わりです。</p>
+<p>よく見ると、この一覧はshadowツリーの中の要素もちゃんと列挙されています。ShadowRootもちゃんと含まれているのが面白いですね。どうしても必要なときはこれを使いましょう。</p>
+<p>composedPathはあまり使う機会がないかもしれませんが、shadowツリーを出るときのイベントの挙動は理解しておいたほうがいいのではないかと思います。</p>
+
+<hr>
+<p>今回はこれで終わりです。今回まで、3回にわたりShadow DOMを紹介しました。Shadow DOMは、カスタム要素を作るときには必須といえるほど便利です。これで皆さんもShadow DOMを使ってカスタム要素を作れるようになりましたね。</p>

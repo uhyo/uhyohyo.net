@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>スロットとCSSのサンプル</title>
+    <style>
+      p.foo { color: red; }
+    </style>
+  </head>
+  <body>
+    <my-element>
+      <p class="foo">私は外の世界の住人です。</p>
+      <p class="bar">私も外の世界の住人です。</p>
+    </my-element>
+    <template id="mytmp">
+      <style>
+        p.bar { color: blue; }
+      </style>
+      <slot></slot>
+    </template>
+    <script>
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+
+          this.attachShadow({
+            mode: 'open',
+          }).appendChild(document.getElementById('mytmp').content.cloneNode(true));
+        }
+      }
+      customElements.define('my-element', MyElement);
+    </script>
+  </body>
+</html>

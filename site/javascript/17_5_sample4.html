@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>slot要素のサンプル3</title>
+  </head>
+  <body>
+    <x-warning>
+      <span slot="title">ちゅうい</span>
+      <p>注意文です！！！！！！！！</p>
+    </x-warning>
+
+    <template id="warning-tmp">
+      <style>
+        section.wrapper {
+          background-color: #ffffe3;
+          color: #666600;
+          border: 10px dashed #444400;
+          padding: 20px;
+        }
+      </style>
+      <section class="wrapper">
+        <h1><slot name="title">注意</slot></h1>
+        <slot></slot>
+      </section>
+    </template>
+    <script>
+      class Warning extends HTMLElement {
+        constructor(){
+          super();
+
+          this.attachShadow({
+            mode: 'open',
+          }).appendChild(document.getElementById('warning-tmp').content.cloneNode(true));
+        }
+      }
+
+      customElements.define('x-warning', Warning);
+    </script>
+  </body>
+</html>

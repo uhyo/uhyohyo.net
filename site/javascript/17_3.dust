@@ -10,7 +10,7 @@ console.log(document.body instanceof HTMLElement); // <em>true (body要素はHTM
 console.log(document.body instanceof Element); // <em>true (HTMLElementはElementを継承している)</em>
 </code></pre>
 
-<p>実は、独自のHTML要素を作るには、<strong>HTMLElementを継承したクラスを作ります。</strong>別にクラスではなく手動でprototypeをいじって実現しても構いませんが、やはり<a href="16_11.html">クラス</a>の構文を使うほうが楽ですね。では、そのようなクラスを作ってみましょう。</p>
+<p>実は、独自のHTML要素を作るには、<strong>HTMLElementを継承したクラスを作ります</strong>。これは<a href="16_11.html">クラス</a>の構文を使って作る必要があります。クラスの構文を使わずに継承をする方法もありましたが（<a href="11_7.html">十一章第七回</a>）、クラスの構文とは細かい違いがあるのでクラスの構文を使わないとうまくいきません。では、そのようなクラスを作ってみましょう。</p>
 
 <pre><code>
 class MyElement extends HTMLElement{

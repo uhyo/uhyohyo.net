@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Shadow DOMとイベントのサンプル</title>
+  </head>
+  <body>
+    <div onclick="console.log(event.target)">
+      <my-element></my-element>
+    </div>
+    <template id="mytmp">
+      <p>
+        <button>ボタン</button>
+      </p>
+    </template>
+    <script>
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+
+          this.attachShadow({
+            mode: 'open',
+          }).appendChild(document.getElementById('mytmp').content.cloneNode(true));
+        }
+      }
+      customElements.define('my-element', MyElement);
+    </script>
+  </body>
+</html>
