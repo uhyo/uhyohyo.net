@@ -1,0 +1,56 @@
+<p>前回<b>Custom Elements</b>の基本を紹介しました。今回は引き続きCustom Elementsの話です。今回のトピックは主に2つです。</p>
+
+<h3>既存の要素に対する拡張</h3>
+<p>前回カスタム要素の作り方を紹介しました。実は、カスタム要素にはもう1種類あります。それは<em>既存の要素を拡張したカスタム要素</em>です。</p>
+<p>もともとある要素（例えばbutton要素）に似ているけど少し挙動が違うカスタム要素を作りたいなと思ったときに、一から同じようなものを作るのは骨が折れます。そういう場合に既存の要素に対する拡張という形でカスタム要素を作ることができます。</p>
+<p>普通のカスタム要素はHTMLElementを継承するクラスによって表されましたが、既存の要素を拡張した場合はそれに対応するクラスを継承する必要があります。たとえばボタンの場合はHTMLButtonElementです。よって、button要素を拡張するカスタム要素はこのように作ります。</p>
+<pre><code>
+class MyButton extends <mark>HTMLButtonElement</mark> {
+  constructor(){
+    super();
+    console.log('MyButton is created');
+  }
+}
+</code></pre>
+<p>定義したカスタム要素は同じように<code>customElements.define</code>を用いて登録することができますが、そのときdefineの第3引数として追加のオプションを渡す必要があります。それは次の例のように、extendsプロパティを持つオブジェクトです。extendsプロパティは継承する要素の名前とします。</p>
+
+<pre><code>
+class MyButton extends HTMLButtonElement {
+  constructor(){
+    super();
+    console.log('MyButton is created');
+  }
+}
+
+customElements.define('my-button', MyButton, {
+  extends: 'button',
+});
+</code></pre>
+<p>このように作ったmy-button要素を実際に使ってみると、普通のbutton要素と同じような挙動となります。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;p&gt;
+      &lt;my-button&gt;ボタン&lt;/my-button&gt;
+    &lt;/p&gt;
+    &lt;script&gt;
+      class MyButton extends HTMLButtonElement {
+        constructor(){
+          super();
+          console.log('MyButton is created');
+        }
+      }
+
+      customElements.define('my-button', MyButton, {
+        extends: 'button',
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>

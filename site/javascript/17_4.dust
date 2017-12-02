@@ -1,0 +1,275 @@
+<p>今回は<b>Web Components</b>関連仕様の紹介の第2弾です。今回紹介する<dfn>Shadow DOM</dfn>もまた、Web Componentsの重要な要素です。</p>
+<p>ここでは、shadowというのは<em>隠されている</em>ということを意味しています。簡単に言うと、Shadow DOMによりある要素の実装（中身）を隠蔽することができるのです。</p>
+
+<h3>ShadowRootを作る</h3>
+<p>Shadow DOMを使うには、要素に対して<dfn>ShadowRoot</dfn>を作ります。そのためには、Elementが持つ<dfn>attachShadow</dfn>メソッドを呼び出します。</p>
+<pre class="language-html line-numbers" data-line="11"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;script&gt;
+      document.body.attachShadow({mode: "open"});
+      console.log(document.body.shadowRoot);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>この例は、script要素中でbody要素に対してattachShadowを呼び出しています。このとき、引数を1つ渡します。この引数はオプションオブジェクトで、modeプロパティに<code>"open"</code>または<code>"closed"</code>を指定します。今回はとりあえずopenとしています。</p>
+<p>この例を開いてもページに何も表示されないはずです。実は、<strong>ShadowRootが作られるとその中身が要素の中身となり、子要素たちは無視される</strong>のです。<small>（正確には無視されるというと語弊があるかもしれませんが、それはのちのち解説します。）</small></p>
+<p>つまり、ShadowRootというのは実は中身を持つものであり、その中身がShadowRootを持つ要素（今回はbody要素）の中身となるのです。ShadowRootを用いて要素の中身を作ってやることで、要素の内部構造が外から見えなくなります。これにより、前回述べたような、外から直接要素の中身をいじられて挙動がおかしくなるというようなことを防ぐことができます。</p>
+<p>上の例の12行目にあるように、ある要素に対してShadowRootが作られると、その要素の<dfn>shadowRoot</dfn>プロパティでShadowRootオブジェクトを取得できます。</p>
+<p>ShadowRootには中身があると述べましたが、実はこれは<a href="7_4.html">DocumentFragment</a>を継承するノードです。したがって、いつも通りの方法でこいつの中身をいじることができます。では、ShadowRootを用いてbodyの中身を作ってみましょう。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;script&gt;
+      document.body.attachShadow({mode: "open"});
+      // body要素の中身としてp要素を作る
+      var p = document.createElement("p");
+      p.textContent = "これはShadowRootの中身です。";
+      // bodyのshadowRootに追加
+      document.body.shadowRoot.appendChild(p);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このページを開くと、「これはShadowRootの中身です。」とだけ表示されます。確かにShadowRootの中身がbodyの中身となっていますね。</p>
+
+<p>では、attachShadowの引数に話を戻します。いまmodeが<code>"open"</code>となっているのを<code>"closed"</code>とすると、ShadowRootが隠されます。つまり、shadowRootプロパティを用いて取得できなくなります。</p>
+<pre class="language-html line-numbers" data-line="12"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;script&gt;
+      document.body.attachShadow({mode: "closed"});
+      console.log(document.body.shadowRoot); // <em>null</em>
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>これだと自分もShadowRootをいじれないような気がしますが、その心配はありません。実は、ShadowRootを作ったときはattachShadowの返り値としてShadowRootが得られるからです。これを用いれば、closedなShadowRootを作って自分だけはそれをいじるということができます。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;test&lt;/h1&gt;
+    &lt;p&gt;これはテストです。&lt;/p&gt;
+    &lt;script&gt;
+      var shadowRoot = document.body.attachShadow({mode: "closed"});
+      var p = document.createElement("p");
+      p.textContent = "これはShadowRootの中身です。";
+      shadowRoot.appendChild(p);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>では、これを前回紹介した<a href="17_3.html">Custom Elements</a>と組み合わせてみましょう。</p>
+<pre class="language-html line-numbers" data-line="16-19,24"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;my-element content="hello"&gt;
+      &lt;p&gt;ここは表示されません。&lt;/p&gt;
+    &lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        static get observedAttributes(){ return ['content']; }
+        constructor(){
+          super();
+          // 自分に対応するshadowRootを作る
+          this.attachShadow({mode: 'open'});
+        }
+        attributeChangedCallback(name, oldValue, newValue){
+          if (name === 'content'){
+            // 自分のShadow Rootの中身を書き換える
+            this.shadowRoot.textContent = newValue || '';
+          }
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>これを表示すると「hello」と表示されています。例えば以下のようなコードでmy-element要素のcontent属性を変更すればそれが反映されるのが分かります。</p>
+<pre><code>
+var elm = document.querySelector('my-element');
+elm.setAttribute('content', 'Hey!');
+</code></pre>
+<p>今回はShadowRootを用いていますから、my-elementの中身をいじられても痛くも痒くもありません。</p>
+<p>この例ではshadowRootはopenにしています。これだとshadowRootを見られたら中身をいじられてしまうので本当に中身を隠したければclosedにするべきでしょうが、Web Components的な観点からは、危険を承知であえて中身をいじりたいという物好きのためにopenにしておくのもありです。closedにしてしまうとまったく融通のきかないカスタム要素になってしまう可能性がありますからね。</p>
+
+<p>とにかく、ShadowRootを用いて要素の実体（要素の中身）を隠すことができました。</p>
+<p>ちなみに、ShadowRootの下にある隠された木構造のことを<dfn>shadow tree</dfn> (shadowツリー)といいます。また、ShadowRootを持っている要素のことは<dfn>shadow host</dfn> (shadowホスト)といいます。</p>
+<p>Shadow DOMの機能は今のところshadowツリーを隠すだけですが、実はもう少し高度な機能があります。それをこれから紹介していきます。</p>
+
+<p>その前にやや細かい話ですが、実はどんな要素に対してもShadowRootを作ることができるわけではありません。カスタム要素はOKですが、それ以外でShadowRootを作れるのは次の要素に限られます（HTML仕様書から引用）。
+<blockquote cite="https://dom.spec.whatwg.org/#dom-element-attachshadow">
+  <p>"article", "aside", "blockquote", "body", "div", "footer", "h1", "h2", "h3", "h4", "h5", "h6", "header", "main" "nav", "p", "section", or "span"</p>
+</blockquote>
+<p>これらの要素は、それ自体にセマンティクス（h1は見出しとか、blockquoteは引用とか）があったりスタイルが適用されていたりするとはいえ、その中身が透過される（中身に手を加えられずそのまま表示される）ような要素です。なので、中身がShadowRootにより別物になっても問題ないわけです。逆に、たとえばinput要素はそれ単体で入力フィールドとかボタンなどのコンポーネントを表現しているので、その実体を別物にするわけにはいきません。他にも、a要素もその中身に対してリンクになるという特別な変化をもたらしますから、ShadowRootにより中身を替えられるわけにはいかないのです。まあ、主にShadowRootを作るのはカスタム要素になると思いますから、こんなことは覚えなくてもなんとかなるでしょう。</p>
+
+<h3>ShadowRootとCSS</h3>
+<p>では、Shadow DOMの便利さを説明していきます。</p>
+<p>実は、shadowツリーはCSSに関して特殊な扱いを受けます。簡単に言うと、shadowツリーの中身は<strong>外のスタイル定義の影響を受けません</strong>。また、逆に、shadowツリーの<strong>中のスタイル定義は外に影響を与えません</strong>。これはざっくりとした説明なので厳密には少し違うのですが、とにかく説明していきます。</p>
+<p>外のスタイル定義の影響を受けないというのは、次の例を見れば分かります。今回は次の例を実際に用いた<a href="17_4_sample.html">サンプル</a>を用意しました。</p>
+<pre class="language-html line-numbers" data-line="7-9,13,19"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style&gt;
+      .foo {
+        color: red;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p class="foo"&gt;赤い段落&lt;/p&gt;
+    &lt;my-element&gt;&lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+          this.attachShadow({mode: 'open'}).innerHTML = `&lt;p class="foo"&gt;赤くない段落&lt;/p&gt;`;
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>7から9行目はCSSで、これはfooクラスを持つ要素の文字色を赤くするという指定です。これにより、13行目のp要素はfooクラスを持つため文字色が赤くなっています。</p>
+<p>今回はmy-elementというカスタム要素を作りました。例によって要素はShadowRootを持ちます。今回は面倒くさいのでinnerHTMLを用いてShadowRootの中身を作りました。ここで注目すべきは、ShadowRootの中にもfooクラスを持つp要素があるということです。</p>
+<p>しかし、このページを表示してみるとmy-elementによって表示されるp要素はfooクラスを持つにもかかわらず赤くなりません。これは、ShadowRootの外のスタイル定義（7-9行目）がShadowRootの中に影響を与えないことを意味しています。これは再利用可能なパーツを作るという目的にとても合致しています。カスタム要素はどこで誰が使っても良いわけですから、外にどんなスタイル定義があってもその中身が影響を受けるべきではありません。外のスタイル定義のせいでカスタム要素の表示がおかしくなるのは困りますね。</p>
+<p>ただし、次のような場合に注意してください（<a href="17_4_sample2.html">サンプル2</a>）。</p>
+<pre class="language-html line-numbers" data-line="14-16"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style&gt;
+      .foo {
+        color: red;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p class="foo"&gt;赤い段落&lt;/p&gt;
+    &lt;div style="color: blue"&gt;
+      &lt;my-element&gt;&lt;/my-element&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+          this.attachShadow({mode: 'open'}).innerHTML = `&lt;p class="foo"&gt;赤くない段落&lt;/p&gt;`;
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>この例では、my-element要素を囲むdiv要素に<code class="language-css">color: blue</code>というスタイルがあります。その結果、my-elementのShadowツリー内のp要素の文字色が青くなります。</p>
+<p>これはShadowRootの中身が外のスタイルに影響を受けていることを示しており、先に述べたのと言っていることが違うように思えるかもしれません。しかし、実はそんなことはありません。今まで一貫して「外のスタイル<em>定義</em>の影響を受けない」と述べていたのはこのことを意図しています。実は、今回ShadowRootの中身は外のスタイルの<em>継承</em>の影響を受けているのです。スタイルの継承とは、親の要素が持つスタイルが子にも受け継がれることです。全てのプロパティが継承するわけではありませんが、今回のcolorプロパティは継承するプロパティのひとつです。すなわち、自身の文字色は親の文字色と同じになるということです。</p>
+<p>Shadowツリー内へのスタイルの継承は、無いとそれはそれで困ります。カスタム要素の中身の文字色に特にこだわりは無く、それが使われる側の文字色に合わせたいという場合はスタイルの継承が必要になります。一方、スタイルの継承を無効化するのはそんなに難しくはありません。内側で別途スタイルを指定すればいいのです。次のようにすればmy-elementの中は黒色（というよりはデフォルトの色）になるでしょう。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+    &lt;style&gt;
+      .foo {
+        color: red;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p class="foo"&gt;赤い段落&lt;/p&gt;
+    &lt;div style="color: blue"&gt;
+      &lt;my-element&gt;&lt;/my-element&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+          this.attachShadow({mode: 'open'}).innerHTML = `&lt;p class="foo" <mark>style="color: initial"</mark>&gt;赤くない段落&lt;/p&gt;`;
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>以上のように、スタイルの継承は便利だし、必要ないときは対処も簡単なので、ShadowRootの内側にも影響を及ぼすことができるのです。</p>
+
+<p>この例では、shadowツリーの中でのスタイル指定が出てきました。実は、ShadowRootの下にstyle要素を置くこともできます（<a href="17_4_sample3.html">サンプル3</a>）。</p>
+<pre class="language-html line-numbers" data-line="15-19"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;test&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p class="foo"&gt;赤い段落&lt;/p&gt;
+    &lt;my-element&gt;&lt;/my-element&gt;
+    &lt;script&gt;
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+          this.attachShadow({mode: 'open'}).innerHTML = `
+            &lt;style&gt;
+              p.foo {
+                color: blue;
+              }
+            &lt;/style&gt;
+            &lt;p class="foo"&gt;青い段落&lt;/p&gt;`;
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>このようにshadow treeの中に置かれたstyle要素はshadow treeの中にだけ影響を及ぼします。特に、shadow treeの外側にもセレクタ<code>p.foo</code>にマッチするp要素がある（8行目）のに、それには影響を及ぼしていません。</p>
+<p>これもShadowRootの便利な性質です。カスタム要素の表示をCSSで調整したいとき、そのCSSがカスタム要素の外側に影響を及ぼすのはやはり好ましくないからです。また、これにより、カスタム要素の中ではセレクタの被りを気にする必要がなくなります。この例ではカスタム要素の内側ではスタイリングのためにfooというクラスを使っていますが、カスタム要素の外側でも偶然fooというクラスが使われています。このようにクラス名が被った場合でも問題が起きないのがShadow DOMの利点であり、これによりカスタム要素側でも好きなようにクラス名を使うことができるのです。</p>
+<hr>
+<p>以上がShadow DOMの基礎です。Shadow DOMではShadowRootの内側と外側を分離させることで、Web Componentsに求められる再利用性を担保しています。前回のCustom Elementsと今回のShadow DOMがWeb Componentsの根幹を成している技術ですが、これらに関してはまだ説明することがありますので、それを次回以降紹介していきます。</p>

@@ -110,3 +110,4 @@ page:
   '17_1': MutationObserver
   '17_2': DOM4的なメソッド
   '17_3': Custom Elements
+  '17_4': Shadow DOM

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Shadow DOMのサンプル</title>
+    <style>
+      .foo {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="foo">赤い段落</p>
+    <my-element></my-element>
+    <script>
+      class MyElement extends HTMLElement {
+        constructor(){
+          super();
+          this.attachShadow({mode: 'open'}).innerHTML = `<p class="foo">赤くない段落</p>`;
+        }
+      }
+
+      customElements.define('my-element', MyElement);
+    </script>
+  </body>
+</html>
