@@ -523,6 +523,8 @@
   <dd><a href="2_5.html">第二章第五回</a></dd>
   <dt>Document#createDocumentFragment</dt>
   <dd><a href="7_4.html">第七章第四回</a></dd>
+  <dt>Document#currentScript</dt>
+  <dd><a href="17_7.html">第十七章第七回</a></dd>
   <dt>Document#defaultView</dt>
   <dd><a href="5_1.html">第五章第一回</a></dd>
   <dt>Document#documentElement</dt>
@@ -592,6 +594,8 @@
   <dt>Element#shadowRoot</dt>
   <dd><a href="17_4.html">第十七章第四回</a></dd>
 
+  <dt>Event#composedPath</dt>
+  <dd><a href="17_6.html">第一七章第六回</a></dd>
   <dt>Event#target,Event#currentTarget</dt>
   <dd><a href="3_5.html">第三章第五回</a></dd>
   <dt>Event#preventDefault</dt>
@@ -680,6 +684,8 @@
   <dd><a href="12_2.html">第十二章第二回</a></dd>
   <dt>HTMLInputElement</dt>
   <dd><a href="2_12.html">第二章第十二回</a></dd>
+  <dt>HTMLLinkElement#import</dt>
+  <dd><a href="17_7.html">第十七章第七回</a></dd>
   <dt>HTMLOptionElement</dt>
   <dd><a href="2_13.html">第二章第十三回</a></dd>
   <dt>HTMLParagraphElement</dt>
@@ -713,6 +719,8 @@
   <dt>HTMLTableRowElement#insertCell,deleteCell</dt>
   <dd><a href="2_8.html">第二章第八回</a></dd>
 
+  <dt>HTMLTemplateElement</dt>
+  <dd><a href="17_5.html">第一七章第五回</a></dd>
   <dt>HTMLTextAreaElement</dt>
   <dd><a href="2_12.html">第二章第十二回</a></dd>
   <dt>HTMLTimeElement</dt>

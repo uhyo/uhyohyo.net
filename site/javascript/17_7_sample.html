@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML Importsのテスト</title>
+    <link rel="import" href="./17_7_sample_loaded.html">
+  </head>
+  <body>
+    <p>これは読みこむ側の文書です。</p>
+    <script>
+      // link要素を取得
+      const link = document.querySelector('link');
+      // link要素が読み込んだDocumentを取得
+      const doc = link.import;
+      // そのbody要素の中身を見る
+      console.log(doc.body);
+    </script>
+  </body>
+</html>

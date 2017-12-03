@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML Importsのテスト2</title>
+    <link rel="import" href="./17_7_sample_loaded.html" async onload="loaded(event)">
+  </head>
+  <body>
+    <p>これは読みこむ側の文書です。</p>
+    <script>
+      // link要素によるロードが完了したら呼び出される関数
+      function loaded(ev){
+        // link要素を取得
+        const link = ev.target;
+        // link要素が読み込んだDocumentを取得
+        const doc = link.import;
+        // そのbody要素の中身を見る
+        console.log(doc.body);
+      }
+    </script>
+  </body>
+</html>

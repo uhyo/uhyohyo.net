@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML Importsで読みこまれるテスト2</title>
+  </head>
+  <body>
+    <p>これは読みこまれる側の文書です。</p>
+    <script>
+      console.log('読みこまれる側の文書からログを表示');
+      console.log(document.body.innerHTML);
+      // 関数を定義
+      function foo(){
+        console.log('foo!');
+      }
+    </script>
+  </body>
+</html>

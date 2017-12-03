@@ -1,0 +1,170 @@
+<p>今回でWeb Components関連の話題は最後です。Web Componentsに関連する技術は大別して4つに分かれるというのが定説です。ひとつは<a href="17_3.html">Custom Elements</a>、もうひとつは<a href="17_4.html">Shadow DOM</a>、3つ目は<a href="17_5.html">template要素</a>です。今回紹介するのが最後のひとつ、<strong>HTML Imports</strong>です。</p>
+<p>importsと言われると、<a href="16_20.html">モジュール</a>の話を思い出しますね。モジュールは他のJavaScriptファイルをimport文によって読み込むことができるという仕組みでした。今回のHTML Importsもそれと似ています。ただし、読み込むのはJavaScriptファイルではなく<em>HTML文書</em>です。</p>
+
+<h3>link要素を使って読み込む</h3>
+<p>HTMLをご存知のかたは<b>link要素</b>を使ったことがあると思います。特に、スタイルシートを読み込むために使うことが多いのではないでしょうか。</p>
+<p>今回は、他のHTML文書を読み込むためにやはりlink要素を使います。link要素のrel属性を<code>"import"</code>にすることにより、他のHTML文書を読み込むことを示すことができます。</p>
+<pre class="language-html"><code>
+&lt;link <mark>rel="import"</mark> href="./some_doc.html"&gt;
+</code></pre>
+<p>そして、このように読み込んだHTML文書はJavaScriptから見ることができます。そのためには、link要素のノード（HTMLLinkElement）が持つプロパティ<dfn>import</dfn>を参照します。これは、読みこまれた文書を表すDocumentオブジェクトです。</p>
+<p>では、ここまでをやってみましょう。読みこまれる文書として次のようなHTMLファイルを用意しました（<a href="17_7_sample_loaded.html">17_7_sample_loaded.html</a>）。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;HTML Importsで読みこまれるテスト&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;これは読みこまれる側の文書です。&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>この文書を読み込む側のファイルは次の通りです（<a href="17_7_sample.html">サンプル1</a>）。
+<pre class="language-html line-numbers" data-line="6,14"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;HTML Importsのテスト&lt;/title&gt;
+    &lt;link rel="import" href="./17_7_sample_loaded.html"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;これは読みこむ側の文書です。&lt;/p&gt;
+    &lt;script&gt;
+      // link要素を取得
+      const link = document.querySelector('link');
+      // link要素が読み込んだDocumentを取得
+      const doc = link.import;
+      // そのbody要素の中身を見る
+      console.log(doc.body);
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>まず6行目で、link要素を用いてドキュメントを読み込んでいます。そのドキュメントをJavaScriptから取得しているのが14行目です。そして、コンソールにそのドキュメントのbody要素を表示しています。コンソールには次のようなことが表示されるはずです。</p>
+<pre class="language-html"><code>
+  &lt;body&gt;
+    &lt;p&gt;これは読みこまれる側の文書です。&lt;/p&gt;
+  &lt;/body&gt;
+</code></pre>
+<p>link要素によって読み込んだ文書の中身を取得できていることが分かりますね。</p>
+
+<h3>非同期的な読み込み</h3>
+<p>なお、このようなlink要素はscript要素などでJavaScriptファイルを読み込んだ場合と同様に<strong>パーサーをブロックします</strong>。すなわち、importされるページの読み込みが完了するまでこちらの読み込みが進まないということです。<a href="16_20.html">モジュール</a>の回でも述べたように、これでは嬉しくない場合もありますね。そこで、読み込みがパーサーをブロックしないようにする方法もあります。そのためには、link要素に<dfn>async属性</dfn>を付けます。async属性があると読み込みが非同期的になり、指定された文書を読み込みつつ自身の文書の読み込みが進められることになります。</p>
+
+<p>ただし、ではその方がいいじゃないかと言って上のサンプルのlink要素にasync属性を付けても正しく動作しないはずです。それは、link要素にasync属性を付けた場合は、14行目で取得したlinkの読み込み先の文書の読み込みがまだ終了していないからです。例えばまだbody要素が読みこまれていないため<code>doc.body</code>がnullになるなどの挙動を示します。</p>
+<p>では、読み込みが完了してから取得するにはどうすればいいのでしょうか。その答えを皆さんは既にしっているはずです。DOMで非同期といえば、そう、<strong>イベント</strong>です。link要素では、読み込みが完了したことを示す<b>loadイベント</b>と、読み込みが失敗した（読み込み先のページが存在しないなど）ことを示す<b>errorイベント</b>が発生します。とりあえずloadイベントを使うことでページの読み込みが完了してから処理を進めることができるでしょう。これをやってみたのが次のサンプルです（<a href="17_7_sample2.html">サンプル2</a>）。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;HTML Importsのテスト2&lt;/title&gt;
+    &lt;link rel="import" href="./17_7_sample_loaded.html" <mark>async</mark> onload="loaded(event)"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;p&gt;これは読みこむ側の文書です。&lt;/p&gt;
+    &lt;script&gt;
+      // link要素によるロードが完了したら呼び出される関数
+      function loaded(ev){
+        // link要素を取得
+        const link = ev.target;
+        // link要素が読み込んだDocumentを取得
+        const doc = link.import;
+        // そのbody要素の中身を見る
+        console.log(doc.body);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>今回は6行目のlink要素にasync属性とonload属性が付きました。今回はひと工夫して、loaded関数にイベントオブジェントを渡し、link要素はそれを用いて取得しています（14行目）。</p>
+
+<p>これがHTML Importsの基本です。他の文書を読み込みたいときにこのようにlink要素を用いて簡単に読み込むことができるのです。</p>
+
+<h3>HTML Importsとスクリプト</h3>
+<p>ところで、link要素によって読みこまれた文書中にスクリプトがあった場合はどうなるでしょうか。実は、その場合そのスクリプトはちゃんと実行されます。<a href="17_7_sample3.html">サンプル3</a>を見てください。ソースコードは省略するので、自分で見てみましょう。</p>
+<p>ポイントは、読みこまれる側の文書内に書かれたscript要素が実行されているということです。それどころか、読みこまれる文書内で作られた関数fooを読み込む側の文書で使うことができています。</p>
+<p>つまり、link要素で読みこまれた文書に書かれたスクリプトは、普通にscript要素で読みこまれたのと同じ感じで実行されるということです。ある意味script要素で外部JavaScriptを読み込む代わりになるわけですね。</p>
+<p>また、もうひとつ驚くべきポイントがあります。<em>読みこまれる側</em>のスクリプトにおいて<code>document.body.innerHTML</code>を表示していますが、ここで表示されるHTMLは<em>読み込む側</em>のものであるはずです。つまり、link要素によって読みこまれたHTML文書内のJavaScriptが実行される場合、document（あるいはwindow）などはその文書自身ではなく、<em>読み込む側の文書を指している</em>のです。</p>
+<p>このことにより、link要素を用いて読みこまれた文書はもとの文書に影響を与えることができます。</p>
+<p>ところで、読みこまれる側のスクリプトを実行中にdocumentを参照すると読み込む側の文書となるなら、読みこまれる側の文書を得るにはどうすればよいのでしょうか。</p>
+<p>それには、<code>document.currentScript.ownerDocument</code>とします。まず、<code>document.currentScript</code>というのは今回初めて登場したもので、現在スクリプトが実行されているscript要素を指します。これはHTML Importsと関係なしに便利に使えるプロパティですね。今回このdocumentというのはやはり読み込む側のdocumentなのですが、現在実行されているのはその読み込む側の文書からlink要素によって読みこまれた文書内に存在するscript要素ということになります。</p>
+<p>そして、<a href="7_1.html#anchor-document-node">ownerDocument</a>は以前紹介しましたね。そのノードが属するDocumentを示すプロパティです。</p>
+<p>このようにして、読みこまれる側の文書のDocumentを取得することができます。なんだか回りくどいですが仕方ありません。一応これを試してみたのが<a href="17_7_sample4.html">サンプル4</a>です。
+
+<h3>Web Componentsにおける利用</h3>
+<p>今まで解説したことを利用すると、カスタム要素の定義を別の文書に独立させることができます。</p>
+<p>まず、読みこまれる側の文書は次のようにします。</p>
+<pre class="language-html line-numbers"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;カスタム要素の定義用文書&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;template id="tmp"&gt;
+      &lt;style&gt;
+        div.wrapper {
+          border: 10px dashed black;
+          padding: 10px;
+        }
+      &lt;/style&gt;
+      &lt;div class="wrapper"&gt;
+        &lt;slot&gt;&lt;/slot&gt;
+      &lt;/div&gt;
+    &lt;/template&gt;
+    &lt;script&gt;
+      (()=&gt;{
+        // template要素を取得しておく
+        const tmp = document.currentScript.ownerDocument.getElementById('tmp');
+
+        class MyElement extends HTMLElement {
+          constructor(){
+            super();
+
+            // template要素の中身をコピー
+            const content = tmp.content.cloneNode(true);
+
+            // ShadowRootを作って中身を追加
+            this.attachShadow({
+              mode: 'open',
+            }).appendChild(content);
+          }
+        }
+
+        customElements.define('my-element', MyElement);
+      })();
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>読み込む側はこれを次のように読み込みます（<a href="17_7_sample5.html">サンプル5</a>）。</p>
+<pre class="language-html line-numbers" data-line="6,9-11"><code>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;カスタム要素を読み込むテスト&lt;/title&gt;
+    &lt;link rel="import" href="./17_7_sample_loaded4.html" async&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;my-element&gt;
+      &lt;p&gt;カスタム要素を使いました。&lt;/p&gt;
+    &lt;/my-element&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>読み込む側が非常にすっきりしましたね。6行目でHTMLファイルをひとつ読み込むだけで、自動的にmy-elementというカスタム要素が利用可能になります。これは、読みこまれる文書がカスタム要素の登録をやってくれるからです。</p>
+<p>読みこまれる側は今までどおりのコードですね。template要素とShadow DOMを利用しつつカスタム要素を登録しています。ただし、今回は全体が無名関数に囲まれています（20&ndash;39行目）。この目的は、変数tmpやMyElementクラスを関数の中のローカル変数としてしまうことで外から隠蔽することです。今回、script要素が実行された時点でtemplate要素を取得して変数tmpに入れてしまっています。これは、<code>document.currentScript</code>を使って読みこまれる側の文書にアクセスできるのはこのscript要素が実行されたときだけだからです。変数を使うとなると、グローバル変数を作るのは好ましくありませんね。読み込む側の文書とか、あるいはさらに別の文書が読みこまれた場合に偶然同じtmpという変数を使っていたらエラーになってしまうからです。</p>
+<p>この例にはHTML Importsを使う利点がよく現れています。この例では、カスタム要素を別のHTMLファイルにパッケージ化することに成功しました。カスタム要素を使いたい側は該当するHTMLファイルを読み込むだけでいいのです。</p>
+<p>さらに、これはscript要素を使ってJavaScriptファイルを読み込むだけではできません。なぜなら、読みこまれる側でtemplate要素を使っているからです。template要素はHTMLの概念なので、JavaScriptファイルだけでなくHTML文書の形で読み込めるようにする必要があったのです。これを可能にしてくれるのがHTML Importsというわけですね。</p>
+<p>特に、読みこまれる側の文書ではtemplate要素にtmpというid属性をつけている点に注目してください。id属性は文書の中で重複が発生してはいけませんが、HTML Importsで読み込むならばそれは別の文書なので、読み込む側とか他の文書との被りを気にせずに自由にid属性をつけることができるのです。このように、上で述べたようにグローバル変数さえ気をつければ、読み込む側の文書に余計な影響を与えない独立したパッケージを作ることができるようになっています。</p>
+
+<hr>
+
+<p>以上がHTML Importsの解説です。HTML Importsは外部スクリプトだけでなく文書の形でまとめてパッケージを読み込むことができます。また、そのような利用法に限らず、単純に複数のページから使いたい構造をtemplate要素に入れておいたページを読み込むというような利用法も可能でしょう。</p>
+<p>最初に述べたようにまだ実際のウェブサイトで実用可能になるには時間がかかるかもしれませんが、これからのウェブページを支える技術のひとつですので覚えておいて損はないでしょう。</p>

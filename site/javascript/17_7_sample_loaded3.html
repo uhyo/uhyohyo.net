@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML Importsで読みこまれるテスト3</title>
+  </head>
+  <body>
+    <p>これは読みこまれる側の文書です。</p>
+    <script>
+      console.log('読みこまれる側の文書の中身：');
+      console.log(document.currentScript.ownerDocument.body.innerHTML);
+    </script>
+  </body>
+</html>

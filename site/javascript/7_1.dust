@@ -89,7 +89,7 @@
 
 <p>以前、documentはwindowと対になっていると説明しました。iframe要素にはcontentDocumentに対応するWindowを取得するための<dfn>contentWindow</dfn>プロパティもあります。
 
-<h3>documentとノードの関係</h3>
+<h3 id="anchor-document-node">documentとノードの関係</h3>
 <p>さて、基本的に、ノードはdocumentに<strong>属しています</strong>。例えば、ある文書のノードは、全てその文書のdocumentに属しています。また、上のiframeの例だと、iframeがある側のページのノードはdocumentに、iframeで読み込まれる側のページのノードはiframe.contentDocumentに属しているということになります。</p>
 <p>ノード側から、そのノードがどのdocumentに属しているかを知ることができます。それには、ノードが持つ<dfn>ownerDocument</dfn>プロパティを用います。</p>
 <pre class="language-html"><code>

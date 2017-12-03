@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>カスタム要素の定義用文書</title>
+  </head>
+  <body>
+    <template id="tmp">
+      <style>
+        div.wrapper {
+          border: 10px dashed black;
+          padding: 10px;
+        }
+      </style>
+      <div class="wrapper">
+        <slot></slot>
+      </div>
+    </template>
+    <script>
+      (()=>{
+        // template要素を取得しておく
+        const tmp = document.currentScript.ownerDocument.getElementById('tmp');
+
+        class MyElement extends HTMLElement {
+          constructor(){
+            super();
+
+            // template要素の中身をコピー
+            const content = tmp.content.cloneNode(true);
+
+            // ShadowRootを作って中身を追加
+            this.attachShadow({
+              mode: 'open',
+            }).appendChild(content);
+          }
+        }
+
+        customElements.define('my-element', MyElement);
+      })();
+    </script>
+  </body>
+</html>
