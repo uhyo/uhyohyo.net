@@ -1,0 +1,58 @@
+{>"$PROJ/templates/top.dust" /}
+{<additionalHead}
+  <link rel="stylesheet" href="/css/top.css">
+{/additionalHead}
+{<content}
+<a href="https://uhy.ooo" id="menu-uhy-ooo">
+  <div>
+    <p>uhy.ooo</p>
+    <p>管理者の情報とか</p>
+  </div>
+</a>
+<a href="https://jinrou.uhyohyo.net" id="menu-jinrou">
+  <div>
+    <p>月下人狼</p>
+    <p>100種類の役職を擁するオンライン人狼サーバー</p>
+  </div>
+</a>
+<a href="javascript/" id="menu-javascript">
+  <div>
+    <p>JavaScript初級者から中級者になろう</p>
+    <p>全部読めば中級者になれるJavaScript講座</p>
+  </div>
+</a>
+<a href="quantum2048/" id="menu-quantum-2048">
+  <div>
+    <p>Quantum 2048</p>
+    <p>2048を改造するのが流行ったときに作ったやつ</p>
+  </div>
+</a>
+<a href="masao/" id="menu-masao">
+  <div>
+    <p>正男関連</p>
+    <p>スーパー正男に関連する制作物のまとめ</p>
+  </div>
+</a>
+<a href="canvas_masao_converter/" id="menu-cmc">
+  <div>
+    <p>Canvas Masao Converter</p>
+    <p>Java版正男のcanvas版に変換してプレイ可能にするChrome拡張機能</p>
+  </div>
+</a>
+<a href="tex_unicode/" id="menu-tex-unicode">
+  <div>
+    <p>TeX to Unicode</p>
+    <p>入力欄にTeX風文字列を入力することで対応するUnicode文字を入力できるChrome拡張機能</p>
+  </div>
+</a>
+<a href="min-caml-wasm/" id="menu-min-caml-wasm">
+  <p>min-caml向けWebAssemblyバックエンドのデモ</p>
+  <p>ブログで紹介したやつです（詳細はブログを参照）</p>
+</a>
+<div id="menu-masao-space">
+  <p>正男投稿サービス<a href="https://masao.space/">masao.space</a>も作ってます</p>
+  <p>
+    <iframe src="https://masao.space/embed/1" width="514" height="434" style="border:none"></iframe>
+  </p>
+</div>
+{/content}
