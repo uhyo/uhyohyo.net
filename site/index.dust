@@ -39,10 +39,16 @@
     <p>Java版正男のcanvas版に変換してプレイ可能にするChrome拡張機能</p>
   </div>
 </a>
-<a href="tex_unicode/" id="menu-tex-unicode">
+<a href="tex-unicode/" id="menu-tex-unicode">
   <div>
     <p>TeX to Unicode</p>
     <p>入力欄にTeX風文字列を入力することで対応するUnicode文字を入力できるChrome拡張機能</p>
+  </div>
+</a>
+<a href="chrome-xxxx" id="menu-chrome-xxxx">
+  <div>
+    <p>Easy ████ing</p>
+    <p>入力欄の右端でShift+右キーを押すことで「█」を入力できるChrome拡張機能</p>
   </div>
 </a>
 <a href="min-caml-wasm/" id="menu-min-caml-wasm">
