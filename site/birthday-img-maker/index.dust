@@ -1,0 +1,18 @@
+{>"$PROJ/templates/top.dust" page_title="誕生日占い画像を作るやつ" /}
+{<additionalHead}
+  <style>
+    @media (max-width: 767px) {
+      body, body > main {
+        margin: 0;
+      }
+    }
+  </style>
+{/additionalHead}
+{<content}
+  <article>
+    <h2>誕生日占い画像を作るやつ</h2>
+    <p>よくある「誕生日占い」の画像を作成できるページです。<small><a rel="external" href="https://github.com/uhyo/birthday-img-maker">GitHub</a>, <a href="./licenses.txt">ライセンス表記</a></small></p>
+    <div id="app"></div>
+    <script src="./bundle.js"></script>
+  </article>
+{/content}

@@ -80,11 +80,11 @@ body > main {
   grid-column: 2;
 }
 #menu-masao {
-  grid-row: 4 / 6;
+  grid-row: 4 / 5;
   grid-column: 1;
 }
 #menu-cmc {
-  grid-row: 6;
+  grid-row: 5;
   grid-column: 1;
 }
 #menu-tex-unicode {
@@ -98,6 +98,10 @@ body > main {
 #menu-min-caml-wasm {
   grid-row: 6;
   grid-column: 2;
+}
+#menu-birthday-img-maker {
+  grid-row: 6;
+  grid-column: 1;
 }
 #menu-masao-space {
   grid-row: 7;
