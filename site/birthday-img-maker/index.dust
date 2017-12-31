@@ -16,8 +16,26 @@
 {<content}
   <article>
     <h2>誕生日占い画像を作るやつ</h2>
-    <p>よくある「誕生日占い」の画像を作成できるページです。<small><a rel="external" href="https://github.com/uhyo/birthday-img-maker">GitHub</a>, <a href="./licenses.txt">ライセンス表記</a></small></p>
+    <p>よくある「誕生日占い」の画像を作成できるページです。
+    <a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=%E8%AA%95%E7%94%9F%E6%97%A5%E5%8D%A0%E3%81%84%E7%94%BB%E5%83%8F%E3%82%92%E4%BD%9C%E3%82%8B%E3%82%84%E3%81%A4">ツイート</a> <small><a rel="external" href="https://github.com/uhyo/birthday-img-maker">GitHub</a>, <a href="./licenses.txt">ライセンス表記</a></small></p>
     <div id="app"></div>
     <script src="./bundle.js"></script>
+    <!-- Twitter widget -->
+    <script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
   </article>
 {/content}
