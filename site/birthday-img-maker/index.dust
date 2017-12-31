@@ -11,7 +11,7 @@
   <meta name="twitter:site" content="@uhyo_">
   <meta name="twitter:title" content="誕生日占い画像を作るやつ">
   <meta name="twitter:description" content="誕生日占い画像を簡単に作れるページです。">
-  <meta name="twitter:image" content="https://uhyohyo.net/birthday-img-maker/card.png">
+  <meta name="twitter:image" content="{site.origin}/birthday-img-maker/card.png">
 {/additionalHead}
 {<content}
   <article>
