@@ -1,0 +1,35 @@
+{>"$PROJ/templates/top.dust" page_title="きららファンタジアのガチャ結果をまとめるやつ" /}
+{<additionalHead}
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@uhyo_">
+  <meta name="twitter:title" content="きららファンタジアのガチャ結果をまとめるやつ">
+  <meta name="twitter:description" content="ガチャ結果のスクリーンショットからアイコンを抽出してまとめるやつです。">
+  <meta name="twitter:image" content="{site.origin}/images/icons/144x144.png">
+{/additionalHead}
+{<content}
+  <article>
+    <h2>きららファンタジアのガチャ結果をまとめるやつ</h2>
+    <p>きららファンタジアのガチャ結果のスクリーンショットからアイコンを抽出してまとめるやつです。</p>
+    <p>バグ報告・要望は<a href="https://github.com/uhyo/kirara-gacha-img">GitHub</a>か<a href="https://twitter.com/uhyo_">Twitter</a>か<a href="https://uhy.ooo/">その他</a>でお願いします。</p>
+    <a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=%E3%81%8D%E3%82%89%E3%82%89%E3%83%95%E3%82%A1%E3%83%B3%E3%82%BF%E3%82%B8%E3%82%A2%E3%81%AE%E3%82%AC%E3%83%81%E3%83%A3%E7%B5%90%E6%9E%9C%E3%82%92%E3%81%BE%E3%81%A8%E3%82%81%E3%82%8B%E3%82%84%E3%81%A4">ツイート</a> <small><a rel="external" href="https://github.com/uhyo/kirara-gacha-img">GitHub</a>, <a href="./licenses.txt">ライセンス表記</a></small></p>
+    <div id="app" class="fullwidth-app"></div>
+    <script src="./bundle.js"></script>
+    <!-- Twitter widget -->
+    <script>window.twttr = (function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+  if (d.getElementById(id)) return t;
+  js = d.createElement(s);
+  js.id = id;
+  js.src = "https://platform.twitter.com/widgets.js";
+  fjs.parentNode.insertBefore(js, fjs);
+
+  t._e = [];
+  t.ready = function(f) {
+    t._e.push(f);
+  };
+
+  return t;
+}(document, "script", "twitter-wjs"));</script>
+  </article>
+{/content}

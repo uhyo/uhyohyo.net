@@ -71,6 +71,11 @@ body > header > h1 {
 }
 body > main {
   margin-left:1rem;
+
+  .fullwidth-app {
+    margin-left: calc(-8px - 1rem);
+    margin-right: -8px;
+  }
 }
 
 

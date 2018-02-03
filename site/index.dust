@@ -55,9 +55,13 @@
   <p>min-caml向けWebAssemblyバックエンドのデモ</p>
   <p>ブログで紹介したやつです（詳細はブログを参照）</p>
 </a>
-<a href="birthday-img-maker/" id="birthday-img-maker">
+<a href="birthday-img-maker/" id="menu-birthday-img-maker">
   <p>誕生日占いの画像を作るやつ</p>
   <p>誕生日占いの画像を簡単に作れるページです。</p>
+</a>
+<a href="kirara-gacha-img/" id="menu-kirara-gacha-img">
+  <p>きららファンタジアのガチャ結果をまとめるやつ</p>
+  <p>複数のガチャ結果スクリーンショットを1枚の画像にまとめます。</p>
 </a>
 <div id="menu-masao-space">
   <p>正男投稿サービス<a href="https://masao.space/">masao.space</a>も作ってます</p>
