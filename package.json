@@ -19,8 +19,8 @@
   "homepage": "https://github.com/uhyo/uhyohyo.net",
   "dependencies": {
     "escape-html": "^1.0.3",
-    "html-minifier": "^3.5.5",
+    "html-minifier": "^3.5.15",
     "my-static": "^1.1.1",
-    "node-sass": "^3.13.1"
+    "node-sass": "^4.9.0"
   }
 }
