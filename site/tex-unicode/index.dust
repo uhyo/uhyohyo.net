@@ -14,6 +14,7 @@
     <p>要望・バグ報告は<a href="https://github.com/uhyo/tex-unicode/issues" rel="external">GitHub</a>がおすすめです。その他の連絡先は<a href="http://uhy.ooo/">uhy.ooo</a>を参照してください。</p>
     <h3>更新履歴</h3>
     <ul>
+      <li>v0.2.1 (<time datetime="2018-05-02">2018年5月2日</time>): <code>\approx</code>が変換されない問題を修正しました。</li>
       <li>v0.2.0 (<time datetime="2017-10-29">2017年10月29日</time>): 拡張機能のアイコンから機能をON/OFFできるようにしました。</li>
       <li>v0.1.0 (<time datetime="2017-07-08">2017年7月8日</time>): 初版公開</li>
     </ul>
@@ -28,7 +29,7 @@
       <li><code>\forall n \in \mathbb{~lb}N{~rb}. sin(n\pi) = 0</code></li>
     </ul>
   </article>
-  <script src="./tex-unicode-v0.2.0.js"></script>
+  <script src="./tex-unicode-v0.2.1.js"></script>
   <script>
     TeXUnicode.enable();
   </script>
