@@ -8,12 +8,14 @@
 {<content}
   <article>
     <h2>Easy ████ing</h2>
-    <p><b>Easy ████ing</b>は、入力エリアの右端でShift+右キーを押すと「█」を入力できるようになるChrome拡張機能です。</p>
+    <p><b>Easy ████ing</b>は、入力エリアの終端でShift+右キーを押すと「█」を入力できるようになるChrome拡張機能です。</p>
+    <p>また、Shift+Ctrl+Lキーで終端以外の場所でも「█」を入力できます。キーは設定で変更可能です。</p>
     <p><a href="https://chrome.google.com/webstore/detail/easy-%E2%96%88%E2%96%88%E2%96%88%E2%96%88ing/boohjpnhpempgagincffdolllgjeohci?hl=ja" rel="external">Easy ████ingをChromeウェブストアからインストール</a></p>
     <p>下の入力エリアでEasy ████ingをインストールせずに試すことができます。Easy ████ingをChromeにインストールすると、全ての入力エリアで有効になります。</p>
     <p>要望・バグ報告は<a href="https://github.com/uhyo/chrome-xxxx/issues" rel="external">GitHub</a>がおすすめです。その他の連絡先は<a href="http://uhy.ooo/">uhy.ooo</a>を参照してください。</p>
     <h3>更新履歴</h3>
     <ul>
+      <li>v0.2.0 (<time datetime="2018-05-27">2018年5月27日</time>): 入力欄の右端以外でも「█」を入力できるショートカットキーの追加。キーを設定で変えられる機能を追加。</li>
       <li>v0.1.0 (<time datetime="2017-12-20">2017年12月20日</time>): 初版公開</li>
     </ul>
 
@@ -21,7 +23,7 @@
     <p>Easy ████ingはChrome用です。もしかしたら他のブラウザでは動かないかもしれません。</p>
     <p><textarea style="width: 60em; max-width: 100%; height: 10em; max-height: 40vh"></textarea></p>
   </article>
-  <script src="./chrome-xxxx-v0.1.0.js"></script>
+  <script src="./chrome-xxxx-v0.2.0.js"></script>
   <script>
     ChromeXxxx.enable();
   </script>
