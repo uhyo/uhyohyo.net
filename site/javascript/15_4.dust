@@ -86,6 +86,7 @@ window.addEventListener("<mark>load</mark>",function(e){
 },false);
 </code></pre>
 <p>最初の<b>loadイベント</b>というのは、ページの読み込みが完了したときに発生するイベントでしたね。今回はリソースの読み込みについての情報が欲しいのでこのイベントを用います。</p>
+<div class="dynamic" data-alt="ウェブ版では実際にこのページでサンプルを動かしています。よろしければ確認してみてください。">
 <div id="resultarea" style="margin:1em;padding:1em;border:2px solid black"></div>
 <script>
 window.addEventListener("load",function(e){
@@ -101,5 +102,6 @@ window.addEventListener("load",function(e){
 },false);
 </script>
 <p>こんな感じでリソースに関する情報を取得することができます。</p>
+</div>
 <p>次回も関連した話です。</p>
 

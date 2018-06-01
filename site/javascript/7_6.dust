@@ -215,6 +215,7 @@ while(node=walker.nextNode()){
 </code></pre>
 <p>これで完成です。</p>
 
+<div class="dynamic" data-alt="前回に引き続き、ウェブ版には実際にページで動作するサンプルが用意されています。よろしければ参照してみてください。">
 <h2>サンプル</h2>
 <p>今回もこのページで試してみました。</p>
 <script type="text/javascript">
@@ -274,4 +275,4 @@ while(ol.parentNode){
 }
 document.body.appendChild(ol);
 </script>
-
+</div>

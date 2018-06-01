@@ -281,6 +281,7 @@ while(ol.parentNode){
 document.body.appendChild(ol);
 </code></pre>
 
+<div class="dynamic" data-alt="今回は以上です。ウェブ版には実際にページで動作するサンプルが用意されています。">
 <h2>サンプル</h2>
 <p>これで完成です。このページで試してみました。ちゃんと動作していることが分かりますね。</p>
 <script type="text/javascript">
@@ -323,4 +324,4 @@ while(ol.parentNode){
 }
 document.body.appendChild(ol);
 </script>
-
+</div>
