@@ -66,7 +66,7 @@ console.log(arr); // [0, 1, 2, 3, 4, <mark><em>0, 1, 2,</em></mark> 8, 9]
 
 <h3>find, findIndex</h3>
 <p>次に紹介する<dfn>find</dfn>と<dfn>findIndex</dfn>は検索系の便利なメソッドです。</p>
-<p>検索といえば、以前紹介した<a href="anchor-indexof">Array#indexOf</a>が思い出されます。これらのメソッドはindexOfが進化したメソッドです。</p>
+<p>検索といえば、以前紹介した<a href="11_1.html#anchor-indexof">Array#indexOf</a>が思い出されます。これらのメソッドはindexOfが進化したメソッドです。</p>
 <p>indexOfは第1引数に検索する<em>値</em>を渡しましたが、findやfindIndexでは<em>関数</em>が渡されます。配列の各要素に対してこの関数が呼び出され、true<small>（または真偽値に変換するとtrueになる値）</small>を返す値を見つけたらその値が返されます。<b>find</b>の場合は見つかった値そのもの、<b>findIndex</b>の場合は見つかった値の位置が返されます。</p>
 <pre><code>
 var arr = [3, 7, 1, -5, 0, -2];

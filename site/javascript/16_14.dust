@@ -221,7 +221,7 @@ console.log(Object.getOwnPropertyDescriptor(obj, 'prop'));
 <p>そんなことを念頭に置きつつ、次のトラップに進みます。</p>
 
 <h3>ownKeysトラップ</h3>
-<p>この<dfn>ownKeysトラップ</dfn>は、<a href="11_4.html">Object.getOwnPropertyNames</a>の結果を詐称するためのトラップです。また、<a href="16_4.hrml">Object.getOwnPropertySymbols</a>の結果にも影響を与えることができます。</p>
+<p>この<dfn>ownKeysトラップ</dfn>は、<a href="11_4.html">Object.getOwnPropertyNames</a>の結果を詐称するためのトラップです。また、<a href="16_4.html">Object.getOwnPropertySymbols</a>の結果にも影響を与えることができます。</p>
 <p>ownKeysトラップの返り値は配列でなければいけません。この配列が、当該オブジェクトに存在するプロパティの名前の一覧として扱われます。よって、配列の要素は文字列かシンボルに制限されます。</p>
 <pre><code>
 var obj = new Proxy({}, {

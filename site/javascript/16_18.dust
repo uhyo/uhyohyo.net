@@ -157,7 +157,7 @@ console.log("foobar".repeat(5)); // "foobarfoobarfoobarfoobarfoobar"
 </code></pre>
 
 <h4>includes</h4>
-<p><dfn>includes</dfn>メソッドは、指定した文字列がもとの文字列に含まれているかどうかを判定するメソッドです。<a href="16_16.html#anchor-includes">Array#includes</a>と似ていますね。<a href="4_1,html#anchor-indexof">String#indexOf</a>を使えば似たようなことができるのも同じですが、便利で分かりやすいので使えるときは使うとよいでしょう。</p>
+<p><dfn>includes</dfn>メソッドは、指定した文字列がもとの文字列に含まれているかどうかを判定するメソッドです。<a href="16_16.html#anchor-includes">Array#includes</a>と似ていますね。<a href="4_1.html#anchor-indexof">String#indexOf</a>を使えば似たようなことができるのも同じですが、便利で分かりやすいので使えるときは使うとよいでしょう。</p>
 <pre><code>
 console.log("こんにちは。私は田中です。".includes("田中")); // <em>true</em>
 </code></pre>

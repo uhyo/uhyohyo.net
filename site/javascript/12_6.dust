@@ -90,7 +90,7 @@ function drop(ev){
 <h3>画像のドラッグ&ドロップ</h3>
 <p>上で、「img要素はもともとドラッグ&amp;ドロップ可能である」といいました。実は、img要素がドラッグされる場合自動的にdataTransferに<em>画像のURL</em>（具体的にはsrc属性の内容）が格納されます。その際のフォーマットは<code>"text/uri-list"</code>です。ただし、複数のimg要素が同時にドラッグされている場合もあります。そのようなときは、全てのURLが改行で区切られた文字列が入っています。</p>
 <p>ということで、このことを用いて画像がドロップされてきたらそれを表示してみるというサンプルを作ってみました。<a href="12_6_sample4.html">サンプル4</a>です。</p>
-<p>このサンプル中では<a href="anchor-split">split</a>メソッドや<a href="anchor-forEach">forEach</a>メソッドを使っています。忘れた方はぜひ戻って復習しましょう。</p>
+<p>このサンプル中では<a href="11_5.html#anchor-split">split</a>メソッドや<a href="11_1.html#anchor-forEach">forEach</a>メソッドを使っています。忘れた方はぜひ戻って復習しましょう。</p>
 <p>ちなみに、もうひとつもともとドラッグ&amp;ドロップ可能な要素としてa要素がありました。実はa要素の場合も、そのリンク先のURL（href属性）が<code>"text/uri-list"</code>で入っています。
 
 <h3>テキストコントロールへのドロップ</h3>

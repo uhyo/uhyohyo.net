@@ -232,3 +232,7 @@ function generateDescription(data){
     // 160文字くらい
     return pre.slice(0, 160) + '……';
 }
+
+// exports some utility.
+module.exports.pageNumber = pageNumber;
+module.exports.kanji = kanji;

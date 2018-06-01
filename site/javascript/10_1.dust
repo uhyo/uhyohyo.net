@@ -4,7 +4,7 @@
 <p><dfn>XPath</dfn>とは、木構造中の<strong>ノード</strong>を指し示す<strong>表現</strong>のことです。ノードは1つでもいいし複数でも構いません。</p>
 <p>具体的な例として、例えば「body要素中の最初のp要素」とか、「3番目のa要素」とかそういった指定が可能です。そういわれるとCSSのセレクタを思い浮かべるかもしれません。しかし、XPathはCSSセレクタよりも数段強力な表現力をもちます。</p>
 <p>JavaScriptのDOMにおいては、このあるノードを表す表現を<strong>条件</strong>として使うことで、対応するノードを絞り込んで処理することができます。</p>
-<p>これは、例えば「要素名」という条件に限れば<a href="2_6.dust#anchor-getelementsbytagname">getElementsByTagName</a>でできていました。また、<a href="2_2.html#anchor-getelementbyid">getElementById</a>も条件によりノードを絞り込んでいるといえるでしょう。</p>
+<p>これは、例えば「要素名」という条件に限れば<a href="2_6.html#anchor-getelementsbytagname">getElementsByTagName</a>でできていました。また、<a href="2_2.html#anchor-getelementbyid">getElementById</a>も条件によりノードを絞り込んでいるといえるでしょう。</p>
 <p>似たようなことは以前<a href="7_3.html">TreeWalker</a>でもやりました。TreeWalkerでは、関数でノードを判定することで条件としていたのです。XPathを利用したノードの絞り込みは、その別方向からのアプローチということもできます。</p>
 
 <h3>XPathの書き方</h3>
