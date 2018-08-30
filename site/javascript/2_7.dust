@@ -8,6 +8,7 @@ AAA
   <li>CCC
   <li>DDD
 </ul>
+</div>
 <p>という木構造があったとき、BBB,CCC,DDDは全て、同じAAAという親を持つ兄弟ノードです。</p>
 <p>あるノードの兄弟ノードを取得するには、プロパティ<dfn>previousSibling</dfn>と<dfn>nextSibling</dfn>を使います。</p>
 <p>previousSiblingはそのノードの1つ前の兄弟、nextSiblingは1つ後の兄弟です。</p>

@@ -6,12 +6,14 @@
 <strong>history</strong>.<mark>back</mark>();
 </code></pre>
 <p>例えばhistory.backメソッドは、いわゆるブラウザの「戻る」ボタンと同じ動きです。</p>
-<p>実際にやってみましょう。<input type="button" value="戻る" onclick="history.back()"></p>
-<p>このボタンは次のようにできています。</p>
-<pre class="language-html"><code>
-&lt;input type="button" value="戻る" onclick="<mark>history.back()</mark>"&gt;
-</code></pre>
-<p>このボタンを押すと、ブラウザの「戻る」ボタンを押したときと同じように前のページに戻ります。</p>
+<div class="dynamic">
+  <p>実際にやってみましょう。<input type="button" value="戻る" onclick="history.back()"></p>
+  <p>このボタンは次のようにできています。</p>
+  <pre class="language-html"><code>
+  &lt;input type="button" value="戻る" onclick="<mark>history.back()</mark>"&gt;
+  </code></pre>
+  <p>このボタンを押すと、ブラウザの「戻る」ボタンを押したときと同じように前のページに戻ります。</p>
+</div>
 <p>逆に「進む」は<code>history.forward()</code>です。他に、「3個すすむ」とか「2個戻る」とかを汎用的に表現する<code>history.go</code>があります。これは引数を取って、使いかたはこうです。</p>
 <pre><code>
 history.go(<mark>3</mark>);	//3個すすむ
@@ -23,12 +25,14 @@ history.go(<mark>-2</mark>);	//-2個戻る
 
 <h3>履歴の追加</h3>
 <p>HTML5での画期的な新機能は何かというと、<strong>履歴の追加</strong>です。<strong>勝手に自分で履歴を追加できる</strong>のです。</p>
-<p>例えば、<input type="button" value="このボタン" onclick="history.pushState(null,'テスト','/javascript/testtest')">を押してみましょう。</p>
-<p>押すと、実際にはページを移動していないのに、上のURLが「http://uhyohyo.net/javascript/testtest」というように変わったと思います。もちろん、実際にそんなURLを開いても何もありません。</p>
-<p>さらに、そこからブラウザで「戻る」をやってみましょう。またもページが変わらずに、URLが元に戻ったと思います。これが意味するのは、このボタンによって、実際にページが変わったわけではないけれども「http://uhyohyo.net/javascript/testtest」というURLに行ったという履歴が追加されたということです。「進む」を押してみるとまたURLが変わるはずです。</p>
-<p>それでは、その方法を紹介します。使うのは、<dfn>history.pushState</dfn>メソッドです。上のボタンは押すと次のようにhistory.pushStateを呼び出します。</p>
+<div class="dynamic">
+  <p>例えば、<input type="button" value="このボタン" onclick="history.pushState(null,'テスト','/javascript/testtest')">を押してみましょう。</p>
+  <p>押すと、実際にはページを移動していないのに、上のURLが「https://uhyohyo.net/javascript/testtest」というように変わったと思います。もちろん、実際にそんなURLを開いても何もありません。</p>
+  <p>さらに、そこからブラウザで「戻る」をやってみましょう。またもページが変わらずに、URLが元に戻ったと思います。これが意味するのは、このボタンによって、実際にページが変わったわけではないけれども「https://uhyohyo.net/javascript/testtest」というURLに行ったという履歴が追加されたということです。「進む」を押してみるとまたURLが変わるはずです。</p>
+</div>
+<p>早速その方法を紹介します。使うのは、<dfn>history.pushState</dfn>メソッドです。例えば次のように呼び出します。</p>
 <pre><code>history.<strong>pushState</strong>(null, 'テスト', '/javascript/testtest');</code></pre>
-<p>今回用いたコードはこれです。3つの引数があることがわかりますね。history.pushStateは、呼び出されると新しい<b>履歴</b>を追加してその履歴に遷移します。</p>
+<p>3つの引数があることがわかりますね。history.pushStateは、呼び出されると新しい<b>履歴</b>を追加してその履歴に遷移します。</p>
 <p>順番が前後しますが、第3引数が新しい履歴のURLだということが分かると思います。また、第2引数は履歴の<strong>タイトル</strong>です。ただ、タイトルは現状のブラウザでは意味がないようです。第3引数については省略可能であり、その場合は現在のURLと同じになります。</p>
 <p>残る第1引数は<strong>state</strong>であり、これは<strong>その履歴と関連付けられた情報</strong>です。好きなオブジェクトを履歴と関連付けることができます。stateの使い方については後述します。ただ、今回は履歴と関連付けたい情報は特に無いのでnullにしてあります。</p>
 

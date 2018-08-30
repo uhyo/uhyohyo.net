@@ -9,6 +9,7 @@ p
 <ul>
   <li>#text
 </ul>
+</div>
 <p>という独立した木構造が生まれるのはご存知の通りです。p要素が例えばbodyにappendChildされて初めてこの木構造は文書の一部となり、それまでは文書の木構造とは独立した木構造として存在することになります。なので、独立した木構造を作りたいだけならばDocumentFragmentは必ずしも必要ではないように思えます。しかし、このように要素を頂点とした木構造では表現できない場合があります。例えば、</p>
 <div class="tree">
 A
@@ -84,7 +85,7 @@ DocumentFragment
   <li>div (div1)
   <li>div (div2)
 </ul>
-</div<
+</div>
 <p>という木構造を持っていることが分かるはずです。</p>
 
 <h4>DocumentFragmentの使い方</h4>
