@@ -76,6 +76,11 @@ module.exports = (context)=>{
                 const t = pageNumber(section+1, 1);
                 next_link = `<a rel="next" href="./${section+1}_1.html" title="${t}　${pageTitle(data, section+1, 1)}">${t}</a>`;
             }
+
+            // 17章に試験的に自動広告
+            if (section >= 17) {
+                data.autoad = true;
+            }
         }else{
             r = rel.match(/^site\/javascript\/kiso(\d+)\.dust$/);
             if (r != null){

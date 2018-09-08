@@ -13,6 +13,15 @@
     <meta name="twitter:description" content="{twitter_description}">
     <meta name="twitter:image" content="https://uhyohyo.net/images/icons/144x144.png">
   {/twitter_description}
+  {?autoad}
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-1080533149094679",
+          enable_page_level_ads: true
+     });
+    </script>
+  {/autoad}
 {/additionalHead}
 {<content}
   <h1>JavaScript初級者から中級者になろう</h1>
