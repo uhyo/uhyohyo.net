@@ -142,6 +142,6 @@ while( p.hasChildNodes() ){
     p.removeChild(<mark>p.firstChild</mark>);
 }
 </code></pre>
-<p>また、余談ですが、<code>p.hasChildNodes()</code>は、<code>p.childNodes.length==0</code>としても同じ事ができます。</p>
+<p>また、余談ですが、<code>p.hasChildNodes()</code>は、<code>p.childNodes.length!=0</code>としても同じ事ができます。</p>
 <p>ついでに紹介すると、<dfn>lastChild</dfn>というプロパティもあります。これは「一番最後の子」です。</p>
 
