@@ -1,4 +1,7 @@
 {>"$PROJ/templates/javascript.dust" twitter_description="JavaScriptの中級講座です。"/}
+{<pageLevelHead}
+  <link rel="canonical" href="https://uhyohyo.net/javascript/">
+{/pageLevelHead}
 {!
 <p>JavaScript。「ジャヴァスクリプト」と読みます。主にWebページを動きを与えるのに使われるほか、現在ではさまざまなところで活躍しているプログラミング言語です。</p>
 <p>現在では多くのWebページに使われていますが、とてもレベルが低く不適切なものも多数あります。もっと質の高いJavaScriptを使える人が増えるといいなという思いから、この講座を作りました。</p>

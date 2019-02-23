@@ -2,6 +2,7 @@
 {<additionalHead}
   <link href="/css/js.css" rel="stylesheet">
   <link href="/css/prism.css" rel="stylesheet">
+  {+pageLevelHead/}
   {?twitter_description}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@uhyo_">
