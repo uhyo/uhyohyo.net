@@ -17,6 +17,7 @@
     <p>拡張機能は<a href="https://github.com/uhyo/mc_extensions">GitHubにまとめてあります</a>。</p>
     <p><a href="./game_accel.html">加速床</a></p>
     <p><a href="./game_t_continue.html">Tキーの動作変更</a></p>
+    <p><a href="./game_echo.html">反響</a></p>
     <h3>ヤチャモダッシュ用</h3>
     <p><a href="./game_bounce.html">反発係数1の壁</a></p>
   </section>
