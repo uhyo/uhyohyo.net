@@ -123,7 +123,7 @@ indexedDB.deleteDatabase("test");
 <p>しかし、オブジェクトストアを操作するには必ずトランザクションを作る必要がありました。ここで注目するのが前回何気なく登場していた<strong>versionchangeトランザクション</strong>です。</p>
 <p>これもトランザクションのひとつで、<code>"readonly"</code>,<code>"readwrite"</code>に続く、特別なモードである<code>"versionchange"</code>を持っているのです。これがversionchangeトランザクションです。このトランザクションは自分で作ることはできず、upgradeneededイベントの発生時のみ作られます。</p>
 
-<p>つまり、upgradeneedイベント時におけるデータベース操作は、このversionchangeトランザクションを根拠として行われているのです。versionchangeトランザクションはreadwriteトランザクションの上位互換で、データベースへの読み書きが行えるほか、オブジェクトストアを作ったり消したりすることまでできます（実はまだありますが、それは後で紹介します）。</p>
+<p>つまり、upgradeneededイベント時におけるデータベース操作は、このversionchangeトランザクションを根拠として行われているのです。versionchangeトランザクションはreadwriteトランザクションの上位互換で、データベースへの読み書きが行えるほか、オブジェクトストアを作ったり消したりすることまでできます（実はまだありますが、それは後で紹介します）。</p>
 <p>versionchangeトランザクションが発生している間は、他のトランザクションを作ることができません。しかし、upgradeneededイベント時に既存のオブジェクトスコアのデータをいじりたいという場合はこのversionchangeトランザクションを利用することで可能です。versionchangeトランザクションはreadwriteの上位互換なので、オブジェクトストアを作ったり消したりだけではなくオブジェクストアの中にレコードを追加したりすることもできます。その方法を説明するのはこれからですが。</p>
 <p>前回紹介したIDBRequestは実は<dfn>transaction</dfn>プロパティを持っています。前回では、openメソッドで返されたIDBOpenDBRequestが、このIDBRequestの一種でした。IDBRequestはまたのちのち登場しますが、openメソッド（やdeleteDatabaseメソッド）で返されるIDBRequestでは、transactionプロパティに、このversionchangeトランザクションを表すIDBTransactionオブジェクトが入っています。これを用いて各種の操作が可能です。</p>
 <p>実は、versionchangeトランザクションのスコープはそのデータベースが持つ全オブジェクトストアとなっています。ですから既存のオブジェクトストアに対して操作することもここでは可能です。例えば次のサンプルのような感じです。</p>

@@ -40,7 +40,7 @@ yuusha3.jikoshokai();
 <p>実は、コンストラクタ（というより<strong>関数</strong>）は<b>prototype</b>というプロパティを持っています。これはオブジェクトで、<strong>コンストラクタのprototypeが持つプロパティやメソッドは、インスタンスのプロパティやメソッドとして参照することができます</strong>。
 <p>つまり、上の例ではYuushaのprototypeにjikoshokaiメソッドがあることにより、Yuushaのインスタンスであるyuusha1などのメソッドとしてjikoshokaiを使うことができたのです。</p>
 <p>これの動作の仕組みは以下のようになっています。あるオブジェクトのプロパティやメソッドを使おうとしてもないとき、<strong>次にコンストラクタのprototypeを探す</strong>のです。それでもなければ、本当にないということで、以前述べたようにundefinedになります。</p>
-<p>例えば、<code>yuusha1,jikoshokai</code>の場合を見てみます。今回の場合、yuusha1のjikoshokaiというメソッドを探しますが、ありません。そこで、yuusha1のコンストラクタがYuushaなので、Yuusha.prototype.jikoshokaiを探します。そこであったので、無事自己紹介できたというわけです。</p>
+<p>例えば、<code>yuusha1.jikoshokai</code>の場合を見てみます。今回の場合、yuusha1のjikoshokaiというメソッドを探しますが、ありません。そこで、yuusha1のコンストラクタがYuushaなので、Yuusha.prototype.jikoshokaiを探します。そこであったので、無事自己紹介できたというわけです。</p>
 
 <p>これを利用して、ちょっと遊んでみます。</p>
 <pre class="line-numbers"><code>

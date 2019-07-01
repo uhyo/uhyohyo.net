@@ -61,7 +61,7 @@ a.abc = function(){
   alert("test");
 };
         </code></pre>
-<p>注意するべきなのは、あくまで代入文なので、<code>function(){ 〜 }</code>の後には「<code>;</code>」が付いているいう点です。</p>
+<p>注意するべきなのは、あくまで代入文なので、<code>function(){ 〜 }</code>の後には「<code>;</code>」が付いているという点です。</p>
 <p>また、次のようにメソッドを定義することもできます。</p>
 <pre><code>var a = {
   abc: function(){ alert("abc"); },

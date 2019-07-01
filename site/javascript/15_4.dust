@@ -1,6 +1,6 @@
 <p><a href="15_3.html">前回</a>の続きです。前回はPerformanceEntryオブジェクトの扱い方を紹介しました。今回はその具体例です。</p>
 
-<p>Resource Timingという仕様では、Webページからimg要素やlink要素によって読み込まれたリソースについて、それにかかった時間などを知ることができます。これは、<a href="15_2.html">一五章第二回</a>で紹介したnavigation Timingと似ていますね。あちらはページ本体に読み込みにかかった時間であり、本体が読み込み完了してHTMLのパース・DOMの構築まで終わったら読み込み完了としていたので、外部リソースに読み込みにかかった時間までは測れませんでした。</p>
+<p>Resource Timingという仕様では、Webページからimg要素やlink要素によって読み込まれたリソースについて、それにかかった時間などを知ることができます。これは、<a href="15_2.html">十五章第二回</a>で紹介したNavigation Timingと似ていますね。あちらはページ本体に読み込みにかかった時間であり、本体が読み込み完了してHTMLのパース・DOMの構築まで終わったら読み込み完了としていたので、外部リソースに読み込みにかかった時間までは測れませんでした。</p>
 
 <h3>PerformanceResourceTiming</h3>
 <p>Resource Timingでは、ページから読み込まれた外部リソース一つ一つについて<dfn>PerformanceResourceTiming</dfn>オブジェクトが作成され、<code>window.performance</code>に登録されます。このPerformanceResourceTimingというのは、前回紹介したPerformanceEntryを継承したオブジェクトです。この場合、前回紹介した4つのプロパティは次のような値が入っています。</p>

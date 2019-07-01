@@ -2,7 +2,7 @@
 
 <h3>オブジェクトストアの操作</h3>
 <p>前回はIDBObjectStoreのメソッドaddとputを紹介しました。</p>
-<p>今回はさらにメソッドを紹介します。まずは<dfn>get</dfn>です。これは、引数にkeyを指定すると、そのkeyをもつレコードが得られるというものです。ただし、そのkeyをもつレコードがない場合はundefinedが帰ってきます。</p>
+<p>今回はさらにメソッドを紹介します。まずは<dfn>get</dfn>です。これは、引数にkeyを指定すると、そのkeyをもつレコードが得られるというものです。ただし、そのkeyをもつレコードがない場合はundefinedが返ってきます。</p>
 <p>これがあるので、keyはレコードにつけた名前のような感覚で使えます。</p>
 <p>ただし、getの結果は返り値として帰ってくるわけではありません。getの返り値は例によって<b>IDBRequest</b>です。</p>
 <p>addやputのときと同様に、IDBRequestで発生するsuccessイベントを待たなければなりません。getの結果、すなわち該当のレコードは例によってIDBRequestのresultプロパティに入っています。addやputの動作から分かるように、同じkeyを持つレコードがオブジェクトストア内に2つ存在することはありえません。よってgetで得られるレコードは1つです（該当レコードが無い場合は0個ですが）。</p>
@@ -48,7 +48,7 @@ IDBKeyRange.<mark>lowerBound</mark>(-10,false);
 <code class="language-none">x&lt;8</code>
 としたいならば、</p>
 <pre><code>
-IDBKeyRange.<mark>upperBound</mark>(8,false);
+IDBKeyRange.<mark>upperBound</mark>(8,true);
 </code></pre>
 <p>とします。</p>
 

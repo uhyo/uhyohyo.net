@@ -9,7 +9,7 @@ var result = document.<strong>evaluate</strong>('/html', document, null, XPathRe
 <p>ここでは、<code>/html</code>という単純なXPath文を文字列として第一引数に渡しています。evaluateはこのXPath文を処理して結果を返します。</p>
 <p>それでは引数の解説ですが、第一引数は既に述べたようにXPath文を文字列で渡します。</p>
 <p>つぎに、第二引数にはdocumentが渡されています。これは、<strong>ルートノード</strong>です。すなわち、（このノードも含めて）このノードより下で探索するということです。documentということは、木構造全部ということですね。基本はdocumentで事足りるでしょう。</p>
-<p>次は第三引数で、これは今nullとなっていますが、ここには<strong>名前空間解決器</strong>（後述）を渡します。不要な場合はnullです。。</p>
+<p>次は第三引数で、これは今nullとなっていますが、ここには<strong>名前空間解決器</strong>（後述）を渡します。不要な場合はnullです。</p>
 <p>第四引数は<strong>結果のタイプ</strong>です。今回は<code>XPathResult.<mark>FIRST_ORDERED_NODE_TYPE</mark></code>です。これは明らかに定数ですね。当然他にもあるのですが、各定数の解説は後述とします。今回指定した定数は、結果のノードセットのうち最初の1つを取得するというものです。</p>
 
 <p>次に第五引数はnullとなっていますが、これは<strong>再利用するオブジェクト</strong>です。この引数に以前のevaluateで結果として返ってきたXPathResultオブジェクトを渡すと、そのオブジェクトに結果が書き込まれます。すなわち、結果のオブジェクトを再利用できるのです。どういうことかというと、通常document.evaluateで結果を得るときは新しいXPathResultが作られて結果として返されます。つまり、1回実行するごとに新しいXPathResultオブジェクトがどんどんできるのです。これは無駄だということで、この第五引数に使い終わったXPathResultオブジェクトを渡すと、新しいXPathResultを作らずに渡されたオブジェクトを書き換えてそれを返してくれます。繰り返しXPathを利用する場合はこれを活用するのがよいかもしれません。</p>

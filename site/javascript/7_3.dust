@@ -95,7 +95,7 @@ var tw = document.<dfn>createTreeWalker</dfn>(
 <p>そして、TreeWalkerを動かすのには、TreeWalkerのメソッドを使います。</p>
 
 <h4>previousNode,nextNode</h4>
-<p><dfn>previousNode</dfn>、<dfn>nextNode</dfn>は、TreeWalkerを動かす基本的なメソッドのひとつです。それぞれ、「前のノード」「次のノード」という意味です。ここで前とか次とかと言っているのは、前回紹介した文書順で前とか次ということです例えば、。</p>
+<p><dfn>previousNode</dfn>、<dfn>nextNode</dfn>は、TreeWalkerを動かす基本的なメソッドのひとつです。それぞれ、「前のノード」「次のノード」という意味です。ここで前とか次とかと言っているのは、前回紹介した文書順で前とか次ということです。例えば、</p>
 <div class="tree">
 A
 <ul>

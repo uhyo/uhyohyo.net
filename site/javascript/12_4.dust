@@ -2,9 +2,9 @@
 <p>HTML5には<strong>独自データ属性</strong>というものがあり、簡単にいうと、要素に好きな属性をつけられるというものです。</p>
 <p>ただ、完全に自由に属性に名前をつけていては大変なので、data-という接頭辞をつけた属性を勝手に自分で作っていいことになっています。つまり、具体的には例えばこうです。</p>
 <pre class="language-html"><code>
-&lt;div <mark>data-test="foo"</mark>&gt;
+&lt;div <mark>data-foo="hi"</mark>&gt;
 </code></pre>
-<p>この例ではdiv要素に<code>data-test</code>という独自データ属性がつけられています。</p>
+<p>この例ではdiv要素に<code>data-foo</code>という独自データ属性がつけられています。</p>
 <p>もちろん自分で勝手に作ったので、HTML的にはこの属性には何の意味もありません。じゃあ何に使うのかというと、そう、<strong>JavaScript側から利用できる</strong>のです。JavaScriptから読む用にHTML要素に付加的な情報をつけるのが独自データ属性の主な役割となります。</p>
 <p>それではこれを読み込むほうはこんな感じでしょうか。ひとつの方法は<a href="2_10.html#anchor-getattribute">getAttribute</a>を使うことです。</p>
 <pre><code>

@@ -52,7 +52,7 @@ p
 </ul>
 </div>
 <p>ここで、変数aaaには、"aaa"というidを持つ要素、つまりem要素のノードを代入しています。</p>
-<p>prevとnextには、それぞれpreviosSiblingとnextSiblingが代入されています。</p>
+<p>prevとnextには、それぞれpreviousSiblingとnextSiblingが代入されています。</p>
 <p>つまり、</p>
 <div class="tree">
 p
@@ -75,7 +75,7 @@ p
 <p>それを確かめているのが次の2行で、tagNameを表示しています。予想通り、「STRONG」と「INS」が表示されるはずです。</p>
 <p>ちなみに、兄弟ノードを全てまとめて（NodeListの形で）取得することは、今までの知識でもできます。<code>aaa.parentNode.childNodes</code>ですね。</p>
 
-<p>このpreviosuSiblingとnextSiblingですが、少し不便な場合もあります。それは、間にテキストノードがある場合です。次のサンプルを見てください。</p>
+<p>このpreviousSiblingとnextSiblingですが、少し不便な場合もあります。それは、間にテキストノードがある場合です。次のサンプルを見てください。</p>
 <pre class="language-html"><code>&lt;!doctype html&gt;
 &lt;html&gt;
   &lt;head&gt;

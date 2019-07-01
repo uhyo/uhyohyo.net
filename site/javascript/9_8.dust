@@ -13,7 +13,6 @@ console.log(a);
 
 <h3>Errorオブジェクト</h3>
 <p>ここで登場するのが<dfn>Errorオブジェクト</dfn>、つまり<strong>Errorのインスタンス</strong>で、その名の通りエラーを表すオブジェクトです。throw文ではこれを投げるのが普通です。実際、処理系によって発生するエラー（プログラム中のthrow文以外によって発生するエラー）で投げられるのは全てErrorオブジェクトのインスタンスです（場合によっては、Errorを<a href="9_3.html">継承</a>したオブジェクトのインスタンス）。</p>
-w:
 <p>Errorのインスタンスには<strong>message</strong>というプロパティがあり、これが<strong>エラーメッセージ</strong>を表します。なので、自分で作ったErrorオブジェクトを投げるときもエラーメッセージを設定してあげましょう。</p>
 <pre><code>
 var err = new <strong>Error</strong>();
