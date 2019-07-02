@@ -81,7 +81,7 @@ console.log(<mark>Object.getOwnPropertySymbols</mark>(obj)[0] === s); //true
 <p>さて、<dfn>Well-Known Symbols</dfn>とは、特別なシンボルです。</p>
 <p>特別なシンボルといっても何か特殊な機能を持つわけではなく、それ自体はただのシンボルです。</p>
 <p>ただ、プログラムの実行の内部処理から参照されるという点で特別な意味を持ちます。</p>
-<p>Well-Known Symbolsは予め作られたシンボルで、<code>Symbol</code>のプロパティとして参照可能です。例えばiterateというwell-known symbolは、<code>Symbol.<mark>iterate</mark></code>として参照可能です。</p>
+<p>Well-Known Symbolsは予め作られたシンボルで、<code>Symbol</code>のプロパティとして参照可能です。例えばiteratorというwell-known symbolは、<code>Symbol.<mark>iterator</mark></code>として参照可能です。</p>
 <p>Well-Known Symbolsには今のところ以下の種類がありますが、言語仕様の追加に伴って増えるかもしれません。</p>
 <ul>
   <li>hasInstance</li>
@@ -107,7 +107,7 @@ var arr=[1,2,3]; //適当な配列
 console.log(arr[<mark>Symbol.iterator</mark>]);
 </code></pre>
 <p>何らかの関数があることが確認できたと思います。</p>
-<p>iterableからイテレータをを得る場合は、こうして得られるメソッドを呼び出してイテレータを得るのです。</p>
+<p>iterableからイテレータを得る場合は、こうして得られるメソッドを呼び出してイテレータを得るのです。</p>
 <p>そこで、とりあえずiterableを作ってみましょう。とりあえず、以前やったフィボナッチ数のイテレータを返すiterableをつくります。
 <pre><code>
 var iterable={};
