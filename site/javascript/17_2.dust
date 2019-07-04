@@ -23,7 +23,7 @@
 <p>ちなみに、従来は複数の種類のノードに存在すべきメソッドは全部Nodeに定義されていました。これは、全ての種類のノード（DocumentとかElementとか）がNodeを継承していることを利用しています。例えば、はるか昔に紹介した<a href="2_5.html#anchor-append-child">appendChild</a>は実はNodeが持つメソッドです。だから、Elementに対してもDocumentFragmentに対しても共通に利用できました。しかし、Nodeが持つメソッドということは、子を持たないようなノード、例えばTextに対してもappendChildを呼び出すことができます。ところがテキストノードは子を持たないノードなので、当然子を追加することはできません。実際にやろうとするとエラーになります。そうなると、テキストノードに対してappendChildを呼び出すのは全く無意味ということです。そこでDOM4では、メソッドが無意味になる事態を無くすために、子に関わるメソッドの範囲をParentNodeに制限することにしたのです。</p>
 <p>とはいえ、互換性の問題から、appendChildといった旧来のメソッドをいきなり消すことはできません。そこで、ParentNodeにしかない新しいメソッドを導入することにしたのです。appendChildは依然として存在し続けますが、それでも新しいメソッドを作ることに意味はあります。というのも、最近はJavaScriptの開発環境が充実し、自動補完や（TypeScriptでは）型チェックなどもできるようになりました。その精度を向上させることができるでしょう。</p>
 
-<p>前置きが長くなりましたが、それでは最初はParentNodeが持つメソッドを紹介します。ParnetNodeの特徴は子を持てることだったので、子に関するメソッドやプロパティがあります。</p>
+<p>前置きが長くなりましたが、それでは最初はParentNodeが持つメソッドを紹介します。ParentNodeの特徴は子を持てることだったので、子に関するメソッドやプロパティがあります。</p>
 <p>まずは<dfn>append</dfn>です。これは子ノードを追加するメソッドです。さきほどまでさんざん例に出してきたappendChildが進化したメソッドです。</p>
 <p>進化したポイントは、まず引数は1つだけではなく任意の数可能です。これにより、複数のノードを一度に追加することができます。一つ一つappendChildする手間が省けるのでとてもうれしいですね。</p>
 <p>もう1つは、テキストノードを挿入したいときは<a href="2_5.html#anchor-createtextnode">document.createTextNode</a>を使ってテキストノードを作るかわりに、引数に文字列を渡すと勝手にテキストノードに変換してくれる点です。</p>
@@ -79,7 +79,7 @@ A
 <p>このメソッドの画期的なところは、親の存在を意識しなくていいところです。今までノードを木構造から除去するには、親ノードの<a href="2_4.html#anchor-removechild">removeChild</a>メソッドを呼ぶ必要がありました。こちらは子ノードのメソッドとなっている点が新しいですね。</p>
 <p>次に、<dfn>replaceWith</dfn>です。これは親の<a href="2_7.html#anchor-replacechild">replaceChild</a>を呼ぶのに相当するメソッドで、引数に渡されたノードで自身を置き換えます。先ほど紹介したappendやprependと同様に、複数のノードや文字列を引数に渡すことができます。</p>
 <p>他には、<dfn>before</dfn>と<dfn>after</dfn>メソッドがあります。これは、自分の前または後に、兄弟として引数のノードを追加するメソッドです。もちろん、引数はreplaceWith等と同様に複数指定可能です。これは特に便利ですね。今まではparentNodeの<a href="2_6.html#anchor-insertbefore">insertBefore</a>などを駆使する必要がありました。</p>
-<p>さらに、プロパティとして、<dfn>preivousElementSibling</dfn>と<dfn>nextElementSibling</dfn>があります。previousElementSiblingは、自身の兄弟ノードで、自身より前にあってElementであるもののうち最初のもの（一番自身に近いもの）を返します。nextElementSiblingは自身より後ろにあるElementで最初のものを返します。</p>
+<p>さらに、プロパティとして、<dfn>previousElementSibling</dfn>と<dfn>nextElementSibling</dfn>があります。previousElementSiblingは、自身の兄弟ノードで、自身より前にあってElementであるもののうち最初のもの（一番自身に近いもの）を返します。nextElementSiblingは自身より後ろにあるElementで最初のものを返します。</p>
 <hr>
 <p>というわけで、今回はDOM4時代の基本的なメソッドをいくつか紹介しました。とても便利なメソッドたちですが、現在（2015年5月）まだブラウザの実装がぜんぜん追い付いていないことは書き終わってから気付きました。使う際は気をつけましょう。</p>
 

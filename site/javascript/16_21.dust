@@ -261,7 +261,7 @@ async function main(){
   try{
     await fail();
   }catch(e){
-    console.log('catched error:', e);
+    console.log('caught error:', e);
   }
   console.log('main end');
 }
@@ -272,7 +272,7 @@ main()
 });
 </code></pre>
 <p>これを実行すると、await式から発生したエラーがtry-catch文にキャッチされ、<code class="language-none">catched error: Error: ぎゃーーーー</code>と表示されます。もちろんmain関数の実行は続行され、関数の最後までふつうにたどり着いたのでmain関数は成功裏に終了することとなります。</p>
-<p>このように、非同期処理のエラーをいい感じに処理したいという場面でも、awaitを用いて非同期処理を待つことによって、try-catchを用いで直感的にエラー処理を行うことができます。Promiseの場合、catchメソッドを用いてエラー処理を行う必要があるのでどうしてもエラー処理がコールバックの中に入ることになります。</p>
+<p>このように、非同期処理のエラーをいい感じに処理したいという場面でも、awaitを用いて非同期処理を待つことによって、try-catchを用いて直感的にエラー処理を行うことができます。Promiseの場合、catchメソッドを用いてエラー処理を行う必要があるのでどうしてもエラー処理がコールバックの中に入ることになります。</p>
 <p>ただし、やはり場合によってはcatchメソッドのほうが都合が良い場合もあります。次の例を見てください。</p>
 <pre><code>
 // 2倍するけど3の倍数は2倍できない謎の関数
