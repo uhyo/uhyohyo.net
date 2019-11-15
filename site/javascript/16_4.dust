@@ -57,7 +57,7 @@ function saveValueInObject(obj,value){
   obj[myhiddensymbol]=value;
 }
 function getValueFromObject(obj){
-  return obj[myhiddensymbol]=value;
+  return obj[myhiddensymbol];
 }
 </code></pre>
 <p>リテラルを使えばどこでも任意のキーを作れる文字列とは異なり、今回キーとして使った<code>myhiddensymbol</code>と同じシンボルを別のところで作る方法はありません。シンボルは作るたびに新しい新しいものができるからですね。</p>
