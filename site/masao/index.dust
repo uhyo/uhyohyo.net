@@ -20,6 +20,9 @@
     <p><a href="./game_echo.html">反響</a></p>
     <h3>ヤチャモダッシュ用</h3>
     <p><a href="./game_bounce.html">反発係数1の壁</a></p>
+    <h3>その他</h3>
+    <p><a href="./game_paper.html">ペーパーマリオにありそうなギミック</a></p>
+    <p><a href="./game_super_paper_masao_stage4.html">スーパーペーパーマリオのステージ4っぽいギミック</a></p>
   </section>
 {/content}
 
